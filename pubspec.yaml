@@ -59,6 +59,19 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   generate: true
+  assets:
+    - assets/images/
+    - assets/fonts/
+  fonts:
+    - family: MonlamTibetan
+      fonts:
+        - asset: assets/fonts/MonlamTBslim.ttf
+          style: normal
+
+    - family: TsumachuTibetan
+      fonts:
+        - asset: assets/fonts/Tsumachu.ttf
+          style: normal
 
 l10n:
   arb-dir: lib/l10n

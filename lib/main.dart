@@ -40,8 +40,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pecha App',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme(_locale),
+      darkTheme: AppTheme.darkTheme(_locale),
       themeMode: _themeMode,
       localizationsDelegates: [
         MaterialLocalizationsBo.delegate,
@@ -127,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Text(
                 localizations.learnLiveShare,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 24),
               IconButton(
