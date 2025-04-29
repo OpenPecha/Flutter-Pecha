@@ -23,8 +23,8 @@ class LoginPage extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0, top: 32.0),
                     child: Image.asset(
-                      'assets/images/pecha_logo.png',
-                      height: 120,
+                      'assets/images/favicon-pecha.png',
+                      height: 150,
                     ),
                   ),
                   const Text(

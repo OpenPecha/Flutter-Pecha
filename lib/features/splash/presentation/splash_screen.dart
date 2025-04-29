@@ -40,7 +40,10 @@ class _SplashScreenState extends State<SplashScreen> {
             // Logo or splash animation can go here
             Padding(
               padding: const EdgeInsets.only(bottom: 24.0),
-              child: Image.asset('assets/images/pecha_logo.png', height: 120),
+              child: Image.asset(
+                'assets/images/favicon-pecha.png',
+                height: 150,
+              ),
             ),
             const Text(
               'Pecha',
