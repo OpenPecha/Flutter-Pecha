@@ -12,7 +12,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _supportedLocales = const [Locale('en'), Locale('es'), Locale('bo')];
+  final _supportedLocales = const [Locale('en'), Locale('zh'), Locale('bo')];
   ThemeMode _themeMode = ThemeMode.system;
   Locale? _locale;
 
@@ -36,8 +36,8 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (locale.languageCode) {
       case 'en':
         return 'English';
-      case 'es':
-        return 'Español';
+      case 'zh':
+        return '中文 (Chinese)';
       case 'bo':
         return 'བོད་སྐད་ (Tibetan)';
       default:

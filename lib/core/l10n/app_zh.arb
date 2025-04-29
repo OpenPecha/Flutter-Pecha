@@ -1,0 +1,10 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Pecha 应用",
+  "pechaHeading": "Pecha",
+  "learnLiveShare": "学习、生活与分享",
+  "themeLight": "浅色模式",
+  "themeDark": "深色模式",
+  "switchToLight": "切换到浅色模式",
+  "switchToDark": "切换到深色模式"
+}

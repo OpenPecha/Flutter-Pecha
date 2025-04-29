@@ -3,8 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_pecha/features/home/presentation/home_screen.dart';
-import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

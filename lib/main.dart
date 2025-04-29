@@ -30,7 +30,7 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en'), Locale('es'), Locale('bo')],
+      supportedLocales: const [Locale('en'), Locale('zh'), Locale('bo')],
       debugShowCheckedModeBanner: false,
     );
   }
