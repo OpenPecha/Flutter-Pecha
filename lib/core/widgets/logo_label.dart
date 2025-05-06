@@ -12,16 +12,12 @@ class LogoLabel extends StatelessWidget {
       children: [
         // Logo or splash animation can go here
         Padding(
-          padding: const EdgeInsets.only(bottom: 24.0),
+          padding: const EdgeInsets.only(bottom: 8.0),
           child: Image.asset('assets/images/favicon-pecha.png', height: 150),
         ),
         Text(
           localizations.pechaHeading,
           style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        ),
-        Text(
-          localizations.learnLiveShare,
-          style: Theme.of(context).textTheme.headlineSmall,
         ),
       ],
     );

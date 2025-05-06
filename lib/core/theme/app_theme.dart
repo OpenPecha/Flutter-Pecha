@@ -17,6 +17,7 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
+      textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.black)),
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
       ).copyWith(secondary: Colors.blueAccent, brightness: Brightness.light),
@@ -34,6 +35,7 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
+      textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.white)),
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
       ).copyWith(secondary: Colors.blueAccent, brightness: Brightness.dark),
