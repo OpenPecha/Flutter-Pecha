@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
+import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 
 class ActionOfTheDayCard extends StatelessWidget {
   const ActionOfTheDayCard({
@@ -68,6 +69,14 @@ class ActionOfTheDayCard extends StatelessWidget {
                         MaterialPageRoute(
                           builder:
                               (context) => const MeditationOfTheDayScreen(),
+                        ),
+                      );
+                    } else if (title == 'Prayer of the Day') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => const PrayerOfTheDayScreen(),
                         ),
                       );
                     }
