@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/stat_button.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -52,9 +54,26 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 16),
             VerseOfTheDayCard(),
             SizedBox(height: 16),
-            VerseOfTheDayCard(),
+            ActionOfTheDayCard(
+              title: 'Meditation of the Day',
+              subtitle: 'Awaken peace within.',
+              iconWidget: Icon(
+                Icons.self_improvement,
+                size: 100,
+                color: Colors.black,
+              ),
+            ),
             SizedBox(height: 16),
-            VerseOfTheDayCard(),
+            ActionOfTheDayCard(
+              title: 'Prayer of the Day',
+              subtitle: 'Begin your day with a sacred intention.',
+              isSpace: true,
+              iconWidget: FaIcon(
+                FontAwesomeIcons.handsPraying,
+                size: 80,
+                color: Colors.black,
+              ),
+            ),
             // Add more content here as needed
           ],
         ),
@@ -68,7 +87,6 @@ class VerseOfTheDayCard extends StatelessWidget {
 
   void handleShare() {
     // TODO: implement handleShare
-    
   }
 
   void handleFavorite() {
