@@ -24,7 +24,7 @@ class LoginPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const LogoLabel(),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 30),
                   if (authState.isLoading)
                     const CircularProgressIndicator()
                   else

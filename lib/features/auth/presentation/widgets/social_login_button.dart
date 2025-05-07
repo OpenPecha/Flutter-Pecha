@@ -12,6 +12,8 @@ class SocialLoginButton extends ConsumerWidget {
     required this.label,
     required this.backgroundColor,
     required this.foregroundColor,
+    required this.iconWidget,
+    this.isBorder = false,
   });
   final String connection;
   final IconData icon;
@@ -19,6 +21,8 @@ class SocialLoginButton extends ConsumerWidget {
   final String label;
   final Color backgroundColor;
   final Color foregroundColor;
+  final Widget iconWidget;
+  final bool isBorder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,14 +30,20 @@ class SocialLoginButton extends ConsumerWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.7,
       child: ElevatedButton.icon(
-        icon: Icon(icon, color: iconColor),
-        style: ElevatedButton.styleFrom(
+        icon: iconWidget,
+        style: OutlinedButton.styleFrom(
+          side:
+              isBorder
+                  ? const BorderSide(color: Colors.grey, width: 0.5)
+                  : BorderSide.none,
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           alignment: Alignment.centerLeft,
+          shadowColor: Colors.black,
         ),
+
         onPressed: () async {
           if (connection == 'guest') {
             await authNotifier.continueAsGuest();
@@ -41,7 +51,7 @@ class SocialLoginButton extends ConsumerWidget {
             await authNotifier.login(connection: connection);
           }
         },
-        label: Text(label),
+        label: Text(label, style: TextStyle(fontSize: 16)),
       ),
     );
   }
