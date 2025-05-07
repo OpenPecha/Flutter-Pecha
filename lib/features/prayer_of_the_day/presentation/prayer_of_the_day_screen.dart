@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PrayerOfTheDayScreen extends StatelessWidget {
   const PrayerOfTheDayScreen({super.key});
@@ -9,7 +10,7 @@ class PrayerOfTheDayScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
         title: const Text('Prayer of the Day'),
         centerTitle: true,

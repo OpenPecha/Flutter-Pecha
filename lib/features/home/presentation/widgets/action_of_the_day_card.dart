@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
-import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 
 class ActionOfTheDayCard extends StatelessWidget {
   const ActionOfTheDayCard({
@@ -9,11 +7,13 @@ class ActionOfTheDayCard extends StatelessWidget {
     required this.subtitle,
     required this.iconWidget,
     this.isSpace = false,
+    required this.onTap,
   });
   final String title;
   final String subtitle;
   final Widget iconWidget;
   final bool isSpace;
+  final Function() onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -62,26 +62,7 @@ class ActionOfTheDayCard extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  onPressed: () {
-                    if (title == 'Meditation of the Day') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => const MeditationOfTheDayScreen(),
-                        ),
-                      );
-                    } else if (title == 'Prayer of the Day') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => const PrayerOfTheDayScreen(),
-                        ),
-                      );
-                    }
-                  },
-
+                  onPressed: onTap,
                   child: Text(
                     'Start now',
                     style: TextStyle(

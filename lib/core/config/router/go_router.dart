@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
+import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
+import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,9 +22,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      // home page routes
       GoRoute(
         path: '/home',
         builder: (context, state) => const SkeletonScreen(),
+      ),
+      GoRoute(
+        path: '/home/meditation_of_the_day',
+        builder: (context, state) => const MeditationOfTheDayScreen(),
+      ),
+      GoRoute(
+        path: '/home/prayer_of_the_day',
+        builder: (context, state) => const PrayerOfTheDayScreen(),
       ),
     ],
     redirect: (context, state) {

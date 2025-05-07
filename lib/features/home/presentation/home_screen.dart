@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/stat_button.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: Column(children: [_buildTopBar(), _buildBody()])),
+      body: SafeArea(
+        child: Column(children: [_buildTopBar(), _buildBody(context)]),
+      ),
     );
   }
 
@@ -39,7 +42,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   // Build the scrollable body
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     return Expanded(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -62,6 +65,7 @@ class HomeScreen extends StatelessWidget {
                 size: 100,
                 color: Colors.black,
               ),
+              onTap: () => context.push('/home/meditation_of_the_day'),
             ),
             SizedBox(height: 16),
             ActionOfTheDayCard(
@@ -73,6 +77,7 @@ class HomeScreen extends StatelessWidget {
                 size: 80,
                 color: Colors.black,
               ),
+              onTap: () => context.push('/home/prayer_of_the_day'),
             ),
             // Add more content here as needed
           ],
