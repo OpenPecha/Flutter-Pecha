@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/widgets/audio_controls.dart';
+import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class MeditationOfTheDayScreen extends StatelessWidget {
@@ -41,38 +43,8 @@ class MeditationOfTheDayScreen extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const Column(
-                  children: [
-                    Slider(
-                      value: 0.11,
-                      onChanged: null,
-                      min: 0,
-                      max: 1,
-                      padding: EdgeInsets.zero,
-                    ),
-                    Row(children: [Text('0:47'), Spacer(), Text('7:03')]),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.replay_10, size: 32),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.pause_circle_filled, size: 44),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.forward_10, size: 32),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
+                const AudioProgressBar(),
+                const AudioControls(),
                 const SizedBox(height: 28),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,

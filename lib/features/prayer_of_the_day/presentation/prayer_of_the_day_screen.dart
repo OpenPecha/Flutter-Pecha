@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:go_router/go_router.dart';
+
+const prayerText = """
+སྟོན་པ་བཅོམ་ལྡན་འདས་དེ་བཞིན་གཤེགས་པ་དགྲ་བཅོམ་པ་
+ཡང་དག་པར་རྫོགས་པའི་སངས་རྒྱས་རིག་པ་དང་ཞབས་སུ་ལྡན་པ། བདེ་བར་གཤེགས་པ། 
+འཇིག་རྟེན་མཁྱེན་པ། སྐྱེས་བུ་འདུལ་བའི་ཁ་ལོ་བསྒྱུར་བ། བླ་
+ན་མེད་པ་ལྷ་དང་མི་རྣམས་ཀྱི་སྟོན་པ། སངས་རྒྱས་བཅོམ་ལྡན་འདས་དཔལ་རྒྱལ་བ་ཤཱཀྱ་
+ཐུབ་པ་ལ་ཕྱག་འཚལ་ལོ། །མཆོད་དོ་སྐྱབས་སུ་མཆིའོ། །གང་ཚེ་རྐང་གཉིས་གཙོ་བོ་
+ཁྱོད་བལྟམས་ཚེ། །ས་ཆེན་འདི་ལ་གོམ་པ་བདུན་བོར་ནས། །ང་ནི་འཇིག་
+རྟེན་འདི་ན་མཆོག་ཅེས་གསུངས། །དེ་ཚེ་མཁས་པ་ཁྱོད་ལ་ཕྱག་འཚལ་ལོ། །རྣམ་
+དག་སྐུ་མངའ་མཆོག་ཏུ་གཟུགས་བཟང་བ། །ཡེ་ཤེས་རྒྱ་མཚོ་གསེར་གྱི་ལྷུན་པོ་
+འདྲ། །གྲགས་པ་འཇིག་རྟེན་གསུམ་ན་ལྷམ་མེ་བ། །མགོན་པོ་མཆོག་བརྙེས་ཁྱོད་ལ་ཕྱག་
+འཚལ་ལོ། །མཚན་མཆོག་ལྡན་པ་དྲི་མེད་ཟླ་བའི་ཞལ། །གསེར་མདོག་འདྲ་
+བ་ཁྱོད་ལ་ཕྱག་འཚལ་ལོ། །
+""";
 
 class PrayerOfTheDayScreen extends StatelessWidget {
   const PrayerOfTheDayScreen({super.key});
@@ -28,7 +43,7 @@ class PrayerOfTheDayScreen extends StatelessWidget {
                 vertical: 12.0,
               ),
               child: Text(
-                '''སྐྱབས་སུ་མཆིའི་སྨོན་ལམ་དང་བཅས་པའི་སྨོན་ལམ།\nབདེ་སྐྱིད་དང་སྡུག་བསྔལ་སོགས་ཀྱི་སྐོར་ལ་བསམ་པ་དག་པའི་སྨོན་ལམ་ཞིག་བསྐུལ་བ་ཡིན།\n... (add full prayer text here)''',
+                prayerText,
                 style: const TextStyle(
                   fontSize: 22,
                   height: 1.5,
@@ -42,18 +57,7 @@ class PrayerOfTheDayScreen extends StatelessWidget {
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 28),
             child: Column(
               children: [
-                Column(
-                  children: [
-                    Slider(
-                      value: 0.11,
-                      onChanged: null,
-                      min: 0,
-                      max: 1,
-                      padding: EdgeInsets.zero,
-                    ),
-                    Row(children: const [Text('0:47'), Spacer(), Text('7:03')]),
-                  ],
-                ),
+                const AudioProgressBar(),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,6 +85,7 @@ class PrayerOfTheDayScreen extends StatelessWidget {
                     IconButton(
                       icon: const Text('x1', style: TextStyle(fontSize: 20)),
                       onPressed: () {},
+                      padding: EdgeInsets.zero,
                     ),
                   ],
                 ),
