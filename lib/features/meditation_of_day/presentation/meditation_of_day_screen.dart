@@ -22,7 +22,7 @@ class MeditationOfTheDayScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const Divider(thickness: 2),
+          const SizedBox(height: 40),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),

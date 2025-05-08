@@ -6,14 +6,19 @@ class AudioProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Slider(
           value: 0.11,
-          onChanged: null,
+          onChanged: (value) {
+            // TODO: Implement slider value change
+          },
           min: 0,
           max: 1,
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.only(top: 16.0),
+          activeColor: Colors.black,
+          inactiveColor: Colors.grey,
+          thumbColor: Colors.black,
         ),
         Row(children: [Text('0:47'), Spacer(), Text('7:03')]),
       ],

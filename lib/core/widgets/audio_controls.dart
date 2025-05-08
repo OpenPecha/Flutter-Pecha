@@ -15,7 +15,7 @@ class AudioControls extends StatelessWidget {
           padding: EdgeInsets.zero,
         ),
         IconButton(
-          icon: const Icon(Icons.pause_circle_filled, size: 44),
+          icon: const Icon(Icons.pause_circle_outline, size: 44),
           onPressed: () {},
           padding: EdgeInsets.zero,
         ),
