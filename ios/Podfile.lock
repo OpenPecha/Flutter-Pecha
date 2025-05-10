@@ -1,4 +1,6 @@
 PODS:
+  - audio_session (0.0.1):
+    - Flutter
   - Auth0 (2.10.0):
     - JWTDecode (= 3.2.0)
     - SimpleKeychain (= 1.2.0)
@@ -9,12 +11,21 @@ PODS:
     - JWTDecode (= 3.2.0)
     - SimpleKeychain (= 1.2.0)
   - Flutter (1.0.0)
+  - just_audio (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - JWTDecode (3.2.0)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - SimpleKeychain (1.2.0)
 
 DEPENDENCIES:
+  - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - auth0_flutter (from `.symlinks/plugins/auth0_flutter/darwin`)
   - Flutter (from `Flutter`)
+  - just_audio (from `.symlinks/plugins/just_audio/darwin`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -23,16 +34,25 @@ SPEC REPOS:
     - SimpleKeychain
 
 EXTERNAL SOURCES:
+  audio_session:
+    :path: ".symlinks/plugins/audio_session/ios"
   auth0_flutter:
     :path: ".symlinks/plugins/auth0_flutter/darwin"
   Flutter:
     :path: Flutter
+  just_audio:
+    :path: ".symlinks/plugins/just_audio/darwin"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
 
 SPEC CHECKSUMS:
+  audio_session: 19e9480dbdd4e5f6c4543826b2e8b0e4ab6145fe
   Auth0: 2876d0c36857422eda9cb580a6cc896c7d14cb36
   auth0_flutter: f07bdadbe380d8d257af41bd84096d3f69e2a460
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  just_audio: a42c63806f16995daf5b219ae1d679deb76e6a79
   JWTDecode: 7dae24cb9bf9b608eae61e5081029ec169bb5527
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   SimpleKeychain: 768cf43ae778b1c21816e94dddf01bb8ee96a075
 
 PODFILE CHECKSUM: e30f02f9d1c72c47bb6344a0a748c9d268180865
