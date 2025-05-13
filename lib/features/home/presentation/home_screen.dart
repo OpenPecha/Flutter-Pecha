@@ -2,24 +2,27 @@
 // It handles the UI for the main home screen after splash.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/stat_button.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
     return Scaffold(
       body: SafeArea(
-        child: Column(children: [_buildTopBar(), _buildBody(context)]),
+        child: Column(children: [_buildTopBar(authState), _buildBody(context)]),
       ),
     );
   }
 
   // Build the top bar
-  Widget _buildTopBar() {
+  Widget _buildTopBar(AuthState authState) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -33,7 +36,15 @@ class HomeScreen extends StatelessWidget {
             children: [
               Icon(Icons.notifications_none, size: 28),
               SizedBox(width: 16),
-              Icon(Icons.account_circle, size: 32),
+              if (authState.isGuest) Icon(Icons.account_circle, size: 32),
+              if (authState.isLoggedIn && !authState.isGuest)
+                // add a user avatar here
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: NetworkImage(
+                    authState.userProfile?.pictureUrl?.toString() ?? '',
+                  ),
+                ),
             ],
           ),
         ],

@@ -9,12 +9,14 @@ class AuthState {
   final bool isLoading;
   final bool isGuest;
   final String? userId;
+  final UserProfile? userProfile;
 
   const AuthState({
     required this.isLoggedIn,
     this.isGuest = false,
     this.userId,
     this.isLoading = false,
+    this.userProfile,
   });
 
   AuthState copyWith({
@@ -22,17 +24,20 @@ class AuthState {
     String? userId,
     bool? isLoading,
     bool? isGuest,
+    UserProfile? userProfile,
   }) => AuthState(
     isLoggedIn: isLoggedIn ?? this.isLoggedIn,
     userId: userId ?? this.userId,
     isLoading: isLoading ?? this.isLoading,
     isGuest: isGuest ?? this.isGuest,
+    userProfile: userProfile ?? this.userProfile,
   );
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService authService;
-  AuthNotifier({required this.authService}) : super(const AuthState(isLoggedIn: false, isLoading: true)) {
+  AuthNotifier({required this.authService})
+    : super(const AuthState(isLoggedIn: false, isLoading: true)) {
     _restoreLoginState();
   }
 
@@ -48,6 +53,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userId: credentials.user.sub,
           isLoading: false,
           isGuest: false,
+          userProfile: credentials.user,
         );
       } else {
         state = state.copyWith(
@@ -55,6 +61,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userId: null,
           isLoading: false,
           isGuest: false,
+          userProfile: null,
         );
       }
     } catch (e) {
@@ -78,6 +85,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userId: credentials.user.sub,
         isLoading: false,
         isGuest: false,
+        userProfile: credentials.user,
       );
     } else {
       state = state.copyWith(isLoading: false);
@@ -91,6 +99,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       isLoggedIn: true,
       userId: 'guest',
       isGuest: true,
+      userProfile: null,
     );
   }
 
@@ -101,6 +110,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       userId: null,
       isLoading: false,
       isGuest: false,
+      userProfile: null,
     );
   }
 }
@@ -108,9 +118,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final configAsync = ref.watch(auth0ConfigProvider);
   return configAsync.when(
-    data: (config) => AuthNotifier(authService: AuthService(domain: config.domain, clientId: config.clientId)),
-    loading: () => AuthNotifier(authService: AuthService(domain: '', clientId: '')),
-    error: (err, stack) => AuthNotifier(authService: AuthService(domain: '', clientId: '')),
+    data:
+        (config) => AuthNotifier(
+          authService: AuthService(
+            domain: config.domain,
+            clientId: config.clientId,
+          ),
+        ),
+    loading:
+        () => AuthNotifier(authService: AuthService(domain: '', clientId: '')),
+    error:
+        (err, stack) =>
+            AuthNotifier(authService: AuthService(domain: '', clientId: '')),
   );
 });
 
