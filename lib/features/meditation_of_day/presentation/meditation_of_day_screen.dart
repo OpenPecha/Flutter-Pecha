@@ -50,8 +50,6 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
         title: const Text('Meditation of the Day'),
         centerTitle: true,
         elevation: 1,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
       body: Column(
         children: [
@@ -93,10 +91,12 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: const Icon(Icons.close, size: 28),
                       onPressed: () => context.pop(),
                     ),
                     IconButton(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: const Icon(Icons.music_note, size: 28),
                       onPressed: () {},
                     ),
@@ -116,6 +116,7 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
                         );
                         if (currentSpeedIndex == -1) currentSpeedIndex = 0;
                         return IconButton(
+                          color: Theme.of(context).appBarTheme.foregroundColor,
                           onPressed: () {
                             int nextIndex =
                                 (currentSpeedIndex + 1) % speeds.length;
@@ -137,7 +138,6 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
           ),
         ],
       ),
-      backgroundColor: Colors.white,
     );
   }
 }

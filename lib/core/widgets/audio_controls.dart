@@ -20,6 +20,7 @@ class AudioControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         IconButton(
+          color: Theme.of(context).appBarTheme.foregroundColor,
           icon: const Icon(Icons.replay_10, size: 32),
           onPressed: () async {
             final newPosition = position - const Duration(seconds: 10);
@@ -30,6 +31,7 @@ class AudioControls extends StatelessWidget {
           padding: EdgeInsets.zero,
         ),
         IconButton(
+          color: Theme.of(context).appBarTheme.foregroundColor,
           icon: Icon(
             audioPlayer.playing
                 ? Icons.pause_circle_outline
@@ -46,6 +48,7 @@ class AudioControls extends StatelessWidget {
           padding: EdgeInsets.zero,
         ),
         IconButton(
+          color: Theme.of(context).appBarTheme.foregroundColor,
           icon: const Icon(Icons.forward_10, size: 32),
           onPressed: () async {
             final newPosition = position + const Duration(seconds: 10);

@@ -1,8 +1,10 @@
 // audio progress bar widget
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/theme/theme_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
-class AudioProgressBar extends StatelessWidget {
+class AudioProgressBar extends ConsumerWidget {
   final AudioPlayer audioPlayer;
   final Duration duration;
   final Duration position;
@@ -14,7 +16,8 @@ class AudioProgressBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeProvider = ref.watch(themeModeProvider);
     return Column(
       children: [
         Slider(
@@ -37,9 +40,12 @@ class AudioProgressBar extends StatelessWidget {
                   ? duration.inSeconds.toDouble()
                   : 1,
           padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
-          activeColor: Colors.black,
-          inactiveColor: Colors.grey,
-          thumbColor: Colors.black,
+          activeColor:
+              themeProvider == ThemeMode.dark ? Colors.white : Colors.black,
+          inactiveColor:
+              themeProvider == ThemeMode.dark ? Colors.grey : Colors.grey,
+          thumbColor:
+              themeProvider == ThemeMode.dark ? Colors.white : Colors.black,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -71,11 +71,7 @@ class HomeScreen extends ConsumerWidget {
             ActionOfTheDayCard(
               title: 'Meditation of the Day',
               subtitle: 'Awaken peace within.',
-              iconWidget: Icon(
-                Icons.self_improvement,
-                size: 100,
-                color: Colors.black,
-              ),
+              iconWidget: Icon(Icons.self_improvement, size: 100),
               onTap: () => context.push('/home/meditation_of_the_day'),
             ),
             SizedBox(height: 16),
@@ -83,11 +79,7 @@ class HomeScreen extends ConsumerWidget {
               title: 'Prayer of the Day',
               subtitle: 'Begin your day with a sacred intention.',
               isSpace: true,
-              iconWidget: FaIcon(
-                FontAwesomeIcons.handsPraying,
-                size: 80,
-                color: Colors.black,
-              ),
+              iconWidget: FaIcon(FontAwesomeIcons.handsPraying, size: 80),
               onTap: () => context.push('/home/prayer_of_the_day'),
             ),
             // Add more content here as needed

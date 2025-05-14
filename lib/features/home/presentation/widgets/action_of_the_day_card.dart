@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/theme/theme_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ActionOfTheDayCard extends StatelessWidget {
+class ActionOfTheDayCard extends ConsumerWidget {
   const ActionOfTheDayCard({
     super.key,
     required this.title,
@@ -16,13 +18,14 @@ class ActionOfTheDayCard extends StatelessWidget {
   final Function() onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeProvider = ref.watch(themeModeProvider);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.black12),
+        color: Theme.of(context).cardColor,
+        border: Border.all(color: Colors.black26),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -31,11 +34,7 @@ class ActionOfTheDayCard extends StatelessWidget {
           // Title at the top left
           Text(
             title,
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           if (isSpace) const SizedBox(height: 16),
           // Centered icon, subtitle, and button
@@ -48,7 +47,10 @@ class ActionOfTheDayCard extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color:
+                        themeProvider == ThemeMode.dark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),

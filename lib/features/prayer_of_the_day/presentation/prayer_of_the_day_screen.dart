@@ -54,12 +54,9 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
         title: const Text('Prayer of the Day'),
         centerTitle: true,
         elevation: 1,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
       body: Column(
         children: [
-          const Divider(thickness: 2),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -93,12 +90,13 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: const Icon(Icons.close, size: 28),
                       onPressed: () => context.pop(),
                       padding: EdgeInsets.zero,
                     ),
-
                     IconButton(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: const Icon(Icons.replay_10, size: 32),
                       onPressed: () async {
                         final newPosition =
@@ -111,6 +109,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
                       },
                     ),
                     IconButton(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: Icon(
                         _isPlaying
                             ? Icons.pause_circle_filled
@@ -126,6 +125,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
                       },
                     ),
                     IconButton(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: const Icon(Icons.forward_10, size: 32),
                       onPressed: () async {
                         final newPosition =
@@ -150,6 +150,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
                         );
                         if (currentSpeedIndex == -1) currentSpeedIndex = 0;
                         return IconButton(
+                          color: Theme.of(context).appBarTheme.foregroundColor,
                           onPressed: () {
                             int nextIndex =
                                 (currentSpeedIndex + 1) % speeds.length;
@@ -171,7 +172,6 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
           ),
         ],
       ),
-      backgroundColor: Colors.white,
     );
   }
 }

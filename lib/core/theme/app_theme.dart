@@ -13,14 +13,22 @@ class AppTheme {
       fontFamily: _fontFamilyForLocale(locale),
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 0,
       ),
       textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.black)),
+      cardColor: Colors.white,
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
       ).copyWith(secondary: Colors.blueAccent, brightness: Brightness.light),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black87,
+        unselectedItemColor: Colors.black26,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+      ),
     );
   }
 
@@ -36,9 +44,17 @@ class AppTheme {
         elevation: 0,
       ),
       textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.white)),
+      cardColor: Colors.grey.shade900,
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
       ).copyWith(secondary: Colors.blueAccent, brightness: Brightness.dark),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Color(0xFF222222),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white24,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+      ),
     );
   }
 
