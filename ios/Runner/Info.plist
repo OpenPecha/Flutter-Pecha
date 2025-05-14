@@ -29,7 +29,7 @@
 			<string>auth0</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.pecha.app</string>
+				<string>org.pecha.app</string>
 			</array>
 		</dict>
 	</array>

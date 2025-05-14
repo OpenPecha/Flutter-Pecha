@@ -30,7 +30,7 @@ android {
         versionName = flutter.versionName
         manifestPlaceholders = [
     'auth0Domain': 'dev-56nxmlhj0amjwa88.us.auth0.com',
-    'auth0Scheme': 'com.pecha.app'
+    'auth0Scheme': 'org.pecha.app'
 ]
     }
 

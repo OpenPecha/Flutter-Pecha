@@ -15,7 +15,7 @@ class AuthService {
   Future<Credentials?> _loginWithConnection(String connection) async {
     try {
       final credentials = await auth0
-          .webAuthentication(scheme: 'com.pecha.app')
+          .webAuthentication(scheme: 'org.pecha.app')
           .login(
             redirectUrl: dotenv.env['AUTH0_IOS_CALLBACK_URL_2'] ?? '',
             parameters: {'connection': connection},
@@ -53,7 +53,7 @@ class AuthService {
 
   Future<void> logout() async {
     try {
-      await auth0.webAuthentication(scheme: 'com.pecha.app').logout();
+      await auth0.webAuthentication(scheme: 'org.pecha.app').logout();
     } catch (e) {
       _logger.severe('Logout failed: $e');
     }
