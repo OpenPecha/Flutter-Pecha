@@ -1,4 +1,6 @@
 // Widget for authentication buttons (social logins, guest login)
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/social_login_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,18 +10,9 @@ class AuthButtons extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isIOS = Platform.isIOS;
     return Column(
       children: [
-        SocialLoginButton(
-          connection: 'facebook',
-          icon: Icons.facebook,
-          iconColor: Colors.white,
-          label: 'Continue with Facebook',
-          backgroundColor: const Color(0xFF1877F3),
-          foregroundColor: Colors.white,
-          iconWidget: Icon(Icons.facebook, color: Colors.white, size: 24),
-        ),
-        const SizedBox(height: 16),
         SocialLoginButton(
           connection: 'google',
           icon: Icons.g_mobiledata,
@@ -35,15 +28,16 @@ class AuthButtons extends ConsumerWidget {
           isBorder: true,
         ),
         const SizedBox(height: 16),
-        SocialLoginButton(
-          connection: 'apple',
-          icon: Icons.apple,
-          iconColor: Colors.white,
-          label: 'Continue with Apple',
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          iconWidget: Icon(Icons.apple, color: Colors.white, size: 24),
-        ),
+        if (isIOS)
+          SocialLoginButton(
+            connection: 'apple',
+            icon: Icons.apple,
+            iconColor: Colors.white,
+            label: 'Continue with Apple',
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            iconWidget: Icon(Icons.apple, color: Colors.white, size: 24),
+          ),
         const SizedBox(height: 16),
         SocialLoginButton(
           connection: 'guest',

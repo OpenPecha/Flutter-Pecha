@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
     <application
         android:label="Pecha"
         android:name="${applicationName}"
@@ -28,9 +31,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="org.pecha.app"
-                 android:host="dev-56nxmlhj0amjwa88.us.auth0.com"
-                 android:pathPrefix="/android/org.pecha.app/callback"
+                <data android:scheme="${auth0Scheme}"
+                 android:host="${auth0Domain}"
+                 android:pathPrefix="/android/${auth0Scheme}/callback"
                 />
             </intent-filter>
         </activity>
