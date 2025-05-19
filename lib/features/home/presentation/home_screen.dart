@@ -124,21 +124,17 @@ class VerseOfTheDayCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Verse of the Day',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            Text(
-              '1 John 5:14 NIV',
+              '''ཇི་སྲིད་ནམ་མཁའ་གནས་པ་དང་།
+འགྲོ་བ་ཇི་སྲིད་གནས་གྱུར་པ།
+དེ་སྲིད་བདག་ནི་གནས་གྱུར་ནས།
+འགྲོ་བའི་སྡུག་བསྔལ་སེལ་བ་ཤོག།''',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 18,
+                height: 2,
+                fontFamily: 'MonlamTibetan',
+                fontWeight: FontWeight.w500,
               ),
-            ),
-            Spacer(),
-            Text(
-              'This is the confidence we have in approaching God: that if we ask anything according to his will, he hears us.',
-              style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             Spacer(),
             Row(

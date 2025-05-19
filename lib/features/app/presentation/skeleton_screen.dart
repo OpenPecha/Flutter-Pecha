@@ -2,6 +2,7 @@
 // Tabs: Home, Texts, Plans, Settings.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/features/texts/presentation/library_catalog_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/home/presentation/home_screen.dart';
 import 'package:flutter_pecha/features/more/presentation/more_screen.dart';
@@ -14,7 +15,7 @@ class SkeletonScreen extends ConsumerWidget {
 
   static final List<Widget> _pages = <Widget>[
     HomeScreen(), // Home tab
-    Center(child: Text('Texts')), // Texts tab placeholder
+    LibraryCatalogScreen(), // Texts tab
     Center(child: Text('Plans')), // Plans tab placeholder
     MoreScreen(), // Settings tab placeholder
   ];
