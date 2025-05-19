@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/features/texts/data/providers/term_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LibraryCatalogScreen extends StatelessWidget {
+class LibraryCatalogScreen extends ConsumerWidget {
   const LibraryCatalogScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final termList = ref.watch(termListFutureProvider);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -56,26 +59,24 @@ class LibraryCatalogScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: const [
-                  _LibrarySection(
-                    title: 'Liturgy',
-                    subtitle: 'Prayers and rituals',
-                    dividerColor: Color(0xFF8B3A50),
-                  ),
-                  _LibrarySection(
-                    title: 'Madhyamaka',
-                    subtitle: 'Madhyamaka treatises',
-                    dividerColor: Color(0xFFB6D7D7),
-                  ),
-                  _LibrarySection(
-                    title: "The Buddha's Teachings",
-                    subtitle:
-                        'Kangyur and newly translated teachings of the Buddha',
-                    dividerColor: Color(0xFF4C406A),
-                  ),
-                ],
+              child: termList.when(
+                data:
+                    (terms) => ListView.builder(
+                      itemCount: terms.length,
+                      itemBuilder: (context, index) {
+                        final term = terms[index];
+                        return _LibrarySection(
+                          title: term.title,
+                          subtitle: term.description,
+                          dividerColor: Color(0xFF8B3A50),
+                          slug: term.slug,
+                        );
+                      },
+                    ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error:
+                    (error, stackTrace) =>
+                        const Center(child: Text('Failed to load terms')),
               ),
             ),
           ],
@@ -89,13 +90,15 @@ class _LibrarySection extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color dividerColor;
+  final String slug;
 
   const _LibrarySection({
     required this.title,
     required this.subtitle,
     required this.dividerColor,
-    Key? key,
-  }) : super(key: key);
+    required this.slug,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +126,7 @@ class _LibrarySection extends StatelessWidget {
               fontFamily: 'Serif',
             ),
           ),
+          const SizedBox(height: 10),
         ],
       ),
     );
