@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/texts/data/providers/term_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
 
 class LibraryCatalogScreen extends ConsumerWidget {
   const LibraryCatalogScreen({super.key});
@@ -65,11 +66,21 @@ class LibraryCatalogScreen extends ConsumerWidget {
                       itemCount: terms.length,
                       itemBuilder: (context, index) {
                         final term = terms[index];
-                        return _LibrarySection(
-                          title: term.title,
-                          subtitle: term.description,
-                          dividerColor: Color(0xFF8B3A50),
-                          slug: term.slug,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CategoryScreen(),
+                              ),
+                            );
+                          },
+                          child: _LibrarySection(
+                            title: term.title,
+                            subtitle: term.description,
+                            dividerColor: Color(0xFF8B3A50),
+                            slug: term.slug,
+                          ),
                         );
                       },
                     ),
@@ -97,7 +108,6 @@ class _LibrarySection extends StatelessWidget {
     required this.subtitle,
     required this.dividerColor,
     required this.slug,
-    super.key,
   });
 
   @override
