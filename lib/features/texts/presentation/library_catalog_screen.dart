@@ -7,7 +7,8 @@ class LibraryCatalogScreen extends ConsumerStatefulWidget {
   const LibraryCatalogScreen({super.key});
 
   @override
-  ConsumerState<LibraryCatalogScreen> createState() => _LibraryCatalogScreenState();
+  ConsumerState<LibraryCatalogScreen> createState() =>
+      _LibraryCatalogScreenState();
 }
 
 class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
@@ -16,7 +17,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();p
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -34,12 +35,20 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
             Expanded(
               child: termList.when(
                 data: (terms) {
-                  final filteredTerms = _searchQuery.isEmpty
-                      ? terms
-                      : terms.where((term) =>
-                          term.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                          term.description.toLowerCase().contains(_searchQuery.toLowerCase())
-                        ).toList();
+                  final filteredTerms =
+                      _searchQuery.isEmpty
+                          ? terms
+                          : terms
+                              .where(
+                                (term) =>
+                                    term.title.toLowerCase().contains(
+                                      _searchQuery.toLowerCase(),
+                                    ) ||
+                                    term.description.toLowerCase().contains(
+                                      _searchQuery.toLowerCase(),
+                                    ),
+                              )
+                              .toList();
                   return ListView.builder(
                     itemCount: filteredTerms.length,
                     itemBuilder: (context, index) {
@@ -59,8 +68,9 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stackTrace) =>
-                    const Center(child: Text('Failed to load terms')),
+                error:
+                    (error, stackTrace) =>
+                        const Center(child: Text('Failed to load terms')),
               ),
             ),
           ],
@@ -74,11 +84,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Text(
         'Browse The Library',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Serif',
-        ),
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -98,17 +104,16 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
           prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
           filled: true,
           fillColor: Colors.grey[200],
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 0,
+            horizontal: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(25),
             borderSide: BorderSide.none,
           ),
         ),
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontFamily: 'Serif',
-        ),
+        style: const TextStyle(color: Colors.black, fontSize: 16),
       ),
     );
   }
@@ -135,25 +140,17 @@ class _LibrarySection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Divider(color: dividerColor, thickness: 3, height: 4),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontFamily: 'Serif',
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 15,
-              fontFamily: 'Serif',
-            ),
+            style: TextStyle(color: Colors.grey[700], fontSize: 16),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
         ],
       ),
     );

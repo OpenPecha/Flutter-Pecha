@@ -14,27 +14,22 @@ class CategoryScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
         title: null,
         centerTitle: true,
+        shape: Border(bottom: BorderSide(color: Color(0xFFB6D7D7), width: 3)),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(thickness: 3, color: Color(0xFFB6D7D7)),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
             child: Text(
               term.title,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Serif',
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
           ),
           Padding(
@@ -42,7 +37,7 @@ class CategoryScreen extends ConsumerWidget {
             child: Text(
               term.description,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey[700],
               ),
@@ -100,20 +95,16 @@ class _CategoryBookItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Divider(thickness: 1, color: Color(0xFFB6D7D7)),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-              fontFamily: 'Serif',
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
+          // const SizedBox(height: 4),
+          // Text(
+          //   subtitle,
+          //   style: const TextStyle(fontSize: 14, color: Colors.grey),
+          // ),
         ],
       ),
     );
