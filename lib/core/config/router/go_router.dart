@@ -8,6 +8,7 @@ import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:flutter_pecha/features/texts/models/term.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/library_catalog_screen.dart';
+import 'package:flutter_pecha/features/texts/presentation/text_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
@@ -45,6 +46,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/texts/category',
         builder: (context, state) => CategoryScreen(term: state.extra as Term),
+      ),
+      GoRoute(
+        path: '/texts/detail',
+        builder:
+            (context, state) => TextDetailScreen(term: state.extra as Term),
       ),
     ],
     redirect: (context, state) {

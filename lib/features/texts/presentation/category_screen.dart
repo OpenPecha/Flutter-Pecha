@@ -3,6 +3,7 @@ import 'package:flutter_pecha/features/texts/data/providers/term_providers.dart'
 import 'package:flutter_pecha/features/texts/models/term.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key, required this.term});
@@ -20,51 +21,104 @@ class CategoryScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: null,
-        centerTitle: true,
         shape: Border(bottom: BorderSide(color: Color(0xFFB6D7D7), width: 3)),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
-            child: Text(
-              term.title,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
-            child: Text(
-              term.description,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Colors.grey[700],
+      body: termCategory.when(
+        data:
+            (terms) => SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                    child: Text(
+                      term.title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
+                    child: Text(
+                      term.description,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...terms.map(
+                    (t) => GestureDetector(
+                      onTap: () {
+                        context.push('/texts/detail', extra: t);
+                      },
+                      child: _CategoryBookItem(
+                        title: t.title,
+                        subtitle: t.description,
+                      ),
+                    ),
+                  ),
+                  _CategoryBookItem(
+                    title: 'Bodhicaryavatara',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Shantideva in the 8th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Entering the Middle Way',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Chandrakirti in the 7th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Bodhicaryavatara',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Shantideva in the 8th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Entering the Middle Way',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Chandrakirti in the 7th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Bodhicaryavatara',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Shantideva in the 8th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Entering the Middle Way',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Chandrakirti in the 7th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Bodhicaryavatara',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Shantideva in the 8th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Entering the Middle Way',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Chandrakirti in the 7th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Bodhicaryavatara',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Shantideva in the 8th century',
+                  ),
+                  _CategoryBookItem(
+                    title: 'Entering the Middle Way',
+                    subtitle:
+                        'Root text and commentaries of the work composed by Chandrakirti in the 7th century',
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: termCategory.when(
-              data:
-                  (terms) => ListView.builder(
-                    itemCount: terms.length,
-                    itemBuilder: (context, index) {
-                      final term = terms[index];
-                      return _CategoryBookItem(
-                        title: term.title,
-                        subtitle: term.description,
-                      );
-                    },
-                  ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error:
-                  (error, stackTrace) =>
-                      const Center(child: Text('Failed to load terms')),
-            ),
-          ),
-        ],
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (error, stackTrace) =>
+                const Center(child: Text('Failed to load terms')),
       ),
       bottomNavigationBar: const PechaBottomNavBar(),
     );
@@ -93,7 +147,7 @@ class _CategoryBookItem extends StatelessWidget {
           // Text(
           //   subtitle,
           //   style: const TextStyle(fontSize: 14, color: Colors.grey),
-          // ),
+          // )
         ],
       ),
     );
