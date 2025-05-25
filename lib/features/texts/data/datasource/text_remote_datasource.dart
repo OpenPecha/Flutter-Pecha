@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
+import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:http/http.dart' as http;
 
 class TextRemoteDatasource {
@@ -46,7 +47,7 @@ class TextRemoteDatasource {
   }) async {
     final uri = Uri.parse(
       '${dotenv.env['BASE_API_URL']}/texts/$textId/contents',
-    ).replace(queryParameters: {'language': language ?? 'bo'});
+    ).replace(queryParameters: {'language': language ?? 'en'});
 
     final response = await client.get(uri);
 
@@ -59,6 +60,29 @@ class TextRemoteDatasource {
           .toList();
     } else {
       throw Exception('Failed to load text content');
+    }
+  }
+
+  // get the version of the text
+  Future<List<Version>> fetchTextVersion({
+    required String textId,
+    String? language,
+  }) async {
+    final uri = Uri.parse(
+      '${dotenv.env['BASE_API_URL']}/texts/$textId/versions',
+    ).replace(queryParameters: {'language': language ?? 'en'});
+
+    final response = await client.get(uri);
+
+    if (response.statusCode == 200) {
+      final decoded = utf8.decode(response.bodyBytes);
+      final Map<String, dynamic> jsonMap = json.decode(decoded);
+      final versionData = jsonMap['versions'] as List<dynamic>;
+      return versionData
+          .map((json) => Version.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load text version');
     }
   }
 }

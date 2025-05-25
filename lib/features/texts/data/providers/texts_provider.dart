@@ -21,3 +21,7 @@ final textsFutureProvider = FutureProvider.family((ref, String termId) {
 final textContentFutureProvider = FutureProvider.family((ref, String textId) {
   return ref.watch(textsRepositoryProvider).fetchTextContent(textId: textId);
 });
+
+final textVersionFutureProvider = FutureProvider.family((ref, String textId) {
+  return ref.watch(textsRepositoryProvider).fetchTextVersion(textId: textId);
+});

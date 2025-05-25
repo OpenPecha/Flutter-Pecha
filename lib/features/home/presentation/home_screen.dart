@@ -170,25 +170,3 @@ class VerseOfTheDayCard extends StatelessWidget {
     );
   }
 }
-
-class _CustomBottomNavBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(blurRadius: 8, color: Colors.black12)],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Icon(Icons.home, size: 32),
-          Icon(Icons.menu_book, size: 32),
-          Icon(Icons.check_box, size: 32),
-          Icon(Icons.menu, size: 32),
-        ],
-      ),
-    );
-  }
-}
