@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:go_router/go_router.dart';
@@ -45,15 +46,17 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Prayer of the Day'),
+        title: Text(localizations.home_prayerTitle),
         centerTitle: true,
-        elevation: 1,
+        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       body: Column(
         children: [

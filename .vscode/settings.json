@@ -1,1 +1,3 @@
-{}
+{
+  "arb-editor.suppressedWarnings": ["missing_metadata_for_key"]
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/theme/theme_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +21,8 @@ class ActionOfTheDayCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = ref.watch(themeModeProvider);
+    final localizations = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -66,7 +69,7 @@ class ActionOfTheDayCard extends ConsumerWidget {
                   ),
                   onPressed: onTap,
                   child: Text(
-                    'Start now',
+                    localizations.home_btnText,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,

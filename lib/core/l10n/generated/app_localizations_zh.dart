@@ -28,4 +28,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get switchToDark => '切换到深色模式';
+
+  @override
+  String get home_today => 'Today';
+
+  @override
+  String get home_dailyRefresh => 'Daily Refresh';
+
+  @override
+  String get home_meditationTitle => 'Meditation of the Day';
+
+  @override
+  String get home_meditationSubtitle => 'Awaken peace within.';
+
+  @override
+  String get home_prayerTitle => 'Prayer of the Day';
+
+  @override
+  String get home_prayerSubtitle => 'Begin your day with a sacred intention.';
+
+  @override
+  String get home_btnText => 'Start now';
 }

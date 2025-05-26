@@ -2,6 +2,7 @@
 // It handles the UI for the main home screen after splash.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/stat_button.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
@@ -13,23 +14,30 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context)!;
+
     final authState = ref.watch(authProvider);
     return Scaffold(
       body: SafeArea(
-        child: Column(children: [_buildTopBar(authState), _buildBody(context)]),
+        child: Column(
+          children: [
+            _buildTopBar(authState, localizations),
+            _buildBody(context, localizations),
+          ],
+        ),
       ),
     );
   }
 
   // Build the top bar
-  Widget _buildTopBar(AuthState authState) {
+  Widget _buildTopBar(AuthState authState, AppLocalizations localizations) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Today',
+            localizations.home_today,
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
           Row(
@@ -53,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   // Build the scrollable body
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, AppLocalizations localizations) {
     return Expanded(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -61,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'daily refresh'.toUpperCase(),
+              localizations.home_dailyRefresh,
               textAlign: TextAlign.left,
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
@@ -69,15 +77,15 @@ class HomeScreen extends ConsumerWidget {
             VerseOfTheDayCard(),
             SizedBox(height: 16),
             ActionOfTheDayCard(
-              title: 'Meditation of the Day',
-              subtitle: 'Awaken peace within.',
+              title: localizations.home_meditationTitle,
+              subtitle: localizations.home_meditationSubtitle,
               iconWidget: Icon(Icons.self_improvement, size: 100),
               onTap: () => context.push('/home/meditation_of_the_day'),
             ),
             SizedBox(height: 16),
             ActionOfTheDayCard(
-              title: 'Prayer of the Day',
-              subtitle: 'Begin your day with a sacred intention.',
+              title: localizations.home_prayerTitle,
+              subtitle: localizations.home_prayerSubtitle,
               isSpace: true,
               iconWidget: FaIcon(FontAwesomeIcons.handsPraying, size: 80),
               onTap: () => context.push('/home/prayer_of_the_day'),

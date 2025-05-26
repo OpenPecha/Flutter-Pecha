@@ -6,5 +6,12 @@
   "themeLight": "浅色模式",
   "themeDark": "深色模式",
   "switchToLight": "切换到浅色模式",
-  "switchToDark": "切换到深色模式"
+  "switchToDark": "切换到深色模式",
+  "home_today": "Today",
+  "home_dailyRefresh": "Daily Refresh",
+  "home_meditationTitle": "Meditation of the Day",
+  "home_meditationSubtitle": "Awaken peace within.",
+  "home_prayerTitle": "Prayer of the Day",
+  "home_prayerSubtitle": "Begin your day with a sacred intention.",
+  "home_btnText": "Start now"
 }

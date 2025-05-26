@@ -6,5 +6,12 @@
   "themeLight": "དཀར་པོའི་ཚད་གཞི་",
   "themeDark": "ནག་པོའི་ཚད་གཞི་",
   "switchToLight": "དཀར་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།",
-  "switchToDark": "ནག་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།"
+  "switchToDark": "ནག་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།",
+  "home_today": "Today",
+  "home_dailyRefresh": "Daily Refresh",
+  "home_meditationTitle": "Meditation of the Day",
+  "home_meditationSubtitle": "Awaken peace within.",
+  "home_prayerTitle": "Prayer of the Day",
+  "home_prayerSubtitle": "Begin your day with a sacred intention.",
+  "home_btnText": "Start now"
 }

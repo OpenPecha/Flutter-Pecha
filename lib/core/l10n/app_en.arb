@@ -6,5 +6,12 @@
   "themeLight": "Light Mode",
   "themeDark": "Dark Mode",
   "switchToLight": "Switch to Light Mode",
-  "switchToDark": "Switch to Dark Mode"
+  "switchToDark": "Switch to Dark Mode",
+  "home_today": "Today",
+  "home_dailyRefresh": "Daily Refresh",
+  "home_meditationTitle": "Meditation of the Day",
+  "home_meditationSubtitle": "Awaken peace within.",
+  "home_prayerTitle": "Prayer of the Day",
+  "home_prayerSubtitle": "Begin your day with a sacred intention.",
+  "home_btnText": "Start now"
 }
