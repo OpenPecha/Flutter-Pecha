@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
+import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TextTocScreen extends ConsumerWidget {
@@ -11,6 +13,8 @@ class TextTocScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textContent = ref.watch(textContentFutureProvider(text.id));
+    final textVersion = ref.watch(textVersionFutureProvider(text.id));
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -28,7 +32,7 @@ class TextTocScreen extends ConsumerWidget {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -52,8 +56,8 @@ class TextTocScreen extends ConsumerWidget {
                     ? "Root Text"
                     : "Commentary Text",
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                   color: Colors.grey[600],
                   letterSpacing: 1.2,
                 ),
@@ -89,43 +93,32 @@ class TextTocScreen extends ConsumerWidget {
                 indicatorColor: Color(0xFFC6A04D),
                 indicatorWeight: 2.5,
                 tabs: [Tab(text: 'Contents'), Tab(text: 'Versions')],
+                dividerColor: Color(0xFFDEE2E6),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Expanded(
                 child: TabBarView(
                   children: [
                     // Contents Tab
-                    GridView.builder(
-                      padding: EdgeInsets.zero,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 5,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 1.1,
-                          ),
-                      itemCount: 10,
-                      itemBuilder: (context, idx) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${idx + 1}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                    textContent.when(
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (error, stackTrace) =>
+                              Center(child: Text(error.toString())),
+                      data: (sections) => _buildContentsTab(sections),
                     ),
                     // Versions Tab
-                    const Center(child: Text('Versions')),
+                    textVersion.when(
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (error, stackTrace) =>
+                              Center(child: Text(error.toString())),
+                      data: (versions) => _buildVersionsTab(versions),
+                    ),
                   ],
                 ),
               ),
@@ -135,5 +128,110 @@ class TextTocScreen extends ConsumerWidget {
         bottomNavigationBar: PechaBottomNavBar(),
       ),
     );
+  }
+
+  Widget _buildContentsTab(List<Section> sections) {
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.1,
+      ),
+      itemCount: sections.length,
+      itemBuilder: (context, idx) {
+        final section = sections[idx];
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Center(
+            child: Text(
+              section.title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVersionsTab(List<Version> versions) {
+    return ListView.separated(
+      itemCount: versions.length,
+      separatorBuilder:
+          (context, idx) =>
+              const Divider(height: 32, thickness: 1, color: Color(0xFFF0F0F0)),
+      itemBuilder: (context, idx) {
+        final version = versions[idx];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    version.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(left: 8, top: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F3F3),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    _getLanguageLabel(version.language),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Revision History',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getLanguageLabel(String code) {
+    switch (code.toLowerCase()) {
+      case 'bo':
+      case 'tibetan':
+        return 'Tibetan';
+      case 'sa':
+      case 'sanskrit':
+        return 'Sanskrit';
+      case 'en':
+      case 'english':
+        return 'English';
+      default:
+        return code;
+    }
   }
 }

@@ -38,7 +38,7 @@ class Version {
       language: json['language'] as String,
       type: json['type'] as String,
       groupId: json['group_id'] as String,
-      tableOfContents: json['table_of_contents'] as List<String>,
+      tableOfContents: (json['table_of_contents'] as List<dynamic>).map((e) => e as String).toList(),
       isPublished: json['is_published'] as bool,
       createdDate: json['created_date'] as String,
       updatedDate: json['updated_date'] as String,
