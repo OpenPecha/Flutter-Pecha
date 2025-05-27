@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Segment {
   final String segmentId;
   final int segmentNumber;
