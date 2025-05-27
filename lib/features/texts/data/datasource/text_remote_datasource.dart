@@ -103,28 +103,38 @@ class TextRemoteDatasource {
   Future<List<Segment>> fetchTextDetails({
     required String textId,
     required String contentId,
+    String? skip,
   }) async {
     final uri = Uri.parse(
       '${dotenv.env['BASE_API_URL']}/texts/$textId/details',
     );
-    final body = {'content_id': contentId};
+    final body = json.encode({
+      'content_id': contentId,
+      'skip': skip ?? 0,
+      'limit': 1,
+    });
+    try {
+      final response = await client.post(
+        uri,
+        body: body,
+        headers: {'Content-Type': 'application/json'},
+      );
 
-    final response = await client.post(uri, body: body);
-
-    if (response.statusCode == 200) {
-      print("Response: ${response.body}");
-      final decoded = utf8.decode(response.bodyBytes);
-      final Map<String, dynamic> jsonMap = json.decode(decoded);
-      final sections = jsonMap["content"]["sections"] as List<dynamic>;
-      if (sections.isEmpty) {
-        return [];
+      if (response.statusCode == 200) {
+        final decoded = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> jsonMap = json.decode(decoded);
+        final sections = jsonMap["content"]["sections"] as List<dynamic>;
+        if (sections.isEmpty) {
+          return [];
+        }
+        final segments = sections[0]["segments"] as List<dynamic>;
+        return segments
+            .map((e) => Segment.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load text details');
       }
-      final segments = sections[0]["segments"] as List<dynamic>;
-      print("Segments: ${segments[0]}");
-      return segments
-          .map((e) => Segment.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } else {
+    } catch (e) {
       throw Exception('Failed to load text details');
     }
   }

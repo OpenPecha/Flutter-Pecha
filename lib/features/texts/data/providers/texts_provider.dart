@@ -8,7 +8,30 @@ class TextDetailsParams {
   final String textId;
   final String? contentId;
   final String? versionId;
-  TextDetailsParams({required this.textId, this.contentId, this.versionId});
+  final String? skip;
+  const TextDetailsParams({
+    required this.textId,
+    this.contentId,
+    this.versionId,
+    this.skip,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TextDetailsParams &&
+          runtimeType == other.runtimeType &&
+          textId == other.textId &&
+          contentId == other.contentId &&
+          versionId == other.versionId &&
+          skip == other.skip;
+
+  @override
+  int get hashCode =>
+      textId.hashCode ^
+      (contentId?.hashCode ?? 0) ^
+      (versionId?.hashCode ?? 0) ^
+      (skip?.hashCode ?? 0);
 }
 
 final textsRepositoryProvider = Provider<TextsRepository>(
@@ -42,5 +65,6 @@ final textDetailsFutureProvider = FutureProvider.family((
       .fetchTextDetails(
         textId: params.textId,
         contentId: params.contentId!,
+        skip: params.skip,
       );
 });

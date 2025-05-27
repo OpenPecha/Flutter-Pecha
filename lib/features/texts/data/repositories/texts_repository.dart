@@ -34,10 +34,12 @@ class TextsRepository {
   Future<List<Segment>> fetchTextDetails({
     required String textId,
     required String contentId,
+    String? skip,
   }) async {
     return remoteDatasource.fetchTextDetails(
       textId: textId,
       contentId: contentId,
+      skip: skip,
     );
   }
 }

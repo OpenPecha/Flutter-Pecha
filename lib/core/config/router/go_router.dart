@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
 import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
+import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/term.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
@@ -64,14 +64,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/texts/reader',
         builder: (context, state) {
           final extra = state.extra;
-          if (extra == null || extra is! Map || !extra.containsKey('textId') || !extra.containsKey('contentId')) {
+          if (extra == null ||
+              extra is! Map ||
+              !extra.containsKey('section') ||
+              !extra.containsKey('skip') ||
+              !extra.containsKey('textId')) {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
             );
           }
           return TextReaderScreen(
             textId: extra['textId'] as String,
-            contentId: extra['contentId'] as String,
+            section: extra['section'] as Section,
+            skip: extra['skip'] as String,
           );
         },
       ),

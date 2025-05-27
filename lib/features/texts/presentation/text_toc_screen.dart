@@ -107,19 +107,7 @@ class TextTocScreen extends ConsumerWidget {
                       error:
                           (error, stackTrace) =>
                               Center(child: Text(error.toString())),
-                      data:
-                          (sections) => GestureDetector(
-                            onTap: () {
-                              context.push(
-                                '/texts/reader',
-                                extra: {
-                                  'textId': text.id,
-                                  'contentId': sections[0].contentId,
-                                },
-                              );
-                            },
-                            child: _buildContentsTab(sections),
-                          ),
+                      data: (sections) => _buildContentsTab(sections),
                     ),
                     // Versions Tab
                     textVersion.when(
@@ -129,19 +117,7 @@ class TextTocScreen extends ConsumerWidget {
                       error:
                           (error, stackTrace) =>
                               Center(child: Text(error.toString())),
-                      data:
-                          (versions) => GestureDetector(
-                            onTap: () {
-                              context.push(
-                                '/texts/reader',
-                                extra: {
-                                  'textId': text.id,
-                                  'contentId': versions[0].id,
-                                },
-                              );
-                            },
-                            child: _buildVersionsTab(versions),
-                          ),
+                      data: (versions) => _buildVersionsTab(versions),
                     ),
                   ],
                 ),
@@ -169,16 +145,31 @@ class TextTocScreen extends ConsumerWidget {
       itemCount: sections.length,
       itemBuilder: (context, idx) {
         final section = sections[idx];
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Center(
-            child: Text(
-              section.title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        return GestureDetector(
+          onTap: () {
+            context.push(
+              '/texts/reader',
+              extra: {
+                'textId': text.id,
+                'section': section,
+                'skip': idx.toString(),
+              },
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Center(
+              child: Text(
+                section.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
         );

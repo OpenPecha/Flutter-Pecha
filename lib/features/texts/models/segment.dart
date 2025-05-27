@@ -2,13 +2,13 @@ class Segment {
   final String segmentId;
   final int segmentNumber;
   final String content;
-  final String translation;
+  final String? translation;
 
   const Segment({
     required this.segmentId,
     required this.segmentNumber,
     required this.content,
-    required this.translation,
+    this.translation,
   });
 
   factory Segment.fromJson(Map<String, dynamic> json) {
@@ -16,7 +16,7 @@ class Segment {
       segmentId: json['segment_id'] as String,
       segmentNumber: json['segment_number'] as int,
       content: json['content'] as String,
-      translation: json['translation'] as String,
+      translation: json['translation'] as String?,
     );
   }
 
