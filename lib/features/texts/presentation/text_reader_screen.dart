@@ -32,6 +32,33 @@ class TextReaderScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         toolbarHeight: 40,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.pop(context),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.language, size: 18),
+                const SizedBox(width: 4),
+                Text(
+                  "EN",
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.only(right: 20),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2),
           child: Container(height: 2, color: const Color(0xFFB6D7D7)),
