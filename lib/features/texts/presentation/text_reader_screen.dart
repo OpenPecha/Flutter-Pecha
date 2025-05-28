@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -140,16 +140,9 @@ class TextReaderScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Html(
-                              data: content,
-                              style: {
-                                "body": Style(
-                                  fontSize: FontSize(16),
-                                  lineHeight: LineHeight(1.6),
-                                  margin: Margins.zero,
-                                  padding: HtmlPaddings.zero,
-                                ),
-                              },
+                            child: SegmentHtmlWidget(
+                              htmlContent: content,
+                              segmentIndex: index,
                             ),
                           ),
                         ],
