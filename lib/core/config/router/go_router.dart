@@ -49,16 +49,48 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/texts/category',
-        builder: (context, state) => CategoryScreen(term: state.extra as Term),
+        builder: (context, state) {
+          final extra = state.extra;
+          late Term term;
+          if (extra is Term) {
+            term = extra;
+          } else if (extra is Map<String, dynamic>) {
+            term = Term.fromJson(extra);
+          } else {
+            throw Exception('Invalid extra type for /texts/category');
+          }
+          return CategoryScreen(term: term);
+        },
       ),
       GoRoute(
         path: '/texts/detail',
-        builder:
-            (context, state) => TextDetailScreen(term: state.extra as Term),
+        builder: (context, state) {
+          final extra = state.extra;
+          late Term term;
+          if (extra is Term) {
+            term = extra;
+          } else if (extra is Map<String, dynamic>) {
+            term = Term.fromJson(extra);
+          } else {
+            throw Exception('Invalid extra type for /texts/detail');
+          }
+          return TextDetailScreen(term: term);
+        },
       ),
       GoRoute(
         path: '/texts/toc',
-        builder: (context, state) => TextTocScreen(text: state.extra as Texts),
+        builder: (context, state) {
+          final extra = state.extra;
+          late Texts text;
+          if (extra is Texts) {
+            text = extra;
+          } else if (extra is Map<String, dynamic>) {
+            text = Texts.fromJson(extra);
+          } else {
+            throw Exception('Invalid extra type for /texts/toc');
+          }
+          return TextTocScreen(text: text);
+        },
       ),
       GoRoute(
         path: '/texts/reader',

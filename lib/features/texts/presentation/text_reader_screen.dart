@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,7 +115,7 @@ class TextReaderScreen extends ConsumerWidget {
                     final segmentNumber = segment.segmentNumber
                         .toString()
                         .padLeft(2, '0');
-                    final content = segment.content.replaceAll('<br>', '\n');
+                    final content = segment.content;
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -123,22 +124,32 @@ class TextReaderScreen extends ConsumerWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            width: 30,
-                            child: Text(
-                              segmentNumber,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: SizedBox(
+                              width: 30,
+                              child: Text(
+                                segmentNumber,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.left,
                               ),
-                              textAlign: TextAlign.left,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              content,
-                              style: TextStyle(fontSize: 16, height: 1.6),
+                            child: Html(
+                              data: content,
+                              style: {
+                                "body": Style(
+                                  fontSize: FontSize(16),
+                                  lineHeight: LineHeight(1.6),
+                                  margin: Margins.zero,
+                                  padding: HtmlPaddings.zero,
+                                ),
+                              },
                             ),
                           ),
                         ],
