@@ -30,7 +30,7 @@ class TextDetailScreen extends ConsumerWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 6, 24, 24),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -112,9 +112,8 @@ class TextDetailScreen extends ConsumerWidget {
               children: [
                 const Divider(thickness: 1, color: Color(0xFFB6D7D7)),
                 ListTile(
-                  dense: true,
                   contentPadding: EdgeInsets.zero,
-                  title: Text(text.title, style: const TextStyle(fontSize: 18)),
+                  title: Text(text.title, style: const TextStyle(fontSize: 22)),
                   onTap: () {
                     // TODO: handle text tap
                     context.push('/texts/toc', extra: text);

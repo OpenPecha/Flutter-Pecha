@@ -65,6 +65,7 @@ final textDetailsFutureProvider = FutureProvider.family((
       .fetchTextDetails(
         textId: params.textId,
         contentId: params.contentId!,
+        versionId: params.versionId,
         skip: params.skip,
       );
 });

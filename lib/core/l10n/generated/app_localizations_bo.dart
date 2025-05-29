@@ -30,7 +30,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get switchToDark => 'ནག་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།';
 
   @override
-  String get home_today => 'Today';
+  String get home_today => 'དེ་རིང་།';
 
   @override
   String get home_dailyRefresh => 'Daily Refresh';

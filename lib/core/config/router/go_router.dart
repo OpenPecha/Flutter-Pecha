@@ -7,6 +7,7 @@ import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/term.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
+import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/library_catalog_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/text_detail_screen.dart';
@@ -99,7 +100,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           if (extra == null ||
               extra is! Map ||
-              !extra.containsKey('section') ||
               !extra.containsKey('skip') ||
               !extra.containsKey('textId')) {
             return const Scaffold(
@@ -108,7 +108,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           }
           return TextReaderScreen(
             textId: extra['textId'] as String,
-            section: extra['section'] as Section,
+            section: extra['section'] as Section?,
+            version: extra['version'] as Version?,
             skip: extra['skip'] as String,
           );
         },

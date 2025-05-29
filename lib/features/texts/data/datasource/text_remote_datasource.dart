@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/segment.dart';
+import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:http/http.dart' as http;
@@ -100,9 +101,10 @@ class TextRemoteDatasource {
   }
 
   // post request to get the details of the text
-  Future<List<Segment>> fetchTextDetails({
+  Future<Map<String, dynamic>> fetchTextDetails({
     required String textId,
     required String contentId,
+    String? versionId,
     String? skip,
   }) async {
     final uri = Uri.parse(
@@ -110,6 +112,7 @@ class TextRemoteDatasource {
     );
     final body = json.encode({
       'content_id': contentId,
+      'version_id': versionId,
       'skip': skip ?? 0,
       'limit': 1,
     });
@@ -125,17 +128,26 @@ class TextRemoteDatasource {
         final Map<String, dynamic> jsonMap = json.decode(decoded);
         final sections = jsonMap["content"]["sections"] as List<dynamic>;
         if (sections.isEmpty) {
-          return [];
+          return {};
         }
-        final segments = sections[0]["segments"] as List<dynamic>;
-        return segments
-            .map((e) => Segment.fromJson(e as Map<String, dynamic>))
-            .toList();
+        final sectionsList =
+            sections
+                .map((e) => Section.fromJson(e as Map<String, dynamic>))
+                .toList();
+        // final segments = sections[0]["segments"] as List<dynamic>;
+        // final segmentsList =
+        //     segments
+        //         .map((e) => Segment.fromJson(e as Map<String, dynamic>))
+        //         .toList();
+        final textDetail = TextDetail.fromJson(
+          jsonMap["text_detail"] as Map<String, dynamic>,
+        );
+        return {"textDetail": textDetail, "sectionsList": sectionsList};
       } else {
-        throw Exception('Failed to load text details');
+        return {};
       }
     } catch (e) {
-      throw Exception('Failed to load text details');
+      return {};
     }
   }
 }

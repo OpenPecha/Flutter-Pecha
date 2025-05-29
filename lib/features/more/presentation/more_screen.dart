@@ -58,11 +58,15 @@ class MoreScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             DropdownButton<Locale>(
               value: locale ?? Localizations.localeOf(context),
+              dropdownColor: Theme.of(context).colorScheme.primary,
               items:
                   _supportedLocales.map((localeItem) {
                     return DropdownMenuItem<Locale>(
                       value: localeItem,
-                      child: Text(_getLanguageName(localeItem)),
+                      child: Text(
+                        _getLanguageName(localeItem),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     );
                   }).toList(),
               onChanged: (Locale? newLocale) {

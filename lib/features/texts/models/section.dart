@@ -1,10 +1,12 @@
+import 'package:flutter_pecha/features/texts/models/segment.dart';
+
 class Section {
   final String id;
-  final String contentId;
+  final String? contentId;
   final String title;
   final int sectionNumber;
   final String? parentId;
-  final List<dynamic> segments;
+  final List<Segment> segments;
   final List<Section> sections;
   final String createdDate;
   final String updatedDate;
@@ -12,7 +14,7 @@ class Section {
 
   const Section({
     required this.id,
-    required this.contentId,
+    this.contentId,
     required this.title,
     required this.sectionNumber,
     required this.parentId,
@@ -26,14 +28,17 @@ class Section {
   factory Section.fromJson(Map<String, dynamic> json) {
     return Section(
       id: json['id'] as String,
-      contentId: json['content_id'] as String,
+      contentId: json['content_id'] as String?,
       title: json['title'] as String,
       sectionNumber:
           json['section_number'] is int
               ? json['section_number'] as int
               : int.tryParse(json['section_number'].toString()) ?? 0,
       parentId: json['parent_id'] as String?,
-      segments: json['segments'] ?? [],
+      segments:
+          (json['segments'] as List<dynamic>)
+              .map((e) => Segment.fromJson(e as Map<String, dynamic>))
+              .toList(),
       sections:
           (json['sections'] as List<dynamic>?)
               ?.map((e) => Section.fromJson(e as Map<String, dynamic>))
@@ -52,7 +57,7 @@ class Section {
       'title': title,
       'section_number': sectionNumber,
       'parent_id': parentId,
-      'segments': segments,
+      'segments': segments.map((e) => e.toJson()).toList(),
       'sections': sections.map((e) => e.toJson()).toList(),
       'created_date': createdDate,
       'updated_date': updatedDate,

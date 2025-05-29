@@ -50,7 +50,7 @@ class CategoryScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   ...terms.map(
                     (t) => GestureDetector(
                       onTap: () {
