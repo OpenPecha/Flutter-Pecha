@@ -84,12 +84,16 @@ class TextReaderScreen extends ConsumerWidget {
               physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 16),
-                      Center(
-                        child: Text(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 4,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 16),
+                        Text(
                           textDetail["textDetail"]?.title ?? '',
                           style: TextStyle(
                             fontSize: 20,
@@ -98,10 +102,8 @@ class TextReaderScreen extends ConsumerWidget {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: Text(
+                        const SizedBox(height: 8),
+                        Text(
                           textDetail["sectionsList"]?[0]?.title ?? '',
                           style: TextStyle(
                             fontSize: 18,
@@ -109,9 +111,9 @@ class TextReaderScreen extends ConsumerWidget {
                             fontFamily: 'Jomolhari',
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   ),
                 ),
                 SliverList(
