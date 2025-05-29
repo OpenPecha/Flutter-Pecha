@@ -3,6 +3,7 @@ import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.da
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class TextReaderScreen extends ConsumerWidget {
   const TextReaderScreen({
@@ -32,30 +33,30 @@ class TextReaderScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
-        toolbarHeight: 40,
+        toolbarHeight: 50,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () => Navigator.pop(context),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.language, size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  "EN",
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
+          GestureDetector(
+            onTap: () => context.push('/texts/version_selection'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.language, size: 18),
+                  const SizedBox(width: 4),
+                  const Text(
+                    "EN",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

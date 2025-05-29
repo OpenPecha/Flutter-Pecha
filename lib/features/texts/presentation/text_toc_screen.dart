@@ -27,7 +27,7 @@ class TextTocScreen extends ConsumerWidget {
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () => Navigator.pop(context),
           ),
-          toolbarHeight: 40,
+          toolbarHeight: 50,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(2),
             child: Container(height: 2, color: const Color(0xFFB6D7D7)),
