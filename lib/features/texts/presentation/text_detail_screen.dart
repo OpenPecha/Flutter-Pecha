@@ -3,7 +3,7 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
-import 'package:flutter_pecha/features/texts/models/texts.dart';
+import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,7 +13,7 @@ class TextDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final texts = ref.watch(textsFutureProvider(term.id));
+    final textDetailResponse = ref.watch(textsFutureProvider(term.id));
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -39,14 +39,14 @@ class TextDetailScreen extends ConsumerWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
-              texts.when(
-                data: (textList) {
+              textDetailResponse.when(
+                data: (response) {
                   final rootTexts =
-                      textList
+                      response.texts
                           .where((t) => t.type.toLowerCase() == 'root_text')
                           .toList();
                   final commentaries =
-                      textList
+                      response.texts
                           .where((t) => t.type.toLowerCase() == 'commentary')
                           .toList();
                   if (rootTexts.isEmpty && commentaries.isEmpty) {
@@ -115,7 +115,6 @@ class TextDetailScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(text.title, style: const TextStyle(fontSize: 22)),
                   onTap: () {
-                    // TODO: handle text tap
                     context.push('/texts/toc', extra: text);
                   },
                 ),

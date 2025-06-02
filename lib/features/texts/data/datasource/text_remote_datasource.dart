@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
-import 'package:flutter_pecha/features/texts/models/segment.dart';
+import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
-import 'package:flutter_pecha/features/texts/models/texts.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,7 +12,7 @@ class TextRemoteDatasource {
   TextRemoteDatasource({required this.client});
 
   // to get the texts
-  Future<List<Texts>> fetchTexts({
+  Future<TextDetailResponse> fetchTexts({
     required String termId,
     String? language,
     int skip = 0,
@@ -33,10 +32,7 @@ class TextRemoteDatasource {
     if (response.statusCode == 200) {
       final decoded = utf8.decode(response.bodyBytes);
       final Map<String, dynamic> jsonMap = json.decode(decoded);
-      final List<dynamic> textsJson = jsonMap['texts'] ?? [];
-      return textsJson
-          .map((json) => Texts.fromJson(json as Map<String, dynamic>))
-          .toList();
+      return TextDetailResponse.fromJson(jsonMap);
     } else {
       throw Exception('Failed to load texts');
     }

@@ -3,7 +3,7 @@ class Texts {
   final String title;
   final String language;
   final String type;
-  final String? groupId; // Optional
+  final String groupId; // Optional
   final bool isPublished;
   final DateTime createdDate;
   final DateTime updatedDate;
@@ -15,7 +15,7 @@ class Texts {
     required this.title,
     required this.language,
     required this.type,
-    this.groupId,
+    required this.groupId,
     required this.isPublished,
     required this.createdDate,
     required this.updatedDate,
@@ -29,7 +29,7 @@ class Texts {
       title: json['title'] as String,
       language: json['language'] as String,
       type: json['type'] as String,
-      groupId: json['group_id'] as String?,
+      groupId: json['group_id'] as String,
       isPublished: json['is_published'] as bool,
       createdDate: DateTime.parse(json['created_date'] as String),
       updatedDate: DateTime.parse(json['updated_date'] as String),

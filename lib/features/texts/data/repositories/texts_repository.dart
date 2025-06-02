@@ -1,6 +1,6 @@
 import 'package:flutter_pecha/features/texts/data/datasource/text_remote_datasource.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
-import 'package:flutter_pecha/features/texts/models/texts.dart';
+import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 
 class TextsRepository {
@@ -8,7 +8,7 @@ class TextsRepository {
 
   TextsRepository({required this.remoteDatasource});
 
-  Future<List<Texts>> getTexts({
+  Future<TextDetailResponse> getTexts({
     required String termId,
     String? language,
     int skip = 0,
