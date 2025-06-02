@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/texts/data/providers/term_providers.dart';
-import 'package:flutter_pecha/features/texts/models/term.dart';
+import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +11,7 @@ class CategoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final termCategory = ref.watch(termCategoryFutureProvider(term.id));
+    final termCategoryResponse = ref.watch(termCategoryFutureProvider(term.id));
 
     return Scaffold(
       appBar: AppBar(
@@ -23,9 +23,9 @@ class CategoryScreen extends ConsumerWidget {
         title: null,
         shape: Border(bottom: BorderSide(color: Color(0xFFB6D7D7), width: 3)),
       ),
-      body: termCategory.when(
+      body: termCategoryResponse.when(
         data:
-            (terms) => SingleChildScrollView(
+            (response) => SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -51,7 +51,7 @@ class CategoryScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...terms.map(
+                  ...response.terms.map(
                     (t) => GestureDetector(
                       onTap: () {
                         context.push('/texts/detail', extra: t);

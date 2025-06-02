@@ -1,7 +1,7 @@
 // lib/features/texts/data/datasources/term_remote_datasource.dart
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_pecha/features/texts/models/term.dart';
+import 'package:flutter_pecha/features/texts/models/term/term_response.dart';
 import 'package:http/http.dart' as http;
 
 class TermRemoteDatasource {
@@ -9,7 +9,7 @@ class TermRemoteDatasource {
 
   TermRemoteDatasource({required this.client});
 
-  Future<List<Term>> fetchTerms({
+  Future<TermResponse> fetchTerms({
     String? parentId,
     String? language,
     int skip = 0,
@@ -29,11 +29,9 @@ class TermRemoteDatasource {
     if (response.statusCode == 200) {
       final decoded = utf8.decode(response.bodyBytes);
       final Map<String, dynamic> jsonMap = json.decode(decoded);
-      final List<dynamic> termsJson = jsonMap['terms'] ?? [];
-      return termsJson
-          .map((json) => Term.fromJson(json as Map<String, dynamic>))
-          .toList();
+      return TermResponse.fromJson(jsonMap);
     } else {
+      print('Error fetching terms: ${response.statusCode} - ${response.body}');
       throw Exception('Failed to load terms');
     }
   }

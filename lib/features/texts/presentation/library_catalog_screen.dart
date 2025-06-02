@@ -24,7 +24,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final termList = ref.watch(termListFutureProvider);
+    final termListResponse = ref.watch(termListFutureProvider);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -34,8 +34,12 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
             _buildSearchField(context),
             const SizedBox(height: 10),
             Expanded(
-              child: termList.when(
-                data: (terms) {
+              child: termListResponse.when(
+                data: (response) {
+                  final terms = response.terms;
+                  if (terms.isEmpty) {
+                    return const Center(child: Text('No terms available'));
+                  }
                   final filteredTerms =
                       _searchQuery.isEmpty
                           ? terms

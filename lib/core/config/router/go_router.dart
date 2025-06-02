@@ -5,7 +5,7 @@ import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation
 import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
-import 'package:flutter_pecha/features/texts/models/term.dart';
+import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
-import 'package:flutter_pecha/features/texts/models/term.dart';
+import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/texts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
