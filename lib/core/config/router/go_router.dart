@@ -114,7 +114,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/texts/version_selection',
         builder: (context, state) {
-          return const VersionSelectionScreen();
+          final extra = state.extra;
+          if (extra == null || extra is! Map || !extra.containsKey('textId')) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return VersionSelectionScreen(
+            textId: extra['textId'] as String,
+            language: extra['language'] as String,
+          );
         },
       ),
       GoRoute(

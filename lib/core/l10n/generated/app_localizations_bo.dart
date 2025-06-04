@@ -82,4 +82,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get english => 'ཨིན་ཇི།';
+
+  @override
+  String get language => 'སྐད་ཡིག';
 }

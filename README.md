@@ -45,3 +45,15 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ## 📄 License
 [MIT](LICENSE)
+
+
+
+
+
+**Table of Contents Screen**
+- Browse through organized text content lists with ease
+- View all available versions of each text in one convenient location
+
+**Reader Screen**
+- Immersive reading experience with optimized formatting
+

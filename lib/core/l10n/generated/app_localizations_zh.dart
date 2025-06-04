@@ -82,4 +82,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get language => 'Language';
 }

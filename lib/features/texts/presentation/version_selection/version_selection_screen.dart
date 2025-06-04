@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/utils/get_language.dart';
+import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/models/version.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class VersionSelectionScreen extends StatelessWidget {
-  const VersionSelectionScreen({super.key});
+class VersionSelectionScreen extends ConsumerWidget {
+  const VersionSelectionScreen({
+    super.key,
+    required this.textId,
+    required this.language,
+  });
+
+  final String textId;
+  final String language;
 
   @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textVersionResponse = ref.watch(textVersionFutureProvider(textId));
+    final numberOfVersions = textVersionResponse.value?.versions
+        .map((version) {
+          if (version.language == language) {
+            return 1;
+          }
+          return 0;
+        })
+        .reduce((a, b) => a + b);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -33,101 +53,21 @@ class VersionSelectionScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Language Card
-            _buildLanguageCard(context),
+            _buildLanguageCard(language, context),
             // Versions Title
-            const Text(
-              'བཀོད་དབྱིབས། Versions (3)',
+            Text(
+              '${getLanguageLabel(language, context)} Versions ($numberOfVersions)',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             // Versions List
-            Expanded(
-              child: ListView(
-                children: [
-                  // CTB
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'CTB',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: const Text('Tibetan, Modern, gSungrab མདོ་སྡེ།'),
-                    trailing: Icon(
-                      Icons.info_outline,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  // NTB
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Row(
-                              children: [
-                                const Text(
-                                  'NTB',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFF3F3F3),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    children: const [
-                                      Icon(Icons.volume_up, size: 16),
-                                      SizedBox(width: 2),
-                                      Text(
-                                        '3',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: const Text(
-                              'New Tibetan Bible བོད་ཀྱི་གསུང་ཚིགས།',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 18.0),
-                          child: Icon(
-                            Icons.info_outline,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // TOT11
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'TOT11',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: const Text('Tibetan Old Testament 2011'),
-                    trailing: Icon(
-                      Icons.info_outline,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ),
+            textVersionResponse.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error:
+                  (error, stackTrace) => Center(child: Text(error.toString())),
+              data:
+                  (textVersion) =>
+                      Expanded(child: _buildVersionCard(textVersion.versions)),
             ),
           ],
         ),
@@ -135,7 +75,8 @@ class VersionSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLanguageCard(BuildContext context) {
+  Widget _buildLanguageCard(String language, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Container(
       margin: EdgeInsets.all(18),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -147,8 +88,8 @@ class VersionSelectionScreen extends StatelessWidget {
         children: [
           const Icon(Icons.language, size: 22),
           const SizedBox(width: 10),
-          const Text(
-            'Language',
+          Text(
+            localizations.language,
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
           ),
           const Spacer(),
@@ -162,8 +103,8 @@ class VersionSelectionScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Text(
-                    'བོད་ཡིག',
+                  Text(
+                    getLanguageLabel(language, context),
                     style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                   ),
                   const SizedBox(width: 8),
@@ -181,7 +122,23 @@ class VersionSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVersionCard() {
-    return const Placeholder();
+  Widget _buildVersionCard(List<Version> versions) {
+    return ListView.builder(
+      itemCount: versions.length,
+      itemBuilder: (context, index) {
+        final version = versions[index];
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            version.title,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            '${getLanguageLabel(version.language, context)}, ${version.publishedBy}',
+          ),
+          trailing: Icon(Icons.info_outline, color: Colors.grey.shade700),
+        );
+      },
+    );
   }
 }

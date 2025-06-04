@@ -48,7 +48,14 @@ class TextReaderScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(context),
           ),
           GestureDetector(
-            onTap: () => context.push('/texts/version_selection'),
+            onTap:
+                () => context.push(
+                  '/texts/version_selection',
+                  extra: {
+                    "textId": textDetails.value?["textDetail"]?.id,
+                    "language": textDetails.value?["textDetail"]?.language,
+                  },
+                ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
               decoration: BoxDecoration(
