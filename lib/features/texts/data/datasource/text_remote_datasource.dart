@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
+import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
+import 'package:flutter_pecha/features/texts/models/text/version_response.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
-import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:http/http.dart' as http;
 
 class TextRemoteDatasource {
@@ -39,7 +40,7 @@ class TextRemoteDatasource {
   }
 
   // get the content of the text
-  Future<List<Section>> fetchTextContent({
+  Future<TocResponse> fetchTextContent({
     required String textId,
     String? language,
   }) async {
@@ -52,26 +53,14 @@ class TextRemoteDatasource {
     if (response.statusCode == 200) {
       final decoded = utf8.decode(response.bodyBytes);
       final Map<String, dynamic> jsonMap = json.decode(decoded);
-      final contents = jsonMap["contents"] as List<dynamic>;
-      if (contents.isEmpty) {
-        return [];
-      }
-      final contentId = contents[0]['id'] as String;
-      final sectionData = contents[0]['sections'] as List<dynamic>;
-      // update all the sections with contentId as "content_id"
-      for (var section in sectionData) {
-        section['content_id'] = contentId;
-      }
-      return sectionData
-          .map((json) => Section.fromJson(json as Map<String, dynamic>))
-          .toList();
+      return TocResponse.fromJson(jsonMap);
     } else {
       throw Exception('Failed to load text content');
     }
   }
 
   // get the version of the text
-  Future<List<Version>> fetchTextVersion({
+  Future<VersionResponse> fetchTextVersion({
     required String textId,
     String? language,
   }) async {
@@ -84,13 +73,7 @@ class TextRemoteDatasource {
     if (response.statusCode == 200) {
       final decoded = utf8.decode(response.bodyBytes);
       final Map<String, dynamic> jsonMap = json.decode(decoded);
-      final versionData = jsonMap['versions'] as List<dynamic>;
-      if (versionData.isEmpty) {
-        return [];
-      }
-      return versionData
-          .map((json) => Version.fromJson(json as Map<String, dynamic>))
-          .toList();
+      return VersionResponse.fromJson(jsonMap);
     } else {
       throw Exception('Failed to load text version');
     }

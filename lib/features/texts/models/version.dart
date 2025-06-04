@@ -2,7 +2,7 @@ class Version {
   final String id;
   final String title;
   final String? parentId;
-  final dynamic priority; // need to change if priority is not dynamic
+  final int? priority;
   final String language;
   final String type;
   final String groupId;
@@ -34,11 +34,14 @@ class Version {
       id: json['id'] as String,
       title: json['title'] as String,
       parentId: json['parent_id'] as String?,
-      priority: json['priority'] as dynamic,
+      priority: json['priority'] as int?,
       language: json['language'] as String,
       type: json['type'] as String,
       groupId: json['group_id'] as String,
-      tableOfContents: (json['table_of_contents'] as List<dynamic>).map((e) => e as String).toList(),
+      tableOfContents:
+          (json['table_of_contents'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
       isPublished: json['is_published'] as bool,
       createdDate: json['created_date'] as String,
       updatedDate: json['updated_date'] as String,

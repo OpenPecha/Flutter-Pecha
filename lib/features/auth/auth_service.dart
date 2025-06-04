@@ -1,5 +1,4 @@
 import 'package:auth0_flutter/auth0_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logging/logging.dart';
 
 class AuthService {
@@ -12,14 +11,18 @@ class AuthService {
   }
 
   // Common login method
-  Future<Credentials?> _loginWithConnection(String connection) async {
+  Future<Credentials?> _loginWithConnection(
+    String connection, [
+    Map<String, String>? additionalParameters,
+  ]) async {
     try {
+      final parameters = {'connection': connection};
+      if (additionalParameters != null) {
+        parameters.addAll(additionalParameters);
+      }
       final credentials = await auth0
           .webAuthentication(scheme: 'org.pecha.app')
-          .login(
-            // redirectUrl: dotenv.env['AUTH0_IOS_CALLBACK_URL_2'] ?? '',
-            parameters: {'connection': connection},
-          );
+          .login(parameters: parameters);
       return credentials;
     } catch (e) {
       _logger.severe('Login failed: $e');
@@ -29,7 +32,7 @@ class AuthService {
 
   // Login with Google
   Future<Credentials?> loginWithGoogle() async {
-    return _loginWithConnection('google-oauth2');
+    return _loginWithConnection('google-oauth2', {'prompt': 'select_account'});
   }
 
   // Login with Facebook

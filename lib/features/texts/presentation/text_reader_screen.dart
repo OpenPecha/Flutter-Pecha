@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/texts/models/segment.dart';
+import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
-import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class TextReaderScreen extends ConsumerWidget {
   const TextReaderScreen({
     super.key,
-    required this.textId,
+    this.toc,
     required this.skip,
-    this.section,
     this.version,
   });
-  final String textId;
-  final Section? section;
+  final Toc? toc;
   final String skip;
   final Version? version;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final params = TextDetailsParams(
-      textId: textId,
+      textId: toc?.textId ?? version?.id ?? '',
       contentId:
-          section?.contentId ??
+          toc?.id ??
           ((version?.tableOfContents != null &&
                   version!.tableOfContents.isNotEmpty)
               ? version!.tableOfContents[0]

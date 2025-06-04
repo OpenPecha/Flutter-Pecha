@@ -1,7 +1,7 @@
 import 'package:flutter_pecha/features/texts/data/datasource/text_remote_datasource.dart';
-import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
-import 'package:flutter_pecha/features/texts/models/version.dart';
+import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
+import 'package:flutter_pecha/features/texts/models/text/version_response.dart';
 
 class TextsRepository {
   final TextRemoteDatasource remoteDatasource;
@@ -22,11 +22,11 @@ class TextsRepository {
     );
   }
 
-  Future<List<Section>> fetchTextContent({required String textId}) async {
+  Future<TocResponse> fetchTextContent({required String textId}) async {
     return remoteDatasource.fetchTextContent(textId: textId);
   }
 
-  Future<List<Version>> fetchTextVersion({required String textId}) async {
+  Future<VersionResponse> fetchTextVersion({required String textId}) async {
     return remoteDatasource.fetchTextVersion(textId: textId);
   }
 

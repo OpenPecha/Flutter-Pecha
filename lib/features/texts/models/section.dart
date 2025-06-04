@@ -2,7 +2,6 @@ import 'package:flutter_pecha/features/texts/models/segment.dart';
 
 class Section {
   final String id;
-  final String? contentId;
   final String title;
   final int sectionNumber;
   final String? parentId;
@@ -14,7 +13,6 @@ class Section {
 
   const Section({
     required this.id,
-    this.contentId,
     required this.title,
     required this.sectionNumber,
     required this.parentId,
@@ -28,7 +26,6 @@ class Section {
   factory Section.fromJson(Map<String, dynamic> json) {
     return Section(
       id: json['id'] as String,
-      contentId: json['content_id'] as String?,
       title: json['title'] as String,
       sectionNumber:
           json['section_number'] is int
@@ -53,7 +50,6 @@ class Section {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'content_id': contentId,
       'title': title,
       'section_number': sectionNumber,
       'parent_id': parentId,

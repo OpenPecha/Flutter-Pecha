@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
-import 'package:flutter_pecha/features/texts/models/section.dart';
-import 'package:flutter_pecha/features/texts/models/texts.dart';
+import 'package:flutter_pecha/features/texts/models/text/texts.dart';
+import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,8 +15,8 @@ class TextTocScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localizations = AppLocalizations.of(context)!;
-    final textContent = ref.watch(textContentFutureProvider(text.id));
-    final textVersion = ref.watch(textVersionFutureProvider(text.id));
+    final textContentResponse = ref.watch(textContentFutureProvider(text.id));
+    final textVersionResponse = ref.watch(textVersionFutureProvider(text.id));
 
     return DefaultTabController(
       length: 2,
@@ -106,24 +106,30 @@ class TextTocScreen extends ConsumerWidget {
                 child: TabBarView(
                   children: [
                     // Contents Tab
-                    textContent.when(
+                    textContentResponse.when(
                       loading:
                           () =>
                               const Center(child: CircularProgressIndicator()),
                       error:
                           (error, stackTrace) =>
                               Center(child: Text(error.toString())),
-                      data: (sections) => _buildContentsTab(sections),
+                      data:
+                          (contentResponse) =>
+                              _buildContentsTab(contentResponse.contents[0]),
                     ),
                     // Versions Tab
-                    textVersion.when(
+                    textVersionResponse.when(
                       loading:
                           () =>
                               const Center(child: CircularProgressIndicator()),
                       error:
                           (error, stackTrace) =>
                               Center(child: Text(error.toString())),
-                      data: (versions) => _buildVersionsTab(versions, context),
+                      data:
+                          (versionResponse) => _buildVersionsTab(
+                            versionResponse.versions,
+                            context,
+                          ),
                     ),
                   ],
                 ),
@@ -136,10 +142,11 @@ class TextTocScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContentsTab(List<Section> sections) {
-    if (sections.isEmpty) {
+  Widget _buildContentsTab(Toc toc) {
+    if (toc.sections.isEmpty) {
       return const Center(child: Text('No contents found'));
     }
+    final sections = toc.sections;
     return GridView.builder(
       padding: EdgeInsets.zero,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -155,11 +162,7 @@ class TextTocScreen extends ConsumerWidget {
           onTap: () {
             context.push(
               '/texts/reader',
-              extra: {
-                'textId': text.id,
-                'section': section,
-                'skip': idx.toString(),
-              },
+              extra: {'toc': toc, 'skip': idx.toString()},
             );
           },
           child: Container(
@@ -200,7 +203,7 @@ class TextTocScreen extends ConsumerWidget {
           onTap:
               () => context.push(
                 '/texts/reader',
-                extra: {'textId': version.id, 'version': version, 'skip': "0"},
+                extra: {'version': version, 'skip': "0"},
               ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
