@@ -106,19 +106,8 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
         },
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.text_search,
-          prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-          filled: true,
-          fillColor: Colors.grey[200],
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 0,
-            horizontal: 16,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide.none,
-          ),
+          prefixIcon: Icon(Icons.search),
         ),
-        style: const TextStyle(color: Colors.black, fontSize: 16),
       ),
     );
   }

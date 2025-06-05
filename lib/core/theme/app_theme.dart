@@ -24,6 +24,17 @@ class AppTheme {
       listTileTheme: const ListTileThemeData(
         titleTextStyle: TextStyle(color: Colors.black),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: const TextStyle(color: Colors.black),
+        prefixIconColor: Colors.black45,
+        fillColor: const Color(0xFFefefef),
+        filled: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(25),
+          borderSide: BorderSide.none,
+        ),
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: Colors.black87,
@@ -36,66 +47,21 @@ class AppTheme {
     if (locale?.languageCode == 'bo') {
       final baseTextTheme = baseTheme.textTheme;
       final boTextTheme = baseTextTheme.copyWith(
-        displayLarge: baseTextTheme.displayLarge?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        displayMedium: baseTextTheme.displayMedium?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        displaySmall: baseTextTheme.displaySmall?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        headlineLarge: baseTextTheme.headlineLarge?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        headlineMedium: baseTextTheme.headlineMedium?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        headlineSmall: baseTextTheme.headlineSmall?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        titleLarge: baseTextTheme.titleLarge?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        titleMedium: baseTextTheme.titleMedium?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        titleSmall: baseTextTheme.titleSmall?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        bodySmall: baseTextTheme.bodySmall?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        labelLarge: baseTextTheme.labelLarge?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        labelMedium: baseTextTheme.labelMedium?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
-        labelSmall: baseTextTheme.labelSmall?.copyWith(
-          height: 2.0,
-          color: Colors.black,
-        ),
+        displayLarge: baseTextTheme.displayLarge?.copyWith(height: 2.0),
+        displayMedium: baseTextTheme.displayMedium?.copyWith(height: 2.0),
+        displaySmall: baseTextTheme.displaySmall?.copyWith(height: 2.0),
+        headlineLarge: baseTextTheme.headlineLarge?.copyWith(height: 2.0),
+        headlineMedium: baseTextTheme.headlineMedium?.copyWith(height: 2.0),
+        headlineSmall: baseTextTheme.headlineSmall?.copyWith(height: 2.0),
+        titleLarge: baseTextTheme.titleLarge?.copyWith(height: 2.0),
+        titleMedium: baseTextTheme.titleMedium?.copyWith(height: 2.0),
+        titleSmall: baseTextTheme.titleSmall?.copyWith(height: 2.0),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(height: 2.0),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(height: 2.0),
+        bodySmall: baseTextTheme.bodySmall?.copyWith(height: 2.0),
+        labelLarge: baseTextTheme.labelLarge?.copyWith(height: 2.0),
+        labelMedium: baseTextTheme.labelMedium?.copyWith(height: 2.0),
+        labelSmall: baseTextTheme.labelSmall?.copyWith(height: 2.0),
       );
       return baseTheme.copyWith(textTheme: boTextTheme);
     }
@@ -113,18 +79,45 @@ class AppTheme {
         foregroundColor: Colors.white30,
         elevation: 0,
       ),
-      // textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.white)),
-      cardColor: Colors.grey.shade900,
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(color: Colors.white),
+        bodyMedium: TextStyle(color: Colors.white),
+        bodySmall: TextStyle(color: Colors.white),
+        titleLarge: TextStyle(color: Colors.white),
+        titleMedium: TextStyle(color: Colors.white),
+        titleSmall: TextStyle(color: Colors.white),
+        labelLarge: TextStyle(color: Colors.white),
+        labelMedium: TextStyle(color: Colors.white),
+        labelSmall: TextStyle(color: Colors.white),
+        headlineLarge: TextStyle(color: Colors.white),
+        headlineMedium: TextStyle(color: Colors.white),
+        headlineSmall: TextStyle(color: Colors.white),
+        displayLarge: TextStyle(color: Colors.white),
+        displayMedium: TextStyle(color: Colors.white),
+        displaySmall: TextStyle(color: Colors.white),
+      ),
+      cardColor: const Color(0xFF232121),
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
       ).copyWith(secondary: Colors.blueAccent, brightness: Brightness.dark),
       listTileTheme: const ListTileThemeData(
         titleTextStyle: TextStyle(color: Colors.white),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        prefixIconColor: Colors.grey[400],
+        fillColor: const Color(0xFF444444),
+        filled: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(25),
+          borderSide: BorderSide.none,
+        ),
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF222222),
+        backgroundColor: Color(0xFF121212),
         selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white24,
+        unselectedItemColor: Color(0xFF7f7f7f),
         showSelectedLabels: false,
         showUnselectedLabels: false,
       ),
@@ -133,66 +126,21 @@ class AppTheme {
     if (locale?.languageCode == 'bo') {
       final baseTextTheme = baseTheme.textTheme;
       final boTextTheme = baseTextTheme.copyWith(
-        displayLarge: baseTextTheme.displayLarge?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        displayMedium: baseTextTheme.displayMedium?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        displaySmall: baseTextTheme.displaySmall?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        headlineLarge: baseTextTheme.headlineLarge?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        headlineMedium: baseTextTheme.headlineMedium?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        headlineSmall: baseTextTheme.headlineSmall?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        titleLarge: baseTextTheme.titleLarge?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        titleMedium: baseTextTheme.titleMedium?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        titleSmall: baseTextTheme.titleSmall?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        bodySmall: baseTextTheme.bodySmall?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        labelLarge: baseTextTheme.labelLarge?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        labelMedium: baseTextTheme.labelMedium?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
-        labelSmall: baseTextTheme.labelSmall?.copyWith(
-          height: 2.0,
-          color: Colors.white,
-        ),
+        displayLarge: baseTextTheme.displayLarge?.copyWith(height: 2.0),
+        displayMedium: baseTextTheme.displayMedium?.copyWith(height: 2.0),
+        displaySmall: baseTextTheme.displaySmall?.copyWith(height: 2.0),
+        headlineLarge: baseTextTheme.headlineLarge?.copyWith(height: 2.0),
+        headlineMedium: baseTextTheme.headlineMedium?.copyWith(height: 2.0),
+        headlineSmall: baseTextTheme.headlineSmall?.copyWith(height: 2.0),
+        titleLarge: baseTextTheme.titleLarge?.copyWith(height: 2.0),
+        titleMedium: baseTextTheme.titleMedium?.copyWith(height: 2.0),
+        titleSmall: baseTextTheme.titleSmall?.copyWith(height: 2.0),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(height: 2.0),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(height: 2.0),
+        bodySmall: baseTextTheme.bodySmall?.copyWith(height: 2.0),
+        labelLarge: baseTextTheme.labelLarge?.copyWith(height: 2.0),
+        labelMedium: baseTextTheme.labelMedium?.copyWith(height: 2.0),
+        labelSmall: baseTextTheme.labelSmall?.copyWith(height: 2.0),
       );
       return baseTheme.copyWith(textTheme: boTextTheme);
     }
@@ -204,5 +152,10 @@ class AppTheme {
       return 'MonlamTibetan';
     }
     return null; // Default font
+  }
+
+  // change line height to 2.0 for all text when locale is "bo"
+  static TextStyle _changeLineHeight(TextStyle style) {
+    return style.copyWith(height: 2.0);
   }
 }

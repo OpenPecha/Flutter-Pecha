@@ -57,6 +57,7 @@ class _VersionSelectionScreenState
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
@@ -102,7 +103,7 @@ class _VersionSelectionScreenState
       margin: EdgeInsets.all(18),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
@@ -132,7 +133,7 @@ class _VersionSelectionScreenState
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -162,6 +163,9 @@ class _VersionSelectionScreenState
       itemBuilder: (context, index) {
         final version = versions[index];
         return ListTile(
+          onTap: () {
+            // context.pop({"version": version, "skip": "0"});
+          },
           contentPadding: EdgeInsets.zero,
           title: Text(
             version.title,
