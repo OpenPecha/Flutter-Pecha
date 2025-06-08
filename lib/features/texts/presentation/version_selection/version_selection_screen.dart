@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/utils/get_language.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/version_provider.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -164,7 +165,8 @@ class _VersionSelectionScreenState
         final version = versions[index];
         return ListTile(
           onTap: () {
-            // context.pop({"version": version, "skip": "0"});
+            ref.read(versionProvider.notifier).setVersion(version, skip: '0');
+            context.pop();
           },
           contentPadding: EdgeInsets.zero,
           title: Text(

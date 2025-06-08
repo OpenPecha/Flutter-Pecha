@@ -1,8 +1,10 @@
+import 'package:flutter_pecha/features/texts/models/translation.dart';
+
 class Segment {
   final String segmentId;
   final int segmentNumber;
   final String content;
-  final String? translation;
+  final Translation? translation;
 
   const Segment({
     required this.segmentId,
@@ -16,7 +18,12 @@ class Segment {
       segmentId: json['segment_id'] as String,
       segmentNumber: json['segment_number'] as int,
       content: json['content'] as String,
-      translation: json['translation'] as String?,
+      translation:
+          json['translation'] != null
+              ? Translation.fromJson(
+                json['translation'] as Map<String, dynamic>,
+              )
+              : null,
     );
   }
 
@@ -25,7 +32,7 @@ class Segment {
       'segment_id': segmentId,
       'segment_number': segmentNumber,
       'content': content,
-      'translation': translation,
+      'translation': translation?.toJson(),
     };
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
+import 'package:flutter_pecha/features/texts/data/providers/text_reading_params_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
@@ -115,8 +116,10 @@ class TextTocScreen extends ConsumerWidget {
                           (error, stackTrace) =>
                               Center(child: Text(error.toString())),
                       data:
-                          (contentResponse) =>
-                              _buildContentsTab(contentResponse.contents[0]),
+                          (contentResponse) => _buildContentsTab(
+                            contentResponse.contents[0],
+                            ref,
+                          ),
                     ),
                     // Versions Tab
                     textVersionResponse.when(
@@ -130,6 +133,7 @@ class TextTocScreen extends ConsumerWidget {
                           (versionResponse) => _buildVersionsTab(
                             versionResponse.versions,
                             context,
+                            ref,
                           ),
                     ),
                   ],
@@ -143,7 +147,7 @@ class TextTocScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContentsTab(Toc toc) {
+  Widget _buildContentsTab(Toc toc, WidgetRef ref) {
     if (toc.sections.isEmpty) {
       return const Center(child: Text('No contents found'));
     }
@@ -161,10 +165,10 @@ class TextTocScreen extends ConsumerWidget {
         final section = sections[idx];
         return GestureDetector(
           onTap: () {
-            context.push(
-              '/texts/reader',
-              extra: {'toc': toc, 'skip': idx.toString()},
-            );
+            ref
+                .read(textReadingParamsProvider.notifier)
+                .setParams(textId: toc.textId, contentId: toc.id, skip: '0');
+            context.push('/texts/reader');
           },
           child: Container(
             decoration: BoxDecoration(
@@ -187,7 +191,11 @@ class TextTocScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildVersionsTab(List<Version> versions, BuildContext context) {
+  Widget _buildVersionsTab(
+    List<Version> versions,
+    BuildContext context,
+    WidgetRef ref,
+  ) {
     final localizations = AppLocalizations.of(context)!;
 
     if (versions.isEmpty) {
@@ -201,11 +209,17 @@ class TextTocScreen extends ConsumerWidget {
       itemBuilder: (context, idx) {
         final version = versions[idx];
         return GestureDetector(
-          onTap:
-              () => context.push(
-                '/texts/reader',
-                extra: {'version': version, 'skip': "0"},
-              ),
+          onTap: () {
+            ref
+                .read(textReadingParamsProvider.notifier)
+                .setParams(
+                  textId: version.id,
+                  contentId: version.tableOfContents[0],
+                  versionId: version.id,
+                  skip: '0',
+                );
+            context.push('/texts/reader');
+          },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

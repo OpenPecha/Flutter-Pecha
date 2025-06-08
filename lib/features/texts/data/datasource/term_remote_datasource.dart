@@ -31,7 +31,6 @@ class TermRemoteDatasource {
       final Map<String, dynamic> jsonMap = json.decode(decoded);
       return TermResponse.fromJson(jsonMap);
     } else {
-      print('Error fetching terms: ${response.statusCode} - ${response.body}');
       throw Exception('Failed to load terms');
     }
   }

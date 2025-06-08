@@ -9,29 +9,23 @@ class TextDetailsParams {
   final String? contentId;
   final String? versionId;
   final String? skip;
+  final String key;
   const TextDetailsParams({
     required this.textId,
     this.contentId,
     this.versionId,
     this.skip,
-  });
+  }) : key = '${textId}_${contentId}_${versionId}_$skip';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TextDetailsParams &&
           runtimeType == other.runtimeType &&
-          textId == other.textId &&
-          contentId == other.contentId &&
-          versionId == other.versionId &&
-          skip == other.skip;
+          key == other.key;
 
   @override
-  int get hashCode =>
-      textId.hashCode ^
-      (contentId?.hashCode ?? 0) ^
-      (versionId?.hashCode ?? 0) ^
-      (skip?.hashCode ?? 0);
+  int get hashCode => key.hashCode;
 }
 
 final textsRepositoryProvider = Provider<TextsRepository>(

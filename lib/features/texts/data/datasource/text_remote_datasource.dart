@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
+import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/version_response.dart';
-import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:http/http.dart' as http;
 
 class TextRemoteDatasource {
@@ -80,7 +79,7 @@ class TextRemoteDatasource {
   }
 
   // post request to get the details of the text
-  Future<Map<String, dynamic>> fetchTextDetails({
+  Future<ReaderResponse> fetchTextDetails({
     required String textId,
     required String contentId,
     String? versionId,
@@ -103,30 +102,18 @@ class TextRemoteDatasource {
       );
 
       if (response.statusCode == 200) {
-        final decoded = utf8.decode(response.bodyBytes);
-        final Map<String, dynamic> jsonMap = json.decode(decoded);
-        final sections = jsonMap["content"]["sections"] as List<dynamic>;
-        if (sections.isEmpty) {
-          return {};
+        try {
+          final decoded = utf8.decode(response.bodyBytes);
+          final Map<String, dynamic> jsonMap = json.decode(decoded);
+          return ReaderResponse.fromJson(jsonMap);
+        } catch (e) {
+          throw Exception('Failed to load text details in response $e');
         }
-        final sectionsList =
-            sections
-                .map((e) => Section.fromJson(e as Map<String, dynamic>))
-                .toList();
-        // final segments = sections[0]["segments"] as List<dynamic>;
-        // final segmentsList =
-        //     segments
-        //         .map((e) => Segment.fromJson(e as Map<String, dynamic>))
-        //         .toList();
-        final textDetail = TextDetail.fromJson(
-          jsonMap["text_detail"] as Map<String, dynamic>,
-        );
-        return {"textDetail": textDetail, "sectionsList": sectionsList};
       } else {
-        return {};
+        throw Exception('Failed to load text details ::: ${response.body}');
       }
     } catch (e) {
-      return {};
+      throw Exception('Failed to load text details ????? $e');
     }
   }
 }

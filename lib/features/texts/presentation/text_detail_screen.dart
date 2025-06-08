@@ -114,7 +114,7 @@ class TextDetailScreen extends ConsumerWidget {
                 const Divider(thickness: 1, color: Color(0xFFB6D7D7)),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(text.title, style: const TextStyle(fontSize: 22)),
+                  title: Text(text.title, style: const TextStyle(fontSize: 20)),
                   onTap: () {
                     context.push('/texts/toc', extra: text);
                   },
