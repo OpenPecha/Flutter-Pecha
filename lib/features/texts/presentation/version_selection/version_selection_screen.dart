@@ -47,7 +47,15 @@ class VersionSelectionScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: VersionSearchDelegate(
+                  versions: filteredVersions ?? [],
+                  ref: ref,
+                ),
+              );
+            },
           ),
         ],
         bottom: PreferredSize(
@@ -163,6 +171,89 @@ class VersionSelectionScreen extends ConsumerWidget {
             '${getLanguageLabel(version.language, context)}, ${version.publishedBy}',
           ),
           trailing: Icon(Icons.info_outline, color: Colors.grey.shade700),
+        );
+      },
+    );
+  }
+}
+
+class VersionSearchDelegate extends SearchDelegate<Version?> {
+  final List<Version> versions;
+  final WidgetRef ref;
+
+  VersionSearchDelegate({required this.versions, required this.ref});
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back_ios),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return _buildSearchResults(context);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return _buildSearchResults(context);
+  }
+
+  Widget _buildSearchResults(BuildContext context) {
+    final filteredVersions =
+        versions.where((version) {
+          return version.title.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+
+    if (filteredVersions.isEmpty) {
+      return Center(
+        child: Text(
+          'No versions found for "$query"',
+          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: filteredVersions.length,
+      itemBuilder: (context, index) {
+        final version = filteredVersions[index];
+        return ListTile(
+          onTap: () {
+            ref
+                .read(textReadingParamsProvider.notifier)
+                .setParams(
+                  textId: version.id,
+                  contentId: version.tableOfContents[0],
+                  versionId: version.id,
+                  skip: '0',
+                );
+            close(context, version);
+            Navigator.pop(context);
+          },
+          title: Text(
+            version.title,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            '${getLanguageLabel(version.language, context)}, ${version.publishedBy}',
+          ),
         );
       },
     );
