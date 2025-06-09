@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_reading_params_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
-import 'package:flutter_pecha/features/texts/models/text/toc.dart';
+import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -116,10 +117,8 @@ class TextTocScreen extends ConsumerWidget {
                           (error, stackTrace) =>
                               Center(child: Text(error.toString())),
                       data:
-                          (contentResponse) => _buildContentsTab(
-                            contentResponse.contents[0],
-                            ref,
-                          ),
+                          (contentResponse) =>
+                              _buildContentsTab(contentResponse, ref),
                     ),
                     // Versions Tab
                     textVersionResponse.when(
@@ -147,7 +146,9 @@ class TextTocScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContentsTab(Toc toc, WidgetRef ref) {
+  Widget _buildContentsTab(TocResponse tocResponse, WidgetRef ref) {
+    final toc = tocResponse.contents[0];
+    final language = tocResponse.textDetail.language;
     if (toc.sections.isEmpty) {
       return const Center(child: Text('No contents found'));
     }
@@ -168,6 +169,9 @@ class TextTocScreen extends ConsumerWidget {
             ref
                 .read(textReadingParamsProvider.notifier)
                 .setParams(textId: toc.textId, contentId: toc.id, skip: '0');
+            ref
+                .read(textVersionLanguageProvider.notifier)
+                .setLanguage(language);
             context.push('/texts/reader');
           },
           child: Container(
@@ -218,6 +222,9 @@ class TextTocScreen extends ConsumerWidget {
                   versionId: version.id,
                   skip: '0',
                 );
+            ref
+                .read(textVersionLanguageProvider.notifier)
+                .setLanguage(version.language);
             context.push('/texts/reader');
           },
           child: Column(

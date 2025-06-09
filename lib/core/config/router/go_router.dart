@@ -108,10 +108,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               body: Center(child: Text('Missing required parameters')),
             );
           }
-          return VersionSelectionScreen(
-            textId: extra['textId'] as String,
-            selectedLanguage: extra['language'] as String,
-          );
+          return VersionSelectionScreen(textId: extra['textId'] as String);
         },
       ),
       GoRoute(
@@ -120,15 +117,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           if (extra == null ||
               extra is! Map ||
-              !extra.containsKey('uniqueLanguages') ||
-              !extra.containsKey('selectedLanguage')) {
+              !extra.containsKey('uniqueLanguages')) {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
             );
           }
           return LanguageSelectionScreen(
             uniqueLanguages: extra['uniqueLanguages'] as List<String>,
-            selectedLanguage: extra['selectedLanguage'] as String,
           );
         },
       ),

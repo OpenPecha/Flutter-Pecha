@@ -3,43 +3,23 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/utils/get_language.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_reading_params_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class VersionSelectionScreen extends ConsumerStatefulWidget {
-  const VersionSelectionScreen({
-    super.key,
-    required this.textId,
-    required this.selectedLanguage,
-  });
+class VersionSelectionScreen extends ConsumerWidget {
+  const VersionSelectionScreen({super.key, required this.textId});
 
   final String textId;
-  final String selectedLanguage;
 
   @override
-  ConsumerState<VersionSelectionScreen> createState() =>
-      _VersionSelectionScreenState();
-}
-
-class _VersionSelectionScreenState
-    extends ConsumerState<VersionSelectionScreen> {
-  late String selectedLanguage;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedLanguage = widget.selectedLanguage;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textVersionResponse = ref.watch(
-      textVersionFutureProvider(widget.textId),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textVersionResponse = ref.watch(textVersionFutureProvider(textId));
+    final currentLanguage = ref.watch(textVersionLanguageProvider);
     final numberOfVersions = textVersionResponse.value?.versions
         .map((version) {
-          if (version.language == selectedLanguage) {
+          if (version.language == currentLanguage) {
             return 1;
           }
           return 0;
@@ -47,7 +27,7 @@ class _VersionSelectionScreenState
         .reduce((a, b) => a + b);
     final filteredVersions =
         textVersionResponse.value?.versions
-            .where((version) => version.language == selectedLanguage)
+            .where((version) => version.language == currentLanguage)
             .toList();
     final uniqueLanguages =
         textVersionResponse.value?.versions
@@ -81,14 +61,14 @@ class _VersionSelectionScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Language Card
-            _buildLanguageCard(uniqueLanguages ?? [], context),
+            _buildLanguageCard(uniqueLanguages ?? [], context, ref),
             // Versions Title
             Text(
-              '${getLanguageLabel(selectedLanguage, context)} Versions ($numberOfVersions)',
+              '${getLanguageLabel(currentLanguage, context)} Versions ($numberOfVersions)',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            Expanded(child: _buildVersionCard(filteredVersions ?? [])),
+            Expanded(child: _buildVersionCard(filteredVersions ?? [], ref)),
           ],
         ),
       ),
@@ -98,8 +78,10 @@ class _VersionSelectionScreenState
   Widget _buildLanguageCard(
     List<String> uniqueLanguages,
     BuildContext context,
+    WidgetRef ref,
   ) {
     final localizations = AppLocalizations.of(context)!;
+    final currentLanguage = ref.watch(textVersionLanguageProvider);
     return Container(
       margin: EdgeInsets.all(18),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -120,15 +102,12 @@ class _VersionSelectionScreenState
             onTap: () async {
               final result = await context.push(
                 '/texts/language_selection',
-                extra: {
-                  "uniqueLanguages": uniqueLanguages,
-                  "selectedLanguage": selectedLanguage,
-                },
+                extra: {"uniqueLanguages": uniqueLanguages},
               );
               if (result != null && result is String) {
-                setState(() {
-                  selectedLanguage = result;
-                });
+                ref
+                    .read(textVersionLanguageProvider.notifier)
+                    .setLanguage(result);
               }
             },
             child: Container(
@@ -140,7 +119,7 @@ class _VersionSelectionScreenState
               child: Row(
                 children: [
                   Text(
-                    getLanguageLabel(selectedLanguage, context),
+                    getLanguageLabel(currentLanguage, context),
                     style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                   ),
                   const SizedBox(width: 8),
@@ -158,7 +137,7 @@ class _VersionSelectionScreenState
     );
   }
 
-  Widget _buildVersionCard(List<Version> versions) {
+  Widget _buildVersionCard(List<Version> versions, WidgetRef ref) {
     return ListView.builder(
       itemCount: versions.length,
       itemBuilder: (context, index) {

@@ -3,6 +3,7 @@ import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.da
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/version_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_reading_params_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +13,8 @@ class TextReaderScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final readingParams = ref.watch(textReadingParamsProvider);
+    final currentLanguage = ref.watch(textVersionLanguageProvider);
+
     final params = TextDetailsParams(
       textId: readingParams?.textId ?? '',
       contentId: readingParams?.contentId ?? '',
@@ -36,19 +39,20 @@ class TextReaderScreen extends ConsumerWidget {
         ),
         toolbarHeight: 50,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => Navigator.pop(context),
-          ),
           GestureDetector(
             onTap: () async {
-              await context.push(
+              final result = await context.push(
                 '/texts/version_selection',
-                extra: {
-                  "textId": textDetails.value?.textDetail.id,
-                  "language": textDetails.value?.textDetail.language,
-                },
+                extra: {"textId": textDetails.value?.textDetail.id},
               );
+              if (result != null && result is Map<String, dynamic>) {
+                final newLanguage = result['language'] as String?;
+                if (newLanguage != null) {
+                  ref
+                      .read(textVersionLanguageProvider.notifier)
+                      .setLanguage(newLanguage);
+                }
+              }
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
@@ -60,9 +64,12 @@ class TextReaderScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.language, size: 18),
                   const SizedBox(width: 4),
-                  const Text(
-                    "EN",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                  Text(
+                    currentLanguage.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ],
               ),

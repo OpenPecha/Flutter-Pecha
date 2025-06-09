@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/utils/get_language.dart';
+import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LanguageSelectionScreen extends StatelessWidget {
-  const LanguageSelectionScreen({
-    super.key,
-    required this.uniqueLanguages,
-    required this.selectedLanguage,
-  });
+class LanguageSelectionScreen extends ConsumerWidget {
+  const LanguageSelectionScreen({super.key, required this.uniqueLanguages});
 
   final List<String> uniqueLanguages;
-  final String selectedLanguage;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentLanguage = ref.watch(textVersionLanguageProvider);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -36,7 +34,7 @@ class LanguageSelectionScreen extends StatelessWidget {
             (context, index) => const Divider(height: 1, thickness: 1),
         itemBuilder: (context, index) {
           final language = uniqueLanguages[index];
-          final isSelected = language == selectedLanguage;
+          final isSelected = language == currentLanguage;
           return ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
@@ -64,7 +62,10 @@ class LanguageSelectionScreen extends StatelessWidget {
               ],
             ),
             onTap: () {
-              Navigator.pop(context, language);
+              ref
+                  .read(textVersionLanguageProvider.notifier)
+                  .setLanguage(language);
+              Navigator.pop(context);
             },
           );
         },
