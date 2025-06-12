@@ -3,6 +3,39 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:go_router/go_router.dart';
+import 'json_data.dart';
+
+class TextSegment {
+  final String text;
+  final Duration startTime;
+  final Duration endTime;
+
+  TextSegment({
+    required this.text,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  @override
+  String toString() {
+    return 'TextSegment(text: $text, startTime: $startTime, endTime: $endTime)';
+  }
+
+  factory TextSegment.fromJson(Map<String, String> json) {
+    return TextSegment(
+      text: json['text']!,
+      startTime: _parseDuration(json['startTime']!),
+      endTime: _parseDuration(json['endTime']!),
+    );
+  }
+
+  static Duration _parseDuration(String timeStr) {
+    final parts = timeStr.split(':');
+    final minutes = int.parse(parts[0]);
+    final seconds = int.parse(parts[1]);
+    return Duration(minutes: minutes, seconds: seconds);
+  }
+}
 
 class PrayerOfTheDayScreen extends StatefulWidget {
   const PrayerOfTheDayScreen({super.key});
@@ -16,18 +49,57 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  final ScrollController _scrollController = ScrollController();
+  List<TextSegment> _textSegments = [];
+  int _currentSegmentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeAudioPlayer();
+    _initializeTextSegments();
+  }
+
+  void _initializeTextSegments() {
+    _textSegments =
+        prayerOfTheDayJson.map((json) => TextSegment.fromJson(json)).toList();
+  }
+
+  void _scrollToCurrentSegment() {
+    if (_currentSegmentIndex >= 0 &&
+        _currentSegmentIndex < _textSegments.length) {
+      final itemHeight = 44.0; // Approximate height of each line
+      final targetScroll = _currentSegmentIndex * itemHeight;
+
+      _scrollController.animateTo(
+        targetScroll,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _updateCurrentSegment(Duration position) {
+    for (int i = 0; i < _textSegments.length; i++) {
+      if (position >= _textSegments[i].startTime &&
+          position < _textSegments[i].endTime) {
+        if (_currentSegmentIndex != i) {
+          setState(() {
+            _currentSegmentIndex = i;
+          });
+          _scrollToCurrentSegment();
+        }
+        break;
+      }
+    }
   }
 
   Future<void> _initializeAudioPlayer() async {
     _audioPlayer = AudioPlayer();
     try {
       final duration = await _audioPlayer.setAsset(
-        'assets/audios/Tibetan_prayer.mp3',
+        // 'assets/audios/Tibetan_prayer.mp3',
+        'assets/audios/replit_assistant.mp3',
       );
       if (mounted) {
         setState(() {
@@ -43,6 +115,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
         setState(() {
           _position = pos;
         });
+        _updateCurrentSegment(pos);
       }
     });
 
@@ -57,6 +130,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -81,20 +155,32 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
+            child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 12.0,
               ),
-              child: Text(
-                prayerText,
-                style: const TextStyle(
-                  fontSize: 22,
-                  height: 1.5,
-                  fontFamily: 'Jomolhari', // Use your Tibetan font here
-                ),
-                textAlign: TextAlign.left,
-              ),
+              itemCount: _textSegments.length,
+              itemBuilder: (context, index) {
+                final segment = _textSegments[index];
+                final isCurrentSegment = index == _currentSegmentIndex;
+                return Text(
+                  segment.text,
+                  style: TextStyle(
+                    fontSize: 22,
+                    height: 1.5,
+                    fontFamily: 'Jomolhari',
+                    color:
+                        isCurrentSegment
+                            ? Theme.of(context).primaryColor
+                            : null,
+                    fontWeight:
+                        isCurrentSegment ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  textAlign: TextAlign.left,
+                );
+              },
             ),
           ),
           Padding(
@@ -135,8 +221,8 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
                       color: Theme.of(context).appBarTheme.foregroundColor,
                       icon: Icon(
                         _isPlaying
-                            ? Icons.pause_circle_filled
-                            : Icons.play_circle_filled,
+                            ? Icons.pause_circle_outline
+                            : Icons.play_circle_outline,
                         size: 44,
                       ),
                       onPressed: () async {
