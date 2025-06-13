@@ -52,12 +52,17 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
   final ScrollController _scrollController = ScrollController();
   List<TextSegment> _textSegments = [];
   int _currentSegmentIndex = 0;
+  final Map<int, GlobalKey> _segmentKeys = {};
 
   @override
   void initState() {
     super.initState();
     _initializeAudioPlayer();
-    _initializeTextSegments();
+    // _initializeTextSegments();
+    // Initialize keys for each segment
+    for (int i = 0; i < _textSegments.length; i++) {
+      _segmentKeys[i] = GlobalKey();
+    }
   }
 
   void _initializeTextSegments() {
@@ -68,14 +73,39 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
   void _scrollToCurrentSegment() {
     if (_currentSegmentIndex >= 0 &&
         _currentSegmentIndex < _textSegments.length) {
-      final itemHeight = 44.0; // Approximate height of each line
-      final targetScroll = _currentSegmentIndex * itemHeight;
+      final viewportHeight = _scrollController.position.viewportDimension;
+      final currentScroll = _scrollController.offset;
 
-      _scrollController.animateTo(
-        targetScroll,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      // Get the current segment's key
+      final currentKey = _segmentKeys[_currentSegmentIndex];
+      if (currentKey?.currentContext != null) {
+        final RenderBox? renderBox =
+            currentKey?.currentContext?.findRenderObject() as RenderBox?;
+        if (renderBox != null) {
+          // Get the position relative to the viewport
+          final segmentPosition = renderBox.localToGlobal(Offset.zero).dy;
+          final viewportTop = _scrollController.position.pixels;
+          final viewportBottom = viewportTop + viewportHeight;
+
+          // Calculate if segment is in the upper half of the viewport
+          final isInUpperHalf =
+              segmentPosition >= viewportTop &&
+              segmentPosition <= (viewportTop + viewportHeight / 2);
+
+          // print('viewportTop: $viewportTop, viewportBottom: $viewportBottom');
+          // print(
+          //   'segmentPosition: $segmentPosition, isInUpperHalf: $isInUpperHalf',
+          // );
+
+          if (!isInUpperHalf) {
+            _scrollController.animateTo(
+              segmentPosition - (viewportHeight / 4),
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+      }
     }
   }
 
@@ -98,8 +128,8 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
     _audioPlayer = AudioPlayer();
     try {
       final duration = await _audioPlayer.setAsset(
-        // 'assets/audios/Tibetan_prayer.mp3',
-        'assets/audios/replit_assistant.mp3',
+        'assets/audios/Tibetan_prayer.mp3',
+        // 'assets/audios/replit_assistant.mp3',
       );
       if (mounted) {
         setState(() {
@@ -115,7 +145,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
         setState(() {
           _position = pos;
         });
-        _updateCurrentSegment(pos);
+        // _updateCurrentSegment(pos);
       }
     });
 
@@ -155,34 +185,56 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 12.0,
               ),
-              itemCount: _textSegments.length,
-              itemBuilder: (context, index) {
-                final segment = _textSegments[index];
-                final isCurrentSegment = index == _currentSegmentIndex;
-                return Text(
-                  segment.text,
-                  style: TextStyle(
-                    fontSize: 22,
-                    height: 1.5,
-                    fontFamily: 'Jomolhari',
-                    color:
-                        isCurrentSegment
-                            ? Theme.of(context).primaryColor
-                            : null,
-                    fontWeight:
-                        isCurrentSegment ? FontWeight.bold : FontWeight.normal,
-                  ),
-                  textAlign: TextAlign.left,
-                );
-              },
+              child: Text(
+                prayerText,
+                style: const TextStyle(
+                  fontSize: 22,
+                  height: 1.5,
+                  fontFamily: 'Jomolhari', // Use your Tibetan font here
+                ),
+                textAlign: TextAlign.left,
+              ),
             ),
           ),
+          // Expanded(
+          //   child: ListView.builder(
+          //     controller: _scrollController,
+          //     padding: const EdgeInsets.symmetric(
+          //       horizontal: 16.0,
+          //       vertical: 12.0,
+          //     ),
+          //     itemCount: _textSegments.length,
+          //     itemBuilder: (context, index) {
+          //       final segment = _textSegments[index];
+          //       final isCurrentSegment = index == _currentSegmentIndex;
+          //       return Container(
+          //         key: _segmentKeys[index],
+          //         child: Text(
+          //           segment.text,
+          //           style: TextStyle(
+          //             fontSize: 22,
+          //             height: 1.5,
+          //             fontFamily: 'Jomolhari',
+          //             color:
+          //                 isCurrentSegment
+          //                     ? Theme.of(context).primaryColor
+          //                     : null,
+          //             fontWeight:
+          //                 isCurrentSegment
+          //                     ? FontWeight.bold
+          //                     : FontWeight.normal,
+          //           ),
+          //           textAlign: TextAlign.left,
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 28),
             child: Column(

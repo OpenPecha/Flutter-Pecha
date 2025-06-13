@@ -24,26 +24,47 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
     _initializeAudioPlayer();
   }
 
-  void _initializeAudioPlayer() async {
-    _audioPlayer = AudioPlayer();
-    final duration = await _audioPlayer.setAsset(
-      'assets/audios/meditation.mp3',
-    );
-    if (mounted) {
-      setState(() {
-        _duration = duration ?? Duration.zero;
+  Future<void> _initializeAudioPlayer() async {
+    try {
+      _audioPlayer = AudioPlayer();
+
+      // Set up listeners before loading audio
+      _audioPlayer.durationStream.listen((duration) {
+        if (mounted) {
+          setState(() {
+            _duration = duration ?? Duration.zero;
+          });
+        }
       });
-      _audioPlayer.play();
+
+      _audioPlayer.positionStream.listen((pos) {
+        if (mounted) {
+          setState(() {
+            _position = pos;
+          });
+        }
+      });
+
+      // Load and play audio
+      await _audioPlayer.setAsset('assets/audios/meditation.mp3');
+      if (mounted) {
+        await _audioPlayer.play();
+      }
+    } catch (e) {
+      debugPrint('Error initializing audio player: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load meditation audio: ${e.toString()}'),
+          ),
+        );
+      }
     }
-    _audioPlayer.positionStream.listen((pos) {
-      setState(() {
-        _position = pos;
-      });
-    });
   }
 
   @override
   void dispose() {
+    _audioPlayer.stop();
     _audioPlayer.dispose();
     super.dispose();
   }

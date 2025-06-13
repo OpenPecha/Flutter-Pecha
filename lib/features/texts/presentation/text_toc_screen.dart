@@ -109,32 +109,38 @@ class TextTocScreen extends ConsumerWidget {
                 child: TabBarView(
                   children: [
                     // Contents Tab
-                    textContentResponse.when(
-                      loading:
-                          () =>
-                              const Center(child: CircularProgressIndicator()),
-                      error:
-                          (error, stackTrace) =>
-                              Center(child: Text(error.toString())),
-                      data:
-                          (contentResponse) =>
-                              _buildContentsTab(contentResponse, ref),
-                    ),
+                    (text.type == "root_text")
+                        ? textContentResponse.when(
+                          loading:
+                              () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                          error:
+                              (error, stackTrace) =>
+                                  Center(child: Text(error.toString())),
+                          data:
+                              (contentResponse) =>
+                                  _buildContentsTab(contentResponse, ref),
+                        )
+                        : const Center(child: Text('No contents found')),
                     // Versions Tab
-                    textVersionResponse.when(
-                      loading:
-                          () =>
-                              const Center(child: CircularProgressIndicator()),
-                      error:
-                          (error, stackTrace) =>
-                              Center(child: Text(error.toString())),
-                      data:
-                          (versionResponse) => _buildVersionsTab(
-                            versionResponse.versions,
-                            context,
-                            ref,
-                          ),
-                    ),
+                    (text.type == "root_text")
+                        ? textVersionResponse.when(
+                          loading:
+                              () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                          error:
+                              (error, stackTrace) =>
+                                  Center(child: Text(error.toString())),
+                          data:
+                              (versionResponse) => _buildVersionsTab(
+                                versionResponse.versions,
+                                context,
+                                ref,
+                              ),
+                        )
+                        : const Center(child: Text('No versions found')),
                   ],
                 ),
               ),
