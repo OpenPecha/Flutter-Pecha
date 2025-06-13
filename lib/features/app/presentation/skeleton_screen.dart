@@ -17,7 +17,7 @@ class SkeletonScreen extends ConsumerWidget {
   static final List<Widget> _pages = <Widget>[
     HomeScreen(), // Home tab
     LibraryCatalogScreen(), // Texts tab
-    Center(child: Text('Plans')), // Plans tab placeholder
+    Center(child: Text('Coming Soon')), // Plans tab placeholder
     MoreScreen(), // Settings tab placeholder
   ];
 

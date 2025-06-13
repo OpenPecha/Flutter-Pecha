@@ -52,7 +52,7 @@ class TextDetailScreen extends ConsumerWidget {
                           .toList();
                   if (rootTexts.isEmpty && commentaries.isEmpty) {
                     return const Text(
-                      "No Texts Found",
+                      "No Text Found",
                       style: TextStyle(fontSize: 16),
                     );
                   } else {

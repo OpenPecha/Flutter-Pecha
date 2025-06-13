@@ -116,7 +116,7 @@ class VerseOfTheDayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 260,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.brown[700],
         borderRadius: BorderRadius.circular(24),
@@ -144,34 +144,34 @@ class VerseOfTheDayCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                StatButton(
-                  icon: Icons.favorite_border,
-                  label: '392.5k',
-                  onTap: () {
-                    // Handle favorite tap
-                  },
-                ),
-                StatButton(
-                  icon: Icons.share,
-                  label: '129.2k',
-                  onTap: () {
-                    // Handle share tap
-                    handleShare();
-                  },
-                ),
-                StatButton(
-                  icon: Icons.text_snippet,
-                  label: 'Text',
-                  onTap: () {
-                    // Handle text tap
-                  },
-                ),
-              ],
-            ),
+            // Spacer(),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     StatButton(
+            //       icon: Icons.favorite_border,
+            //       label: '392.5k',
+            //       onTap: () {
+            //         // Handle favorite tap
+            //       },
+            //     ),
+            //     StatButton(
+            //       icon: Icons.share,
+            //       label: '129.2k',
+            //       onTap: () {
+            //         // Handle share tap
+            //         handleShare();
+            //       },
+            //     ),
+            //     StatButton(
+            //       icon: Icons.text_snippet,
+            //       label: 'Text',
+            //       onTap: () {
+            //         // Handle text tap
+            //       },
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),
