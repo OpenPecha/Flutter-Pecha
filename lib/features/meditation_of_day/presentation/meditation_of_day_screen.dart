@@ -21,12 +21,20 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeAudioPlayer();
+  }
+
+  void _initializeAudioPlayer() async {
     _audioPlayer = AudioPlayer();
-    _audioPlayer.setAsset('assets/audios/meditation.mp3').then((duration) {
+    final duration = await _audioPlayer.setAsset(
+      'assets/audios/meditation.mp3',
+    );
+    if (mounted) {
       setState(() {
         _duration = duration ?? Duration.zero;
       });
-    });
+      _audioPlayer.play();
+    }
     _audioPlayer.positionStream.listen((pos) {
       setState(() {
         _position = pos;
