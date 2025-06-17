@@ -11,7 +11,7 @@ class SegmentHtmlWidget extends ConsumerStatefulWidget {
     super.key,
     required this.htmlContent,
     required this.segmentIndex,
-    this.fontSize = 16,
+    required this.fontSize,
   });
 
   @override

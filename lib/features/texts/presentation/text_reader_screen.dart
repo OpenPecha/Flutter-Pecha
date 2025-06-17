@@ -4,6 +4,7 @@ import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart'
 import 'package:flutter_pecha/features/texts/data/providers/version_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_reading_params_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,48 +15,67 @@ class TextReaderScreen extends ConsumerWidget {
     // showDialog(
     //   context: context,
     //   builder: (context) {
-    //     return AlertDialog(
-    //       content: Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         children: [
-    //           Row(
-    //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //             children: [
-    //               for (final size in [12.0, 16.0, 20.0, 24.0, 28.0])
-    //                 Text(
-    //                   'A',
-    //                   style: TextStyle(
-    //                     fontSize: size,
-    //                     fontWeight: FontWeight.bold,
-    //                   ),
+    //     return Consumer(
+    //       builder: (context, ref, child) {
+    //         final fontSize = ref.watch(fontSizeProvider);
+    //         return Dialog(
+    //           alignment: Alignment.topCenter,
+    //           insetPadding: const EdgeInsets.only(
+    //             top: 60.0,
+    //             left: 20.0,
+    //             right: 20.0,
+    //           ),
+    //           child: Container(
+    //             padding: const EdgeInsets.symmetric(
+    //               horizontal: 24,
+    //               vertical: 16,
+    //             ),
+    //             child: Column(
+    //               mainAxisSize: MainAxisSize.min,
+    //               children: [
+    //                 Row(
+    //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                   crossAxisAlignment: CrossAxisAlignment.end,
+    //                   children: [
+    //                     for (final size in [12.0, 18.0, 24.0, 30.0, 40.0])
+    //                       Text(
+    //                         'A',
+    //                         style: TextStyle(
+    //                           fontSize: size,
+    //                           fontWeight: FontWeight.bold,
+    //                         ),
+    //                       ),
+    //                   ],
     //                 ),
-    //             ],
+    //                 const SizedBox(height: 8),
+    //                 Slider(
+    //                   padding: EdgeInsets.zero,
+    //                   activeColor: Theme.of(context).colorScheme.primary,
+    //                   inactiveColor: Colors.grey.shade300,
+    //                   min: 10,
+    //                   max: 40,
+    //                   value: fontSize,
+    //                   label: '${fontSize.round()}',
+    //                   onChanged: (value) {
+    //                     ref.read(fontSizeProvider.notifier).setFontSize(value);
+    //                   },
+    //                 ),
+    //                 const SizedBox(height: 16),
+    //                 Row(
+    //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                   children: const [
+    //                     Text('50%'),
+    //                     Text('110%'),
+    //                     Text('175%'),
+    //                     Text('235%'),
+    //                     Text('300%'),
+    //                   ],
+    //                 ),
+    //               ],
+    //             ),
     //           ),
-    //           Slider(
-    //             min: 10,
-    //             max: 40,
-    //             value: readingParams?.fontSize ?? 16,
-    //             divisions: 6,
-    //             label:
-    //                 '${(readingParams?.fontSize ?? 16 / 18.0 * 100).round()}%',
-    //             onChanged: (value) {
-    //               ref
-    //                   .read(textReadingParamsProvider.notifier)
-    //                   .setFontSize(value);
-    //             },
-    //           ),
-    //           Row(
-    //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //             children: const [
-    //               Text('50%'),
-    //               Text('110%'),
-    //               Text('175%'),
-    //               Text('235%'),
-    //               Text('300%'),
-    //             ],
-    //           ),
-    //         ],
-    //       ),
+    //         );
+    //       },
     //     );
     //   },
     // );
@@ -65,7 +85,7 @@ class TextReaderScreen extends ConsumerWidget {
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
-            final readingParams = ref.watch(textReadingParamsProvider);
+            final fontSize = ref.watch(fontSizeProvider);
             return Padding(
               padding: const EdgeInsets.only(
                 left: 24,
@@ -78,8 +98,9 @@ class TextReaderScreen extends ConsumerWidget {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      for (final size in [12.0, 16.0, 20.0, 24.0, 28.0])
+                      for (final size in [12.0, 18.0, 24.0, 30.0, 40.0])
                         Text(
                           'A',
                           style: TextStyle(
@@ -94,16 +115,12 @@ class TextReaderScreen extends ConsumerWidget {
                     padding: EdgeInsets.zero,
                     activeColor: Theme.of(context).colorScheme.primary,
                     inactiveColor: Theme.of(context).colorScheme.primary,
-                    min: 10,
-                    max: 40,
-                    value: readingParams?.fontSize ?? 16,
-                    divisions: 6,
-                    label:
-                        '${(readingParams?.fontSize ?? 16 / 18.0 * 100).round()}%',
+                    min: 12,
+                    max: 42,
+                    value: fontSize,
+                    label: '${fontSize.round()}',
                     onChanged: (value) {
-                      ref
-                          .read(textReadingParamsProvider.notifier)
-                          .setFontSize(value);
+                      ref.read(fontSizeProvider.notifier).setFontSize(value);
                     },
                   ),
                   const SizedBox(height: 16),
@@ -130,6 +147,7 @@ class TextReaderScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final readingParams = ref.watch(textReadingParamsProvider);
     final currentLanguage = ref.watch(textVersionLanguageProvider);
+    final fontSize = ref.watch(fontSizeProvider);
 
     final params = TextDetailsParams(
       textId: readingParams?.textId ?? '',
@@ -283,7 +301,7 @@ class TextReaderScreen extends ConsumerWidget {
                           child: SegmentHtmlWidget(
                             htmlContent: content,
                             segmentIndex: index,
-                            fontSize: readingParams?.fontSize ?? 16,
+                            fontSize: fontSize,
                           ),
                         ),
                       ],
