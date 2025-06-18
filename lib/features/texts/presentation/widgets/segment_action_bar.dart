@@ -5,8 +5,31 @@ import 'package:share_plus/share_plus.dart';
 import 'package:html/parser.dart' as html_parser;
 
 String htmlToPlainText(String htmlString) {
-  final document = html_parser.parse(htmlString);
+  // Remove specific HTML elements with their content
+  String cleanedHtml = removeHtmlElementsWithContent(
+    htmlString,
+    ['sup', 'i'], // Add more tags as needed
+  );
+  final document = html_parser.parse(cleanedHtml);
   return document.body?.text ?? '';
+}
+
+String removeHtmlElementsWithContent(String html, List<String> tagsToRemove) {
+  String result = html;
+
+  for (String tag in tagsToRemove) {
+    // Create regex pattern to match opening and closing tags with content
+    // This pattern matches: <tag>...</tag> or <tag attributes>...</tag>
+    RegExp regex = RegExp(
+      '<$tag(?:\\s[^>]*)?>.*?<\\/$tag>',
+      caseSensitive: false,
+      dotAll: true, // Makes . match newlines too
+    );
+
+    result = result.replaceAll(regex, '');
+  }
+
+  return result;
 }
 
 class SegmentActionBar extends StatelessWidget {
@@ -55,10 +78,7 @@ class SegmentActionBar extends StatelessWidget {
                   final webUrl =
                       "https://pecha-frontend-12552055234-4f99e0e.onrender.com/";
                   SharePlus.instance.share(
-                    ShareParams(
-                      text: "$plainText\n$webUrl",
-                      title: "The wisdom of the Buddha",
-                    ),
+                    ShareParams(text: "$plainText\n$webUrl"),
                   );
                   onClose();
                 },
