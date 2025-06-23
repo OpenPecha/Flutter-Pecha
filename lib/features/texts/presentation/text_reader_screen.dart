@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
-import 'package:flutter_pecha/features/texts/data/providers/version_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_reading_params_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
@@ -9,9 +8,20 @@ import 'package:flutter_pecha/features/texts/data/providers/selected_segment_pro
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class TextReaderScreen extends ConsumerWidget {
+class TextReaderScreen extends ConsumerStatefulWidget {
   const TextReaderScreen({super.key});
+
+  @override
+  ConsumerState<TextReaderScreen> createState() => _TextReaderScreenState();
+}
+
+class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   void _showFontSizeSelector(BuildContext context, WidgetRef ref) {
     showDialog(
@@ -85,9 +95,8 @@ class TextReaderScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final readingParams = ref.watch(textReadingParamsProvider);
-    final currentLanguage = ref.watch(textVersionLanguageProvider);
     final fontSize = ref.watch(fontSizeProvider);
     final selectedIndex = ref.watch(selectedSegmentProvider);
 
@@ -108,18 +117,32 @@ class TextReaderScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            ref.read(versionProvider.notifier).clearVersion();
-            ref.read(textReadingParamsProvider.notifier).clearParams();
             Navigator.pop(context);
           },
         ),
         toolbarHeight: 50,
         actions: [
           // search icon
-          // IconButton(
-          //   onPressed: () => _showSearchDialog(context, ref),
-          //   icon: const Icon(Icons.search),
-          // ),
+          IconButton(
+            onPressed: () async {
+              final details = textDetails.value;
+              if (details != null) {
+                final selectedIndex = await showSearch<int?>(
+                  context: context,
+                  delegate: TextSearchDelegate(textDetails: details, ref: ref),
+                );
+
+                if (selectedIndex != null && mounted) {
+                  itemScrollController.scrollTo(
+                    index: selectedIndex + 1, // +1 for the header
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              }
+            },
+            icon: const Icon(Icons.search),
+          ),
           IconButton(
             onPressed: () => _showFontSizeSelector(context, ref),
             icon: const Icon(Icons.text_increase),
@@ -145,8 +168,7 @@ class TextReaderScreen extends ConsumerWidget {
                   const Icon(Icons.language, size: 18),
                   const SizedBox(width: 4),
                   Text(
-                    textDetails.value?.textDetail.language.toUpperCase() ??
-                        "en".toUpperCase(),
+                    textDetails.value?.textDetail.language.toUpperCase() ?? "",
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -176,11 +198,14 @@ class TextReaderScreen extends ConsumerWidget {
           }
           return Stack(
             children: [
-              CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
+              ScrollablePositionedList.builder(
+                itemScrollController: itemScrollController,
+                itemPositionsListener: itemPositionsListener,
+                itemCount: response.content.sections.first.segments.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    // This is the header
+                    return Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 4,
@@ -191,17 +216,16 @@ class TextReaderScreen extends ConsumerWidget {
                           const SizedBox(height: 16),
                           Text(
                             response.textDetail.title,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
-                              fontFamily: 'Jomolhari',
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            firstSection.title,
-                            style: TextStyle(
+                            response.content.sections.first.title,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Jomolhari',
@@ -210,81 +234,188 @@ class TextReaderScreen extends ConsumerWidget {
                           const SizedBox(height: 8),
                         ],
                       ),
-                    ),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final segment = firstSection.segments[index];
-                      final segmentNumber = segment.segmentNumber
-                          .toString()
-                          .padLeft(2);
-                      final content = segment.content;
-                      final isSelected = selectedIndex == index;
+                    );
+                  }
 
-                      return GestureDetector(
-                        onTap: () {
-                          ref.read(selectedSegmentProvider.notifier).state =
-                              ref.read(selectedSegmentProvider) == index
-                                  ? null
-                                  : index;
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? Theme.of(
-                                      context,
-                                    ).colorScheme.primary.withAlpha(25)
-                                    : null,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: SizedBox(
-                                  width: 30,
-                                  child: Text(
-                                    segmentNumber,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
+                  final segmentIndex = index - 1;
+                  final segment =
+                      response.content.sections.first.segments[segmentIndex];
+                  final segmentNumber = segment.segmentNumber
+                      .toString()
+                      .padLeft(2);
+                  final content = segment.content;
+                  final isSelected = selectedIndex == segmentIndex;
+
+                  return GestureDetector(
+                    onTap: () {
+                      ref.read(selectedSegmentProvider.notifier).state =
+                          ref.read(selectedSegmentProvider) == segmentIndex
+                              ? null
+                              : segmentIndex;
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color:
+                            isSelected
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(25)
+                                : null,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: SizedBox(
+                              width: 30,
+                              child: Text(
+                                segmentNumber,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
                                 ),
+                                textAlign: TextAlign.left,
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: SegmentHtmlWidget(
-                                  htmlContent: content,
-                                  segmentIndex: index,
-                                  fontSize: fontSize,
-                                  isSelected: isSelected,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    }, childCount: firstSection.segments.length),
-                  ),
-                ],
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SegmentHtmlWidget(
+                              htmlContent: content,
+                              segmentIndex: segmentIndex,
+                              fontSize: fontSize,
+                              isSelected: isSelected,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               if (selectedIndex != null)
                 SegmentActionBar(
-                  text: firstSection.segments[selectedIndex].content,
+                  text:
+                      response
+                          .content
+                          .sections
+                          .first
+                          .segments[selectedIndex]
+                          .content,
                   onClose:
                       () =>
                           ref.read(selectedSegmentProvider.notifier).state =
                               null,
                 ),
             ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class TextSearchDelegate extends SearchDelegate<int?> {
+  final ReaderResponse textDetails;
+  final WidgetRef ref;
+
+  TextSearchDelegate({required this.textDetails, required this.ref});
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Theme.of(context).copyWith(
+      appBarTheme: AppBarTheme(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        iconTheme: IconThemeData(
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: InputBorder.none,
+      ),
+    );
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+          showSuggestions(context);
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back_ios),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return _buildSearchResults(context);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return _buildSearchResults(context);
+  }
+
+  Widget _buildSearchResults(BuildContext context) {
+    if (query.isEmpty) {
+      return Container(color: Theme.of(context).scaffoldBackgroundColor);
+    }
+    final segments = textDetails.content.sections.first.segments;
+    final results =
+        segments
+            .where(
+              (segment) =>
+                  segment.content.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList();
+
+    if (results.isEmpty) {
+      return Center(
+        child: Text(
+          'No results found for "$query"',
+          style: const TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: ListView.builder(
+        itemCount: results.length,
+        itemBuilder: (context, index) {
+          final segment = results[index];
+          return ListTile(
+            title: Text(
+              segment.content.replaceAll(RegExp(r'<[^>]*>'), ''),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text('Segment ${segment.segmentNumber}'),
+            onTap: () {
+              final originalIndex = segments.indexOf(segment);
+              close(context, originalIndex);
+            },
           );
         },
       ),
