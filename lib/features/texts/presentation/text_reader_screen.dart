@@ -201,7 +201,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
               ScrollablePositionedList.builder(
                 itemScrollController: itemScrollController,
                 itemPositionsListener: itemPositionsListener,
-                itemCount: response.content.sections.first.segments.length + 1,
+                itemCount: firstSection.segments.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     // This is the header
@@ -224,11 +224,10 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            response.content.sections.first.title,
+                            firstSection.title,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'Jomolhari',
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -238,8 +237,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                   }
 
                   final segmentIndex = index - 1;
-                  final segment =
-                      response.content.sections.first.segments[segmentIndex];
+                  final segment = firstSection.segments[segmentIndex];
                   final segmentNumber = segment.segmentNumber
                       .toString()
                       .padLeft(2);
@@ -301,13 +299,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
               ),
               if (selectedIndex != null)
                 SegmentActionBar(
-                  text:
-                      response
-                          .content
-                          .sections
-                          .first
-                          .segments[selectedIndex]
-                          .content,
+                  text: firstSection.segments[selectedIndex].content,
                   onClose:
                       () =>
                           ref.read(selectedSegmentProvider.notifier).state =
