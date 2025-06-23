@@ -115,24 +115,24 @@ class TextReaderScreen extends ConsumerWidget {
         ),
         toolbarHeight: 50,
         actions: [
+          // search icon
+          // IconButton(
+          //   onPressed: () => _showSearchDialog(context, ref),
+          //   icon: const Icon(Icons.search),
+          // ),
           IconButton(
             onPressed: () => _showFontSizeSelector(context, ref),
             icon: const Icon(Icons.text_increase),
           ),
           GestureDetector(
-            onTap: () async {
-              final result = await context.push(
+            onTap: () {
+              ref
+                  .read(textVersionLanguageProvider.notifier)
+                  .setLanguage(textDetails.value?.textDetail.language ?? "en");
+              context.push(
                 '/texts/version_selection',
                 extra: {"textId": textDetails.value?.textDetail.id},
               );
-              if (result != null && result is Map<String, dynamic>) {
-                final newLanguage = result['language'] as String?;
-                if (newLanguage != null) {
-                  ref
-                      .read(textVersionLanguageProvider.notifier)
-                      .setLanguage(newLanguage);
-                }
-              }
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
@@ -145,10 +145,11 @@ class TextReaderScreen extends ConsumerWidget {
                   const Icon(Icons.language, size: 18),
                   const SizedBox(width: 4),
                   Text(
-                    currentLanguage.toUpperCase(),
+                    textDetails.value?.textDetail.language.toUpperCase() ??
+                        "en".toUpperCase(),
                     style: const TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

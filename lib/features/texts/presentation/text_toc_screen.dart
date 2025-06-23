@@ -175,9 +175,6 @@ class TextTocScreen extends ConsumerWidget {
             ref
                 .read(textReadingParamsProvider.notifier)
                 .setParams(textId: toc.textId, contentId: toc.id, skip: '0');
-            ref
-                .read(textVersionLanguageProvider.notifier)
-                .setLanguage(language);
             context.push('/texts/reader');
           },
           child: Container(
@@ -228,9 +225,6 @@ class TextTocScreen extends ConsumerWidget {
                   versionId: version.id,
                   skip: '0',
                 );
-            ref
-                .read(textVersionLanguageProvider.notifier)
-                .setLanguage(version.language);
             context.push('/texts/reader');
           },
           child: Column(
