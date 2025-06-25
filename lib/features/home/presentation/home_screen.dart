@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/view_illustration.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -109,7 +110,19 @@ class HomeScreen extends ConsumerWidget {
                 width: 100,
                 height: 100,
               ),
-              onTap: () => context.push('/home/meditation_of_the_day'),
+              onTap:
+                  () => showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: "Close",
+                    transitionDuration: const Duration(milliseconds: 200),
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return ViewIllustration(
+                        imageUrl:
+                            "https://drive.google.com/uc?export=view&id=1H8r8pspaXqnF-_bWT53cBPJww7_ebcvs",
+                      );
+                    },
+                  ),
             ),
             SizedBox(height: 10),
           ],
@@ -137,7 +150,7 @@ class VerseOfTheDayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final illustrationUrl =
-        "https://drive.google.com/uc?export=view&id=1JoFRlDNbU8Alz-tkLfRqjIAAaesbUucP";
+        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS";
     return GestureDetector(
       onTap: () {
         showGeneralDialog(
@@ -146,7 +159,7 @@ class VerseOfTheDayCard extends StatelessWidget {
           barrierLabel: "Close",
           transitionDuration: const Duration(milliseconds: 200),
           pageBuilder: (context, animation, secondaryAnimation) {
-            return VerseIllustrationOverlay(imageUrl: illustrationUrl);
+            return ViewIllustration(imageUrl: illustrationUrl);
           },
         );
       },
@@ -205,56 +218,6 @@ class VerseOfTheDayCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class VerseIllustrationOverlay extends StatelessWidget {
-  final String imageUrl;
-
-  const VerseIllustrationOverlay({super.key, required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.contain,
-                width: double.infinity,
-                height: double.infinity,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return const Center(child: CircularProgressIndicator());
-                },
-                errorBuilder:
-                    (context, error, stackTrace) =>
-                        const Center(child: Icon(Icons.broken_image, size: 80)),
-              ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 30,
-            left: 4,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: const Icon(Icons.close, color: Colors.black, size: 24),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
