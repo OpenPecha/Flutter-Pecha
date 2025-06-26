@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
+import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:go_router/go_router.dart';
-import 'json_data.dart';
 
 class TextSegment {
   final String text;
@@ -38,7 +38,13 @@ class TextSegment {
 }
 
 class PrayerOfTheDayScreen extends StatefulWidget {
-  const PrayerOfTheDayScreen({super.key});
+  final String audioUrl;
+  final List<PrayerData> prayerData;
+  const PrayerOfTheDayScreen({
+    super.key,
+    required this.audioUrl,
+    required this.prayerData,
+  });
 
   @override
   State<PrayerOfTheDayScreen> createState() => _PrayerOfTheDayScreenState();
@@ -50,7 +56,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   final ScrollController _scrollController = ScrollController();
-  List<TextSegment> _textSegments = [];
+  // List<TextSegment> _textSegments = [];
   int _currentSegmentIndex = 0;
   final Map<int, GlobalKey> _segmentKeys = {};
 
@@ -58,21 +64,21 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
   void initState() {
     super.initState();
     _initializeAudioPlayer();
-    _initializeTextSegments();
+    // _initializeTextSegments();
     // Initialize keys for each segment
-    for (int i = 0; i < _textSegments.length; i++) {
+    for (int i = 0; i < widget.prayerData.length; i++) {
       _segmentKeys[i] = GlobalKey();
     }
   }
 
-  void _initializeTextSegments() {
-    _textSegments =
-        prayerOfTheDayJson.map((json) => TextSegment.fromJson(json)).toList();
-  }
+  // void _initializeTextSegments() {
+  //   _textSegments =
+  //       prayerOfTheDayJson.map((json) => TextSegment.fromJson(json)).toList();
+  // }
 
   void _scrollToCurrentSegment() {
     if (_currentSegmentIndex >= 0 &&
-        _currentSegmentIndex < _textSegments.length) {
+        _currentSegmentIndex < widget.prayerData.length) {
       final currentKey = _segmentKeys[_currentSegmentIndex];
       if (currentKey?.currentContext != null && _scrollController.hasClients) {
         final RenderBox renderBox =
@@ -96,7 +102,8 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
             (viewportHeight / 2 - segmentHeight / 2);
 
         // Check if we're at the last segment
-        final isLastSegment = _currentSegmentIndex == _textSegments.length - 1;
+        final isLastSegment =
+            _currentSegmentIndex == widget.prayerData.length - 1;
 
         // Check if the segment is already fully visible
         final isFullyVisible =
@@ -127,9 +134,9 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
   }
 
   void _updateCurrentSegment(Duration position) {
-    for (int i = 0; i < _textSegments.length; i++) {
-      if (position >= _textSegments[i].startTime &&
-          position < _textSegments[i].endTime) {
+    for (int i = 0; i < widget.prayerData.length; i++) {
+      if (position >= widget.prayerData[i].startTime &&
+          position < widget.prayerData[i].endTime) {
         if (_currentSegmentIndex != i) {
           setState(() {
             _currentSegmentIndex = i;
@@ -146,7 +153,7 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
     try {
       final duration = await _audioPlayer.setAsset(
         // 'assets/audios/Tibetan_prayer.mp3',
-        'assets/audios/replit_assistant.mp3',
+        'assets/audios/monday_prayer.mp3',
       );
       if (mounted) {
         setState(() {
@@ -201,25 +208,6 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
       ),
       body: Column(
         children: [
-          // for static tibetan prayer data
-          // Expanded(
-          //   child: SingleChildScrollView(
-          //     padding: const EdgeInsets.symmetric(
-          //       horizontal: 16.0,
-          //       vertical: 12.0,
-          //     ),
-          //     child: Text(
-          //       prayerText,
-          //       style: const TextStyle(
-          //         fontSize: 22,
-          //         height: 1.5,
-          //         fontFamily: 'Jomolhari', // Use your Tibetan font here
-          //       ),
-          //       textAlign: TextAlign.left,
-          //     ),
-          //   ),
-          // ),
-          // for dynamic data from json
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -227,9 +215,9 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
                 horizontal: 16.0,
                 vertical: 12.0,
               ),
-              itemCount: _textSegments.length,
+              itemCount: widget.prayerData.length,
               itemBuilder: (context, index) {
-                final segment = _textSegments[index];
+                final segment = widget.prayerData[index];
                 final isCurrentSegment = index == _currentSegmentIndex;
                 return Container(
                   key: _segmentKeys[index],

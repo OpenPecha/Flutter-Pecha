@@ -6,7 +6,13 @@ import 'package:just_audio/just_audio.dart';
 import 'package:go_router/go_router.dart';
 
 class MeditationOfTheDayScreen extends StatefulWidget {
-  const MeditationOfTheDayScreen({super.key});
+  final String audioUrl;
+  final String imageUrl;
+  const MeditationOfTheDayScreen({
+    super.key,
+    required this.audioUrl,
+    required this.imageUrl,
+  });
 
   @override
   State<MeditationOfTheDayScreen> createState() =>
@@ -45,8 +51,10 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
         }
       });
 
-      // Load and play audio
-      await _audioPlayer.setAsset('assets/audios/meditation.mp3');
+      // Load and play audio for url
+      // await _audioPlayer.setUrl(widget.audioUrl);
+      // for assets
+      await _audioPlayer.setAsset("assets/audios/monday_meditation.mp3");
       if (mounted) {
         await _audioPlayer.play();
       }
@@ -91,10 +99,21 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/images/meditation.png',
+              child: Image.network(
+                widget.imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  if (wasSynchronouslyLoaded) return child;
+                  return AnimatedOpacity(
+                    opacity: frame == null ? 0 : 1,
+                    duration: const Duration(milliseconds: 300),
+                    child: child,
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  return child;
+                },
               ),
             ),
           ),

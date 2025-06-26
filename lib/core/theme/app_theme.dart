@@ -35,6 +35,7 @@ class AppTheme {
           borderSide: BorderSide.none,
         ),
       ),
+      iconTheme: const IconThemeData(color: Colors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: Colors.black87,
@@ -114,6 +115,7 @@ class AppTheme {
           borderSide: BorderSide.none,
         ),
       ),
+      iconTheme: const IconThemeData(color: Colors.white),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Color(0xFF121212),
         selectedItemColor: Colors.white,

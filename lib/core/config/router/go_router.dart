@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
+import 'package:flutter_pecha/features/home/models/prayer_data.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/guided_scripture.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
 import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
@@ -39,12 +41,51 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SkeletonScreen(),
       ),
       GoRoute(
+        path: '/home/guided_scripture',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is String) {
+            return GuidedScripture(videoUrl: extra);
+          } else {
+            throw Exception('Invalid extra type for /home/guided_scripture');
+          }
+        },
+      ),
+      GoRoute(
         path: '/home/meditation_of_the_day',
-        builder: (context, state) => const MeditationOfTheDayScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra == null ||
+              extra is! Map ||
+              !extra.containsKey('meditationAudioUrl') ||
+              !extra.containsKey('meditationImageUrl')) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return MeditationOfTheDayScreen(
+            audioUrl: extra['meditationAudioUrl'] as String,
+            imageUrl: extra['meditationImageUrl'] as String,
+          );
+        },
       ),
       GoRoute(
         path: '/home/prayer_of_the_day',
-        builder: (context, state) => const PrayerOfTheDayScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra == null ||
+              extra is! Map ||
+              !extra.containsKey('prayerAudioUrl') ||
+              !extra.containsKey('prayerData')) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return PrayerOfTheDayScreen(
+            audioUrl: extra['prayerAudioUrl'] as String,
+            prayerData: extra['prayerData'] as List<PrayerData>,
+          );
+        },
       ),
       GoRoute(
         path: '/texts',
