@@ -2,31 +2,31 @@ import 'package:flutter_pecha/features/texts/models/segment.dart';
 
 class Section {
   final String id;
-  final String title;
+  final String? title;
   final int sectionNumber;
   final String? parentId;
   final List<Segment> segments;
-  final List<Section> sections;
-  final String createdDate;
-  final String updatedDate;
-  final String publishedDate;
+  final List<Section>? sections;
+  final String? createdDate;
+  final String? updatedDate;
+  final String? publishedDate;
 
   const Section({
     required this.id,
-    required this.title,
+    this.title,
     required this.sectionNumber,
-    required this.parentId,
+    this.parentId,
     required this.segments,
-    required this.sections,
-    required this.createdDate,
-    required this.updatedDate,
-    required this.publishedDate,
+    this.sections,
+    this.createdDate,
+    this.updatedDate,
+    this.publishedDate,
   });
 
   factory Section.fromJson(Map<String, dynamic> json) {
     return Section(
       id: json['id'] as String,
-      title: json['title'] as String,
+      title: json['title'] as String?,
       sectionNumber:
           json['section_number'] is int
               ? json['section_number'] as int
@@ -41,9 +41,9 @@ class Section {
               ?.map((e) => Section.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      createdDate: json['created_date'] as String,
-      updatedDate: json['updated_date'] as String,
-      publishedDate: json['published_date'] as String,
+      createdDate: json['created_date'] as String?,
+      updatedDate: json['updated_date'] as String?,
+      publishedDate: json['published_date'] as String?,
     );
   }
 
@@ -54,7 +54,7 @@ class Section {
       'section_number': sectionNumber,
       'parent_id': parentId,
       'segments': segments.map((e) => e.toJson()).toList(),
-      'sections': sections.map((e) => e.toJson()).toList(),
+      'sections': sections?.map((e) => e.toJson()).toList(),
       'created_date': createdDate,
       'updated_date': updatedDate,
       'published_date': publishedDate,

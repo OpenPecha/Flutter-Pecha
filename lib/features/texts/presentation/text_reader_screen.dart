@@ -225,7 +225,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            firstSection.title,
+                            firstSection.title ?? '',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -286,7 +286,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: SegmentHtmlWidget(
-                              htmlContent: content,
+                              htmlContent: content ?? '',
                               segmentIndex: segmentIndex,
                               fontSize: fontSize,
                               isSelected: isSelected,
@@ -300,7 +300,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
               ),
               if (selectedIndex != null)
                 SegmentActionBar(
-                  text: firstSection.segments[selectedIndex].content,
+                  text: firstSection.segments[selectedIndex].content ?? '',
                   onClose:
                       () =>
                           ref.read(selectedSegmentProvider.notifier).state =

@@ -183,7 +183,7 @@ class TextTocScreen extends ConsumerWidget {
             ),
             child: Center(
               child: Text(
-                section.title,
+                section.title ?? '',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,

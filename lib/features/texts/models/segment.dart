@@ -3,13 +3,13 @@ import 'package:flutter_pecha/features/texts/models/translation.dart';
 class Segment {
   final String segmentId;
   final int segmentNumber;
-  final String content;
+  final String? content;
   final Translation? translation;
 
   const Segment({
     required this.segmentId,
     required this.segmentNumber,
-    required this.content,
+    this.content,
     this.translation,
   });
 
@@ -17,7 +17,7 @@ class Segment {
     return Segment(
       segmentId: json['segment_id'] as String,
       segmentNumber: json['segment_number'] as int,
-      content: json['content'] as String,
+      content: json['content'] as String?,
       translation:
           json['translation'] != null
               ? Translation.fromJson(
@@ -31,7 +31,7 @@ class Segment {
     return {
       'segment_id': segmentId,
       'segment_number': segmentNumber,
-      'content': content,
+      'content': content ?? '',
       'translation': translation?.toJson(),
     };
   }
