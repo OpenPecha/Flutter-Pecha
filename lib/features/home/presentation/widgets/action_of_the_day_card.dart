@@ -47,7 +47,7 @@ class ActionOfTheDayCard extends ConsumerWidget {
                 ),
                 // duration
                 Text(
-                  "10 min",
+                  "5 min",
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
                 ),
               ],

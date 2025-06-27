@@ -19,11 +19,7 @@ class _GuidedScriptureState extends State<GuidedScripture> {
     final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
     _controller = YoutubePlayerController(
       initialVideoId: videoId ?? '',
-      flags: const YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-        hideControls: true,
-      ),
+      flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
     );
   }
 
@@ -56,22 +52,6 @@ class _GuidedScriptureState extends State<GuidedScripture> {
               playedColor: Colors.red,
               handleColor: Colors.redAccent,
             ),
-            bottomActions: [
-              // play/pause button
-              IconButton(
-                onPressed: () {
-                  if (_controller.value.isPlaying) {
-                    _controller.pause();
-                  } else {
-                    _controller.play();
-                  }
-                },
-                icon: Icon(
-                  _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.red,
-                ),
-              ),
-            ],
           ),
           builder: (context, player) {
             return player;

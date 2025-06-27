@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
+import 'package:flutter_pecha/features/home/data/week_plan.dart';
 import 'package:flutter_pecha/features/home/models/plan_item.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_card.dart';
@@ -11,14 +12,14 @@ import 'package:flutter_pecha/features/home/presentation/widgets/view_illustrati
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 const Map<String, dynamic> dayPlan = {
   "verseText":
       "By thinking of all sentient beings\nAs more precious than a wish-fulfilling jewel\nFor accomplishing the highest aim,\nI will always hold them dear.",
   "verseImageUrl":
       "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-  "scriptureVideoUrl":
-      "https://www.youtube.com/watch?v=oFPVuddzCVA&list=PLEbXpuWAnGgikyJVrbzcNmuLpDYr7atZ2&index=3",
+  "scriptureVideoUrl": "https://www.youtube.com/watch?v=z1nB5fIn3UY",
   "meditationAudioUrl":
       "https://drive.google.com/uc?export=view&id=18DxBd030-wbZSfkod8ot6P8_pfN2Y0C_",
   "meditationImageUrl":
@@ -65,7 +66,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    planItem = PlanItem.fromJson(dayPlan);
+    _getTodayPlan();
+  }
+
+  _getTodayPlan() {
+    final today = DateTime.now();
+    final dayName = DateFormat('EEEE').format(today).toLowerCase();
+    final plan = weekPlan[dayName];
+    planItem = PlanItem.fromJson(plan);
   }
 
   @override
@@ -129,7 +137,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               textAlign: TextAlign.left,
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 8),
             VerseCard(
               imageUrl: planItem.verseImageUrl,
               verse: planItem.verseText,
