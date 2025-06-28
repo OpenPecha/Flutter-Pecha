@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale_provider.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:flutter_pecha/features/home/models/prayer_data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,7 +39,7 @@ class TextSegment {
   }
 }
 
-class PrayerOfTheDayScreen extends StatefulWidget {
+class PrayerOfTheDayScreen extends ConsumerStatefulWidget {
   final String audioUrl;
   final List<PrayerData> prayerData;
   const PrayerOfTheDayScreen({
@@ -47,10 +49,11 @@ class PrayerOfTheDayScreen extends StatefulWidget {
   });
 
   @override
-  State<PrayerOfTheDayScreen> createState() => _PrayerOfTheDayScreenState();
+  ConsumerState<PrayerOfTheDayScreen> createState() =>
+      _PrayerOfTheDayScreenState();
 }
 
-class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
+class _PrayerOfTheDayScreenState extends ConsumerState<PrayerOfTheDayScreen> {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
@@ -148,13 +151,25 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
     }
   }
 
+  String _getPrayerUrl(Locale? locale) {
+    switch (locale?.languageCode) {
+      case 'en':
+        return 'assets/audios/en_prayer.mp3';
+      case 'bo':
+        return 'assets/audios/bo_prayer.mp3';
+      case 'zh':
+        return 'assets/audios/zh_prayer.mp3';
+      default:
+        return 'assets/audios/en_prayer.mp3';
+    }
+  }
+
   Future<void> _initializeAudioPlayer() async {
     _audioPlayer = AudioPlayer();
     try {
-      final duration = await _audioPlayer.setAsset(
-        // 'assets/audios/Tibetan_prayer.mp3',
-        'assets/audios/monday_prayer.mp3',
-      );
+      final locale = ref.read(localeProvider);
+      final prayerUrl = _getPrayerUrl(locale);
+      final duration = await _audioPlayer.setAsset(prayerUrl);
       if (mounted) {
         setState(() {
           _duration = duration ?? Duration.zero;
@@ -178,6 +193,20 @@ class _PrayerOfTheDayScreenState extends State<PrayerOfTheDayScreen> {
         setState(() {
           _isPlaying = state.playing;
         });
+      }
+    });
+
+    // Listen for when audio ends to reset to beginning
+    _audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        // Audio has finished, just update state without auto-seek
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+            _currentSegmentIndex = 0;
+            _position = Duration.zero;
+          });
+        }
       }
     });
   }

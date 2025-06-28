@@ -87,11 +87,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final dayName = DateFormat('EEEE').format(today).toLowerCase();
     if (dayName != _currentDay) {
       _currentDay = dayName;
-      final plan = weekPlan[_currentDay];
-      setState(() {
-        planItem = PlanItem.fromJson(plan);
-      });
+      _updatePlanForNewDay();
     }
+  }
+
+  void _updatePlanForNewDay() {
+    final weekPlan = ref.read(weekPlanProvider);
+    final plan = weekPlan[_currentDay];
+    setState(() {
+      planItem = PlanItem.fromJson(plan);
+    });
   }
 
   @override
@@ -112,6 +117,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final today = DateTime.now();
     final dayName = DateFormat('EEEE').format(today).toLowerCase();
     _currentDay = dayName;
+
+    // Get the localized week plan
+    final weekPlan = ref.read(weekPlanProvider);
     final plan = weekPlan[_currentDay];
     planItem = PlanItem.fromJson(plan);
   }
@@ -203,13 +211,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               title: localizations.home_meditationTitle,
               subtitle: localizations.home_meditationSubtitle,
               iconWidget: Icon(Icons.self_improvement, size: 100),
+              // Use: when audio url is available
+              //   onTap:
+              //       () => context.push(
+              //         '/home/meditation_of_the_day',
+              //         extra: {
+              //           "meditationAudioUrl": planItem.meditationAudioUrl,
+              //           "meditationImageUrl": planItem.meditationImageUrl,
+              //         },
+              //       ),
+              // ),
+
+              // when only video url is available
               onTap:
                   () => context.push(
-                    '/home/meditation_of_the_day',
-                    extra: {
-                      "meditationAudioUrl": planItem.meditationAudioUrl,
-                      "meditationImageUrl": planItem.meditationImageUrl,
-                    },
+                    '/home/meditation_video',
+                    extra: planItem.meditationAudioUrl,
                   ),
             ),
             SizedBox(height: 16),
