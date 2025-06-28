@@ -41,22 +41,20 @@ class _MeditationVideoState extends State<MeditationVideo> {
         ),
         title: const Text("Meditation"),
       ),
-      body: Center(
-        child: YoutubePlayerBuilder(
-          player: YoutubePlayer(
-            aspectRatio: 9 / 16,
-            controller: _controller,
-            showVideoProgressIndicator: true,
-            progressIndicatorColor: Colors.red,
-            progressColors: const ProgressBarColors(
-              playedColor: Colors.red,
-              handleColor: Colors.redAccent,
-            ),
+      body: YoutubePlayerBuilder(
+        player: YoutubePlayer(
+          aspectRatio: 9 / 16,
+          controller: _controller,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.red,
+          progressColors: const ProgressBarColors(
+            playedColor: Colors.red,
+            handleColor: Colors.redAccent,
           ),
-          builder: (context, player) {
-            return player;
-          },
         ),
+        builder: (context, player) {
+          return player;
+        },
       ),
     );
   }
