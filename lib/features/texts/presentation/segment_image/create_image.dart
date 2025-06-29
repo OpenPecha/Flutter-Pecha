@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 
 class CreateImage extends StatefulWidget {
   const CreateImage({super.key, required this.imagePath, required this.text});
@@ -64,7 +64,7 @@ class _CreateImageState extends State<CreateImage> {
       return;
     }
     try {
-      final result = await ImageGallerySaver.saveImage(
+      final result = await ImageGallerySaverPlus.saveImage(
         _capturedImageBytes!,
         name: 'verse_image_${DateTime.now().millisecondsSinceEpoch}',
         quality: 100,

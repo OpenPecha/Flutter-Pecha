@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
-import 'package:flutter_pecha/core/theme/theme_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ActionOfTheDayCard extends ConsumerWidget {
@@ -20,9 +18,6 @@ class ActionOfTheDayCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeProvider = ref.watch(themeModeProvider);
-    final localizations = AppLocalizations.of(context)!;
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -45,7 +40,6 @@ class ActionOfTheDayCard extends ConsumerWidget {
                   title,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
-                // duration
                 Text(
                   "5 min",
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),

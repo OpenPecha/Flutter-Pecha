@@ -54,10 +54,10 @@ dependencies:
   html: ^0.15.6
   screenshot: ^3.0.0
   path_provider: ^2.1.5
-  image_gallery_saver: ^2.0.3
   scrollable_positioned_list: ^0.3.8
   video_player: ^2.10.0
   youtube_player_flutter: ^9.1.1
+  image_gallery_saver_plus: ^4.0.1
 
 dev_dependencies:
   flutter_test:
