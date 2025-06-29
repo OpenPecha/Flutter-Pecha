@@ -78,7 +78,14 @@ class TextTocScreen extends ConsumerWidget {
                     ),
                   ),
                   onPressed: () {
-                    // TODO: handle start reading
+                    ref
+                        .read(textReadingParamsProvider.notifier)
+                        .setParams(
+                          textId: text.id,
+                          contentId: text.id,
+                          skip: '0',
+                        );
+                    context.push('/texts/reader');
                   },
                   child: Text(
                     localizations.text_toc_continueReading,
