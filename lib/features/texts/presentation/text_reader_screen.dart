@@ -194,6 +194,8 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
             return const Center(child: Text("No content available"));
           }
           final firstSection = response.content.sections[0];
+          final textId = response.textDetail.id;
+          final contentId = response.content.id;
           if (firstSection.segments.isEmpty) {
             return const Center(child: Text("No segments available"));
           }
@@ -301,6 +303,10 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
               if (selectedIndex != null)
                 SegmentActionBar(
                   text: firstSection.segments[selectedIndex].content ?? '',
+                  textId: textId,
+                  contentId: contentId,
+                  segmentId: firstSection.segments[selectedIndex].segmentId,
+                  language: response.textDetail.language,
                   onClose:
                       () =>
                           ref.read(selectedSegmentProvider.notifier).state =

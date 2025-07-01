@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_pecha/features/texts/data/providers/share_provider.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/action_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -33,17 +35,26 @@ String removeHtmlElementsWithContent(String html, List<String> tagsToRemove) {
   return result;
 }
 
-class SegmentActionBar extends StatelessWidget {
+class SegmentActionBar extends ConsumerWidget {
   final String text;
+  final String textId;
+  final String contentId;
+  final String segmentId;
+  final String language;
   final VoidCallback onClose;
+
   const SegmentActionBar({
     required this.text,
     required this.onClose,
+    required this.textId,
+    required this.contentId,
+    required this.segmentId,
+    required this.language,
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Positioned(
       left: 0,
       right: 0,
@@ -70,18 +81,75 @@ class SegmentActionBar extends StatelessWidget {
                   onClose();
                 },
               ),
-              ActionButton(
-                icon: Icons.share,
-                label: 'Share',
-                onTap: () {
-                  final textWithLineBreaks = text.replaceAll("<br>", "\n");
-                  final plainText = htmlToPlainText(textWithLineBreaks);
-                  final webUrl =
-                      "https://pecha-frontend-12552055234-4f99e0e.onrender.com/";
-                  SharePlus.instance.share(
-                    ShareParams(text: "$plainText\n$webUrl"),
+              Consumer(
+                builder: (context, ref, child) {
+                  final shareParams = ShareUrlParams(
+                    textId: textId,
+                    contentId: contentId,
+                    segmentId: segmentId,
+                    language: language,
                   );
-                  onClose();
+
+                  final shareUrlAsync = ref.watch(
+                    shareUrlProvider(shareParams),
+                  );
+
+                  return shareUrlAsync.when(
+                    data:
+                        (shortUrl) => ActionButton(
+                          icon: Icons.share,
+                          label: 'Share',
+                          onTap: () async {
+                            try {
+                              await SharePlus.instance.share(
+                                ShareParams(text: shortUrl),
+                              );
+                              onClose();
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Failed to share: ${e.toString()}',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                    loading:
+                        () => ActionButton(
+                          icon: Icons.share,
+                          label: 'Loading...',
+                          onTap: () {
+                            // Show loading indicator
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Generating share link...'),
+                              ),
+                            );
+                          },
+                        ),
+                    error:
+                        (error, stack) => ActionButton(
+                          icon: Icons.share,
+                          label: 'Error',
+                          onTap: () {
+                            // Retry the share operation
+                            ref.invalidate(shareUrlProvider(shareParams));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Retrying... ${error.toString()}',
+                                ),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                          },
+                        ),
+                  );
                 },
               ),
               ActionButton(
