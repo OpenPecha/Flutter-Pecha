@@ -5,6 +5,7 @@ import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/guided_scripture.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/meditation_video.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
+import 'package:flutter_pecha/features/plans/presentation/plan_info.dart';
 import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:flutter_pecha/features/texts/models/term/term.dart';
@@ -212,6 +213,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             text: extra['text'] as String,
           );
         },
+      ),
+      // plan tab routes
+      GoRoute(
+        path: '/plans/info',
+        builder: (context, state) => const PlanInfo(),
       ),
     ],
     redirect: (context, state) {
