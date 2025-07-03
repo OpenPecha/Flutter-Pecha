@@ -118,6 +118,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
+            ref.read(selectedSegmentProvider.notifier).state = null;
             Navigator.pop(context);
           },
         ),

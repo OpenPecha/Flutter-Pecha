@@ -60,112 +60,123 @@ class SegmentActionBar extends ConsumerWidget {
       right: 0,
       bottom: 24,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Material(
           elevation: 8,
           borderRadius: BorderRadius.circular(18),
           color: Theme.of(context).cardColor,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ActionButton(
-                icon: Icons.copy,
-                label: 'Copy',
-                onTap: () {
-                  final textWithLineBreaks = text.replaceAll("<br>", "\n");
-                  final plainText = htmlToPlainText(textWithLineBreaks);
-                  Clipboard.setData(ClipboardData(text: plainText));
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Copied!')));
-                  onClose();
-                },
-              ),
-              Consumer(
-                builder: (context, ref, child) {
-                  final shareParams = ShareUrlParams(
-                    textId: textId,
-                    contentId: contentId,
-                    segmentId: segmentId,
-                    language: language,
-                  );
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // commentary button
+                ActionButton(
+                  icon: Icons.comment_outlined,
+                  label: 'Commentary',
+                  onTap: () {
+                    context.push('/texts/commentary');
+                  },
+                ),
+                ActionButton(
+                  icon: Icons.copy,
+                  label: 'Copy',
+                  onTap: () {
+                    final textWithLineBreaks = text.replaceAll("<br>", "\n");
+                    final plainText = htmlToPlainText(textWithLineBreaks);
+                    Clipboard.setData(ClipboardData(text: plainText));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('Copied!')));
+                    onClose();
+                  },
+                ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final shareParams = ShareUrlParams(
+                      textId: textId,
+                      contentId: contentId,
+                      segmentId: segmentId,
+                      language: language,
+                    );
 
-                  final shareUrlAsync = ref.watch(
-                    shareUrlProvider(shareParams),
-                  );
+                    final shareUrlAsync = ref.watch(
+                      shareUrlProvider(shareParams),
+                    );
 
-                  return shareUrlAsync.when(
-                    data:
-                        (shortUrl) => ActionButton(
-                          icon: Icons.share,
-                          label: 'Share',
-                          onTap: () async {
-                            try {
-                              await SharePlus.instance.share(
-                                ShareParams(text: shortUrl),
-                              );
-                              onClose();
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Failed to share: ${e.toString()}',
-                                    ),
-                                    backgroundColor: Colors.red,
-                                  ),
+                    return shareUrlAsync.when(
+                      data:
+                          (shortUrl) => ActionButton(
+                            icon: Icons.share,
+                            label: 'Share',
+                            onTap: () async {
+                              try {
+                                await SharePlus.instance.share(
+                                  ShareParams(text: shortUrl),
                                 );
+                                onClose();
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to share: ${e.toString()}',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
-                            }
-                          },
-                        ),
-                    loading:
-                        () => ActionButton(
-                          icon: Icons.share,
-                          label: 'Loading...',
-                          onTap: () {
-                            // Show loading indicator
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Generating share link...'),
-                              ),
-                            );
-                          },
-                        ),
-                    error:
-                        (error, stack) => ActionButton(
-                          icon: Icons.share,
-                          label: 'Error',
-                          onTap: () {
-                            // Retry the share operation
-                            ref.invalidate(shareUrlProvider(shareParams));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Retrying... ${error.toString()}',
+                            },
+                          ),
+                      loading:
+                          () => ActionButton(
+                            icon: Icons.share,
+                            label: 'Loading...',
+                            onTap: () {
+                              // Show loading indicator
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Generating share link...'),
                                 ),
-                                backgroundColor: Colors.orange,
-                              ),
-                            );
-                          },
-                        ),
-                  );
-                },
-              ),
-              ActionButton(
-                icon: Icons.image,
-                label: 'Image',
-                onTap: () {
-                  final textWithLineBreaks = text.replaceAll("<br>", "\n");
-                  final plainText = htmlToPlainText(textWithLineBreaks);
-                  context.push(
-                    '/texts/segment_image/choose_image',
-                    extra: plainText,
-                  );
-                  onClose();
-                },
-              ),
-            ],
+                              );
+                            },
+                          ),
+                      error:
+                          (error, stack) => ActionButton(
+                            icon: Icons.share,
+                            label: 'Error',
+                            onTap: () {
+                              // Retry the share operation
+                              ref.invalidate(shareUrlProvider(shareParams));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Retrying... ${error.toString()}',
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            },
+                          ),
+                    );
+                  },
+                ),
+                ActionButton(
+                  icon: Icons.image_outlined,
+                  label: 'Image',
+                  onTap: () {
+                    final textWithLineBreaks = text.replaceAll("<br>", "\n");
+                    final plainText = htmlToPlainText(textWithLineBreaks);
+                    context.push(
+                      '/texts/segment_image/choose_image',
+                      extra: plainText,
+                    );
+                    onClose();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

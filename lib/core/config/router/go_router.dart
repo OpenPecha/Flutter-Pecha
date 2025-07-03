@@ -11,6 +11,7 @@ import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
+import 'package:flutter_pecha/features/texts/presentation/commentary/commentary_view.dart';
 import 'package:flutter_pecha/features/texts/presentation/library_catalog_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_image/choose_image.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_image/create_image.dart';
@@ -213,6 +214,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             text: extra['text'] as String,
           );
         },
+      ),
+      GoRoute(
+        path: '/texts/commentary',
+        builder: (context, state) => const CommentaryView(),
       ),
       // plan tab routes
       GoRoute(
