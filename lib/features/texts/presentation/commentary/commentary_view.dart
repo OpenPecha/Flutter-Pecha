@@ -36,103 +36,126 @@ class CommentaryView extends ConsumerWidget {
       ),
       body: segmentCommentaries.when(
         data:
-            (data) => ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: data.commentaries.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      'All Commentary (${data.commentaries.length})',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  );
-                }
-                final commentary = data.commentaries[index - 1];
-                final isExpanded = expandedIndex == index;
-                // replace <br> with \n
-                final content = commentary.content.replaceAll('<br>', '\n');
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16, top: 0),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+            (data) =>
+                data.commentaries.isEmpty
+                    ? const Center(
+                      child: Text(
+                        'No commentary found',
+                        style: TextStyle(fontSize: 16),
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        commentary.title,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          fontFamily: getFontFamily(commentary.language),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 2,
-                        color: const Color(0xFFB6D7D7),
-                        margin: const EdgeInsets.only(bottom: 8),
-                      ),
-                      Text(
-                        isExpanded ? content : _getPreview(content),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontFamily: getFontFamily(commentary.language),
-                          height: getLineHeight(commentary.language),
-                        ),
-                      ),
-                      if (!isExpanded)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed:
-                                () =>
-                                    ref
-                                        .read(
-                                          expandedCommentaryProvider.notifier,
-                                        )
-                                        .state = index,
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: data.commentaries.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
-                              'Read more',
-                              style: Theme.of(context).textTheme.bodySmall,
+                              'All Commentary (${data.commentaries.length})',
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
-                          ),
-                        ),
-                      if (isExpanded)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed:
-                                  () =>
-                                      ref
-                                          .read(
-                                            expandedCommentaryProvider.notifier,
-                                          )
-                                          .state = null,
-                              child: Text(
-                                'Show less',
-                                style: Theme.of(context).textTheme.bodySmall,
+                          );
+                        }
+                        final commentary = data.commentaries[index - 1];
+                        final isExpanded = expandedIndex == index;
+                        // replace <br> with \n
+                        final content = commentary.content.replaceAll(
+                          '<br>',
+                          '\n',
+                        );
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16, top: 0),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                commentary.title,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(
+                                  fontFamily: getFontFamily(
+                                    commentary.language,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 2,
+                                color: const Color(0xFFB6D7D7),
+                                margin: const EdgeInsets.only(bottom: 8),
+                              ),
+                              Text(
+                                isExpanded ? content : _getPreview(content),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  fontFamily: getFontFamily(
+                                    commentary.language,
+                                  ),
+                                  height: getLineHeight(commentary.language),
+                                ),
+                              ),
+                              if (!isExpanded)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed:
+                                        () =>
+                                            ref
+                                                .read(
+                                                  expandedCommentaryProvider
+                                                      .notifier,
+                                                )
+                                                .state = index,
+                                    child: Text(
+                                      'Read more',
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ),
+                                ),
+                              if (isExpanded)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton(
+                                      onPressed:
+                                          () =>
+                                              ref
+                                                  .read(
+                                                    expandedCommentaryProvider
+                                                        .notifier,
+                                                  )
+                                                  .state = null,
+                                      child: Text(
+                                        'Show less',
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
         error: (error, stackTrace) => Center(child: Text('Error: $error')),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
