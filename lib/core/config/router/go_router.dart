@@ -217,7 +217,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/texts/commentary',
-        builder: (context, state) => const CommentaryView(),
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra == null || extra is! String) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return CommentaryView(segmentId: extra);
+        },
       ),
       // plan tab routes
       GoRoute(

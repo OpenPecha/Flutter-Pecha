@@ -24,6 +24,22 @@ String? getFontFamily(String language) {
   }
 }
 
+// Helper function to get the line height for a given language
+double? getLineHeight(String language) {
+  switch (language) {
+    case "bo":
+      return 2;
+    case "en":
+      return 1.5;
+    case "sa":
+      return 2;
+    case "zh":
+      return 1.5;
+    default:
+      return 1.5;
+  }
+}
+
 // Helper function to get the font size for a given language
 double? getFontSize(String language) {
   switch (language) {

@@ -75,7 +75,7 @@ class SegmentActionBar extends ConsumerWidget {
                   icon: Icons.comment_outlined,
                   label: 'Commentary',
                   onTap: () {
-                    context.push('/texts/commentary');
+                    context.push('/texts/commentary', extra: segmentId);
                   },
                 ),
                 ActionButton(

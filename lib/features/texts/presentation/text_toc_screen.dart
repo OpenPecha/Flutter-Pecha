@@ -218,6 +218,7 @@ class TextTocScreen extends ConsumerWidget {
     }
     return ListView.separated(
       itemCount: versions.length,
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
       separatorBuilder:
           (context, idx) =>
               const Divider(height: 32, thickness: 1, color: Color(0xFFF0F0F0)),
