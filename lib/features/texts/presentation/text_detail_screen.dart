@@ -4,6 +4,7 @@ import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dar
 import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
+import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,7 +115,13 @@ class TextDetailScreen extends ConsumerWidget {
                 const Divider(thickness: 1, color: Color(0xFFB6D7D7)),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(text.title, style: const TextStyle(fontSize: 20)),
+                  title: Text(
+                    text.title,
+                    style: TextStyle(
+                      fontSize: getFontSize(text.language),
+                      fontFamily: getFontFamily(text.language),
+                    ),
+                  ),
                   onTap: () {
                     context.push('/texts/toc', extra: text);
                   },

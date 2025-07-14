@@ -35,37 +35,3 @@ Map<String, dynamic> _getWeekPlanForLocale(Locale? locale) {
 Map<String, dynamic> getWeekPlanForLocale(Locale? locale) {
   return _getWeekPlanForLocale(locale);
 }
-
-// detail format of the a day plan item
-const oneDayPlan = {
-  "verse": {
-    "text": "this is the verse text",
-    "imageUrl":
-        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-  },
-  "scripture": {
-    "videoUrl":
-        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-  },
-  "meditation": {
-    "audioUrl":
-        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-    "imageUrl":
-        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-  },
-  "prayer": {
-    "data": [
-      {
-        "text": "this is the prayer text",
-        "startTime": "00:00:00",
-        "endTime": "00:00:00",
-      },
-    ],
-    "audioUrl":
-        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-  },
-  "mindTraining": {
-    "imageUrl":
-        "https://drive.google.com/uc?export=view&id=1M_IFmQGMrlBOHDWpSID_kesZiFUsV9zS",
-  },
-};

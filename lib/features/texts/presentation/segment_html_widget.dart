@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_pecha/core/config/locale_provider.dart';
+import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SegmentHtmlWidget extends ConsumerStatefulWidget {
@@ -8,12 +8,14 @@ class SegmentHtmlWidget extends ConsumerStatefulWidget {
   final int segmentIndex;
   final double fontSize;
   final bool isSelected;
+  final String language;
   const SegmentHtmlWidget({
     super.key,
     required this.htmlContent,
     required this.segmentIndex,
     required this.fontSize,
     this.isSelected = false,
+    required this.language,
   });
 
   @override
@@ -26,8 +28,7 @@ class _SegmentHtmlWidgetState extends ConsumerState<SegmentHtmlWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = ref.watch(localeProvider);
-    final lineHeight = locale?.languageCode == 'bo' ? 2.0 : 1.5;
+    final lineHeight = widget.language == 'bo' ? 2.0 : 1.5;
 
     int footnoteCounter = 0;
     return Html(
@@ -50,6 +51,7 @@ class _SegmentHtmlWidgetState extends ConsumerState<SegmentHtmlWidget> {
           fontSize: FontSize(widget.fontSize),
           lineHeight: LineHeight(lineHeight),
           margin: Margins.zero,
+          fontFamily: getFontFamily(widget.language),
           padding: HtmlPaddings.zero,
         ),
         'p': Style(margin: Margins.zero, padding: HtmlPaddings.zero),

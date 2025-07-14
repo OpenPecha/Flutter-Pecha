@@ -14,6 +14,6 @@ String getLanguageLabel(String code, BuildContext context) {
     case 'english':
       return localizations.english;
     default:
-      return code;
+      return localizations.english;
   }
 }

@@ -23,17 +23,18 @@ class ActionOfTheDayCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           border: Border.all(color: Colors.black26),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -41,7 +42,7 @@ class ActionOfTheDayCard extends ConsumerWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  "5 min",
+                  subtitle,
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
                 ),
               ],

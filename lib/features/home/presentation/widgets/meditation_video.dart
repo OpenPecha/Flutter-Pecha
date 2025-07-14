@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -31,6 +32,7 @@ class _MeditationVideoState extends State<MeditationVideo> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -39,7 +41,7 @@ class _MeditationVideoState extends State<MeditationVideo> {
             context.pop();
           },
         ),
-        title: const Text("Meditation"),
+        title: Text(localizations.home_meditationTitle),
       ),
       body: YoutubePlayerBuilder(
         player: YoutubePlayer(

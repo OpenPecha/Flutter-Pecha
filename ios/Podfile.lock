@@ -18,8 +18,6 @@ PODS:
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 6.0.3)
-  - image_gallery_saver (2.0.2):
-    - Flutter
   - image_gallery_saver_plus (0.0.1):
     - Flutter
   - just_audio (0.0.1):
@@ -45,7 +43,6 @@ DEPENDENCIES:
   - auth0_flutter (from `.symlinks/plugins/auth0_flutter/darwin`)
   - Flutter (from `Flutter`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
-  - image_gallery_saver (from `.symlinks/plugins/image_gallery_saver/ios`)
   - image_gallery_saver_plus (from `.symlinks/plugins/image_gallery_saver_plus/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -69,8 +66,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
-  image_gallery_saver:
-    :path: ".symlinks/plugins/image_gallery_saver/ios"
   image_gallery_saver_plus:
     :path: ".symlinks/plugins/image_gallery_saver_plus/ios"
   just_audio:
@@ -90,7 +85,6 @@ SPEC CHECKSUMS:
   auth0_flutter: f07bdadbe380d8d257af41bd84096d3f69e2a460
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
-  image_gallery_saver: cb43cc43141711190510e92c460eb1655cd343cb
   image_gallery_saver_plus: 782ade975fe6a4600b53e7c1983e3a2979d1e9e5
   just_audio: a42c63806f16995daf5b219ae1d679deb76e6a79
   JWTDecode: 7dae24cb9bf9b608eae61e5081029ec169bb5527

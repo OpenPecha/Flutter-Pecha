@@ -36,7 +36,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get home_dailyRefresh => 'Daily Refresh';
 
   @override
-  String get home_meditationTitle => 'Meditation of the Day';
+  String get home_meditationTitle => 'སྒོམ་སྒྲུབ།';
 
   @override
   String get home_meditationSubtitle => 'Awaken peace within.';
@@ -49,6 +49,15 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get home_btnText => 'Start now';
+
+  @override
+  String get home_goDeeper => ' ཞིབ་གཟིགས།';
+
+  @override
+  String get home_intention => 'ངའི་དེ་རིང་གི་དམིགས་པ།';
+
+  @override
+  String get home_bringing => 'ཉམས་ལེན་དངོས།';
 
   @override
   String get text_browseTheLibrary => 'དཀར་ཆག';

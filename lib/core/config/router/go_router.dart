@@ -5,11 +5,13 @@ import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/guided_scripture.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/meditation_video.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
+import 'package:flutter_pecha/features/plans/presentation/plan_info.dart';
 import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
 import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
+import 'package:flutter_pecha/features/texts/presentation/commentary/commentary_view.dart';
 import 'package:flutter_pecha/features/texts/presentation/library_catalog_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_image/choose_image.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_image/create_image.dart';
@@ -212,6 +214,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             text: extra['text'] as String,
           );
         },
+      ),
+      GoRoute(
+        path: '/texts/commentary',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra == null || extra is! String) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return CommentaryView(segmentId: extra);
+        },
+      ),
+      // plan tab routes
+      GoRoute(
+        path: '/plans/info',
+        builder: (context, state) => const PlanInfo(),
       ),
     ],
     redirect: (context, state) {

@@ -36,7 +36,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_dailyRefresh => 'Daily Refresh';
 
   @override
-  String get home_meditationTitle => 'Meditation of the Day';
+  String get home_meditationTitle => '禪修時刻';
 
   @override
   String get home_meditationSubtitle => 'Awaken peace within.';
@@ -49,6 +49,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get home_btnText => 'Start now';
+
+  @override
+  String get home_goDeeper => '深入了解';
+
+  @override
+  String get home_intention => '今日心願';
+
+  @override
+  String get home_bringing => '融入生活';
 
   @override
   String get text_browseTheLibrary => 'Browse The Library';

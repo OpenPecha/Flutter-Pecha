@@ -6,6 +6,7 @@ import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart'
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
+import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,9 +46,10 @@ class TextTocScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       text.title,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: getFontSize(text.language),
                         fontWeight: FontWeight.w500,
+                        fontFamily: getFontFamily(text.language),
                       ),
                     ),
                   ),
@@ -63,7 +65,6 @@ class TextTocScreen extends ConsumerWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.grey[600],
-                  letterSpacing: 1.2,
                 ),
               ),
               const SizedBox(height: 18),
@@ -160,6 +161,7 @@ class TextTocScreen extends ConsumerWidget {
 
   Widget _buildContentsTab(TocResponse tocResponse, WidgetRef ref) {
     final toc = tocResponse.contents[0];
+    final textDetail = tocResponse.textDetail;
     if (toc.sections.isEmpty) {
       return const Center(child: Text('No contents found'));
     }
@@ -191,9 +193,10 @@ class TextTocScreen extends ConsumerWidget {
             child: Center(
               child: Text(
                 section.title ?? '',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
+                  fontFamily: getFontFamily(textDetail.language),
                 ),
               ),
             ),
@@ -215,6 +218,7 @@ class TextTocScreen extends ConsumerWidget {
     }
     return ListView.separated(
       itemCount: versions.length,
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
       separatorBuilder:
           (context, idx) =>
               const Divider(height: 32, thickness: 1, color: Color(0xFFF0F0F0)),
@@ -241,9 +245,10 @@ class TextTocScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       version.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
+                        fontFamily: getFontFamily(version.language),
                       ),
                     ),
                   ),

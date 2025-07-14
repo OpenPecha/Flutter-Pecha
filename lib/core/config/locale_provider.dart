@@ -7,7 +7,7 @@ final localeProvider = StateNotifierProvider<LocaleNotifier, Locale?>(
 );
 
 class LocaleNotifier extends StateNotifier<Locale?> {
-  LocaleNotifier() : super(null); // null means use system locale
+  LocaleNotifier() : super(const Locale("en")); // default to English
 
   void setLocale(Locale? locale) {
     state = locale;

@@ -154,7 +154,7 @@ abstract class AppLocalizations {
   /// No description provided for @home_meditationTitle.
   ///
   /// In en, this message translates to:
-  /// **'Meditation of the Day'**
+  /// **'Meditation'**
   String get home_meditationTitle;
 
   /// No description provided for @home_meditationSubtitle.
@@ -180,6 +180,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start now'**
   String get home_btnText;
+
+  /// No description provided for @home_goDeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Deeper'**
+  String get home_goDeeper;
+
+  /// No description provided for @home_intention.
+  ///
+  /// In en, this message translates to:
+  /// **'My Intention for Today'**
+  String get home_intention;
+
+  /// No description provided for @home_bringing.
+  ///
+  /// In en, this message translates to:
+  /// **'Bringing it to life'**
+  String get home_bringing;
 
   /// No description provided for @text_browseTheLibrary.
   ///

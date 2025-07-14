@@ -6,6 +6,7 @@ import 'package:flutter_pecha/features/texts/data/providers/text_version_languag
 import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
+import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
@@ -118,6 +119,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
+            ref.read(selectedSegmentProvider.notifier).state = null;
             Navigator.pop(context);
           },
         ),
@@ -194,6 +196,8 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
             return const Center(child: Text("No content available"));
           }
           final firstSection = response.content.sections[0];
+          final textId = response.textDetail.id;
+          final contentId = response.content.id;
           if (firstSection.segments.isEmpty) {
             return const Center(child: Text("No segments available"));
           }
@@ -217,8 +221,13 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                           const SizedBox(height: 16),
                           Text(
                             response.textDetail.title,
-                            style: const TextStyle(
-                              fontSize: 20,
+                            style: TextStyle(
+                              fontSize: getFontSize(
+                                response.textDetail.language,
+                              ),
+                              fontFamily: getFontFamily(
+                                response.textDetail.language,
+                              ),
                               fontWeight: FontWeight.w600,
                             ),
                             textAlign: TextAlign.center,
@@ -226,8 +235,11 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                           const SizedBox(height: 8),
                           Text(
                             firstSection.title ?? '',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
+                              fontFamily: getFontFamily(
+                                response.textDetail.language,
+                              ),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -290,6 +302,7 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                               segmentIndex: segmentIndex,
                               fontSize: fontSize,
                               isSelected: isSelected,
+                              language: response.textDetail.language,
                             ),
                           ),
                         ],
@@ -301,6 +314,10 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
               if (selectedIndex != null)
                 SegmentActionBar(
                   text: firstSection.segments[selectedIndex].content ?? '',
+                  textId: textId,
+                  contentId: contentId,
+                  segmentId: firstSection.segments[selectedIndex].segmentId,
+                  language: response.textDetail.language,
                   onClose:
                       () =>
                           ref.read(selectedSegmentProvider.notifier).state =

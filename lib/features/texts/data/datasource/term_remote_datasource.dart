@@ -18,7 +18,7 @@ class TermRemoteDatasource {
     final uri = Uri.parse('${dotenv.env['BASE_API_URL']}/terms').replace(
       queryParameters: {
         if (parentId != null) 'parent_id': parentId,
-        if (language != null) 'language': language,
+        if (language != null) 'language': language == 'zh' ? 'en' : language,
         'skip': skip.toString(),
         'limit': limit.toString(),
       },
