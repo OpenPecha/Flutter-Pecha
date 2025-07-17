@@ -6,16 +6,20 @@ import 'package:flutter_pecha/core/config/locale_provider.dart';
 
 class TextDetailsParams {
   final String textId;
-  final String? contentId;
+  final String contentId;
   final String? versionId;
-  final String? skip;
+  final String? segmentId;
+  final String? sectionId;
+  final String? direction;
   final String key;
   const TextDetailsParams({
     required this.textId,
-    this.contentId,
+    required this.contentId,
     this.versionId,
-    this.skip,
-  }) : key = '${textId}_${contentId}_${versionId}_$skip';
+    this.segmentId,
+    this.sectionId,
+    this.direction,
+  }) : key = '${textId}_${contentId}_${versionId}_${segmentId}_${sectionId}_$direction';
 
   @override
   bool operator ==(Object other) =>
@@ -56,11 +60,21 @@ final textDetailsFutureProvider = FutureProvider.family((
 ) {
   return ref
       .watch(textsRepositoryProvider)
+      // .fetchTextDetails(
+        // textId: params.textId,
+        // contentId: params.contentId!,
+        // versionId: params.versionId,
+        // skip: params.skip,
+      // );
+
+      // update pagination
       .fetchTextDetails(
         textId: params.textId,
-        contentId: params.contentId!,
+        contentId: params.contentId,
         versionId: params.versionId,
-        skip: params.skip,
+        segmentId: params.segmentId,
+        sectionId: params.sectionId,
+        direction: params.direction,
       );
 });
 

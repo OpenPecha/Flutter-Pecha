@@ -158,7 +158,9 @@ class VersionSelectionScreen extends ConsumerWidget {
                   textId: version.id,
                   contentId: version.tableOfContents[0],
                   versionId: version.id,
-                  skip: '0',
+                  segmentId: null,
+                  sectionId: null,
+                  direction: "next",
                 );
             context.pop();
           },
@@ -242,7 +244,9 @@ class VersionSearchDelegate extends SearchDelegate<Version?> {
                   textId: version.id,
                   contentId: version.tableOfContents[0],
                   versionId: version.id,
-                  skip: '0',
+                  segmentId: '',
+                  sectionId: '',
+                  direction: '',
                 );
             close(context, version);
             Navigator.pop(context);

@@ -84,7 +84,7 @@ class TextTocScreen extends ConsumerWidget {
                         .setParams(
                           textId: text.id,
                           contentId: text.id,
-                          skip: '0',
+                          direction: 'next',
                         );
                     context.push('/texts/reader');
                   },
@@ -181,7 +181,13 @@ class TextTocScreen extends ConsumerWidget {
           onTap: () {
             ref
                 .read(textReadingParamsProvider.notifier)
-                .setParams(textId: toc.textId, contentId: toc.id, skip: '0');
+                .setParams(
+                  textId: toc.textId,
+                  contentId: toc.id,
+                  sectionId: section.id,
+                  segmentId: section.segments[0].segmentId,
+                  direction: 'next',
+                );
             context.push('/texts/reader');
           },
           child: Container(
@@ -231,8 +237,7 @@ class TextTocScreen extends ConsumerWidget {
                 .setParams(
                   textId: version.id,
                   contentId: version.tableOfContents[0],
-                  versionId: version.id,
-                  skip: '0',
+                  direction: "next",
                 );
             context.push('/texts/reader');
           },

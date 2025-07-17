@@ -84,16 +84,18 @@ class TextRemoteDatasource {
     required String textId,
     required String contentId,
     String? versionId,
-    String? skip,
+    String? segmentId,
+    String? sectionId,
+    String? direction,
   }) async {
     final uri = Uri.parse(
       '${dotenv.env['BASE_API_URL']}/texts/$textId/details',
     );
     final body = json.encode({
       'content_id': contentId,
-      'version_id': versionId,
-      'skip': skip ?? 0,
-      'limit': 1,
+      if (segmentId != null) 'segment_id': segmentId,
+      if (sectionId != null) 'section_id': sectionId,
+      'direction': direction,
     });
     try {
       final response = await client.post(

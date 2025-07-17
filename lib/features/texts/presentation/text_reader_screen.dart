@@ -105,8 +105,9 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
     final params = TextDetailsParams(
       textId: readingParams?.textId ?? '',
       contentId: readingParams?.contentId ?? '',
-      versionId: readingParams?.versionId,
-      skip: readingParams?.skip,
+      segmentId: readingParams?.segmentId,
+      sectionId: readingParams?.sectionId,
+      direction: readingParams?.direction,
     );
 
     final textDetails = ref.watch(textDetailsFutureProvider(params));

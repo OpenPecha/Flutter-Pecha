@@ -36,13 +36,17 @@ class TextsRepository {
     required String textId,
     required String contentId,
     String? versionId,
-    String? skip,
+    String? segmentId,
+    String? sectionId,
+    String? direction,
   }) async {
     final result = await remoteDatasource.fetchTextDetails(
       textId: textId,
       contentId: contentId,
       versionId: versionId,
-      skip: skip,
+      segmentId: segmentId,
+      sectionId: sectionId,
+      direction: direction,
     );
     return result;
   }

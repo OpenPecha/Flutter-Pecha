@@ -3,27 +3,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class TextReadingParams {
   final String textId;
   final String contentId;
+  final String? segmentId;
+  final String? sectionId;
+  final String? direction;
   final String? versionId;
-  final String skip;
 
   const TextReadingParams({
     required this.textId,
     required this.contentId,
+    this.segmentId,
+    this.sectionId,
+    this.direction,
     this.versionId,
-    this.skip = '0',
   });
 
   TextReadingParams copyWith({
     required String textId,
     required String contentId,
+    String? segmentId,
+    String? sectionId,
+    String? direction,
     String? versionId,
-    String? skip,
   }) {
     return TextReadingParams(
       textId: textId,
       contentId: contentId,
-      versionId: versionId ?? this.versionId,
-      skip: skip ?? this.skip,
+      segmentId: segmentId,
+      sectionId: sectionId,
+      direction: direction,
+      versionId: versionId,
     );
   }
 }
@@ -34,29 +42,37 @@ class TextReadingParamsNotifier extends StateNotifier<TextReadingParams?> {
   void setParams({
     required String textId,
     required String contentId,
+    String? segmentId,
+    String? sectionId,
+    String? direction,
     String? versionId,
-    String skip = '0',
   }) {
     state = TextReadingParams(
       textId: textId,
       contentId: contentId,
+      segmentId: segmentId,
+      sectionId: sectionId,
+      direction: direction,
       versionId: versionId,
-      skip: skip,
     );
   }
 
   void updateParams({
     required String textId,
     required String contentId,
+    String? segmentId,
+    String? sectionId,
+    String? direction,
     String? versionId,
-    String? skip,
   }) {
     if (state != null) {
       state = state!.copyWith(
         textId: textId,
         contentId: contentId,
+        segmentId: segmentId,
+        sectionId: sectionId,
+        direction: direction,
         versionId: versionId,
-        skip: skip,
       );
     }
   }
