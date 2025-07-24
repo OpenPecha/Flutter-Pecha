@@ -85,7 +85,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     // Get the localized week plan
     final weekPlan = ref.read(weekPlanProvider);
     final plan = weekPlan[_currentDay];
-    debugPrint(plan.toString());
     planItems =
         (plan["plan"] as List<dynamic>)
             .map((item) => PlanItem.fromJson(item))
@@ -153,7 +152,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 case "text":
                   return Column(
                     children: [
-                      VerseCard(verse: planItem.content),
+                      VerseCard(
+                        verse: planItem.content,
+                        author: planItem.author,
+                      ),
                       SizedBox(height: 16),
                     ],
                   );

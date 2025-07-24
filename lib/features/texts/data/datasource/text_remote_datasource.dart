@@ -23,7 +23,7 @@ class TextRemoteDatasource {
     final uri = Uri.parse('${dotenv.env['BASE_API_URL']}/texts').replace(
       queryParameters: {
         'collection_id': termId,
-        if (language != null) 'language': language == 'zh' ? 'en' : language,
+        if (language != null) 'language': language,
         'skip': skip.toString(),
         'limit': limit.toString(),
       },
