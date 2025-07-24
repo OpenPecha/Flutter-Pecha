@@ -134,28 +134,22 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   }
 
   @override
-  // TODO: implement bottomSheetLabel
-  String get bottomSheetLabel => throw UnimplementedError();
+  String get bottomSheetLabel => 'Bottom sheet';
 
   @override
-  // TODO: implement calendarModeButtonLabel
-  String get calendarModeButtonLabel => throw UnimplementedError();
+  String get calendarModeButtonLabel => _en.calendarModeButtonLabel;
 
   @override
-  // TODO: implement clearButtonTooltip
-  String get clearButtonTooltip => throw UnimplementedError();
+  String get clearButtonTooltip => _en.clearButtonTooltip;
 
   @override
-  // TODO: implement collapsedHint
-  String get collapsedHint => throw UnimplementedError();
+  String get collapsedHint => _en.collapsedHint;
 
   @override
-  // TODO: implement collapsedIconTapHint
-  String get collapsedIconTapHint => throw UnimplementedError();
+  String get collapsedIconTapHint => _en.collapsedIconTapHint;
 
   @override
-  // TODO: implement currentDateLabel
-  String get currentDateLabel => throw UnimplementedError();
+  String get currentDateLabel => _en.currentDateLabel;
 
   @override
   // TODO: implement dateInputLabel
@@ -190,28 +184,22 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get dialModeButtonLabel => throw UnimplementedError();
 
   @override
-  // TODO: implement expandedHint
-  String get expandedHint => throw UnimplementedError();
+  String get expandedHint => _en.expandedHint;
 
   @override
-  // TODO: implement expandedIconTapHint
-  String get expandedIconTapHint => throw UnimplementedError();
+  String get expandedIconTapHint => _en.expandedIconTapHint;
 
   @override
-  // TODO: implement expansionTileCollapsedHint
-  String get expansionTileCollapsedHint => throw UnimplementedError();
+  String get expansionTileCollapsedHint => _en.expansionTileCollapsedHint;
 
   @override
-  // TODO: implement expansionTileCollapsedTapHint
-  String get expansionTileCollapsedTapHint => throw UnimplementedError();
+  String get expansionTileCollapsedTapHint => _en.expansionTileCollapsedTapHint;
 
   @override
-  // TODO: implement expansionTileExpandedHint
-  String get expansionTileExpandedHint => throw UnimplementedError();
+  String get expansionTileExpandedHint => _en.expansionTileExpandedHint;
 
   @override
-  // TODO: implement expansionTileExpandedTapHint
-  String get expansionTileExpandedTapHint => throw UnimplementedError();
+  String get expansionTileExpandedTapHint => _en.expansionTileExpandedTapHint;
 
   @override
   // TODO: implement firstPageTooltip
@@ -438,8 +426,7 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get menuBarMenuLabel => throw UnimplementedError();
 
   @override
-  // TODO: implement menuDismissLabel
-  String get menuDismissLabel => throw UnimplementedError();
+  String get menuDismissLabel => 'Dismiss';
 
   @override
   // TODO: implement moreButtonTooltip
@@ -487,27 +474,23 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => throw UnimplementedError();
 
   @override
-  // TODO: implement saveButtonLabel
-  String get saveButtonLabel => throw UnimplementedError();
+  String get saveButtonLabel => 'Save';
 
   @override
   // TODO: implement scanTextButtonLabel
   String get scanTextButtonLabel => throw UnimplementedError();
 
   @override
-  // TODO: implement scrimLabel
-  String get scrimLabel => throw UnimplementedError();
+  String get scrimLabel => 'Close';
 
   @override
-  // TODO: implement scrimOnTapHintRaw
-  String get scrimOnTapHintRaw => throw UnimplementedError();
+  String get scrimOnTapHintRaw => 'Close';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  // TODO: implement searchFieldLabel
-  String get searchFieldLabel => throw UnimplementedError();
+  String get searchFieldLabel => 'Search';
 
   @override
   // TODO: implement searchWebButtonLabel
@@ -522,8 +505,7 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleOther => throw UnimplementedError();
 
   @override
-  // TODO: implement shareButtonLabel
-  String get shareButtonLabel => throw UnimplementedError();
+  String get shareButtonLabel => 'Share';
 
   @override
   // TODO: implement showAccountsLabel
