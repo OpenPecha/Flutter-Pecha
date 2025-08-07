@@ -41,7 +41,7 @@ class VersionSelectionScreen extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         toolbarHeight: 50,
         actions: [
@@ -152,10 +152,14 @@ class VersionSelectionScreen extends ConsumerWidget {
         final version = versions[index];
         return ListTile(
           onTap: () {
-            context.pop({
-              'textId': version.id,
-              'contentId': version.tableOfContents[0],
-            });
+            context.pop();
+            context.replace(
+              '/texts/chapter',
+              extra: {
+                'textId': version.id,
+                'contentId': version.tableOfContents[0],
+              },
+            );
           },
           contentPadding: EdgeInsets.zero,
           title: Text(

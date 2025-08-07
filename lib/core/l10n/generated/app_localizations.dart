@@ -271,6 +271,12 @@ abstract class AppLocalizations {
   /// **'English'**
   String get english;
 
+  /// No description provided for @chinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get chinese;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:

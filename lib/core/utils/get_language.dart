@@ -13,6 +13,9 @@ String getLanguageLabel(String code, BuildContext context) {
     case 'en':
     case 'english':
       return localizations.english;
+    case 'zh':
+    case 'chinese':
+      return localizations.chinese;
     default:
       return localizations.english;
   }

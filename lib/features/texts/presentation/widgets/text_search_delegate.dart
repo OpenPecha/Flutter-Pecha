@@ -4,13 +4,13 @@ import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/segment_match.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 
-class TextSearchDelegate extends SearchDelegate<int?> {
-  final ReaderResponse textDetails;
+class TextSearchDelegate extends SearchDelegate<String?> {
+  final ReaderResponse allContent;
   final WidgetRef ref;
   String _submittedQuery = '';
   bool _hasSubmitted = false;
 
-  TextSearchDelegate({required this.textDetails, required this.ref});
+  TextSearchDelegate({required this.allContent, required this.ref});
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -104,7 +104,7 @@ class TextSearchDelegate extends SearchDelegate<int?> {
 
     final searchParams = SearchTextParams(
       query: _submittedQuery,
-      textId: textDetails.textDetail.id,
+      textId: allContent.textDetail.id,
     );
 
     // Use Consumer to ensure rebuilds when provider changes
@@ -172,20 +172,8 @@ class TextSearchDelegate extends SearchDelegate<int?> {
                       vertical: 8,
                     ),
                     onTap: () {
-                      // Find the segment index in the local segments to scroll to
-                      final segments =
-                          textDetails.content.sections.first.segments;
-                      final segmentIndex = segments.indexWhere(
-                        (segment) =>
-                            segment.segmentId == segmentMatch.segmentId,
-                      );
-
-                      if (segmentIndex != -1) {
-                        close(context, segmentIndex);
-                      } else {
-                        // If segment not found locally, just close with null
-                        close(context, null);
-                      }
+                      final segmentId = segmentMatch.segmentId;
+                      close(context, segmentId);
                     },
                   );
                 },

@@ -8,28 +8,27 @@ import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
+import 'package:flutter_pecha/features/texts/utils/hepler_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fquery/fquery.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class Chapter extends ConsumerStatefulWidget {
+  final ItemScrollController itemScrollController;
   final Toc content;
   final String? selectedSegmentId;
   final TextDetail textDetail;
   final UseInfiniteQueryResult<ReaderResponse, dynamic, Map<String, dynamic>>
   infiniteQuery;
-  final Function(Section)? onCurrentSectionChange;
-  final String? currentSectionId;
   final List<Section> newPageSections;
 
   const Chapter({
     super.key,
+    required this.itemScrollController,
     required this.content,
     this.selectedSegmentId,
     required this.textDetail,
     required this.infiniteQuery,
-    this.onCurrentSectionChange,
-    this.currentSectionId,
     required this.newPageSections,
   });
 
@@ -38,7 +37,6 @@ class Chapter extends ConsumerStatefulWidget {
 }
 
 class _ChapterState extends ConsumerState<Chapter> {
-  final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
 
@@ -132,22 +130,9 @@ class _ChapterState extends ConsumerState<Chapter> {
   int _getTotalItemCount() {
     int count = 0;
     for (final section in widget.content.sections) {
-      count += _calculateSectionItemCount(section);
+      count += calculateSectionItemCount(section);
     }
     return count; // No loading indicators in the count!
-  }
-
-  int _calculateSectionItemCount(Section section) {
-    int count = 1; // Section title
-    count += section.segments.length; // Direct segments
-
-    // Add nested sections
-    if (section.sections != null) {
-      for (final nestedSection in section.sections!) {
-        count += _calculateSectionItemCount(nestedSection);
-      }
-    }
-    return count;
   }
 
   @override
@@ -165,7 +150,7 @@ class _ChapterState extends ConsumerState<Chapter> {
         // Main content with ScrollablePositionedList
         Expanded(
           child: ScrollablePositionedList.builder(
-            itemScrollController: itemScrollController,
+            itemScrollController: widget.itemScrollController,
             itemPositionsListener: itemPositionsListener,
             itemCount:
                 _getTotalItemCount(), // Clean count, no loading indicators
@@ -188,7 +173,7 @@ class _ChapterState extends ConsumerState<Chapter> {
     int currentIndex = 0;
 
     for (final section in widget.content.sections) {
-      final sectionItemCount = _calculateSectionItemCount(section);
+      final sectionItemCount = calculateSectionItemCount(section);
 
       if (currentIndex <= index && index < currentIndex + sectionItemCount) {
         return _buildSectionRecursive(section, index - currentIndex);
@@ -223,9 +208,7 @@ class _ChapterState extends ConsumerState<Chapter> {
     // Nested sections
     if (section.sections != null) {
       for (final nestedSection in section.sections!) {
-        final nestedSectionItemCount = _calculateSectionItemCount(
-          nestedSection,
-        );
+        final nestedSectionItemCount = calculateSectionItemCount(nestedSection);
         if (currentIndex <= relativeIndex &&
             relativeIndex < currentIndex + nestedSectionItemCount) {
           return Padding(

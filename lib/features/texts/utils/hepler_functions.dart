@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/segment.dart';
+import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 
 /// Gets the last segment ID from a list of sections
 ///
@@ -89,35 +90,40 @@ List<Section> mergeSections(
 
       if (existingIndex != -1) {
         // Section exists, merge segments and nested sections
-        final existingSection = mergedSections[existingIndex];
+        final Section existingSection = mergedSections[existingIndex];
         final mergedSegments = List<Segment>.from(existingSection.segments);
 
         // Merge segments
-        if (direction == 'previous') {
-          // For previous direction, insert segments in reverse order so last one is on top
-          for (int i = newSection.segments.length - 1; i >= 0; i--) {
-            final newSegment = newSection.segments[i];
-            final segmentExists = mergedSegments.any(
-              (segment) => segment.segmentId == newSegment.segmentId,
-            );
+        // if (direction == 'previous') {
+        //   // For previous direction, insert segments in reverse order so last one is on top
+        //   for (int i = newSection.segments.length - 1; i >= 0; i--) {
+        //     final newSegment = newSection.segments[i];
+        //     final segmentExists = mergedSegments.any(
+        //       (segment) => segment.segmentId == newSegment.segmentId,
+        //     );
 
-            if (!segmentExists) {
+        //     if (!segmentExists) {
+        //       mergedSegments.insert(0, newSegment);
+        //     }
+        //   }
+        // } else {
+        // For next direction, add segments in normal order
+        for (final newSegment in newSection.segments) {
+          final segmentExists = mergedSegments.any(
+            (segment) => segment.segmentId == newSegment.segmentId,
+          );
+
+          if (!segmentExists) {
+            if (direction == 'previous') {
+              // Add at the beginning
               mergedSegments.insert(0, newSegment);
-            }
-          }
-        } else {
-          // For next direction, add segments in normal order
-          for (final newSegment in newSection.segments) {
-            final segmentExists = mergedSegments.any(
-              (segment) => segment.segmentId == newSegment.segmentId,
-            );
-
-            if (!segmentExists) {
+            } else {
               // Add at the end
               mergedSegments.add(newSegment);
             }
           }
         }
+        // }
 
         // Merge nested sections recursively
         final mergedNestedSections = mergeSections(
@@ -127,16 +133,10 @@ List<Section> mergeSections(
         );
 
         // Create new section with merged segments and nested sections
-        mergedSections[existingIndex] = Section(
-          id: existingSection.id,
-          title: existingSection.title,
-          sectionNumber: existingSection.sectionNumber,
-          parentId: existingSection.parentId,
+        // Equivalent to JavaScript: {...existingSection, segments: mergedSegments, sections: mergedNestedSections}
+        mergedSections[existingIndex] = existingSection.copyWith(
           segments: mergedSegments,
           sections: mergedNestedSections,
-          createdDate: existingSection.createdDate,
-          updatedDate: existingSection.updatedDate,
-          publishedDate: existingSection.publishedDate,
         );
       } else {
         // Section doesn't exist, add it based on direction
@@ -154,4 +154,82 @@ List<Section> mergeSections(
   }
 
   return mergedSections;
+}
+
+// ✅ Correct function to find segment index
+int findSegmentIndex(Toc content, String targetSegmentId) {
+  int currentIndex = 0;
+
+  for (final section in content.sections) {
+    // Check if target is in this section (including nested)
+    final segmentIndex = _findSegmentInSection(
+      section,
+      targetSegmentId,
+      currentIndex,
+    );
+    if (segmentIndex != -1) {
+      return segmentIndex;
+    }
+
+    // Move to next section
+    currentIndex += calculateSectionItemCount(section);
+  }
+
+  return -1; // Not found
+}
+
+// recursive function to find segment in a section
+int _findSegmentInSection(
+  Section section,
+  String targetSegmentId,
+  int startIndex,
+) {
+  int currentIndex = startIndex;
+
+  // Skip section title
+  currentIndex++;
+
+  // Check direct segments in this section
+  for (
+    int segmentIndex = 0;
+    segmentIndex < section.segments.length;
+    segmentIndex++
+  ) {
+    final segment = section.segments[segmentIndex];
+    if (segment.segmentId == targetSegmentId) {
+      return currentIndex; // Found it!
+    }
+    currentIndex++;
+  }
+
+  // Check nested sections
+  if (section.sections != null) {
+    for (final nestedSection in section.sections!) {
+      final segmentIndex = _findSegmentInSection(
+        nestedSection,
+        targetSegmentId,
+        currentIndex,
+      );
+      if (segmentIndex != -1) {
+        return segmentIndex; // Found in nested section
+      }
+      currentIndex += calculateSectionItemCount(nestedSection);
+    }
+  }
+
+  return -1; // Not found in this section
+}
+
+// Helper function to calculate section item count (same as in Chapter widget)
+int calculateSectionItemCount(Section section) {
+  int count = 1; // Section title
+  count += section.segments.length; // Direct segments
+
+  // Add nested sections
+  if (section.sections != null) {
+    for (final nestedSection in section.sections!) {
+      count += calculateSectionItemCount(nestedSection);
+    }
+  }
+  return count;
 }
