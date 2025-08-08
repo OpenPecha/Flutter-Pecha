@@ -37,7 +37,7 @@ class TextDetailScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                term.title,
+                textDetailResponse.value?.term.title ?? '',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),

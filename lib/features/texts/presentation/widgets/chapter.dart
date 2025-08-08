@@ -244,8 +244,8 @@ class _ChapterState extends ConsumerState<Chapter> {
     final segment = section.segments[segmentIndex];
     final segmentNumber = segment.segmentNumber.toString().padLeft(2);
     final content = segment.content;
-    final selectedSegmentId = ref.watch(selectedSegmentProvider);
-    final isSelected = selectedSegmentId == segment.segmentId;
+    final selectedSegment = ref.watch(selectedSegmentProvider);
+    final isSelected = selectedSegment?.segmentId == segment.segmentId;
 
     return Container(
       key: Key(segment.segmentId),
@@ -255,9 +255,9 @@ class _ChapterState extends ConsumerState<Chapter> {
         child: InkWell(
           onTap: () {
             ref.read(selectedSegmentProvider.notifier).state =
-                selectedSegmentId == segment.segmentId
+                selectedSegment?.segmentId == segment.segmentId
                     ? null
-                    : segment.segmentId;
+                    : segment;
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

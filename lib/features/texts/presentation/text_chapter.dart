@@ -4,11 +4,13 @@ import 'package:flutter_pecha/features/texts/data/providers/selected_segment_pro
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
+import 'package:flutter_pecha/features/texts/models/segment.dart';
 import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/chapter.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/text_search_delegate.dart';
 import 'package:flutter_pecha/features/texts/utils/hepler_functions.dart';
 import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
@@ -33,7 +35,7 @@ class TextChapter extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedSegmentId = ref.watch(selectedSegmentProvider);
+    final selectedSegment = ref.watch(selectedSegmentProvider);
     final size = 20;
     final newPageSections = useState<List<Section>>([]);
 
@@ -168,7 +170,7 @@ class TextChapter extends HookConsumerWidget {
             allContent.content,
             allContent.textDetail,
             infiniteQuery,
-            selectedSegmentId,
+            selectedSegment,
             newPageSections.value,
           ),
         ],
@@ -308,7 +310,7 @@ class TextChapter extends HookConsumerWidget {
     TextDetail textDetail,
     UseInfiniteQueryResult<ReaderResponse, dynamic, Map<String, dynamic>>
     infiniteQuery,
-    String? selectedSegmentId,
+    Segment? selectedSegment,
     List<Section> newPageSections,
   ) {
     return Expanded(
@@ -319,14 +321,33 @@ class TextChapter extends HookConsumerWidget {
             itemScrollController: itemScrollController,
             textDetail: textDetail,
             content: content,
-            selectedSegmentId: selectedSegmentId,
+            selectedSegmentId: selectedSegment?.segmentId,
             infiniteQuery: infiniteQuery,
             newPageSections: newPageSections,
           ),
           // Segment action bar
-          // if (selectedIndex != null) _buildSegmentActionBar(selectedIndex),
+          if (selectedSegment != null)
+            _buildSegmentActionBar(context, ref, selectedSegment, textDetail),
         ],
       ),
+    );
+  }
+
+  Widget _buildSegmentActionBar(
+    BuildContext context,
+    WidgetRef ref,
+    Segment selectedSegment,
+    TextDetail textDetail,
+  ) {
+    if (selectedSegment.content == null) return const SizedBox.shrink();
+
+    return SegmentActionBar(
+      text: selectedSegment.content ?? '',
+      textId: textDetail.id,
+      contentId: contentId,
+      segmentId: selectedSegment.segmentId,
+      language: textDetail.language,
+      onClose: () => ref.read(selectedSegmentProvider.notifier).state = null,
     );
   }
 }
