@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Pecha App';
 
   @override
-  String get pechaHeading => 'Pecha';
+  String get pechaHeading => 'WeBuddhist';
 
   @override
   String get learnLiveShare => 'Learn Live and Share';

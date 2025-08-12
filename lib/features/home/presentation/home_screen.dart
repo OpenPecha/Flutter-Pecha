@@ -126,11 +126,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               SizedBox(width: 16),
               if (authState.isGuest) Icon(Icons.account_circle, size: 32),
               if (authState.isLoggedIn && !authState.isGuest)
-                // add a user avatar here
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: NetworkImage(
-                    authState.userProfile?.pictureUrl?.toString() ?? '',
+                GestureDetector(
+                  onTap: () => context.push('/profile'),
+                  child: Hero(
+                    tag: 'profile-avatar',
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage:
+                          (authState.userProfile?.pictureUrl?.toString() ?? '')
+                                  .isNotEmpty
+                              ? NetworkImage(
+                                authState.userProfile!.pictureUrl!.toString(),
+                              )
+                              : null,
+                      child:
+                          ((authState.userProfile?.pictureUrl?.toString() ?? '')
+                                  .isEmpty)
+                              ? const Icon(Icons.person, color: Colors.black54)
+                              : null,
+                    ),
                   ),
                 ),
             ],

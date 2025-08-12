@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
+import 'package:flutter_pecha/features/auth/presentation/profile_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
 import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/guided_scripture.dart';
@@ -18,7 +19,6 @@ import 'package:flutter_pecha/features/texts/presentation/segment_image/choose_i
 import 'package:flutter_pecha/features/texts/presentation/segment_image/create_image.dart';
 import 'package:flutter_pecha/features/texts/presentation/text_chapter.dart';
 import 'package:flutter_pecha/features/texts/presentation/text_detail_screen.dart';
-import 'package:flutter_pecha/features/texts/presentation/text_reader_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/text_toc_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/version_selection/language_selection.dart';
 import 'package:flutter_pecha/features/texts/presentation/version_selection/version_selection_screen.dart';
@@ -44,6 +44,37 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/home',
         builder: (context, state) => const SkeletonScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const ProfilePage(),
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              final fade = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              );
+              final offsetTween = Tween<Offset>(
+                begin: const Offset(0.0, 0.03),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeOutCubic));
+              return FadeTransition(
+                opacity: fade,
+                child: SlideTransition(
+                  position: animation.drive(offsetTween),
+                  child: child,
+                ),
+              );
+            },
+          );
+        },
       ),
       GoRoute(
         path: '/home/guided_scripture',

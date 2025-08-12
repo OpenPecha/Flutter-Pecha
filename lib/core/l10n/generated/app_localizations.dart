@@ -106,7 +106,7 @@ abstract class AppLocalizations {
   /// No description provided for @pechaHeading.
   ///
   /// In en, this message translates to:
-  /// **'Pecha'**
+  /// **'WeBuddhist'**
   String get pechaHeading;
 
   /// No description provided for @learnLiveShare.

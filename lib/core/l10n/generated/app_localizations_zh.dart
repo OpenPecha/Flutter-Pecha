@@ -9,10 +9,10 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'Pecha 应用';
+  String get appTitle => 'WeBuddhist 应用';
 
   @override
-  String get pechaHeading => 'Pecha';
+  String get pechaHeading => 'WeBuddhist';
 
   @override
   String get learnLiveShare => '学习、生活与分享';
