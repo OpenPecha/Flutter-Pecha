@@ -4,16 +4,24 @@ import 'package:go_router/go_router.dart';
 class CreatorInfoScreen extends StatelessWidget {
   const CreatorInfoScreen({super.key});
 
+  static const List<String> _planItems = [
+    'Concentration',
+    'Mind training',
+    'Prayer',
+    'Habit',
+    'Mind training',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            _buildBioSection(),
-            _buildFeaturedPlanSection(),
+            _buildBioSection(context),
+            _buildFeaturedPlanSection(context),
           ],
         ),
       ),
@@ -22,13 +30,7 @@ class CreatorInfoScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF2A2A2A), Color(0xFF1A1A1A)],
-        ),
-      ),
+      decoration: BoxDecoration(color: Theme.of(context).cardColor),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -38,12 +40,10 @@ class CreatorInfoScreen extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () => context.pop(),
-                  child: const Text(
+                  child: Text(
                     'Done',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -51,7 +51,7 @@ class CreatorInfoScreen extends StatelessWidget {
                   onPressed: () {
                     // TODO: Implement share functionality
                   },
-                  icon: const Icon(Icons.share, color: Colors.white, size: 24),
+                  icon: const Icon(Icons.share, size: 24),
                 ),
               ],
             ),
@@ -73,7 +73,6 @@ class CreatorInfoScreen extends StatelessWidget {
                       const Text(
                         'Sammetha Khatri',
                         style: TextStyle(
-                          color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -85,23 +84,21 @@ class CreatorInfoScreen extends StatelessWidget {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.black, width: 1),
+                          border: Border.all(
+                            color:
+                                Theme.of(context).appBarTheme.foregroundColor!,
+                            width: 1,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
-                              Icons.add,
-                              color: Colors.black,
-                              size: 16,
-                            ),
+                            const Icon(Icons.add, size: 16),
                             const SizedBox(width: 8),
                             const Text(
                               'Follow',
                               style: TextStyle(
-                                color: Colors.black,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -120,7 +117,7 @@ class CreatorInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBioSection() {
+  Widget _buildBioSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -128,22 +125,18 @@ class CreatorInfoScreen extends StatelessWidget {
         children: [
           const Text(
             'Sammetha Khatri is the pastor of the Rock Church in San Diego, former defensive back for the San Diego Chargers, author, actor, motivational speaker, and fo...',
-            style: TextStyle(color: Colors.white, fontSize: 16, height: 1.4),
+            style: TextStyle(fontSize: 16, height: 1.4),
           ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF2A2A2A),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Text(
               'More Info',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -151,7 +144,7 @@ class CreatorInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturedPlanSection() {
+  Widget _buildFeaturedPlanSection(BuildContext context) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16.0),
@@ -160,21 +153,13 @@ class CreatorInfoScreen extends StatelessWidget {
           children: [
             const Text(
               'Featured Plan',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: ListView(
                 children: [
-                  _buildPlanItem('21 Tara'),
-                  _buildPlanItem('8 verse of mind training'),
-                  _buildPlanItem('PP1'),
-                  _buildPlanItem('PP2'),
-                  _buildPlanItem('PP3'),
+                  ..._planItems.map((item) => _buildPlanItem(context, item)),
                 ],
               ),
             ),
@@ -184,12 +169,12 @@ class CreatorInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPlanItem(String title) {
+  Widget _buildPlanItem(BuildContext context, String title) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -197,16 +182,13 @@ class CreatorInfoScreen extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Theme.of(context).appBarTheme.foregroundColor,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 16),
-          Text(
-            title,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-          ),
+          Text(title, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );

@@ -3,4 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final selectedSegmentProvider = StateProvider<Segment?>((ref) => null);
 
-final bottomBarVisibleProvider = StateProvider<bool>((ref) => false);
+final bottomBarVisibleProvider = StateProvider.autoDispose<bool>(
+  (ref) => false,
+);

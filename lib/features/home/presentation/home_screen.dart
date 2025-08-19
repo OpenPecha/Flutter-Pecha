@@ -13,6 +13,7 @@ import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_d
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_card.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/view_illustration.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
+import 'package:flutter_pecha/features/texts/models/term/term.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/action_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -137,7 +138,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               icon: Icons.library_books,
               label: 'Library',
               onTap: () {
-                context.push('/library');
+                // context.push('/library');
+                context.push(
+                  '/texts/detail',
+                  extra: Term(
+                    id: "67dd22a8d9f06ab28feedc90",
+                    title: "",
+                    description: "",
+                    slug: "",
+                    hasChild: false,
+                  ),
+                );
               },
             ),
             ActionButton(
