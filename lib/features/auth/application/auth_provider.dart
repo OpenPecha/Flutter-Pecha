@@ -1,6 +1,9 @@
 // Riverpod provider and logic for authentication state.
+import 'dart:async';
+
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import '../auth_service.dart';
 import 'package:flutter_pecha/features/auth/application/auth0_config.dart';
 
@@ -10,6 +13,7 @@ class AuthState {
   final bool isGuest;
   final String? userId;
   final UserProfile? userProfile;
+  final String? errorMessage; // Add error state
 
   const AuthState({
     required this.isLoggedIn,
@@ -17,6 +21,7 @@ class AuthState {
     this.userId,
     this.isLoading = false,
     this.userProfile,
+    this.errorMessage,
   });
 
   AuthState copyWith({
@@ -25,13 +30,17 @@ class AuthState {
     bool? isLoading,
     bool? isGuest,
     UserProfile? userProfile,
+    String? errorMessage,
   }) => AuthState(
     isLoggedIn: isLoggedIn ?? this.isLoggedIn,
     userId: userId ?? this.userId,
     isLoading: isLoading ?? this.isLoading,
     isGuest: isGuest ?? this.isGuest,
     userProfile: userProfile ?? this.userProfile,
+    errorMessage: errorMessage,
   );
+
+  AuthState clearError() => copyWith(errorMessage: '');
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -70,25 +79,45 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> login({String? connection}) async {
-    state = state.copyWith(isLoading: true);
-    Credentials? credentials;
-    if (connection == 'google') {
-      credentials = await authService.loginWithGoogle();
-    } else if (connection == 'facebook') {
-      credentials = await authService.loginWithFacebook();
-    } else if (connection == 'apple') {
-      credentials = await authService.loginWithApple();
-    }
-    if (credentials != null) {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      Credentials? credentials;
+
+      switch (connection) {
+        case 'google':
+          credentials = await authService.loginWithGoogle();
+          break;
+        case 'facebook':
+          credentials = await authService.loginWithFacebook();
+          break;
+        case 'apple':
+          credentials = await authService.loginWithApple();
+          break;
+        default:
+          throw Exception('Unsupported login method: $connection');
+      }
+
+      if (credentials != null) {
+        state = state.copyWith(
+          isLoggedIn: true,
+          userId: credentials.user.sub,
+          isLoading: false,
+          isGuest: false,
+          userProfile: credentials.user,
+          errorMessage: null,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Login was cancelled or failed',
+        );
+      }
+    } catch (e) {
       state = state.copyWith(
-        isLoggedIn: true,
-        userId: credentials.user.sub,
         isLoading: false,
-        isGuest: false,
-        userProfile: credentials.user,
+        errorMessage: 'Login failed: ${e.toString()}',
       );
-    } else {
-      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -113,23 +142,56 @@ class AuthNotifier extends StateNotifier<AuthState> {
       userProfile: null,
     );
   }
+
+  Future<void> checkTokenRefresh() async {
+    if (!state.isLoggedIn || state.isGuest) return;
+
+    try {
+      if (await authService.needsTokenRefresh()) {
+        final success = await authService.refreshTokens();
+        if (!success) {
+          // Token refresh failed, logout user
+          await logout();
+        }
+      }
+    } catch (e) {
+      Logger('AuthNotifier').warning('Token refresh check failed: $e');
+    }
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final configAsync = ref.watch(auth0ConfigProvider);
   return configAsync.when(
-    data:
-        (config) => AuthNotifier(
-          authService: AuthService(
-            domain: config.domain,
-            clientId: config.clientId,
-          ),
-        ),
+    data: (config) {
+      final authService = AuthService(
+        domain: config.domain,
+        clientId: config.clientId,
+      );
+      final notifier = AuthNotifier(authService: authService);
+
+      // Set up periodic token refresh
+      Timer.periodic(const Duration(minutes: 5), (timer) {
+        if (notifier.mounted) {
+          notifier.checkTokenRefresh();
+        } else {
+          timer.cancel();
+        }
+      });
+
+      return notifier;
+    },
     loading:
-        () => AuthNotifier(authService: AuthService(domain: '', clientId: '')),
-    error:
-        (err, stack) =>
-            AuthNotifier(authService: AuthService(domain: '', clientId: '')),
+        () => AuthNotifier(
+          authService: AuthService(domain: 'loading', clientId: 'loading'),
+        ),
+    error: (err, stack) {
+      // Log the error for debugging
+      Logger('AuthProvider').severe('Failed to load auth config', err, stack);
+      return AuthNotifier(
+        authService: AuthService(domain: 'error', clientId: 'error'),
+      );
+    },
   );
 });
 

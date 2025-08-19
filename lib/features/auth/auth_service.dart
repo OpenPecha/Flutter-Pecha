@@ -20,13 +20,22 @@ class AuthService {
       if (additionalParameters != null) {
         parameters.addAll(additionalParameters);
       }
+
       final credentials = await auth0
           .webAuthentication(scheme: 'org.pecha.app')
           .login(useHTTPS: true, parameters: parameters);
+
+      _logger.info('Login successful for connection: $connection');
       return credentials;
+    } on WebAuthenticationException catch (e) {
+      _logger.severe('WebAuth error for $connection: ${e.message}');
+      if (e.code == 'a0.session.user_cancelled') {
+        throw AuthException('Login was cancelled by user', code: e.code);
+      }
+      throw AuthException('Login failed: ${e.message}', code: e.code);
     } catch (e) {
-      _logger.severe('Login failed: $e');
-      return null;
+      _logger.severe('Unexpected login error for $connection: $e');
+      throw AuthException('An unexpected error occurred during login');
     }
   }
 
@@ -61,4 +70,36 @@ class AuthService {
       _logger.severe('Logout failed: $e');
     }
   }
+
+  // Add token refresh functionality
+  Future<bool> refreshTokens() async {
+    try {
+      await auth0.credentialsManager.credentials(minTtl: 60);
+      return true;
+    } catch (e) {
+      _logger.warning('Token refresh failed: $e');
+      return false;
+    }
+  }
+
+  // Add method to check if tokens need refresh
+  Future<bool> needsTokenRefresh() async {
+    try {
+      // This will throw if tokens are expired or need refresh
+      await auth0.credentialsManager.credentials(minTtl: 300); // 5 minutes
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }
+}
+
+class AuthException implements Exception {
+  final String message;
+  final String? code;
+
+  AuthException(this.message, {this.code});
+
+  @override
+  String toString() => 'AuthException: $message';
 }

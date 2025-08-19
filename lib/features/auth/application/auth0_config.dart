@@ -23,8 +23,11 @@ Future<Auth0Config> fetchAuth0Config() async {
   }
   final response = await http.get(Uri.parse(url));
   if (response.statusCode == 200) {
-    final jsonData = json.decode(response.body);
-    return Auth0Config.fromJson(jsonData);
+    // final jsonData = json.decode(response.body);
+    return Auth0Config.fromJson({
+      'domain': dotenv.env['AUTH0_DOMAIN'] ?? '',
+      'client_id': dotenv.env['AUTH0_CLIENT_ID'] ?? '',
+    });
   } else {
     throw Exception('Failed to load Auth0 config');
   }
