@@ -139,6 +139,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               label: 'Library',
               onTap: () {
                 // context.push('/library');
+                ref.read(bottomBarVisibleProvider.notifier).state =
+                    !ref.read(bottomBarVisibleProvider.notifier).state;
                 context.push(
                   '/texts/detail',
                   extra: Term(
@@ -155,6 +157,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               icon: Icons.info_outline,
               label: 'Creator Info',
               onTap: () {
+                ref.read(bottomBarVisibleProvider.notifier).state =
+                    !ref.read(bottomBarVisibleProvider.notifier).state;
                 context.push('/creator_info');
               },
             ),

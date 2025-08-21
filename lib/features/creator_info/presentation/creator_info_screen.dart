@@ -47,16 +47,11 @@ class CreatorInfoScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    // TODO: Implement share functionality
-                  },
-                  icon: const Icon(Icons.share, size: 24),
-                ),
               ],
             ),
             const SizedBox(height: 20),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
                   radius: 50,
@@ -67,46 +62,29 @@ class CreatorInfoScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 20),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Sammetha Khatri',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color:
-                                Theme.of(context).appBarTheme.foregroundColor!,
-                            width: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "格西索南貢布（諾諾格西）",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.add, size: 16),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Follow',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 16),
+                        const Text(
+                          "台灣格魯總會",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -124,20 +102,10 @@ class CreatorInfoScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Sammetha Khatri is the pastor of the Rock Church in San Diego, former defensive back for the San Diego Chargers, author, actor, motivational speaker, and fo...',
-            style: TextStyle(fontSize: 16, height: 1.4),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Text(
-              'More Info',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
+            "索南貢布（sonam gonpo），1969年出生，1992年進入南印度色拉傑寺佛學院（serajey monastery）學習五部大論等各種佛法知識，2009年取得格西學位。2010年進入下密院學習密法。2011年有幸參加了尊者辦公室為有中文基礎的格西，特別開設為期三年的中文佛法介紹培訓課程，在此期間也同時學習到了孔子、孟子等聖賢教論。隨後經色拉傑寺派駐台灣色拉傑遍知佛學會，擔任當家格西；卸任後應邀為臺北市明覺佛學會常住當家格西，並為台灣國際藏傳佛教研究會組成成員之一，2024年獲聘任為臺灣格魯總會名譽理事長",
+            style: TextStyle(fontSize: 15, height: 1.7),
+            softWrap: true,
+            overflow: TextOverflow.visible,
           ),
         ],
       ),

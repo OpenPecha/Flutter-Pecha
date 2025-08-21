@@ -5,11 +5,26 @@ import 'package:go_router/go_router.dart';
 class PlanList extends ConsumerWidget {
   const PlanList({super.key});
 
+  static const List<Map<String, dynamic>> plans = [
+    {'name': 'Way of the Heart', 'days': 5},
+    {'name': 'Train Your Mind', 'days': 12},
+    {'name': 'Compassion', 'days': 3},
+    {'name': 'Peaceful Mind', 'days': 15},
+    {'name': 'Mindfulness', 'days': 12},
+    {'name': 'Gratitude Meditation', 'days': 30},
+    {'name': 'Others before self', 'days': 15},
+    {'name': 'The Way of the Bodhisattva', 'days': 8},
+    {'name': 'Bodhisattva Mind', 'days': 10},
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plans'),
+        title: const Text(
+          'Plans',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         scrolledUnderElevation: 0,
         centerTitle: false,
         actions: [
@@ -27,8 +42,9 @@ class PlanList extends ConsumerWidget {
       // Use ListView.builder directly instead of SingleChildScrollView
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: 10,
+        itemCount: plans.length,
         itemBuilder: (context, index) {
+          final plan = plans[index];
           return GestureDetector(
             onTap: () {
               context.push('/plans/info');
@@ -37,23 +53,23 @@ class PlanList extends ConsumerWidget {
               height: 100,
               width: double.infinity,
               margin: const EdgeInsets.only(bottom: 16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                border: Border.all(color: Colors.black26),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(16),
+              // decoration: BoxDecoration(
+              //   color: Theme.of(context).cardColor,
+              //   border: Border.all(color: Colors.black26),
+              //   borderRadius: BorderRadius.circular(12),
+              // ),
+              // padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Hero(
-                    tag: 'plan_image',
+                    tag: plan['name'],
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
                         'assets/images/bg.jpg',
-                        width: 100,
-                        height: 100,
+                        width: 90,
+                        height: 90,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -62,16 +78,20 @@ class PlanList extends ConsumerWidget {
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        SizedBox(height: 10),
                         Text(
-                          'Plan Name',
+                          '${plan['days']} Days',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        Text(
+                          plan['name'],
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text('No. days', style: TextStyle(fontSize: 12)),
                       ],
                     ),
                   ),

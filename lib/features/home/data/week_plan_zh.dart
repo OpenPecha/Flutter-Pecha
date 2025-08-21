@@ -2,221 +2,409 @@ const Map<String, dynamic> weekPlanZh = {
   "monday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "既得此閒暇\n若我不修善\n自欺莫勝此\n亦無過此愚",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第23偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "是故我應於此敵\n毀其糧秣令無餘\n唯除如是為我害\n此敵更無他事業",
+        "author": "入菩薩行論忍辱品第 8 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=XhjsFEYQxOU",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=bGaxZDOlHAQ",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=O4e1x4p2E7Q",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1uR8FuL-ym27wPv9Hw7hM53r0MoPiQ8yV",
       },
     ],
   },
   "tuesday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "若我已解此\n因癡復怠惰\n則於臨終時\n定生大憂苦",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第24偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "作所不欲遮所欲\n瞋恚由斯二者生\n心不愉悅如飲食\n長養瞋心應摧伏",
+        "author": "入菩薩行論忍辱品第 7 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=J6qkykG8IVE",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=XMKjN94v3gE",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=e0m_J3LuTe4",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1SyyVwtNUVW_gDdIk8YbS5en00JlLNtB5",
       },
     ],
   },
   "wednesday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "難忍地獄火\n長久燒身時\n悔火亦炙燃\n吾心必痛苦",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第25偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "是故我應於此敵\n毀其糧秣令無餘\n唯除如是為我害\n此敵更無他事業",
+        "author": "入菩薩行論忍辱品第 8 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=vaTRDMp4oB0",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=bGaxZDOlHAQ",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=O4e1x4p2E7Q",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1uR8FuL-ym27wPv9Hw7hM53r0MoPiQ8yV",
       },
     ],
   },
   "thursday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "既得此閒暇\n若我不修善\n自欺莫勝此\n亦無過此愚",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第23偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "作所不欲遮所欲\n瞋恚由斯二者生\n心不愉悅如飲食\n長養瞋心應摧伏",
+        "author": "入菩薩行論忍辱品第 7 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=XhjsFEYQxOU",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=XMKjN94v3gE",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=e0m_J3LuTe4",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1SyyVwtNUVW_gDdIk8YbS5en00JlLNtB5",
       },
     ],
   },
   "friday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "既得此閒暇\n若我不修善\n自欺莫勝此\n亦無過此愚",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第23偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "作所不欲遮所欲\n瞋恚由斯二者生\n心不愉悅如飲食\n長養瞋心應摧伏",
+        "author": "入菩薩行論忍辱品第 7 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=XhjsFEYQxOU",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=XMKjN94v3gE",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=e0m_J3LuTe4",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1SyyVwtNUVW_gDdIk8YbS5en00JlLNtB5",
       },
     ],
   },
   "saturday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "若我已解此\n因癡復怠惰\n則於臨終時\n定生大憂苦",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第24偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "是故我應於此敵\n毀其糧秣令無餘\n唯除如是為我害\n此敵更無他事業",
+        "author": "入菩薩行論忍辱品第 8 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=J6qkykG8IVE",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=bGaxZDOlHAQ",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=O4e1x4p2E7Q",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1uR8FuL-ym27wPv9Hw7hM53r0MoPiQ8yV",
       },
     ],
   },
   "sunday": {
     "plan": [
       {
-        "label": "Verse",
+        "label": "今日智慧",
         "contentType": "text",
-        "content": "難忍地獄火\n長久燒身時\n悔火亦炙燃\n吾心必痛苦",
-        "author": "⟪入菩薩行論⟫第四品不放逸品第25偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+        "content": "作所不欲遮所欲\n瞋恚由斯二者生\n心不愉悅如飲食\n長養瞋心應摧伏",
+        "author": "入菩薩行論忍辱品第 7 偈\n寂天菩薩造 如石法師譯\n講解者：格西索南貢布（諾諾格西）",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=vaTRDMp4oB0",
-      },
-      {
-        "label": "晨間引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
-      },
-      {
-        "label": "睡前引導",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+        "content": "https://www.youtube.com/watch?v=XMKjN94v3gE",
       },
       {
         "label": "融入生活",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=e0m_J3LuTe4",
+      },
+      {
+        "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+            "https://drive.google.com/uc?export=view&id=1SyyVwtNUVW_gDdIk8YbS5en00JlLNtB5",
       },
     ],
   },
 };
+
+// friday, sunday, tuesday, thursday,
+// saturday, monday, wednesday,
+
+// const Map<String, dynamic> weekPlanZh = {
+//   "monday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "既得此閒暇\n若我不修善\n自欺莫勝此\n亦無過此愚",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第23偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=XhjsFEYQxOU",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+//   "tuesday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "若我已解此\n因癡復怠惰\n則於臨終時\n定生大憂苦",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第24偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=J6qkykG8IVE",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+//   "wednesday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "難忍地獄火\n長久燒身時\n悔火亦炙燃\n吾心必痛苦",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第25偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=vaTRDMp4oB0",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+//   "thursday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "既得此閒暇\n若我不修善\n自欺莫勝此\n亦無過此愚",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第23偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=XhjsFEYQxOU",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+//   "friday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "既得此閒暇\n若我不修善\n自欺莫勝此\n亦無過此愚",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第23偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=XhjsFEYQxOU",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+//   "saturday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "若我已解此\n因癡復怠惰\n則於臨終時\n定生大憂苦",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第24偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=J6qkykG8IVE",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+//   "sunday": {
+//     "plan": [
+//       {
+//         "label": "Verse",
+//         "contentType": "text",
+//         "content": "難忍地獄火\n長久燒身時\n悔火亦炙燃\n吾心必痛苦",
+//         "author": "⟪入菩薩行論⟫第四品不放逸品第25偈\n寂天菩薩造 如石法師譯\n講解者：格西羅桑堅贊",
+//       },
+//       {
+//         "label": "深入了解",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=vaTRDMp4oB0",
+//       },
+//       {
+//         "label": "晨間引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=pIdpbDpsHtg",
+//       },
+//       {
+//         "label": "睡前引導",
+//         "contentType": "video",
+//         "content": "https://www.youtube.com/watch?v=l9agDt0o6OA",
+//       },
+//       {
+//         "label": "融入生活",
+//         "contentType": "image",
+//         "content":
+//             "https://drive.google.com/uc?export=view&id=1WxGk9sV-QTVlGwuLSn_GSmNj5h2_PKt_",
+//       },
+//     ],
+//   },
+// };
 
 // const Map<String, dynamic> weekPlanZh = {
 //   "monday": {

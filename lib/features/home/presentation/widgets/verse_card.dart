@@ -19,16 +19,6 @@ class VerseCard extends ConsumerWidget {
         if (isZh) {
           ref.read(bottomBarVisibleProvider.notifier).state =
               !ref.read(bottomBarVisibleProvider.notifier).state;
-          // context.push(
-          //   '/texts/detail',
-          //   extra: Term(
-          //     id: "67dd22a8d9f06ab28feedc90",
-          //     title: "",
-          //     description: "",
-          //     slug: "",
-          //     hasChild: false,
-          //   ),
-          // );
         }
       },
       child: Container(
