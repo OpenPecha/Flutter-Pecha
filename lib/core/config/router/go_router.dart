@@ -313,7 +313,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // plan tab routes
       GoRoute(
         path: '/plans/info',
-        builder: (context, state) => const PlanInfo(),
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra == null || extra is! Map<String, dynamic>) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return PlanInfo(plan: extra);
+        },
       ),
       GoRoute(
         path: '/plans/details',

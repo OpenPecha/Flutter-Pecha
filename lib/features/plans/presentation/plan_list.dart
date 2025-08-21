@@ -41,13 +41,13 @@ class PlanList extends ConsumerWidget {
       ),
       // Use ListView.builder directly instead of SingleChildScrollView
       body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         itemCount: plans.length,
         itemBuilder: (context, index) {
           final plan = plans[index];
           return GestureDetector(
             onTap: () {
-              context.push('/plans/info');
+              context.push('/plans/info', extra: plan);
             },
             child: Container(
               height: 100,
@@ -76,23 +76,26 @@ class PlanList extends ConsumerWidget {
                   ),
                   const SizedBox(width: 24),
                   Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 10),
-                        Text(
-                          '${plan['days']} Days',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        Text(
-                          plan['name'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10),
+                          Text(
+                            '${plan['days']} Days',
+                            style: TextStyle(fontSize: 12),
                           ),
-                        ),
-                      ],
+                          Text(
+                            plan['name'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

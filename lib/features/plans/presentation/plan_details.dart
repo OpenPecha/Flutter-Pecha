@@ -39,14 +39,9 @@ class _PlanDetailsState extends State<PlanDetails> {
       appBar: AppBar(
         title: const Text(
           'Train your Mind',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-        ),
       ),
       body: Column(
         children: [
@@ -54,10 +49,8 @@ class _PlanDetailsState extends State<PlanDetails> {
           Container(
             width: double.infinity,
             height: 150,
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
             child: Hero(
               tag: 'plan_image',
               child: ClipRRect(
@@ -101,46 +94,30 @@ class _PlanDetailsState extends State<PlanDetails> {
                     width: 60,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
-                      color:
-                          isSelected ? const Color(0xFF1E3A8A) : Colors.white,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color:
                             isSelected
                                 ? const Color(0xFF1E3A8A)
-                                : Colors.grey.shade300,
+                                : Theme.of(context).cardColor,
                         width: 1,
                       ),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            Text(
-                              '${day['day']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
-                            ),
-                            if (day['completed'])
-                              const Icon(
-                                Icons.check,
-                                size: 12,
-                                color: Colors.green,
-                              ),
-                          ],
+                        Text(
+                          '${day['day']}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           day['date'],
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: isSelected ? Colors.white70 : Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                       ],
                     ),

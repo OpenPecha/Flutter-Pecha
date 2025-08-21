@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class PlanInfo extends StatelessWidget {
-  const PlanInfo({super.key});
+  const PlanInfo({super.key, required this.plan});
+  final Map<String, dynamic> plan;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Plan Info'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text(
+          'Plan Info',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: false,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Hero(
-              tag: 'plan_image',
+              tag: plan['name'],
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
@@ -31,12 +38,12 @@ class PlanInfo extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Train Your Mind',
+                  plan['name'],
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 10),
                 Text(
-                  '10 Days',
+                  '${plan['days']} Days',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ],
