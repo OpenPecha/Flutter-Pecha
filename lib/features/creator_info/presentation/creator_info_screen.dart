@@ -4,13 +4,7 @@ import 'package:go_router/go_router.dart';
 class CreatorInfoScreen extends StatelessWidget {
   const CreatorInfoScreen({super.key});
 
-  static const List<String> _planItems = [
-    'Concentration',
-    'Mind training',
-    'Prayer',
-    'Habit',
-    'Mind training',
-  ];
+  static const List<String> _planItems = ["入菩薩行論教你如何對治嗔心"];
 
   @override
   Widget build(BuildContext context) {
