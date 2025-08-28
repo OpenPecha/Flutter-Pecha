@@ -46,7 +46,7 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService authService;
   AuthNotifier({required this.authService})
-    : super(const AuthState(isLoggedIn: false, isLoading: true)) {
+    : super(const AuthState(isLoggedIn: false, isLoading: false)) {
     _restoreLoginState();
   }
 

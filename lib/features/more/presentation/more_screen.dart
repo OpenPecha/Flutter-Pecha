@@ -261,6 +261,7 @@ class MoreScreen extends ConsumerWidget {
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             title: Text(
               'Log Out',
               style: Theme.of(
