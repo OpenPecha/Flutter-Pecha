@@ -282,6 +282,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @dailyPracticeReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Practice Reminder'**
+  String get dailyPracticeReminder;
+
+  /// No description provided for @timeForDailyPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for your daily practice! 🙏'**
+  String get timeForDailyPractice;
+
+  /// No description provided for @notificationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Settings'**
+  String get notificationSettings;
+
+  /// No description provided for @dailyPracticeReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Practice Reminders'**
+  String get dailyPracticeReminders;
+
+  /// No description provided for @dailyPracticeRemindersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get reminded daily to practice your meditation and prayers'**
+  String get dailyPracticeRemindersDescription;
+
+  /// No description provided for @enableReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Reminders'**
+  String get enableReminders;
+
+  /// No description provided for @remindersEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders are active'**
+  String get remindersEnabled;
+
+  /// No description provided for @remindersDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders are inactive'**
+  String get remindersDisabled;
+
+  /// No description provided for @reminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder Time'**
+  String get reminderTime;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get selectTime;
+
+  /// No description provided for @updateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Time'**
+  String get updateTime;
+
+  /// No description provided for @testNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Notifications'**
+  String get testNotifications;
+
+  /// No description provided for @testNotificationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a test notification to verify everything is working'**
+  String get testNotificationsDescription;
+
+  /// No description provided for @sendTestNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test Notification'**
+  String get sendTestNotification;
+
+  /// No description provided for @manageDailyReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage daily reminders'**
+  String get manageDailyReminders;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

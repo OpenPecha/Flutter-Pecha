@@ -30,5 +30,20 @@
   "sanskrit": "Sanskrit",
   "english": "English",
   "chinese": "Chinese",
-  "language": "Language"
+  "language": "Language",
+  "dailyPracticeReminder": "Daily Practice Reminder",
+  "timeForDailyPractice": "Time for your daily practice! 🙏",
+  "notificationSettings": "Notification Settings",
+  "dailyPracticeReminders": "Daily Practice Reminders",
+  "dailyPracticeRemindersDescription": "Get reminded daily to practice your meditation and prayers",
+  "enableReminders": "Enable Reminders",
+  "remindersEnabled": "Reminders are active",
+  "remindersDisabled": "Reminders are inactive",
+  "reminderTime": "Reminder Time",
+  "selectTime": "Select Time",
+  "updateTime": "Update Time",
+  "testNotifications": "Test Notifications",
+  "testNotificationsDescription": "Send a test notification to verify everything is working",
+  "sendTestNotification": "Send Test Notification",
+  "manageDailyReminders": "Manage daily reminders"
 }

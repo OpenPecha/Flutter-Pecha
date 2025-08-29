@@ -100,4 +100,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get language => 'Language';
+
+  @override
+  String get dailyPracticeReminder => 'Daily Practice Reminder';
+
+  @override
+  String get timeForDailyPractice => 'Time for your daily practice! 🙏';
+
+  @override
+  String get notificationSettings => 'Notification Settings';
+
+  @override
+  String get dailyPracticeReminders => 'Daily Practice Reminders';
+
+  @override
+  String get dailyPracticeRemindersDescription => 'Get reminded daily to practice your meditation and prayers';
+
+  @override
+  String get enableReminders => 'Enable Reminders';
+
+  @override
+  String get remindersEnabled => 'Reminders are active';
+
+  @override
+  String get remindersDisabled => 'Reminders are inactive';
+
+  @override
+  String get reminderTime => 'Reminder Time';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get updateTime => 'Update Time';
+
+  @override
+  String get testNotifications => 'Test Notifications';
+
+  @override
+  String get testNotificationsDescription => 'Send a test notification to verify everything is working';
+
+  @override
+  String get sendTestNotification => 'Send Test Notification';
+
+  @override
+  String get manageDailyReminders => 'Manage daily reminders';
 }

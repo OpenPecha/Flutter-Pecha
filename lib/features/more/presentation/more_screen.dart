@@ -5,6 +5,7 @@ import 'package:flutter_pecha/core/theme/theme_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../notifications/presentation/notification_settings_screen.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -129,6 +130,33 @@ class MoreScreen extends ConsumerWidget {
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showLanguageBottomSheet(context, ref, locale),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Notification Settings
+          _buildSectionHeader(context, 'Notifications'),
+          _buildSectionCard(
+            context,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.notifications),
+                title: Text(
+                  AppLocalizations.of(context)?.notificationSettings ??
+                      'Notification Settings',
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context)?.manageDailyReminders ??
+                      'Manage daily reminders',
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationSettingsScreen(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
