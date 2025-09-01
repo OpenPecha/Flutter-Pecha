@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -16,6 +17,13 @@ class NotificationService {
   bool _isInitialized = false;
   static const String _dailyReminderKey = 'daily_reminder_time';
   static const String _dailyReminderEnabledKey = 'daily_reminder_enabled';
+  // Add a static router reference
+  static GoRouter? _router;
+
+  // Method to set the router reference
+  static void setRouter(GoRouter router) {
+    _router = router;
+  }
 
   bool get isInitialized => _isInitialized;
 
@@ -58,8 +66,10 @@ class NotificationService {
   // TODO: request permission for notifications
 
   void _onNotificationTapped(NotificationResponse response) {
-    // TODO:Handle notification tap - navigate to home or practice screen
-    // You can use GoRouter here to navigate
+    // Navigate to home using the global router
+    if (_router != null) {
+      _router!.go('/home');
+    }
   }
 
   // schedule notification

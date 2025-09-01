@@ -32,6 +32,8 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final themeMode = ref.watch(themeModeProvider);
 
+    NotificationService.setRouter(router);
+
     // Add QueryClient provider wrapper
     return QueryClientProvider(
       queryClient: QueryClient(
