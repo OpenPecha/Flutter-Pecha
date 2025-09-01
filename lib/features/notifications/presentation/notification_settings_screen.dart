@@ -94,6 +94,7 @@ class _NotificationSettingsScreenState
     final isEnabled = state.isEnabled;
     final selectedTime =
         state.reminderTime ?? const TimeOfDay(hour: 8, minute: 0);
+    final hasPermission = state.hasPermission;
 
     return Scaffold(
       appBar: AppBar(
@@ -107,86 +108,132 @@ class _NotificationSettingsScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              color: Theme.of(context).cardColor,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SwitchListTile(
-                      activeTrackColor: Theme.of(context).colorScheme.primary,
-                      inactiveTrackColor: Colors.grey,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 0,
+            // Permission Status Card
+            if (!hasPermission) ...[
+              Card(
+                color: Colors.orange.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange, size: 48),
+                      SizedBox(height: 8),
+                      Text(
+                        'Please turn on Notifications',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      title: Text(
-                        'Daily Practice',
-                        style: Theme.of(context).textTheme.titleSmall,
+                      SizedBox(height: 8),
+                      Text(
+                        'Please enable notifications to receive daily practice reminders.',
+                        textAlign: TextAlign.center,
                       ),
-                      subtitle: Text(
-                        "Get notification of your daily to practices",
-                        style: Theme.of(context).textTheme.bodySmall,
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final granted =
+                              await ref
+                                  .read(notificationServiceProvider)
+                                  .requestPermission();
+                          if (granted) {
+                            ref
+                                .read(notificationProvider.notifier)
+                                .checkPermissionStatus();
+                          } else {
+                            _showPermissionDeniedDialog();
+                          }
+                        },
+                        child: Text('Enable Notifications'),
                       ),
-                      value: isEnabled,
-                      onChanged: (v) => _toggleNotifications(v, selectedTime),
-                    ),
-                    if (isEnabled) ...[
-                      ListTile(
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+            ],
+            if (hasPermission) ...[
+              Card(
+                color: Theme.of(context).cardColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SwitchListTile(
+                        activeTrackColor: Theme.of(context).colorScheme.primary,
+                        inactiveTrackColor: Colors.grey,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 0,
+                        ),
                         title: Text(
-                          'Select Time',
+                          'Daily Practice',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         subtitle: Text(
-                          selectedTime.format(context),
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          "Get notification of your daily to practices",
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
-                        trailing: const Icon(Icons.access_time),
-                        onTap: () => _selectTime(context, selectedTime),
+                        value: isEnabled,
+                        onChanged: (v) => _toggleNotifications(v, selectedTime),
+                      ),
+                      if (isEnabled) ...[
+                        ListTile(
+                          title: Text(
+                            'Select Time',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          subtitle: Text(
+                            selectedTime.format(context),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          trailing: const Icon(Icons.access_time),
+                          onTap: () => _selectTime(context, selectedTime),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                color: Theme.of(context).cardColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)?.testNotifications ??
+                            'Test Notifications',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                              context,
+                            )?.testNotificationsDescription ??
+                            'Send a test notification to verify everything is working',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _testNotification,
+                          icon: const Icon(Icons.notifications),
+                          label: Text(
+                            AppLocalizations.of(
+                                  context,
+                                )?.sendTestNotification ??
+                                'Send Test Notification',
+                          ),
+                        ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              color: Theme.of(context).cardColor,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)?.testNotifications ??
-                          'Test Notifications',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      AppLocalizations.of(
-                            context,
-                          )?.testNotificationsDescription ??
-                          'Send a test notification to verify everything is working',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _testNotification,
-                        icon: const Icon(Icons.notifications),
-                        label: Text(
-                          AppLocalizations.of(context)?.sendTestNotification ??
-                              'Send Test Notification',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            ],
             if (state.isLoading) ...[
               const SizedBox(height: 16),
               const Center(child: CircularProgressIndicator()),
@@ -194,6 +241,34 @@ class _NotificationSettingsScreenState
           ],
         ),
       ),
+    );
+  }
+
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Permission Denied'),
+            content: Text(
+              'Notifications are disabled. You can enable them in your device settings:\n\n'
+              'Settings > Apps > Pecha > Notifications',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('OK'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Open app settings (requires permission_handler package)
+                  // AppSettings.openAppSettings();
+                },
+                child: Text('Open Settings'),
+              ),
+            ],
+          ),
     );
   }
 }

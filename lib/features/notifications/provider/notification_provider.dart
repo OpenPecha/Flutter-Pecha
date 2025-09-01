@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/notification_service.dart';
 
 class NotificationState {
   final bool isEnabled;
   final TimeOfDay? reminderTime;
   final bool isLoading;
+  final bool hasPermission;
 
   const NotificationState({
     this.isEnabled = false,
     this.reminderTime,
     this.isLoading = false,
+    this.hasPermission = false,
   });
 
   NotificationState copyWith({
     bool? isEnabled,
     TimeOfDay? reminderTime,
     bool? isLoading,
+    bool? hasPermission,
   }) {
     return NotificationState(
       isEnabled: isEnabled ?? this.isEnabled,
       reminderTime: reminderTime ?? this.reminderTime,
       isLoading: isLoading ?? this.isLoading,
+      hasPermission: hasPermission ?? this.hasPermission,
     );
   }
 }
@@ -41,10 +44,13 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
     try {
       final isEnabled = await _notificationService.isDailyReminderEnabled();
       final reminderTime = await _notificationService.getDailyReminderTime();
+      final hasPermission =
+          await _notificationService.areNotificationsEnabled();
 
       state = state.copyWith(
         isEnabled: isEnabled,
         reminderTime: reminderTime,
+        hasPermission: hasPermission,
         isLoading: false,
       );
     } catch (e) {
@@ -70,11 +76,17 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
         isEnabled: true,
         reminderTime: time,
         isLoading: false,
+        hasPermission: true,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false);
       rethrow;
     }
+  }
+
+  Future<void> checkPermissionStatus() async {
+    final hasPermission = await _notificationService.areNotificationsEnabled();
+    state = state.copyWith(hasPermission: hasPermission);
   }
 
   Future<void> disableDailyReminder() async {

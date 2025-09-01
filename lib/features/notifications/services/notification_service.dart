@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -61,9 +63,60 @@ class NotificationService {
     );
 
     _isInitialized = true;
+    await requestPermission();
   }
 
   // TODO: request permission for notifications
+  Future<bool> requestPermission() async {
+    if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+          notificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >();
+
+      final bool? granted =
+          await androidImplementation?.requestNotificationsPermission();
+      return granted ?? false;
+    } else if (Platform.isIOS) {
+      final IOSFlutterLocalNotificationsPlugin? iosImplementation =
+          notificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin
+              >();
+      final bool? granted = await iosImplementation?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      return granted ?? false;
+    }
+    return false;
+  }
+
+  Future<bool> areNotificationsEnabled() async {
+    if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+          notificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >();
+
+      final bool? granted =
+          await androidImplementation?.areNotificationsEnabled();
+      return granted ?? false;
+    } else if (Platform.isIOS) {
+      final IOSFlutterLocalNotificationsPlugin? iosImplementation =
+          notificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin
+              >();
+      final NotificationsEnabledOptions? granted =
+          await iosImplementation?.checkPermissions();
+      return granted?.isEnabled ?? false;
+    }
+    return false;
+  }
 
   void _onNotificationTapped(NotificationResponse response) {
     // Navigate to home using the global router
