@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -13,6 +14,8 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
+  static const String _dailyReminderKey = 'daily_reminder_time';
+  static const String _dailyReminderEnabledKey = 'daily_reminder_enabled';
 
   bool get isInitialized => _isInitialized;
 
@@ -59,18 +62,6 @@ class NotificationService {
     // You can use GoRouter here to navigate
   }
 
-  // notitication detail setup
-  NotificationDetails notificationDetails = const NotificationDetails(
-    android: AndroidNotificationDetails(
-      "daily_practice_reminder",
-      "Daily Practice Reminderel",
-      channelDescription: 'Reminds you to practice daily',
-      importance: Importance.max,
-      priority: Priority.high,
-    ),
-    iOS: DarwinNotificationDetails(presentAlert: true, presentSound: true),
-  );
-
   // schedule notification
   Future<void> scheduledNotification({
     int id = 1,
@@ -87,6 +78,13 @@ class NotificationService {
       scheduledTime.hour,
       scheduledTime.minute,
     );
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _dailyReminderKey,
+      '${scheduledTime.hour}:${scheduledTime.minute}',
+    );
+    await prefs.setBool(_dailyReminderEnabledKey, true);
 
     // schedule the notification
     await notificationsPlugin.zonedSchedule(
@@ -115,6 +113,29 @@ class NotificationService {
 
   Future<void> cancelNotification({int id = 1}) async {
     await notificationsPlugin.cancel(id);
+
+    // Update preferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_dailyReminderEnabledKey, false);
+  }
+
+  Future<bool> isDailyReminderEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_dailyReminderEnabledKey) ?? false;
+  }
+
+  Future<void> updateDailyReminder({
+    required TimeOfDay time,
+    required String title,
+    required String body,
+  }) async {
+    if (await isDailyReminderEnabled()) {
+      await scheduledNotification(
+        scheduledTime: time,
+        title: title,
+        body: body,
+      );
+    }
   }
 
   // Method to show immediate notification (for testing)

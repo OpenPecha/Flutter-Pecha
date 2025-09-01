@@ -56,8 +56,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
 
   Future<void> enableDailyReminder({
     required TimeOfDay time,
-    String title = 'Daily Practice Reminder',
-    String body = 'Time for your daily practice! ��',
+    String title = 'Daily Practice',
+    String body = 'Time for your daily practice! 🙏',
   }) async {
     state = state.copyWith(isLoading: true);
 

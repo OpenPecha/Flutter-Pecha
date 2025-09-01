@@ -301,11 +301,11 @@ abstract class AppLocalizations {
   /// **'Notification Settings'**
   String get notificationSettings;
 
-  /// No description provided for @dailyPracticeReminders.
+  /// No description provided for @dailyPractice.
   ///
   /// In en, this message translates to:
-  /// **'Daily Practice Reminders'**
-  String get dailyPracticeReminders;
+  /// **'Daily Practice'**
+  String get dailyPractice;
 
   /// No description provided for @dailyPracticeRemindersDescription.
   ///

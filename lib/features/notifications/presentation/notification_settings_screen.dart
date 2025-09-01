@@ -34,14 +34,12 @@ class _NotificationSettingsScreenState
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
+    final TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: _selectedTime ?? const TimeOfDay(hour: 8, minute: 0),
     );
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-      });
+    if (selectedTime != null && selectedTime != _selectedTime) {
+      _updateReminderTime(selectedTime);
     }
   }
 
@@ -81,12 +79,10 @@ class _NotificationSettingsScreenState
     }
   }
 
-  Future<void> _updateReminderTime() async {
-    if (_selectedTime != null && _isEnabled) {
+  Future<void> _updateReminderTime(TimeOfDay time) async {
+    if (_isEnabled) {
       try {
-        await ref
-            .read(notificationProvider.notifier)
-            .updateReminderTime(_selectedTime!);
+        await ref.read(notificationProvider.notifier).updateReminderTime(time);
         _showSuccessMessage('Reminder time updated');
       } catch (e) {
         _showErrorMessage('Failed to update reminder time: $e');
@@ -132,88 +128,51 @@ class _NotificationSettingsScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
+              color: Theme.of(context).cardColor,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)?.dailyPracticeReminders ??
-                          'Daily Practice Reminders',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      AppLocalizations.of(
-                            context,
-                          )?.dailyPracticeRemindersDescription ??
-                          'Get reminded daily to practice your meditation and prayers',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
                     SwitchListTile(
+                      activeTrackColor: Theme.of(context).colorScheme.primary,
+                      inactiveTrackColor: Colors.grey,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 0,
+                      ),
                       title: Text(
-                        AppLocalizations.of(context)?.enableReminders ??
-                            'Enable Reminders',
+                        'Daily Practice',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       subtitle: Text(
-                        _isEnabled
-                            ? AppLocalizations.of(context)?.remindersEnabled ??
-                                'Reminders are active'
-                            : AppLocalizations.of(context)?.remindersDisabled ??
-                                'Reminders are inactive',
+                        "Get notification of your daily to practices",
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       value: _isEnabled,
                       onChanged: _toggleNotifications,
                     ),
+                    if (_isEnabled) ...[
+                      ListTile(
+                        title: Text(
+                          'Select Time',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        subtitle: Text(
+                          _selectedTime?.format(context) ?? 'No time selected',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        trailing: const Icon(Icons.access_time),
+                        onTap: () => _selectTime(context),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            if (_isEnabled) ...[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)?.reminderTime ??
-                            'Reminder Time',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      ListTile(
-                        title: Text(
-                          AppLocalizations.of(context)?.selectTime ??
-                              'Select Time',
-                        ),
-                        subtitle: Text(
-                          _selectedTime?.format(context) ?? 'No time selected',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        trailing: const Icon(Icons.access_time),
-                        onTap: () => _selectTime(context),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _updateReminderTime,
-                          child: Text(
-                            AppLocalizations.of(context)?.updateTime ??
-                                'Update Time',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
             Card(
+              color: Theme.of(context).cardColor,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(

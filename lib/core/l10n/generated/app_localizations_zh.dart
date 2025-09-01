@@ -111,7 +111,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationSettings => 'Notification Settings';
 
   @override
-  String get dailyPracticeReminders => 'Daily Practice Reminders';
+  String get dailyPractice => 'Daily Practice';
 
   @override
   String get dailyPracticeRemindersDescription => 'Get reminded daily to practice your meditation and prayers';
