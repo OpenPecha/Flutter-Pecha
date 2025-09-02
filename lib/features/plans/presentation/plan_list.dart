@@ -26,7 +26,7 @@ class PlanList extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(
           'Plans',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         scrolledUnderElevation: 0,
         centerTitle: false,

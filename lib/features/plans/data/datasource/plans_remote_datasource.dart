@@ -1,12 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
 import 'package:http/http.dart' as http;
 
 class PlansRemoteDatasource {
   final http.Client client;
-  final String baseUrl =
-      'https://your-api-base-url.com'; // Replace with your actual API URL
+  final String baseUrl = dotenv.env['BASE_API_URL']!;
 
   PlansRemoteDatasource({required this.client});
 
@@ -14,7 +14,7 @@ class PlansRemoteDatasource {
   Future<List<PlansModel>> getPlans() async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/plans'),
+        Uri.parse('$baseUrl/cms/plans'),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {

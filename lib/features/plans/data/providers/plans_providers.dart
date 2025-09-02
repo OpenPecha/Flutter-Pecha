@@ -1,3 +1,4 @@
+import 'package:flutter_pecha/features/plans/data/utils/mock_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../repositories/plans_repository.dart';
@@ -13,7 +14,8 @@ final plansRepositoryProvider = Provider<PlansRepository>((ref) {
 
 // Get all plans provider
 final plansFutureProvider = FutureProvider<List<PlansModel>>((ref) {
-  return ref.watch(plansRepositoryProvider).getPlans();
+  // return ref.watch(plansRepositoryProvider).getPlans();
+  return Future.value(mockPlans);
 });
 
 final planByIdFutureProvider = FutureProvider.family<PlansModel, String>((

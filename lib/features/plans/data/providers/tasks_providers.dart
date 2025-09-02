@@ -1,6 +1,6 @@
 import 'package:flutter_pecha/features/plans/data/datasource/tasks_remote_datasource.dart';
 import 'package:flutter_pecha/features/plans/data/repositories/tasks_repository.dart';
-import 'package:flutter_pecha/features/plans/models/tasks_model.dart';
+import 'package:flutter_pecha/features/plans/models/plan_tasks_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,13 +11,13 @@ final tasksRepositoryProvider = Provider<TasksRepository>((ref) {
 });
 
 final tasksByPlanItemIdFutureProvider =
-    FutureProvider.family<List<TasksModel>, String>((ref, planItemId) {
+    FutureProvider.family<List<PlanTasksModel>, String>((ref, planItemId) {
       return ref
           .watch(tasksRepositoryProvider)
           .getTasksByPlanItemId(planItemId);
     });
 
-final taskByIdFutureProvider = FutureProvider.family<TasksModel, String>((
+final taskByIdFutureProvider = FutureProvider.family<PlanTasksModel, String>((
   ref,
   id,
 ) {

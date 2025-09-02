@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter_pecha/features/plans/models/tasks_model.dart';
+import 'package:flutter_pecha/features/plans/models/plan_tasks_model.dart';
 import 'package:http/http.dart' as http;
 
 class TasksRemoteDatasource {
@@ -10,7 +10,7 @@ class TasksRemoteDatasource {
   TasksRemoteDatasource({required this.client});
 
   // Get tasks by plan item ID
-  Future<List<TasksModel>> getTasksByPlanItemId(String planItemId) async {
+  Future<List<PlanTasksModel>> getTasksByPlanItemId(String planItemId) async {
     try {
       final response = await client.get(
         Uri.parse('$baseUrl/plan-items/$planItemId/tasks'),
@@ -18,7 +18,7 @@ class TasksRemoteDatasource {
       );
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-        return jsonData.map((json) => TasksModel.fromJson(json)).toList();
+        return jsonData.map((json) => PlanTasksModel.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load tasks: ${response.statusCode}');
       }
@@ -28,7 +28,7 @@ class TasksRemoteDatasource {
   }
 
   // Get task by ID
-  Future<TasksModel> getTaskById(String id) async {
+  Future<PlanTasksModel> getTaskById(String id) async {
     try {
       final response = await client.get(
         Uri.parse('$baseUrl/tasks/$id'),
@@ -36,7 +36,7 @@ class TasksRemoteDatasource {
       );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        return TasksModel.fromJson(jsonData);
+        return PlanTasksModel.fromJson(jsonData);
       } else {
         throw Exception('Failed to load task: ${response.statusCode}');
       }
@@ -46,7 +46,7 @@ class TasksRemoteDatasource {
   }
 
   // Update task
-  Future<TasksModel> updateTask(String id, TasksModel task) async {
+  Future<PlanTasksModel> updateTask(String id, PlanTasksModel task) async {
     try {
       final response = await client.put(
         Uri.parse('$baseUrl/tasks/$id'),
@@ -55,7 +55,7 @@ class TasksRemoteDatasource {
       );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        return TasksModel.fromJson(jsonData);
+        return PlanTasksModel.fromJson(jsonData);
       } else {
         throw Exception('Failed to update task: ${response.statusCode}');
       }
