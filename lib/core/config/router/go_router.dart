@@ -28,27 +28,31 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
+import 'route_config.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(
       ref.watch(authProvider.notifier).stream,
     ),
     routes: [
       GoRoute(
-        path: '/splash',
+        path: RouteConfig.splash,
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: RouteConfig.login,
+        builder: (context, state) => const LoginPage(),
+      ),
       // home page routes
       GoRoute(
-        path: '/home',
+        path: RouteConfig.home,
         builder: (context, state) => const SkeletonScreen(),
       ),
       GoRoute(
-        path: '/profile',
+        path: RouteConfig.profile,
         pageBuilder: (context, state) {
           return CustomTransitionPage(
             key: state.pageKey,
@@ -79,7 +83,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '/creator_info',
+        path: RouteConfig.creatorInfo,
         pageBuilder: (context, state) {
           return CustomTransitionPage(
             key: state.pageKey,
@@ -332,27 +336,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoading = authState.isLoading;
       final isLoggedIn = authState.isLoggedIn;
-      final onSplash = state.fullPath == '/splash';
-      final onLogin = state.fullPath == '/login';
+      final currentPath = state.fullPath ?? RouteConfig.splash;
 
-      // // 1. If loading, stay on splash screen
+      // 1. While loading, stay on splash screen
       if (isLoading) {
-        return '/login';
+        return currentPath == RouteConfig.splash ? null : RouteConfig.splash;
       }
 
-      // 2. If not loading and on splash, go to login or home
-      if (!isLoading && onSplash) {
-        return isLoggedIn ? '/home' : '/login';
+      // 2. From splash screen, redirect based on auth status
+      if (currentPath == RouteConfig.splash) {
+        return isLoggedIn ? RouteConfig.home : RouteConfig.login;
       }
 
-      // 3. If not logged in and not on login/splash, go to login
-      if (!isLoggedIn && !onLogin && !onSplash) {
-        return '/login';
+      // 3. Authenticated user on login page should go to home
+      if (isLoggedIn && currentPath == RouteConfig.login) {
+        return RouteConfig.home;
       }
 
-      // 4. If logged in and on login, go to home
-      if (isLoggedIn && onLogin) {
-        return '/home';
+      // 4. Unauthenticated user trying to access protected route
+      if (!isLoggedIn && RouteConfig.isProtectedRoute(currentPath)) {
+        return RouteConfig.login;
       }
 
       // 5. No redirect needed
