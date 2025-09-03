@@ -47,6 +47,12 @@ class PlanList extends ConsumerWidget {
           bottom: TabBar(
             tabs: [Tab(text: 'My Plans'), Tab(text: 'All Plans')],
             labelStyle: TextStyle(fontWeight: FontWeight.bold),
+            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+            labelColor: Theme.of(context).colorScheme.secondary,
+            unselectedLabelColor:
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
           ),
         ),
         body: TabBarView(
@@ -135,6 +141,7 @@ class PlanList extends ConsumerWidget {
 
   Widget _buildPlanCard(PlansModel plan, BuildContext context) {
     return Card(
+      color: Theme.of(context).cardColor,
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -204,10 +211,7 @@ class PlanSearchDelegate extends SearchDelegate<PlansModel?> {
   List<Widget> buildActions(BuildContext context) {
     return [
       if (query.isNotEmpty)
-        IconButton(
-          onPressed: () => close(context, null),
-          icon: const Icon(Icons.clear),
-        ),
+        IconButton(onPressed: () => query = '', icon: const Icon(Icons.clear)),
     ];
   }
 

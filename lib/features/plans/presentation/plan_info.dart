@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class PlanInfo extends StatelessWidget {
+class PlanInfo extends ConsumerWidget {
   const PlanInfo({super.key, required this.plan});
   final PlansModel plan;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+    final isGuest = authState.isGuest;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -26,12 +31,9 @@ class PlanInfo extends StatelessWidget {
             SizedBox(height: 20),
             _buildPlanTitleDays(context),
             SizedBox(height: 20),
-            _buildActionButtons(context),
+            _buildActionButtons(context, isGuest),
             SizedBox(height: 20),
-            Text(
-              'Plan Description\nThis is a plan description and for testing purposes.',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-            ),
+            _buildPlanDescription(context),
           ],
         ),
       ),
@@ -63,33 +65,50 @@ class PlanInfo extends StatelessWidget {
         ),
         SizedBox(width: 10),
         Text(
-          '6 Days',
+          '${plan.durationDays} Days',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ],
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, bool isGuest) {
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
-        onPressed: () {
-          context.push('/plans/details');
-        },
+        onPressed: isGuest ? null : () => context.push('/plans/details'),
         style: FilledButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 12),
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: isGuest ? Colors.grey[300] : Colors.black,
+          foregroundColor: isGuest ? Colors.grey[600] : Colors.white,
+          disabledBackgroundColor: Colors.grey[300],
+          disabledForegroundColor: Colors.grey[600],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
         ),
         child: Text(
-          'Start Plan',
+          isGuest ? 'Login Required' : 'Start Plan',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
+    );
+  }
+
+  Widget _buildPlanDescription(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Description',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          plan.description ?? 'No description available.',
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
     );
   }
 }
