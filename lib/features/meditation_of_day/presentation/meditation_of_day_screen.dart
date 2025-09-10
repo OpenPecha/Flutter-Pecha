@@ -63,7 +63,9 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load meditation audio: ${e.toString()}'),
+            content: Text(
+              'Unable to load meditation audio. Please try again later.',
+            ),
           ),
         );
       }

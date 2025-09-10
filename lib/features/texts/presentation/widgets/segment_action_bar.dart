@@ -120,7 +120,7 @@ class SegmentActionBar extends ConsumerWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Failed to share: ${e.toString()}',
+                                        'Unable to share. Please try again later.',
                                       ),
                                       backgroundColor: Colors.red,
                                     ),
@@ -152,7 +152,7 @@ class SegmentActionBar extends ConsumerWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Retrying... ${error.toString()}',
+                                    'Unable to create share link. Please try again later.',
                                   ),
                                   backgroundColor: Colors.orange,
                                 ),
