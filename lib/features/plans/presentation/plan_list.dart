@@ -131,7 +131,10 @@ class PlanList extends ConsumerWidget {
                     return _buildPlanCard(plan, context);
                   },
                 ),
-            error: (error, stackTrace) => Center(child: Text('Error: $error')),
+            error:
+                (error, stackTrace) => Center(
+                  child: Text('Unable to load plans. Please try again later.'),
+                ),
             loading: () => const Center(child: CircularProgressIndicator()),
           ),
         ),
@@ -182,7 +185,7 @@ class PlanList extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${plan.durationDays} Days',
+          '${plan.totalDays} Days',
           style: const TextStyle(
             fontSize: 12,
             color: Colors.grey,

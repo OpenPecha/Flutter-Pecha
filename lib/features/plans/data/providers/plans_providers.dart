@@ -14,8 +14,8 @@ final plansRepositoryProvider = Provider<PlansRepository>((ref) {
 
 // Get all plans provider
 final plansFutureProvider = FutureProvider<List<PlansModel>>((ref) {
-  // return ref.watch(plansRepositoryProvider).getPlans();
-  return Future.value(mockPlans);
+  return ref.watch(plansRepositoryProvider).getPlans();
+  // return Future.value(mockPlans);
 });
 
 final planByIdFutureProvider = FutureProvider.family<PlansModel, String>((

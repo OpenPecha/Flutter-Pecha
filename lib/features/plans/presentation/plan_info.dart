@@ -65,7 +65,7 @@ class PlanInfo extends ConsumerWidget {
         ),
         SizedBox(width: 10),
         Text(
-          '${plan.durationDays} Days',
+          '${plan.totalDays} Days',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ],
@@ -76,7 +76,8 @@ class PlanInfo extends ConsumerWidget {
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
-        onPressed: isGuest ? null : () => context.push('/plans/details'),
+        onPressed: () => context.push('/plans/details'),
+        // onPressed: isGuest ? null : () => context.push('/plans/details'),
         style: FilledButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 12),
           backgroundColor: isGuest ? Colors.grey[300] : Colors.black,

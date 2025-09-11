@@ -70,7 +70,7 @@ class PlansRemoteDatasource {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        final List<dynamic> jsonData = responseData['items'] as List<dynamic>;
+        final List<dynamic> jsonData = responseData['plans'] as List<dynamic>;
         return jsonData.map((json) => PlansModel.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load plans: ${response.statusCode}');
