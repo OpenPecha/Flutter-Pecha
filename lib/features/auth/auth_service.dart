@@ -72,13 +72,28 @@ class AuthService {
   }
 
   // Add token refresh functionality
-  Future<bool> refreshTokens() async {
+  Future<Credentials?> refreshTokens() async {
     try {
-      await auth0.credentialsManager.credentials(minTtl: 60);
-      return true;
+      final credentials = await auth0.credentialsManager.credentials(
+        minTtl: 300, // Ensure token is valid for at least 500 seconds
+      );
+      _logger.info('Token refresh successful');
+      return credentials;
     } catch (e) {
       _logger.warning('Token refresh failed: $e');
-      return false;
+      return null;
+    }
+  }
+
+  // Add method to get current valid credentials
+  Future<Credentials?> getCurrentCredentials() async {
+    try {
+      return await auth0.credentialsManager.credentials(
+        minTtl: 300,
+      );
+    } catch (e) {
+      _logger.warning('Failed to get current credentials: $e');
+      return null;
     }
   }
 

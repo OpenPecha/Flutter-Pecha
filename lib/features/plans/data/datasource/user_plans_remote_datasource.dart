@@ -39,10 +39,7 @@ class UserPlansRemoteDatasource {
         body: body,
         headers: {'Content-Type': 'application/json'},
       );
-
       if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
-        final List<dynamic> jsonData = responseData['plans'] as List<dynamic>;
         return true;
       } else {
         return false;

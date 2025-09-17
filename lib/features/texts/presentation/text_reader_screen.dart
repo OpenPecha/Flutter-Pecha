@@ -5,13 +5,12 @@ import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
-import 'package:flutter_pecha/features/texts/data/providers/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
-import 'package:flutter_pecha/features/texts/presentation/widgets/text_search_delegate.dart';
 import 'package:flutter_pecha/features/texts/utils/hepler_functions.dart';
 import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -398,10 +397,10 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
 
     return GestureDetector(
       onTap: () {
-        ref.read(selectedSegmentProvider.notifier).state =
-            ref.read(selectedSegmentProvider) == globalSegmentIndex
-                ? null
-                : globalSegmentIndex;
+        // ref.read(selectedSegmentProvider.notifier).state =
+        //     ref.read(selectedSegmentProvider) == globalSegmentIndex
+        //         ? null
+        //         : globalSegmentIndex;
       },
       child: Container(
         decoration: BoxDecoration(
@@ -554,22 +553,22 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                   totalSegments: totalSegments,
                 );
 
-                final selectedIndex = await showSearch<int?>(
-                  context: context,
-                  delegate: TextSearchDelegate(
-                    textDetails: readerResponse,
-                    ref: ref,
-                  ),
-                );
+                // final selectedIndex = await showSearch<int?>(
+                //   context: context,
+                //   delegate: TextSearchDelegate(
+                //     textDetails: readerResponse,
+                //     ref: ref,
+                //   ),
+                // );
 
-                if (selectedIndex != null && mounted) {
-                  final adjustedIndex = _calculateIndexForSearch(selectedIndex);
-                  itemScrollController.scrollTo(
-                    index: adjustedIndex,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut,
-                  );
-                }
+                // if (selectedIndex != null && mounted) {
+                //   final adjustedIndex = _calculateIndexForSearch(selectedIndex);
+                //   itemScrollController.scrollTo(
+                //     index: adjustedIndex,
+                //     duration: const Duration(milliseconds: 500),
+                //     curve: Curves.easeInOut,
+                //   );
+                // }
               }
             },
             icon: const Icon(Icons.search),
@@ -701,8 +700,8 @@ class _TextReaderScreenState extends ConsumerState<TextReaderScreen> {
                           },
                         ),
                         // Segment action bar
-                        if (selectedIndex != null)
-                          _buildSegmentActionBar(selectedIndex),
+                        // if (selectedIndex != null)
+                        // _buildSegmentActionBar(selectedIndex),
                       ],
                     ),
                   ),

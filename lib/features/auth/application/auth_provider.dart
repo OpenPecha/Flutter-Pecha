@@ -148,14 +148,50 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       if (await authService.needsTokenRefresh()) {
-        final success = await authService.refreshTokens();
-        if (!success) {
+        final refreshedCredentials = await authService.refreshTokens();
+        if (refreshedCredentials != null) {
+          // Update state with refreshed credentials and user profile
+          state = state.copyWith(
+            isLoggedIn: true,
+            userId: refreshedCredentials.user.sub,
+            userProfile: refreshedCredentials.user,
+            errorMessage: null,
+          );
+          Logger('AuthNotifier').info('Token refresh successful');
+        } else {
           // Token refresh failed, logout user
+          Logger(
+            'AuthNotifier',
+          ).warning('Token refresh failed, logging out user');
           await logout();
         }
       }
     } catch (e) {
-      Logger('AuthNotifier').warning('Token refresh check failed: $e');
+      Logger('AuthNotifier').severe('Token refresh check failed: $e');
+      // On critical errors, logout to ensure security
+      await logout();
+    }
+  }
+
+  // Add method to manually refresh tokens (useful for API retry logic)
+  Future<bool> refreshTokensManually() async {
+    if (!state.isLoggedIn || state.isGuest) return false;
+
+    try {
+      final refreshedCredentials = await authService.refreshTokens();
+      if (refreshedCredentials != null) {
+        state = state.copyWith(
+          isLoggedIn: true,
+          userId: refreshedCredentials.user.sub,
+          userProfile: refreshedCredentials.user,
+          errorMessage: null,
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      Logger('AuthNotifier').severe('Manual token refresh failed: $e');
+      return false;
     }
   }
 }
