@@ -245,8 +245,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         onTap:
                             () => context.push(
-                              '/home/guided_scripture',
-                              extra: planItem.content,
+                              '/home/video_player',
+                              extra: {
+                                'videoUrl': planItem.content,
+                                'title': planItem.label,
+                              },
                             ),
                       ),
                       SizedBox(height: 16),
@@ -293,21 +296,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           height: 80,
                         ),
                         onTap:
-                            () => showGeneralDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              barrierLabel: "Close",
-                              transitionDuration: const Duration(
-                                milliseconds: 200,
-                              ),
-                              pageBuilder: (
-                                context,
-                                animation,
-                                secondaryAnimation,
-                              ) {
-                                return ViewIllustration(
-                                  imageUrl: planItem.content,
-                                );
+                            () => context.push(
+                              '/home/view_illustration',
+                              extra: {
+                                'imageUrl': planItem.content,
+                                'title': planItem.label,
                               },
                             ),
                       ),

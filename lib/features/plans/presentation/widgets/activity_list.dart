@@ -19,13 +19,16 @@ class ActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('todays verse of the day: ${tasks[0].subtasks[0].content}');
+    if (tasks.isNotEmpty && tasks[0].subtasks.isNotEmpty) {
+      debugPrint('todays verse of the day: ${tasks[0].subtasks[0].content}');
+    }
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final isSelected = selectedActivities.contains(index);
+        final task = tasks[index];
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
@@ -59,24 +62,40 @@ class ActivityList extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  tasks[index].title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                child: GestureDetector(
+                  onTap: () => handleActivityTap(task),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          task.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                        color: Colors.black,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 20,
-                color: Colors.black,
               ),
             ],
           ),
         );
       },
     );
+  }
+
+  void handleActivityTap(PlanTasksModel task) {
+    // Navigate to activity details or perform action
+    debugPrint('Activity tapped: ${task.title}');
+    // TODO: Add navigation to activity details page when implemented
+    if (task.subtasks.isNotEmpty) {}
   }
 }

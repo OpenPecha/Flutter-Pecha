@@ -3,15 +3,20 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-class GuidedScripture extends StatefulWidget {
+class YoutubeVideoPlayer extends StatefulWidget {
   final String videoUrl;
-  const GuidedScripture({super.key, required this.videoUrl});
+  final String title;
+  const YoutubeVideoPlayer({
+    super.key,
+    required this.videoUrl,
+    required this.title,
+  });
 
   @override
-  State<GuidedScripture> createState() => _GuidedScriptureState();
+  State<YoutubeVideoPlayer> createState() => _YoutubeVideoPlayerState();
 }
 
-class _GuidedScriptureState extends State<GuidedScripture> {
+class _YoutubeVideoPlayerState extends State<YoutubeVideoPlayer> {
   late YoutubePlayerController _controller;
 
   @override
@@ -41,7 +46,7 @@ class _GuidedScriptureState extends State<GuidedScripture> {
             context.pop();
           },
         ),
-        title: Text(localizations.home_goDeeper),
+        title: Text(widget.title),
       ),
       body: YoutubePlayerBuilder(
         player: YoutubePlayer(

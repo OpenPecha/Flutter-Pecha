@@ -4,7 +4,8 @@ import 'package:flutter_pecha/features/auth/presentation/profile_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
 import 'package:flutter_pecha/features/creator_info/presentation/creator_info_screen.dart';
 import 'package:flutter_pecha/features/home/models/prayer_data.dart';
-import 'package:flutter_pecha/features/home/presentation/widgets/guided_scripture.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/view_illustration.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/youtube_video_player.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/meditation_video.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
 import 'package:flutter_pecha/features/notifications/presentation/notification_settings_screen.dart';
@@ -115,14 +116,37 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '/home/guided_scripture',
+        path: '/home/video_player',
         builder: (context, state) {
           final extra = state.extra;
-          if (extra is String) {
-            return GuidedScripture(videoUrl: extra);
+          if (extra is Map &&
+              extra.containsKey('videoUrl') &&
+              extra.containsKey('title')) {
+            return YoutubeVideoPlayer(
+              videoUrl: extra['videoUrl'] as String,
+              title: extra['title'] as String,
+            );
           } else {
-            throw Exception('Invalid extra type for /home/guided_scripture');
+            throw Exception('Invalid extra type for /home/video_player');
           }
+        },
+      ),
+      GoRoute(
+        path: '/home/view_illustration',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra == null ||
+              extra is! Map ||
+              !extra.containsKey('imageUrl') ||
+              !extra.containsKey('title')) {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return ViewIllustration(
+            imageUrl: extra['imageUrl'] as String,
+            title: extra['title'] as String,
+          );
         },
       ),
       GoRoute(
