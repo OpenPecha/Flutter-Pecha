@@ -5,16 +5,16 @@ class ActivityList extends StatelessWidget {
   final List<PlanTasksModel> tasks;
   final int today;
   final int totalDays;
-  final int selectedActivity;
-  final Function(int) onActivitySelected;
+  final Set<int> selectedActivities; // Changed from single int to Set<int>
+  final Function(int) onActivityToggled; // Changed from onActivitySelected
 
   const ActivityList({
     super.key,
     required this.tasks,
     required this.today,
     required this.totalDays,
-    required this.selectedActivity,
-    required this.onActivitySelected,
+    required this.selectedActivities,
+    required this.onActivityToggled,
   });
 
   @override
@@ -28,36 +28,64 @@ class ActivityList extends StatelessWidget {
             "Day $today of $totalDays",
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           ListView.builder(
-            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: tasks.length,
             itemBuilder: (context, index) {
-              return Row(
-                children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: selectedActivity,
-                    onChanged: (value) {
-                      if (value != null) {
-                        onActivitySelected(value);
-                      }
-                    },
-                    activeColor: const Color(0xFF1E3A8A),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      tasks[index].title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+              final isSelected = selectedActivities.contains(index);
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => onActivityToggled(index),
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? const Color(0xFF1E3A8A)
+                                    : Colors.black,
+                            width: 1,
+                          ),
+                          color:
+                              isSelected
+                                  ? const Color(0xFF1E3A8A)
+                                  : Colors.transparent,
+                        ),
+                        child:
+                            isSelected
+                                ? const Icon(
+                                  Icons.check,
+                                  size: 16,
+                                  color: Colors.white,
+                                )
+                                : null,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        tasks[index].title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                  ],
+                ),
               );
             },
           ),

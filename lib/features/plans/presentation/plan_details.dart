@@ -16,7 +16,7 @@ class PlanDetails extends ConsumerStatefulWidget {
 
 class _PlanDetailsState extends ConsumerState<PlanDetails> {
   int selectedDay = 1; // Day 3 is selected by default
-  int selectedActivity = -1; // No activity selected initially
+  Set<int> selectedActivities = {}; // No activities selected initially
 
   final List<String> activities = [
     'Read verse of the day',
@@ -81,10 +81,14 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               tasks: planDayContent.value?.tasks ?? [],
               today: selectedDay,
               totalDays: widget.plan.totalDays,
-              selectedActivity: selectedActivity,
-              onActivitySelected: (activity) {
+              selectedActivities: selectedActivities,
+              onActivityToggled: (activity) {
                 setState(() {
-                  selectedActivity = activity;
+                  if (selectedActivities.contains(activity)) {
+                    selectedActivities.remove(activity);
+                  } else {
+                    selectedActivities.add(activity);
+                  }
                 });
               },
             ),
