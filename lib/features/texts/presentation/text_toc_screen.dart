@@ -180,57 +180,6 @@ class TextTocScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContentsTab(TocResponse tocResponse) {
-    final toc = tocResponse.contents[0];
-    final textDetail = tocResponse.textDetail;
-    if (toc.sections.isEmpty) {
-      return const Center(child: Text('No contents found'));
-    }
-    final sections = toc.sections;
-    return GridView.builder(
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 5,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.1,
-      ),
-      itemCount: sections.length,
-      itemBuilder: (context, idx) {
-        final section = sections[idx];
-        return GestureDetector(
-          onTap: () {
-            context.push(
-              '/texts/chapter',
-              extra: {
-                'textId': toc.textId,
-                'contentId': toc.id,
-                'segmentId': section.segments[0].segmentId,
-              },
-            );
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Center(
-              child: Text(
-                section.title ?? '',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: getFontFamily(textDetail.language),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildVersionsTab(List<Version> versions, BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
 
