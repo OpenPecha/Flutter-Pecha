@@ -239,11 +239,7 @@ class _PlanListState extends ConsumerState<PlanList>
       children: [
         Text(
           '${plan.totalDays} Days',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 4),
         Text(
