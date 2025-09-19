@@ -46,7 +46,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
             SizedBox(height: 20),
             _buildPlanTitleDays(context),
             SizedBox(height: 20),
-            _buildActionButtons(context, subscribedPlansIds),
+            _buildActionButtons(context, subscribedPlansIds, isGuest),
             SizedBox(height: 20),
             _buildPlanDescription(context),
           ],
@@ -94,13 +94,19 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
   Widget _buildActionButtons(
     BuildContext context,
     List<String> subscribedPlansIds,
+    bool isGuest,
   ) {
     final isSubscribed = subscribedPlansIds.contains(widget.plan.id);
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
         onPressed:
-            () => isSubscribed ? handleContinuePlan() : handleStartPlan(),
+            () =>
+                isGuest
+                    ? ref.read(authProvider.notifier).logout()
+                    : isSubscribed
+                    ? handleContinuePlan()
+                    : handleStartPlan(),
         style: FilledButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 12),
           backgroundColor: Colors.black,
@@ -112,7 +118,11 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
           ),
         ),
         child: Text(
-          isSubscribed ? 'Continue Plan' : 'Start Plan',
+          isGuest
+              ? 'Login to Continue'
+              : isSubscribed
+              ? 'Continue Plan'
+              : 'Start Plan',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),

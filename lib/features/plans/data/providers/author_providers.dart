@@ -47,9 +47,8 @@ class AuthorState {
 }
 
 class AuthorNotifier extends StateNotifier<AuthorState> {
-  final AuthorRepository _repository;
-
-  AuthorNotifier(this._repository) : super(const AuthorState());
+  final AuthorRepository repository;
+  AuthorNotifier(this.repository) : super(const AuthorState());
 
   void clearError() {
     state = state.copyWith(errorMessage: null);
