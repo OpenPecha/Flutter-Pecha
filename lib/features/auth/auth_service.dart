@@ -16,14 +16,18 @@ class AuthService {
     Map<String, String>? additionalParameters,
   ]) async {
     try {
-      final parameters = {'connection': connection};
+      final parameters = {"connection": connection};
       if (additionalParameters != null) {
         parameters.addAll(additionalParameters);
       }
 
       final credentials = await auth0
           .webAuthentication(scheme: 'org.pecha.app')
-          .login(useHTTPS: true, parameters: parameters);
+          .login(
+            useHTTPS: true,
+            parameters: parameters,
+            scopes: {"openid", "profile", "email", "offline_access"},
+          );
 
       _logger.info('Login successful for connection: $connection');
       return credentials;
@@ -44,11 +48,6 @@ class AuthService {
     return _loginWithConnection('google-oauth2', {'prompt': 'select_account'});
   }
 
-  // Login with Facebook
-  Future<Credentials?> loginWithFacebook() async {
-    return _loginWithConnection('facebook');
-  }
-
   // Login with Apple
   Future<Credentials?> loginWithApple() async {
     return _loginWithConnection('apple');
@@ -65,7 +64,9 @@ class AuthService {
 
   Future<void> logout() async {
     try {
-      await auth0.webAuthentication(scheme: 'org.pecha.app').logout();
+      await auth0
+          .webAuthentication(scheme: 'org.pecha.app')
+          .logout(useHTTPS: true);
     } catch (e) {
       _logger.severe('Logout failed: $e');
     }
@@ -75,36 +76,13 @@ class AuthService {
   Future<Credentials?> refreshTokens() async {
     try {
       final credentials = await auth0.credentialsManager.credentials(
-        minTtl: 300, // Ensure token is valid for at least 500 seconds
+        minTtl: 900, // 15 minutes
       );
       _logger.info('Token refresh successful');
       return credentials;
     } catch (e) {
       _logger.warning('Token refresh failed: $e');
       return null;
-    }
-  }
-
-  // Add method to get current valid credentials
-  Future<Credentials?> getCurrentCredentials() async {
-    try {
-      return await auth0.credentialsManager.credentials(
-        minTtl: 300,
-      );
-    } catch (e) {
-      _logger.warning('Failed to get current credentials: $e');
-      return null;
-    }
-  }
-
-  // Add method to check if tokens need refresh
-  Future<bool> needsTokenRefresh() async {
-    try {
-      // This will throw if tokens are expired or need refresh
-      await auth0.credentialsManager.credentials(minTtl: 300); // 5 minutes
-      return false;
-    } catch (e) {
-      return true;
     }
   }
 }

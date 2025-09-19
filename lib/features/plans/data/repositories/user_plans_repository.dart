@@ -7,8 +7,8 @@ class UserPlansRepository {
 
   UserPlansRepository({required this.userPlansRemoteDatasource});
 
-  Future<List<PlansModel>> getUserPlans(String userId) async {
-    return await userPlansRemoteDatasource.getUserPlansByUserId(userId);
+  Future<List<PlansModel>> getUserPlans() async {
+    return await userPlansRemoteDatasource.getUserPlansByUserId();
   }
 
   Future<bool> subscribeToPlan(String planId) async {

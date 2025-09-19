@@ -1,7 +1,5 @@
 // lib/core/network/authenticated_http_client.dart
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:logging/logging.dart';
@@ -10,9 +8,6 @@ class AuthenticatedHttpClient extends http.BaseClient {
   final http.Client _inner;
   final Auth0 auth0;
   final Logger _logger = Logger('AuthenticatedHttpClient');
-
-  String? _cachedToken;
-  DateTime? _tokenExpiry;
 
   AuthenticatedHttpClient._internal(this._inner, this.auth0);
 
@@ -38,84 +33,33 @@ class AuthenticatedHttpClient extends http.BaseClient {
     // Handle 401 Unauthorized - token might be expired, try to refresh and retry
     if (response.statusCode == 401 && _needsAuthentication(request.url.path)) {
       _logger.warning('401 Unauthorized - attempting token refresh and retry');
-      _cachedToken = null;
-      _tokenExpiry = null;
 
-      // Try to get a fresh token and retry the request once
-      final freshToken = await _getValidToken();
-      if (freshToken != null) {
-        // Clone the request and retry with fresh token
+      try {
+        final creds = await auth0.credentialsManager.credentials(
+          minTtl: 900, // 5 min buffer
+        );
+        final freshToken = creds.idToken;
         final newRequest = _cloneRequest(request);
         newRequest.headers['Authorization'] = 'Bearer $freshToken';
-        _logger.info('Retrying request with refreshed idToken');
+        _logger.info('Retrying request with refreshed accessToken');
         return await _inner.send(newRequest);
+      } catch (e) {
+        _logger.severe('Error during token refresh retry: $e');
       }
     }
-
     return response;
   }
 
   Future<String?> _getValidToken() async {
     try {
-      // Return cached token if still valid (with 5-minute buffer)
-      if (_cachedToken != null &&
-          _tokenExpiry != null &&
-          DateTime.now().isBefore(
-            _tokenExpiry!.subtract(Duration(minutes: 5)),
-          )) {
-        return _cachedToken;
-      }
-
-      // Fetch fresh credentials (this will auto-refresh if needed)
       final credentials = await auth0.credentialsManager.credentials(
-        minTtl: 300,
+        minTtl: 300, // 5 min buffer
       );
-
-      // Use idToken as required by your backend
-      _cachedToken = credentials.idToken;
-
-      // Parse JWT to get actual expiry time
-      _tokenExpiry =
-          _parseJwtExpiry(credentials.idToken) ??
-          DateTime.now().add(Duration(hours: 1)); // Fallback
-
-      return _cachedToken;
+      return credentials.idToken;
     } catch (e) {
       _logger.severe('Failed to get valid idToken: $e');
-      _cachedToken = null;
-      _tokenExpiry = null;
       return null;
     }
-  }
-
-  // Parse JWT expiry from idToken
-  DateTime? _parseJwtExpiry(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) {
-        _logger.warning('Invalid JWT format');
-        return null;
-      }
-
-      // Decode payload (add padding if needed)
-      String payload = parts[1];
-      while (payload.length % 4 != 0) {
-        payload += '=';
-      }
-
-      final decoded = utf8.decode(base64Url.decode(payload));
-      final Map<String, dynamic> claims = json.decode(decoded);
-
-      if (claims['exp'] != null) {
-        final expiry = DateTime.fromMillisecondsSinceEpoch(
-          claims['exp'] * 1000,
-        );
-        return expiry;
-      }
-    } catch (e) {
-      _logger.warning('Failed to parse JWT expiry: $e');
-    }
-    return null;
   }
 
   // Helper method to clone a request for retry
@@ -150,11 +94,5 @@ class AuthenticatedHttpClient extends http.BaseClient {
     return protectedPaths.any(
       (protectedPath) => path.startsWith(protectedPath.replaceAll('/*', '')),
     );
-  }
-
-  void clearToken() {
-    _cachedToken = null;
-    _tokenExpiry = null;
-    _logger.info('Token cache cleared');
   }
 }

@@ -23,7 +23,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
     var subscribedPlans = AsyncValue<List<PlansModel>>.data([]);
 
     if (!isGuest && isLoggedIn) {
-      subscribedPlans = ref.watch(userPlansFutureProvider(authState.userId!));
+      subscribedPlans = ref.watch(userPlansFutureProvider);
     }
     final subscribedPlansIds =
         subscribedPlans.valueOrNull?.map((plan) => plan.id).toList() ?? [];
@@ -149,7 +149,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
           );
 
           // Invalidate the user plans provider to refresh the data
-          ref.invalidate(userPlansFutureProvider(authState.userId!));
+          ref.invalidate(userPlansFutureProvider);
 
           // Wait a moment for the data to refresh, then navigate
           await Future.delayed(Duration(milliseconds: 500));

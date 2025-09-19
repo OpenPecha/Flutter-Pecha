@@ -38,7 +38,7 @@ class _PlanListState extends ConsumerState<PlanList>
     var subscribedPlans = AsyncValue<List<PlansModel>>.data([]);
 
     if (!isGuest && isLoggedIn) {
-      subscribedPlans = ref.watch(userPlansFutureProvider(authState.userId!));
+      subscribedPlans = ref.watch(userPlansFutureProvider);
     }
 
     return Scaffold(

@@ -12,7 +12,7 @@ class UserPlansRemoteDatasource {
   UserPlansRemoteDatasource({required this.client});
 
   // get user plans by user id
-  Future<List<PlansModel>> getUserPlansByUserId(String userId) async {
+  Future<List<PlansModel>> getUserPlansByUserId() async {
     try {
       final response = await client.get(Uri.parse('$baseUrl/users/me/plans'));
 

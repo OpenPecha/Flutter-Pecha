@@ -13,11 +13,9 @@ final userPlansRepositoryProvider = Provider<UserPlansRepository>((ref) {
   );
 });
 
-final userPlansFutureProvider = FutureProvider.family<List<PlansModel>, String>(
-  (ref, userId) {
-    return ref.watch(userPlansRepositoryProvider).getUserPlans(userId);
-  },
-);
+final userPlansFutureProvider = FutureProvider<List<PlansModel>>((ref) {
+  return ref.watch(userPlansRepositoryProvider).getUserPlans();
+});
 
 final userPlanProgressDetailsFutureProvider =
     FutureProvider.family<List<PlanProgressModel>, String>((ref, planId) {
