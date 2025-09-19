@@ -197,6 +197,8 @@ class _PlanListState extends ConsumerState<PlanList>
 
             // Handle the result from plan_info screen
             if (result == true && context.mounted) {
+              // change tab to my plans
+              _tabController.animateTo(0);
               context.push('/plans/details', extra: plan);
             }
           } else {

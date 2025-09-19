@@ -8,7 +8,7 @@ class PlanCoverImage extends StatelessWidget {
   const PlanCoverImage({
     super.key,
     required this.imageUrl,
-    this.heroTag = 'plan_image',
+    required this.heroTag,
     this.height,
   });
 

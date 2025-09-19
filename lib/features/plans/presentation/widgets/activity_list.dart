@@ -20,9 +20,6 @@ class ActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (tasks.isNotEmpty && tasks[0].subtasks.isNotEmpty) {
-      debugPrint('todays verse of the day: ${tasks[0].subtasks[0].content}');
-    }
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -96,10 +93,6 @@ class ActivityList extends StatelessWidget {
   }
 
   void handleActivityTap(BuildContext context, PlanTasksModel task) {
-    // Navigate to activity details or perform action
-    debugPrint(
-      'Activity tapped: ${task.title}, ${task.subtasks[0].contentType}',
-    );
     if (task.subtasks.isNotEmpty) {
       switch (task.subtasks[0].contentType) {
         case "VIDEO":

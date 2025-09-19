@@ -41,7 +41,6 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     }
     previousSelectedDay = selectedDay;
 
-    debugPrint('planDayContent day number: ${planDayContent.value?.dayNumber}');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -53,7 +52,10 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            PlanCoverImage(imageUrl: widget.plan.imageUrl ?? ''),
+            PlanCoverImage(
+              imageUrl: widget.plan.imageUrl ?? '',
+              heroTag: widget.plan.title,
+            ),
             DayCarousel(
               days: planDays.value ?? [],
               selectedDay: selectedDay,
