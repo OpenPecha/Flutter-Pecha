@@ -70,7 +70,7 @@ class SocialMediaSection extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: FaIcon(
           getIcon(item['account']),
-          size: 24,
+          size: 22,
           color: Theme.of(context).iconTheme.color,
         ),
       ),

@@ -93,8 +93,8 @@ class CreatorInfoScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                    Wrap(
+                      alignment: WrapAlignment.start,
                       children: [
                         ...socialMedia.map(
                           (item) => SocialMediaSection(item: item),
