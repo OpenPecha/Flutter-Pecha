@@ -8,12 +8,12 @@ const Map<String, dynamic> weekPlanZh = {
             "讓樣康 (灑淨) 嗡阿吽 (三遍)\n六字真言神力故，薰煙化雲成妙供\n三寶怙主與護法，一切具德應供客\n六道眾生⾷餘者，所有悲施應供客\n業債命債諸債主，我悉敬獻此煙供\n飽足欣喜而解冤，共與不共善成就\n三輪體空普迴向",
         "author": "楚西仁波切造",
         "imageUrl":
-            "https://drive.google.com/uc?export=view&id=1r7oMXGgLclpzIr2qFjXjhYbI86Sq9cFG",
+            "https://drive.google.com/uc?export=view&id=1dzfVNVAFX3K9E2XS7RizwdQCdfwfAf-n",
       },
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=0YoNkWZhvwo",
+        "content": "https://www.youtube.com/watch?v=D_UG4RBQ1-g",
       },
       {
         "label": "禪修",
@@ -23,13 +23,13 @@ const Map<String, dynamic> weekPlanZh = {
       {
         "label": "持誦",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=_8Dw-ySfcD4",
+        "content": "https://www.youtube.com/watch?v=x3ifRZogB5I",
       },
       {
         "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1r7oMXGgLclpzIr2qFjXjhYbI86Sq9cFG",
+            "https://drive.google.com/uc?export=view&id=1pUG2oKNds7IyoEOkw-9K3VlG191Z91UW",
       },
     ],
   },
@@ -47,7 +47,7 @@ const Map<String, dynamic> weekPlanZh = {
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=JMYxDJ7RW1w",
+        "content": "https://www.youtube.com/watch?v=thtTebJoLKI",
       },
       {
         "label": "教學",
@@ -57,51 +57,17 @@ const Map<String, dynamic> weekPlanZh = {
       {
         "label": "真實故事",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=eRRp3BiBuE0",
+        "content": "https://www.youtube.com/watch?v=zRb7GlTT_qI",
       },
       {
         "label": "觀想",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1Bdp50NH-me9fU6rbxASBTYJOUhSreFIe",
+            "https://drive.google.com/uc?export=view&id=1Q9RgUxOD-J82lsVb-xcIq-wY6MdWdmcH",
       },
     ],
   },
   "wednesday": {
-    "plan": [
-      {
-        "label": "今日偈誦",
-        "contentType": "text",
-        "content":
-            "讓樣康 (灑淨) 嗡阿吽 (三遍)\n六字真言神力故，薰煙化雲成妙供\n三寶怙主與護法，一切具德應供客\n六道眾生⾷餘者，所有悲施應供客\n業債命債諸債主，我悉敬獻此煙供\n飽足欣喜而解冤，共與不共善成就\n三輪體空普迴向",
-        "author": "楚西仁波切造",
-        "imageUrl":
-            "https://drive.google.com/uc?export=view&id=1r7oMXGgLclpzIr2qFjXjhYbI86Sq9cFG",
-      },
-      {
-        "label": "深入了解",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=0YoNkWZhvwo",
-      },
-      {
-        "label": "禪修",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=3xpab3s7-a0",
-      },
-      {
-        "label": "持誦",
-        "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=_8Dw-ySfcD4",
-      },
-      {
-        "label": "今日任務",
-        "contentType": "image",
-        "content":
-            "https://drive.google.com/uc?export=view&id=1r7oMXGgLclpzIr2qFjXjhYbI86Sq9cFG",
-      },
-    ],
-  },
-  "thursday": {
     "plan": [
       {
         "label": "今日偈誦",
@@ -132,6 +98,40 @@ const Map<String, dynamic> weekPlanZh = {
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1Bdp50NH-me9fU6rbxASBTYJOUhSreFIe",
+      },
+    ],
+  },
+  "thursday": {
+    "plan": [
+      {
+        "label": "今日偈誦",
+        "contentType": "text",
+        "content":
+            "讓樣康 (灑淨) 嗡阿吽 (三遍)\n六字真言神力故，薰煙化雲成妙供\n三寶怙主與護法，一切具德應供客\n六道眾生⾷餘者，所有悲施應供客\n業債命債諸債主，我悉敬獻此煙供\n飽足欣喜而解冤，共與不共善成就\n三輪體空普迴向",
+        "author": "楚西仁波切造",
+        "imageUrl":
+            "https://drive.google.com/uc?export=view&id=1dzfVNVAFX3K9E2XS7RizwdQCdfwfAf-n",
+      },
+      {
+        "label": "深入了解",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=0YoNkWZhvwo",
+      },
+      {
+        "label": "禪修",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=3xpab3s7-a0",
+      },
+      {
+        "label": "持誦",
+        "contentType": "video",
+        "content": "https://www.youtube.com/watch?v=ft-w5RoFyXI",
+      },
+      {
+        "label": "今日任務",
+        "contentType": "image",
+        "content":
+            "https://drive.google.com/uc?export=view&id=15fJiqSC4UFW5iF4mvAU6bsjpaHPt0FlK",
       },
     ],
   },
@@ -178,7 +178,7 @@ const Map<String, dynamic> weekPlanZh = {
             "讓樣康 (灑淨) 嗡阿吽 (三遍)\n六字真言神力故，薰煙化雲成妙供\n三寶怙主與護法，一切具德應供客\n六道眾生⾷餘者，所有悲施應供客\n業債命債諸債主，我悉敬獻此煙供\n飽足欣喜而解冤，共與不共善成就\n三輪體空普迴向",
         "author": "楚西仁波切造",
         "imageUrl":
-            "https://drive.google.com/uc?export=view&id=1r7oMXGgLclpzIr2qFjXjhYbI86Sq9cFG",
+            "https://drive.google.com/uc?export=view&id=1dzfVNVAFX3K9E2XS7RizwdQCdfwfAf-n",
       },
       {
         "label": "深入了解",
@@ -193,13 +193,13 @@ const Map<String, dynamic> weekPlanZh = {
       {
         "label": "持誦",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=_8Dw-ySfcD4",
+        "content": "https://www.youtube.com/watch?v=ft-w5RoFyXI",
       },
       {
         "label": "今日任務",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1r7oMXGgLclpzIr2qFjXjhYbI86Sq9cFG",
+            "https://drive.google.com/uc?export=view&id=15fJiqSC4UFW5iF4mvAU6bsjpaHPt0FlK",
       },
     ],
   },
@@ -217,7 +217,7 @@ const Map<String, dynamic> weekPlanZh = {
       {
         "label": "深入了解",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=JMYxDJ7RW1w",
+        "content": "https://www.youtube.com/watch?v=_bwCUqrOnDQ",
       },
       {
         "label": "教學",
@@ -227,13 +227,13 @@ const Map<String, dynamic> weekPlanZh = {
       {
         "label": "真實故事",
         "contentType": "video",
-        "content": "https://www.youtube.com/watch?v=eRRp3BiBuE0",
+        "content": "https://www.youtube.com/watch?v=LCMqxikZteI",
       },
       {
         "label": "觀想",
         "contentType": "image",
         "content":
-            "https://drive.google.com/uc?export=view&id=1Bdp50NH-me9fU6rbxASBTYJOUhSreFIe",
+            "https://drive.google.com/uc?export=view&id=1JTSU3cBlTyPTZIkTYWQOsDZZyC54MBca",
       },
     ],
   },
