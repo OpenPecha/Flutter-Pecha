@@ -46,6 +46,7 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService authService;
   Timer? _refreshTimer;
+  final Logger _logger = Logger('AuthNotifier');
 
   AuthNotifier({required this.authService})
     : super(const AuthState(isLoggedIn: false, isLoading: false)) {
@@ -72,24 +73,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _restoreLoginState() async {
+    state = state.copyWith(isLoading: true);
+
     try {
-      final hasValid = await authService.auth0.credentialsManager
-          .hasValidCredentials(minTtl: 300);
-      if (hasValid) {
-        final credentials = await authService.auth0.credentialsManager
-            .credentials(
-              minTtl: 300, // Ensure token is valid for at least 5 minutes
-            );
-        state = state.copyWith(
-          isLoggedIn: true,
-          userId: credentials.user.sub,
-          isLoading: false,
-          isGuest: false,
-          userProfile: credentials.user,
-        );
-        // ✅ START timer after successful restore
-        _startRefreshTimer();
-      } else {
+      // First check if we have any credentials at all
+      final hasCredentials = await authService.auth0.credentialsManager
+          .hasValidCredentials(minTtl: 0); // Check if any credentials exist
+
+      if (!hasCredentials) {
+        // No credentials at all, user needs to log in
         state = state.copyWith(
           isLoggedIn: false,
           userId: null,
@@ -97,9 +89,45 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isGuest: false,
           userProfile: null,
         );
+        return;
       }
+
+      // Try to get valid credentials with a reasonable buffer
+      final credentials = await authService.auth0.credentialsManager
+          .credentials(minTtl: 300); // 5 minute buffer
+
+      state = state.copyWith(
+        isLoggedIn: true,
+        userId: credentials.user.sub,
+        isLoading: false,
+        isGuest: false,
+        userProfile: credentials.user,
+        errorMessage: null,
+      );
+
+      // Start timer after successful restore
+      _startRefreshTimer();
     } catch (e) {
-      state = state.copyWith(isLoggedIn: false, userId: null, isLoading: false);
+      _logger.severe('Failed to restore login state: $e');
+
+      // If we get here, it means tokens are expired or invalid
+      // Clear any stored credentials and require re-authentication
+      try {
+        await authService.localLogout();
+      } catch (logoutError) {
+        _logger.warning(
+          'Failed to clear credentials during logout: $logoutError',
+        );
+      }
+
+      state = state.copyWith(
+        isLoggedIn: false,
+        userId: null,
+        isLoading: false,
+        isGuest: false,
+        userProfile: null,
+        errorMessage: 'Session expired. Please log in again.',
+      );
     }
   }
 
@@ -171,7 +199,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  // Add token refresh capability
+  // Enhanced refresh method that handles expired tokens better
   Future<void> refreshTokens() async {
     if (state.isGuest || !state.isLoggedIn) return;
 
@@ -182,10 +210,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userProfile: credentials.user,
           errorMessage: null,
         );
+        _logger.info('Token refresh successful');
       } else {
         // Token refresh failed, user needs to re-authenticate
-        // ✅ STOP timer when session expires
         _stopRefreshTimer();
+        await authService.localLogout(); // Clear stored credentials
+
         state = state.copyWith(
           isLoggedIn: false,
           userId: null,
@@ -193,11 +223,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userProfile: null,
           errorMessage: 'Session expired. Please log in again.',
         );
+        _logger.warning('Token refresh failed - user needs to re-authenticate');
       }
     } catch (e) {
+      _logger.severe('Token refresh error: $e');
+
+      // On error, stop the timer and require re-authentication
+      _stopRefreshTimer();
+      await authService.localLogout();
+
       state = state.copyWith(
-        errorMessage: 'Failed to refresh session: ${e.toString()}',
+        isLoggedIn: false,
+        userId: null,
+        isGuest: false,
+        userProfile: null,
+        errorMessage: 'Session expired. Please log in again.',
       );
+    }
+  }
+
+  // Method to handle API errors that might indicate expired tokens
+  void handleApiError(int statusCode) {
+    if (statusCode == 401 && state.isLoggedIn && !state.isGuest) {
+      _logger.warning('API returned 401 - triggering token refresh');
+      refreshTokens();
     }
   }
 }
