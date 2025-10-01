@@ -10,6 +10,8 @@ class ReusableYoutubePlayer extends StatefulWidget {
   final Color progressIndicatorColor;
   final ProgressBarColors? progressColors;
   final VoidCallback? onReady;
+  final ValueChanged<bool>? onStateChanged;
+  final ValueChanged<YoutubePlayerController>? onControllerCreated;
 
   const ReusableYoutubePlayer({
     super.key,
@@ -24,6 +26,8 @@ class ReusableYoutubePlayer extends StatefulWidget {
       handleColor: Colors.redAccent,
     ),
     this.onReady,
+    this.onStateChanged,
+    this.onControllerCreated,
   });
 
   @override
@@ -32,6 +36,8 @@ class ReusableYoutubePlayer extends StatefulWidget {
 
 class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
   late YoutubePlayerController _controller;
+  bool _hasCalledOnReady = false;
+  PlayerState? _previousPlayerState;
 
   @override
   void initState() {
@@ -42,14 +48,33 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
       flags: YoutubePlayerFlags(autoPlay: widget.autoPlay, mute: widget.mute),
     );
 
-    if (widget.onReady != null) {
+    // Notify parent widget about controller creation
+    if (widget.onControllerCreated != null) {
+      widget.onControllerCreated!(_controller);
+    }
+
+    if (widget.onReady != null || widget.onStateChanged != null) {
       _controller.addListener(_onControllerUpdate);
     }
   }
 
   void _onControllerUpdate() {
-    if (_controller.value.isReady && widget.onReady != null) {
+    // Handle onReady callback
+    if (_controller.value.isReady &&
+        !_hasCalledOnReady &&
+        widget.onReady != null) {
+      _hasCalledOnReady = true;
       widget.onReady!();
+    }
+
+    // Handle state change callback
+    if (widget.onStateChanged != null && _controller.value.isReady) {
+      final currentState = _controller.value.playerState;
+      if (currentState != _previousPlayerState) {
+        _previousPlayerState = currentState;
+        final isPlaying = currentState == PlayerState.playing;
+        widget.onStateChanged!(isPlaying);
+      }
     }
   }
 
@@ -61,18 +86,21 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return YoutubePlayerBuilder(
-      player: YoutubePlayer(
-        aspectRatio: widget.aspectRatio,
-        controller: _controller,
-        showVideoProgressIndicator: widget.showVideoProgressIndicator,
-        progressIndicatorColor: widget.progressIndicatorColor,
-        progressColors: widget.progressColors,
-        onReady: widget.onReady,
+    return AbsorbPointer(
+      absorbing: true,
+      child: YoutubePlayerBuilder(
+        player: YoutubePlayer(
+          aspectRatio: widget.aspectRatio,
+          controller: _controller,
+          showVideoProgressIndicator: widget.showVideoProgressIndicator,
+          progressIndicatorColor: widget.progressIndicatorColor,
+          progressColors: widget.progressColors,
+          onReady: widget.onReady,
+        ),
+        builder: (context, player) {
+          return player;
+        },
       ),
-      builder: (context, player) {
-        return player;
-      },
     );
   }
 }

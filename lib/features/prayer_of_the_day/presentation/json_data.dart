@@ -1,3 +1,5 @@
+import 'package:flutter_pecha/features/plans/models/plan_subtasks_model.dart';
+
 const List<Map<String, String>> prayerOfTheDayJson = [
   {
     "text": "I'm am Jud I'm the CEO and founder of Replit",
@@ -331,3 +333,39 @@ const List<Map<String, String>> prayerOfTheDayJson = [
     "endTime": "02:42",
   },
 ];
+
+
+  final List<PlanSubtasksModel> subtask = [
+    PlanSubtasksModel(
+      id: "1",
+      contentType: "TEXT",
+      content:
+          "Avert enemies, harm, and epidemics,\nPacify all conflicts, expand bodily and mental bliss,\nIncrease wealth, dominion, grain, and lifespan,\nAccomplish all desired aims according to one's wishes,\nAnd always protect and guard without negligence.",
+      displayOrder: 1,
+    ),
+    PlanSubtasksModel(
+      id: "2",
+      contentType: "VIDEO",
+      content: "https://www.youtube.com/watch?v=fusKR990UyE",
+      displayOrder: 2,
+    ),
+    PlanSubtasksModel(
+      id: "3",
+      contentType: "VIDEO",
+      content: "https://youtube.com/shorts/k4kzbi48SVc",
+      displayOrder: 3,
+    ),
+    PlanSubtasksModel(
+      id: "4",
+      contentType: "VIDEO",
+      content: "https://www.youtube.com/watch?v=JoyGCOrgPjY",
+      displayOrder: 4,
+    ),
+    PlanSubtasksModel(
+      id: "5",
+      contentType: "IMAGE",
+      content:
+          "https://drive.google.com/uc?export=view&id=19dDFtkhowkKg_mtTOGJXp9X_B4B_A6G7",
+      displayOrder: 5,
+    ),
+  ];
