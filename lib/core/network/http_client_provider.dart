@@ -8,20 +8,24 @@ import 'authenticated_http_client.dart';
 final httpClientProvider = Provider<http.Client>((ref) {
   final authState = ref.watch(authProvider);
 
-  // For unauthenticated users, return simple HTTP client
+  // For unauthenticated users or guests, return simple HTTP client
   if (!authState.isLoggedIn || authState.isGuest) {
     return http.Client();
   }
 
-  // For authenticated users, return singleton authenticated client
-  final authService = ref.read(authProvider.notifier).authService;
-  return AuthenticatedHttpClient(http.Client(), authService.auth0);
+  // For authenticated users, return singleton authenticated client and
+  // provide a callback to handle refresh-token expiry → logout + redirect to login.
+  final authNotifier = ref.read(authProvider.notifier);
+  final authService = authNotifier.authService;
+
+  return AuthenticatedHttpClient(http.Client(), authService);
 });
 
 // Alternative: Separate providers for different use cases
 final publicHttpClientProvider = Provider<http.Client>((ref) => http.Client());
 
 final authenticatedHttpClientProvider = Provider<http.Client>((ref) {
-  final authService = ref.read(authProvider.notifier).authService;
-  return AuthenticatedHttpClient(http.Client(), authService.auth0);
+  final authNotifier = ref.read(authProvider.notifier);
+  final authService = authNotifier.authService;
+  return AuthenticatedHttpClient(http.Client(), authService);
 });

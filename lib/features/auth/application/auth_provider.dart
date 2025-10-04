@@ -1,5 +1,6 @@
 // Riverpod provider and logic for authentication state.
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,7 +46,6 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService authService;
-  Timer? _refreshTimer;
   final Logger _logger = Logger('AuthNotifier');
 
   AuthNotifier({required this.authService})
@@ -53,23 +53,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _restoreLoginState();
   }
 
-  void _startRefreshTimer() {
-    _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(
-      const Duration(minutes: 30), // Refresh every 30 minutes
-      (_) => refreshTokens(),
-    );
-  }
-
-  void _stopRefreshTimer() {
-    _refreshTimer?.cancel();
-    _refreshTimer = null;
-  }
-
-  @override
-  void dispose() {
-    _stopRefreshTimer();
-    super.dispose();
+  // Decode JWT idToken and return exp (seconds since epoch), or null if unavailable
+  int? _parseJwtExp(String idToken) {
+    try {
+      final parts = idToken.split('.');
+      if (parts.length != 3) return null;
+      final payload = utf8.decode(
+        base64Url.decode(base64Url.normalize(parts[1])),
+      );
+      final map = json.decode(payload) as Map<String, dynamic>;
+      final exp = map['exp'];
+      if (exp is int) return exp;
+      if (exp is num) return exp.toInt();
+      return null;
+    } catch (e) {
+      _logger.warning('Failed to parse idToken exp: $e');
+      return null;
+    }
   }
 
   Future<void> _restoreLoginState() async {
@@ -77,8 +77,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       // First check if we have any credentials at all
-      final hasCredentials = await authService.auth0.credentialsManager
-          .hasValidCredentials(minTtl: 0); // Check if any credentials exist
+      final hasCredentials =
+          await authService.auth0.credentialsManager.hasValidCredentials();
 
       if (!hasCredentials) {
         // No credentials at all, user needs to log in
@@ -92,7 +92,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
 
-      // Try to get valid credentials with a reasonable buffer
+      // Try to get valid credentials.
       final credentials = await authService.auth0.credentialsManager
           .credentials(minTtl: 300); // 5 minute buffer
 
@@ -104,9 +104,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userProfile: credentials.user,
         errorMessage: null,
       );
-
-      // Start timer after successful restore
-      _startRefreshTimer();
     } catch (e) {
       _logger.severe('Failed to restore login state: $e');
 
@@ -119,15 +116,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'Failed to clear credentials during logout: $logoutError',
         );
       }
-
-      state = state.copyWith(
-        isLoggedIn: false,
-        userId: null,
-        isLoading: false,
-        isGuest: false,
-        userProfile: null,
-        errorMessage: 'Session expired. Please log in again.',
-      );
     }
   }
 
@@ -157,8 +145,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userProfile: credentials.user,
           errorMessage: null,
         );
-        // ✅ START timer after successful login
-        _startRefreshTimer();
       } else {
         state = state.copyWith(
           isLoading: false,
@@ -175,8 +161,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // continue as guest
   Future<void> continueAsGuest() async {
-    // ✅ STOP timer for guest users (they don't need token refresh)
-    _stopRefreshTimer();
     state = state.copyWith(
       isLoading: false,
       isLoggedIn: true,
@@ -187,8 +171,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    // ✅ STOP timer before logout
-    _stopRefreshTimer();
     await authService.localLogout();
     state = state.copyWith(
       isLoggedIn: false,
@@ -198,63 +180,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       userProfile: null,
     );
   }
-
-  // Enhanced refresh method that handles expired tokens better
-  Future<void> refreshTokens() async {
-    if (state.isGuest || !state.isLoggedIn) return;
-
-    try {
-      final credentials = await authService.refreshTokens();
-      if (credentials != null) {
-        state = state.copyWith(
-          userProfile: credentials.user,
-          errorMessage: null,
-        );
-        _logger.info('Token refresh successful');
-      } else {
-        // Token refresh failed, user needs to re-authenticate
-        _stopRefreshTimer();
-        await authService.localLogout(); // Clear stored credentials
-
-        state = state.copyWith(
-          isLoggedIn: false,
-          userId: null,
-          isGuest: false,
-          userProfile: null,
-          errorMessage: 'Session expired. Please log in again.',
-        );
-        _logger.warning('Token refresh failed - user needs to re-authenticate');
-      }
-    } catch (e) {
-      _logger.severe('Token refresh error: $e');
-
-      // On error, stop the timer and require re-authentication
-      _stopRefreshTimer();
-      await authService.localLogout();
-
-      state = state.copyWith(
-        isLoggedIn: false,
-        userId: null,
-        isGuest: false,
-        userProfile: null,
-        errorMessage: 'Session expired. Please log in again.',
-      );
-    }
-  }
-
-  // Method to handle API errors that might indicate expired tokens
-  void handleApiError(int statusCode) {
-    if (statusCode == 401 && state.isLoggedIn && !state.isGuest) {
-      _logger.warning('API returned 401 - triggering token refresh');
-      refreshTokens();
-    }
-  }
 }
 
 // Helper classes for loading and error states
 class LoadingAuthNotifier extends AuthNotifier {
   LoadingAuthNotifier()
     : super(authService: AuthService(domain: 'temp', clientId: 'temp')) {
+    // Don't call _restoreLoginState() as this is just a temporary loading state
+    // The actual AuthNotifier will handle state restoration when config loads
     state = const AuthState(isLoggedIn: false, isLoading: true);
   }
 }
