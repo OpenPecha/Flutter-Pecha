@@ -1,25 +1,24 @@
+import 'package:flutter_pecha/core/storage/preferences_service.dart';
+import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-const String _fontSizeKey = 'font_size';
 
 class FontSizeNotifier extends StateNotifier<double> {
-  FontSizeNotifier() : super(16.0) {
+  final PreferencesService _prefs;
+  FontSizeNotifier(this._prefs) : super(16.0) {
     _loadFontSize();
   }
 
   Future<void> _loadFontSize() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getDouble(_fontSizeKey) ?? 16.0;
+    final fontSize = await _prefs.get<double>(StorageKeys.fontSize);
+    state = fontSize ?? 16.0;
   }
 
   Future<void> setFontSize(double size) async {
     state = size;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_fontSizeKey, size);
+    await _prefs.set(StorageKeys.fontSize, size);
   }
 }
 
 final fontSizeProvider = StateNotifierProvider<FontSizeNotifier, double>((ref) {
-  return FontSizeNotifier();
+  return FontSizeNotifier(ref.read(preferencesServiceProvider));
 });
