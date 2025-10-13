@@ -1,23 +1,26 @@
-class Term {
+class Collections {
   final String id;
   final String title;
   final String description;
+  final String language;
   final String slug;
   final bool hasChild;
 
-  Term({
+  Collections({
     required this.id,
     required this.title,
     required this.description,
+    required this.language,
     required this.slug,
     required this.hasChild,
   });
 
-  factory Term.fromJson(Map<String, dynamic> json) {
-    return Term(
+  factory Collections.fromJson(Map<String, dynamic> json) {
+    return Collections(
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
+      language: json['language'] as String,
       slug: json['slug'] as String,
       hasChild: json['has_child'] as bool,
     );
@@ -28,6 +31,7 @@ class Term {
       'id': id,
       'title': title,
       'description': description,
+      'language': language,
       'slug': slug,
       'has_child': hasChild,
     };

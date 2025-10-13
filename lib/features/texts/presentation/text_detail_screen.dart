@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
-import 'package:flutter_pecha/features/texts/models/term/term.dart';
+import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
@@ -9,12 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class TextDetailScreen extends ConsumerWidget {
-  const TextDetailScreen({super.key, required this.term});
-  final Term term;
+  const TextDetailScreen({super.key, required this.collection});
+  final Collections collection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final textDetailResponse = ref.watch(textsFutureProvider(term.id));
+    final textDetailResponse = ref.watch(textsFutureProvider(collection.id));
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -37,7 +37,7 @@ class TextDetailScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                textDetailResponse.value?.term.title ?? '',
+                textDetailResponse.value?.collections.title ?? '',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),

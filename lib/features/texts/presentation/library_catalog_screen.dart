@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
-import 'package:flutter_pecha/features/texts/data/providers/apis/term_providers.dart';
+import 'package:flutter_pecha/features/texts/data/providers/apis/collections_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,7 +24,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final termListResponse = ref.watch(termListFutureProvider);
+    final collectionsListResponse = ref.watch(collectionsListFutureProvider);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -34,39 +34,41 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
             _buildSearchField(context),
             const SizedBox(height: 10),
             Expanded(
-              child: termListResponse.when(
+              child: collectionsListResponse.when(
                 data: (response) {
-                  final terms = response.terms;
-                  if (terms.isEmpty) {
-                    return const Center(child: Text('No terms available'));
+                  final collections = response.collections;
+                  if (collections.isEmpty) {
+                    return const Center(
+                      child: Text('No collections available'),
+                    );
                   }
-                  final filteredTerms =
+                  final filteredCollections =
                       _searchQuery.isEmpty
-                          ? terms
-                          : terms
+                          ? collections
+                          : collections
                               .where(
-                                (term) =>
-                                    term.title.toLowerCase().contains(
+                                (collection) =>
+                                    collection.title.toLowerCase().contains(
                                       _searchQuery.toLowerCase(),
                                     ) ||
-                                    term.description.toLowerCase().contains(
-                                      _searchQuery.toLowerCase(),
-                                    ),
+                                    collection.description
+                                        .toLowerCase()
+                                        .contains(_searchQuery.toLowerCase()),
                               )
                               .toList();
                   return ListView.builder(
-                    itemCount: filteredTerms.length,
+                    itemCount: filteredCollections.length,
                     itemBuilder: (context, index) {
-                      final term = filteredTerms[index];
+                      final collection = filteredCollections[index];
                       return GestureDetector(
                         onTap: () {
-                          context.push('/texts/category', extra: term);
+                          context.push('/texts/category', extra: collection);
                         },
                         child: _LibrarySection(
-                          title: term.title,
-                          subtitle: term.description,
+                          title: collection.title,
+                          subtitle: collection.description,
                           dividerColor: Color(0xFF8B3A50),
-                          slug: term.slug,
+                          slug: collection.slug,
                         ),
                       );
                     },
@@ -75,7 +77,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error:
                     (error, stackTrace) =>
-                        const Center(child: Text('Failed to load terms')),
+                        const Center(child: Text('Failed to load collections')),
               ),
             ),
           ],

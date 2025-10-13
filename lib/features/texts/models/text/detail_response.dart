@@ -1,15 +1,15 @@
-import 'package:flutter_pecha/features/texts/models/term/term.dart';
+import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 
 class TextDetailResponse {
-  final Term term;
+  final Collections collections;
   final List<Texts> texts;
   final int total;
   final int skip;
   final int limit;
 
   TextDetailResponse({
-    required this.term,
+    required this.collections,
     required this.texts,
     required this.total,
     required this.skip,
@@ -18,7 +18,7 @@ class TextDetailResponse {
 
   factory TextDetailResponse.fromJson(Map<String, dynamic> json) {
     return TextDetailResponse(
-      term: Term.fromJson(json['collection']),
+      collections: Collections.fromJson(json['collection']),
       texts: (json['texts'] as List).map((e) => Texts.fromJson(e)).toList(),
       total: json['total'],
       skip: json['skip'],
@@ -28,7 +28,7 @@ class TextDetailResponse {
 
   Map<String, dynamic> toJson() {
     return {
-      'collection': term.toJson(),
+      'collection': collections.toJson(),
       'texts': texts.map((e) => e.toJson()).toList(),
       'total': total,
       'skip': skip,

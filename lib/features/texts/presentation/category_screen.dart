@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/features/texts/data/providers/apis/term_providers.dart';
-import 'package:flutter_pecha/features/texts/models/term/term.dart';
+import 'package:flutter_pecha/features/texts/data/providers/apis/collections_providers.dart';
+import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class CategoryScreen extends ConsumerWidget {
-  const CategoryScreen({super.key, required this.term});
-  final Term term;
+  const CategoryScreen({super.key, required this.collection});
+  final Collections collection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final termCategoryResponse = ref.watch(termCategoryFutureProvider(term.id));
+    final collectionsCategoryResponse = ref.watch(
+      collectionsCategoryFutureProvider(collection.id),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -24,7 +26,7 @@ class CategoryScreen extends ConsumerWidget {
         title: null,
         shape: Border(bottom: BorderSide(color: Color(0xFFB6D7D7), width: 3)),
       ),
-      body: termCategoryResponse.when(
+      body: collectionsCategoryResponse.when(
         data:
             (response) => SingleChildScrollView(
               child: Column(
@@ -33,7 +35,7 @@ class CategoryScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
                     child: Text(
-                      term.title,
+                      collection.title,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
@@ -43,7 +45,7 @@ class CategoryScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
                     child: Text(
-                      term.description,
+                      collection.description,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -52,14 +54,14 @@ class CategoryScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...response.terms.map(
-                    (t) => GestureDetector(
+                  ...response.collections.map(
+                    (c) => GestureDetector(
                       onTap: () {
-                        context.push('/texts/detail', extra: t);
+                        context.push('/texts/detail', extra: c);
                       },
                       child: _CategoryBookItem(
-                        title: t.title,
-                        subtitle: t.description,
+                        title: c.title,
+                        subtitle: c.description,
                       ),
                     ),
                   ),
@@ -69,7 +71,7 @@ class CategoryScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error:
             (error, stackTrace) =>
-                const Center(child: Text('Failed to load terms')),
+                const Center(child: Text('Failed to load collections')),
       ),
       bottomNavigationBar: const PechaBottomNavBar(),
     );

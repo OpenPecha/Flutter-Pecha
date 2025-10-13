@@ -15,7 +15,7 @@ import 'package:flutter_pecha/features/plans/presentation/plan_details.dart';
 import 'package:flutter_pecha/features/plans/presentation/plan_info.dart';
 import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
 import 'package:flutter_pecha/features/splash/presentation/splash_screen.dart';
-import 'package:flutter_pecha/features/texts/models/term/term.dart';
+import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/commentary/commentary_view.dart';
@@ -213,30 +213,30 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/texts/category',
         builder: (context, state) {
           final extra = state.extra;
-          late Term term;
-          if (extra is Term) {
-            term = extra;
+          late Collections collection;
+          if (extra is Collections) {
+            collection = extra;
           } else if (extra is Map<String, dynamic>) {
-            term = Term.fromJson(extra);
+            collection = Collections.fromJson(extra);
           } else {
             throw Exception('Invalid extra type for /texts/category');
           }
-          return CategoryScreen(term: term);
+          return CategoryScreen(collection: collection);
         },
       ),
       GoRoute(
         path: '/texts/detail',
         builder: (context, state) {
           final extra = state.extra;
-          late Term term;
-          if (extra is Term) {
-            term = extra;
+          late Collections collection;
+          if (extra is Collections) {
+            collection = extra;
           } else if (extra is Map<String, dynamic>) {
-            term = Term.fromJson(extra);
+            collection = Collections.fromJson(extra);
           } else {
             throw Exception('Invalid extra type for /texts/detail');
           }
-          return TextDetailScreen(term: term);
+          return TextDetailScreen(collection: collection);
         },
       ),
       GoRoute(
