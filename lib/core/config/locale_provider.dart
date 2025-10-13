@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/l10n.dart';
 import 'package:flutter_pecha/core/storage/preferences_service.dart';
 import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,14 +17,31 @@ class LocaleNotifier extends StateNotifier<Locale?> {
   }
 
   Future<void> _loadLocale() async {
-    final locale = await _prefs.get<String>(StorageKeys.locale);
-    if (locale != null) {
-      state = Locale(locale);
+    try {
+      final locale = await _prefs.get<String>(StorageKeys.locale);
+      if (locale != null) {
+        // Validate that the stored locale is supported
+        final isSupported = L10n.all.any((l) => l.languageCode == locale);
+        if (isSupported) {
+          state = Locale(locale);
+        } else {
+          // If stored locale is not supported, fall back to default "en"
+          state = const Locale("en");
+        }
+      }
+    } catch (e) {
+      // If storage fails, keep default "en" locale
+      state = const Locale("en");
     }
   }
 
   Future<void> setLocale(Locale? locale) async {
     state = locale;
-    await _prefs.set(StorageKeys.locale, locale?.languageCode ?? "en");
+    try {
+      await _prefs.set(StorageKeys.locale, locale?.languageCode ?? "en");
+    } catch (e) {
+      // If storage fails, state is still updated but not persisted
+      // This ensures the UI reflects the change even if persistence fails
+    }
   }
 }
