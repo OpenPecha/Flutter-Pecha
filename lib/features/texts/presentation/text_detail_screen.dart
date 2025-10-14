@@ -54,35 +54,9 @@ class TextDetailScreen extends ConsumerWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        localizations.text_detail_rootText,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      if (rootTexts.isEmpty)
-                        const Text(
-                          "No root text found",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ...rootTexts.map((t) => _buildTextList([t], context)),
+                      _buildRootTexts(rootTexts, context),
                       const SizedBox(height: 12),
-                      Text(
-                        localizations.text_detail_commentaryText,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      if (commentaries.isEmpty)
-                        const Text(
-                          "No commentary text found",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ...commentaries.map((t) => _buildTextList([t], context)),
+                      _buildCommentaries(commentaries, context),
                     ],
                   );
                 },
@@ -102,6 +76,46 @@ class TextDetailScreen extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: const PechaBottomNavBar(),
+    );
+  }
+
+  Widget _buildRootTexts(List<Texts> texts, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final buildTitle = Text(
+      localizations.text_detail_rootText,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        color: Colors.grey[700],
+      ),
+    );
+    if (texts.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildTitle,
+        ...texts.map((text) => _buildTextList([text], context)),
+      ],
+    );
+  }
+
+  Widget _buildCommentaries(List<Texts> texts, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final buildTitle = Text(
+      localizations.text_detail_commentaryText,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        color: Colors.grey[700],
+      ),
+    );
+    if (texts.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildTitle,
+        ...texts.map((text) => _buildTextList([text], context)),
+      ],
     );
   }
 
