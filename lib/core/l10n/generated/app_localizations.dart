@@ -100,7 +100,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Pecha App'**
+  /// **'WeBuddhist'**
   String get appTitle;
 
   /// No description provided for @pechaHeading.
@@ -204,6 +204,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bringing it to life'**
   String get home_bringing;
+
+  /// No description provided for @home_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get home_profile;
 
   /// No description provided for @text_browseTheLibrary.
   ///
@@ -384,6 +390,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to Tibetan'**
   String get text_switchToTibetan;
+
+  /// No description provided for @common_sign_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get common_sign_in;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

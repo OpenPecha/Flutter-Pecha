@@ -179,7 +179,7 @@ class MoreScreen extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   title: Text(
-                    'Sign In',
+                    localizations.common_sign_in,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w500,

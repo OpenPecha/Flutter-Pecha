@@ -12,7 +12,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get appTitle => 'པེ་ཆ་འཇུག';
 
   @override
-  String get pechaHeading => 'པེ་ཆ་';
+  String get pechaHeading => 'WeBuddhist';
 
   @override
   String get learnLiveShare => 'སློབ་སྦྱོང་དང་འཚོ་བ་དང་མཉམ་འབྲེལ།';
@@ -61,6 +61,9 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get home_bringing => 'ཉམས་ལེན་དངོས།';
+
+  @override
+  String get home_profile => 'ངོ་སྤྲོད་སྙིང་བསྡུས།';
 
   @override
   String get text_browseTheLibrary => 'དཀར་ཆག';
@@ -151,4 +154,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get text_switchToTibetan => 'Switch to Tibetan';
+
+  @override
+  String get common_sign_in => 'ནང་འཛུལ་གྱིས།';
 }

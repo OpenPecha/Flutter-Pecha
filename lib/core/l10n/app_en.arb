@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Pecha App",
+  "appTitle": "WeBuddhist",
   "pechaHeading": "WeBuddhist",
   "learnLiveShare": "Learn Live and Share",
   "themeLight": "Light Mode",
@@ -18,6 +18,7 @@
   "home_intention": "My Intention for Today",
   "home_recitation": "Recitation",
   "home_bringing": "Bringing it to life",
+  "home_profile": "Profile",
   "text_browseTheLibrary": "Browse The Library",
   "text_search": "Search",
   "text_detail_rootText": "Root Text",
@@ -47,5 +48,6 @@
   "sendTestNotification": "Send Test Notification",
   "manageDailyReminders": "Manage daily reminders",
   "text_noContent": "No texts available in the selected language",
-  "text_switchToTibetan": "Switch to Tibetan"
+  "text_switchToTibetan": "Switch to Tibetan",
+  "common_sign_in": "Sign in"
 }

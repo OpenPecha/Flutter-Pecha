@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
@@ -97,6 +98,7 @@ class _PlanListState extends ConsumerState<PlanList>
   }
 
   Widget _buildGuestLoginPrompt(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context)!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -111,7 +113,7 @@ class _PlanListState extends ConsumerState<PlanList>
         ElevatedButton.icon(
           onPressed: () => ref.read(authProvider.notifier).logout(),
           icon: const Icon(Icons.login),
-          label: const Text('Login'),
+          label: Text(localizations.common_sign_in),
         ),
       ],
     );

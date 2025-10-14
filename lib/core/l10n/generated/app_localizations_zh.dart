@@ -9,7 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'WeBuddhist 应用';
+  String get appTitle => 'WeBuddhist';
 
   @override
   String get pechaHeading => 'WeBuddhist';
@@ -61,6 +61,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get home_bringing => '融入生活';
+
+  @override
+  String get home_profile => 'Profile';
 
   @override
   String get text_browseTheLibrary => 'Browse The Library';
@@ -151,4 +154,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get text_switchToTibetan => 'Switch to Tibetan';
+
+  @override
+  String get common_sign_in => 'Sign in';
 }

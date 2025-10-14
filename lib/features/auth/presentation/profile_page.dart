@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../application/auth_provider.dart';
@@ -10,6 +11,7 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final localizations = AppLocalizations.of(context)!;
 
     if (authState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -37,7 +39,7 @@ class ProfilePage extends ConsumerWidget {
     final bio = "Welcome to WeBuddhist";
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: Text(localizations.home_profile)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -120,6 +122,7 @@ class ProfilePage extends ConsumerWidget {
 
   Widget _buildGuestProfile(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -169,7 +172,7 @@ class ProfilePage extends ConsumerWidget {
                   context.go(RouteConfig.login);
                 },
                 icon: const Icon(Icons.login),
-                label: const Text('Sign In'),
+                label: Text(localizations.common_sign_in),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
