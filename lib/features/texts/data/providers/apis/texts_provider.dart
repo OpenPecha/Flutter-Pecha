@@ -6,18 +6,19 @@ import 'package:flutter_pecha/core/config/locale_provider.dart';
 
 class TextDetailsParams {
   final String textId;
-  final String contentId;
+  final String? contentId;
   final String? versionId;
   final String? segmentId;
   final String? direction;
   final String key;
   const TextDetailsParams({
     required this.textId,
-    required this.contentId,
+    this.contentId,
     this.versionId,
     this.segmentId,
     this.direction,
-  }) : key = '${textId}_${contentId}_${versionId}_${segmentId}_$direction';
+  }) : key =
+           '${textId}_${contentId ?? ''}_${versionId ?? ''}_${segmentId ?? ''}_${direction ?? ''}';
 
   @override
   bool operator ==(Object other) =>
@@ -101,5 +102,30 @@ final searchTextFutureProvider = FutureProvider.family((
   final result = ref
       .watch(textsRepositoryProvider)
       .searchTextRepository(query: params.query, textId: params.textId);
+  return result;
+});
+
+class LibrarySearchParams {
+  final String query;
+  const LibrarySearchParams({required this.query});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LibrarySearchParams &&
+          runtimeType == other.runtimeType &&
+          query == other.query;
+
+  @override
+  int get hashCode => query.hashCode;
+}
+
+final librarySearchProvider = FutureProvider.family((
+  ref,
+  LibrarySearchParams params,
+) {
+  final result = ref
+      .watch(textsRepositoryProvider)
+      .searchTextRepository(query: params.query, textId: null);
   return result;
 });

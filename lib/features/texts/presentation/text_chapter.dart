@@ -22,12 +22,12 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 // text chapter layout for long text
 class TextChapter extends HookConsumerWidget {
   final String textId;
-  final String contentId;
+  final String? contentId;
   final String? segmentId;
   TextChapter({
     super.key,
     required this.textId,
-    required this.contentId,
+    this.contentId,
     this.segmentId,
   });
 
@@ -45,7 +45,7 @@ class TextChapter extends HookConsumerWidget {
       dynamic,
       Map<String, dynamic>
     >(
-      ['content', textId, contentId, segmentId ?? '', size],
+      ['content', textId, contentId ?? '', segmentId ?? '', size],
 
       (Map<String, dynamic> pageParam) async {
         final segmentId = pageParam['segmentId'] ?? this.segmentId;

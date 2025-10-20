@@ -46,7 +46,7 @@ class TextsRepository {
 
   Future<ReaderResponse> fetchTextDetails({
     required String textId,
-    required String contentId,
+    String? contentId,
     String? versionId,
     String? segmentId,
     String? direction,
@@ -63,7 +63,7 @@ class TextsRepository {
 
   Future<SearchResponse> searchTextRepository({
     required String query,
-    required String textId,
+    String? textId,
   }) async {
     final result = await remoteDatasource.searchText(
       query: query,

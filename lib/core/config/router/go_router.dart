@@ -253,17 +253,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/texts/chapter',
         builder: (context, state) {
           final extra = state.extra;
-          if (extra == null ||
-              extra is! Map ||
-              !extra.containsKey('textId') ||
-              !extra.containsKey('contentId')) {
+          if (extra == null || extra is! Map || !extra.containsKey('textId')) {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
             );
           }
           return TextChapter(
             textId: extra['textId'] as String,
-            contentId: extra['contentId'] as String,
+            contentId: extra['contentId'] as String?,
             segmentId: extra['segmentId'] as String?,
           );
         },

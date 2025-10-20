@@ -82,7 +82,7 @@ class TextRemoteDatasource {
   // post request to get the details of the text
   Future<ReaderResponse> fetchTextDetails({
     required String textId,
-    required String contentId,
+    String? contentId,
     String? versionId,
     String? segmentId,
     String? direction,
@@ -91,7 +91,7 @@ class TextRemoteDatasource {
       '${dotenv.env['BASE_API_URL']}/texts/$textId/details',
     );
     final body = json.encode({
-      'content_id': contentId,
+      if (contentId != null) 'content_id': contentId,
       if (segmentId != null) 'segment_id': segmentId,
       'direction': direction,
     });
@@ -128,7 +128,7 @@ class TextRemoteDatasource {
       queryParameters: {
         'query': query,
         'search_type': 'SOURCE',
-        'text_id': textId,
+        if (textId != null) 'text_id': textId,
       },
     );
     final response = await client.get(uri);
