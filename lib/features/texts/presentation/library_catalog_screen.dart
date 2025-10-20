@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/collections_providers.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/utils/text_highlight_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -93,52 +94,6 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
       ),
     );
-  }
-
-  List<TextSpan> _buildHighlightedText(
-    String text,
-    String query,
-    TextStyle? baseStyle,
-  ) {
-    if (query.isEmpty) {
-      return [TextSpan(text: text, style: baseStyle)];
-    }
-
-    final List<TextSpan> spans = [];
-    final lowerText = text.toLowerCase();
-    final lowerQuery = query.toLowerCase();
-    int start = 0;
-
-    while (start < text.length) {
-      final index = lowerText.indexOf(lowerQuery, start);
-      if (index == -1) {
-        // No more matches, add remaining text
-        if (start < text.length) {
-          spans.add(TextSpan(text: text.substring(start), style: baseStyle));
-        }
-        break;
-      }
-
-      // Add text before match
-      if (index > start) {
-        spans.add(
-          TextSpan(text: text.substring(start, index), style: baseStyle),
-        );
-      }
-
-      // Add highlighted match
-      final matchText = text.substring(index, index + query.length);
-      spans.add(
-        TextSpan(
-          text: matchText,
-          style: baseStyle?.copyWith(backgroundColor: const Color(0xFFFFFF00)),
-        ),
-      );
-
-      start = index + query.length;
-    }
-
-    return spans;
   }
 
   Widget _buildSearchField(BuildContext context) {
@@ -319,7 +274,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
                               ),
                               child: Text.rich(
                                 TextSpan(
-                                  children: _buildHighlightedText(
+                                  children: buildHighlightedText(
                                     cleanContent,
                                     _submittedQuery,
                                     TextStyle(

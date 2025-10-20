@@ -11,7 +11,7 @@ import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/chapter.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
-import 'package:flutter_pecha/features/texts/presentation/widgets/text_search_delegate.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/library_search_delegate.dart';
 import 'package:flutter_pecha/features/texts/utils/helper_functions.dart';
 import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:fquery/fquery.dart';
@@ -20,39 +20,79 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 // text chapter layout for long text
-class TextChapter extends HookConsumerWidget {
+class TextChapter extends StatefulHookConsumerWidget {
   final String textId;
   final String? contentId;
   final String? segmentId;
-  TextChapter({
+
+  const TextChapter({
     super.key,
     required this.textId,
     this.contentId,
     this.segmentId,
   });
 
+  @override
+  ConsumerState<TextChapter> createState() => _TextChapterState();
+}
+
+class _TextChapterState extends ConsumerState<TextChapter> {
   final ItemScrollController itemScrollController = ItemScrollController();
 
+  // State variables to hold the current textId and segmentId
+  late String currentTextId;
+  late String? currentContentId;
+  late String? currentSegmentId;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    // Initialize with the widget's initial values
+    currentTextId = widget.textId;
+    currentContentId = widget.contentId;
+    currentSegmentId = widget.segmentId;
+  }
+
+  // Method to update the text and segment
+  void updateTextAndSegment(
+    String newTextId, {
+    String? newSegmentId,
+    String? newContentId,
+  }) {
+    setState(() {
+      currentTextId = newTextId;
+      currentSegmentId = newSegmentId;
+      currentContentId = newContentId;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedSegment = ref.watch(selectedSegmentProvider);
     final size = 20;
     final newPageSections = useState<List<Section>>([]);
 
-    // Initialize the infinite query
+    // Initialize the infinite query using current state values
     final infiniteQuery = useInfiniteQuery<
       ReaderResponse,
       dynamic,
       Map<String, dynamic>
     >(
-      ['content', textId, contentId ?? '', segmentId ?? '', size],
+      [
+        'content',
+        currentTextId,
+        currentContentId ?? '',
+        currentSegmentId ?? '',
+        size,
+      ],
 
       (Map<String, dynamic> pageParam) async {
-        final segmentId = pageParam['segmentId'] ?? this.segmentId;
+        final segmentId = pageParam['segmentId'] ?? currentSegmentId;
+        final contentId = pageParam['contentId'] ?? currentContentId;
         final direction = pageParam['direction'] ?? 'next';
 
         final params = TextDetailsParams(
-          textId: textId,
+          textId: currentTextId,
           contentId: contentId,
           segmentId: segmentId,
           direction: direction,
@@ -64,7 +104,7 @@ class TextChapter extends HookConsumerWidget {
         newPageSections.value = response.content.sections;
         return response;
       },
-      initialPageParam: {'segmentId': segmentId, 'direction': 'next'},
+      initialPageParam: {'segmentId': currentSegmentId, 'direction': 'next'},
 
       // Function to fetch data for each page
       // (TextDetailsParams params) async {
@@ -92,7 +132,7 @@ class TextChapter extends HookConsumerWidget {
         if (firstSegmentId == null) return null;
         return {'segmentId': firstSegmentId, 'direction': 'previous'};
       },
-      enabled: textId.isNotEmpty,
+      enabled: currentTextId.isNotEmpty,
       refetchOnMount: RefetchOnMount.never,
     );
 
@@ -192,7 +232,7 @@ class TextChapter extends HookConsumerWidget {
         toolbarHeight: 50,
         actions: [
           // if (infiniteQuery.data != null)
-          // _buildSearchButton(context, ref, allContent!),
+          _buildSearchButton(context, ref),
           _buildFontSizeSelector(context, ref),
           if (infiniteQuery.data != null)
             _buildLanguageSelector(context, ref, infiniteQuery),
@@ -207,34 +247,20 @@ class TextChapter extends HookConsumerWidget {
     );
   }
 
-  Widget _buildSearchButton(
-    BuildContext context,
-    WidgetRef ref,
-    ReaderResponse allContent,
-  ) {
+  Widget _buildSearchButton(BuildContext context, WidgetRef ref) {
     return IconButton(
       onPressed: () async {
-        final selectedSegmentId = await showSearch<String?>(
+        final result = await showSearch<Map<String, String>?>(
           context: context,
-          delegate: TextSearchDelegate(allContent: allContent, ref: ref),
+          delegate: LibrarySearchDelegate(ref: ref, textId: currentTextId),
         );
 
-        if (selectedSegmentId != null) {
-          // ✅ Correct way to find the segment index
-          final segmentIndex = findSegmentIndex(
-            allContent.content,
-            selectedSegmentId,
-          );
+        if (result != null) {
+          final selectedTextId = result['textId']!;
+          final selectedSegmentId = result['segmentId']!;
 
-          if (segmentIndex != -1) {
-            itemScrollController.scrollTo(
-              index: segmentIndex,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-            );
-          } else {
-            debugPrint("Segment not found: $selectedSegmentId");
-          }
+          // Update textId and segmentId to load new text without routing
+          updateTextAndSegment(selectedTextId, newSegmentId: selectedSegmentId);
         }
       },
       icon: const Icon(Icons.search),
@@ -260,7 +286,10 @@ class TextChapter extends HookConsumerWidget {
         ref
             .read(textVersionLanguageProvider.notifier)
             .setLanguage(textDetail.language);
-        context.push('/texts/version_selection', extra: {"textId": textId});
+        context.push(
+          '/texts/version_selection',
+          extra: {"textId": currentTextId},
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
@@ -344,7 +373,7 @@ class TextChapter extends HookConsumerWidget {
     return SegmentActionBar(
       text: selectedSegment.content ?? '',
       textId: textDetail.id,
-      contentId: contentId,
+      contentId: currentContentId,
       segmentId: selectedSegment.segmentId,
       language: textDetail.language,
       onClose: () => ref.read(selectedSegmentProvider.notifier).state = null,
