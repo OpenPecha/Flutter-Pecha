@@ -95,6 +95,52 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
     );
   }
 
+  List<TextSpan> _buildHighlightedText(
+    String text,
+    String query,
+    TextStyle? baseStyle,
+  ) {
+    if (query.isEmpty) {
+      return [TextSpan(text: text, style: baseStyle)];
+    }
+
+    final List<TextSpan> spans = [];
+    final lowerText = text.toLowerCase();
+    final lowerQuery = query.toLowerCase();
+    int start = 0;
+
+    while (start < text.length) {
+      final index = lowerText.indexOf(lowerQuery, start);
+      if (index == -1) {
+        // No more matches, add remaining text
+        if (start < text.length) {
+          spans.add(TextSpan(text: text.substring(start), style: baseStyle));
+        }
+        break;
+      }
+
+      // Add text before match
+      if (index > start) {
+        spans.add(
+          TextSpan(text: text.substring(start, index), style: baseStyle),
+        );
+      }
+
+      // Add highlighted match
+      final matchText = text.substring(index, index + query.length);
+      spans.add(
+        TextSpan(
+          text: matchText,
+          style: baseStyle?.copyWith(backgroundColor: const Color(0xFFFFFF00)),
+        ),
+      );
+
+      start = index + query.length;
+    }
+
+    return spans;
+  }
+
   Widget _buildSearchField(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -177,20 +223,25 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
           );
         }
 
-        // Flatten all segment matches from all sources
-        final allResults = <Map<String, dynamic>>[];
+        // Group segment matches by textId
+        final groupedResults = <String, Map<String, dynamic>>{};
         for (final source in searchResponse.sources!) {
-          for (final segmentMatch in source.segmentMatches) {
-            allResults.add({
+          if (!groupedResults.containsKey(source.text.textId)) {
+            groupedResults[source.text.textId] = {
               'textId': source.text.textId,
               'textTitle': source.text.title,
+              'segments': <Map<String, String>>[],
+            };
+          }
+          for (final segmentMatch in source.segmentMatches) {
+            (groupedResults[source.text.textId]!['segments'] as List).add({
               'segmentId': segmentMatch.segmentId,
               'content': segmentMatch.content,
             });
           }
         }
 
-        if (allResults.isEmpty) {
+        if (groupedResults.isEmpty) {
           return Center(
             child: Text(
               'No results found for "$_submittedQuery"',
@@ -199,50 +250,95 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
           );
         }
 
+        final groupedList = groupedResults.values.toList();
+
         return ListView.builder(
-          itemCount: allResults.length,
+          itemCount: groupedList.length,
           itemBuilder: (context, index) {
-            final result = allResults[index];
-            final textTitle = result['textTitle'] as String;
-            final content = result['content'] as String;
-            // Strip HTML tags from content
-            final cleanContent = content.replaceAll(RegExp(r'<[^>]*>'), '');
+            final textGroup = groupedList[index];
+            final textId = textGroup['textId'] as String;
+            final textTitle = textGroup['textTitle'] as String;
+            final segments = textGroup['segments'] as List<Map<String, String>>;
 
             return Card(
               margin: const EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 8.0,
               ),
-              child: InkWell(
-                onTap: () {
-                  final textId = result['textId'] as String;
-                  final segmentId = result['segmentId'] as String;
-                  context.push(
-                    '/texts/chapter',
-                    extra: {'textId': textId, 'segmentId': segmentId},
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        textTitle,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Text title shown once
+                    Text(
+                      textTitle,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        cleanContent,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
+                    // List all segments for this text
+                    ...segments.asMap().entries.map((entry) {
+                      final segmentIndex = entry.key;
+                      final segment = entry.value;
+                      final segmentId = segment['segmentId']!;
+                      final content = segment['content']!;
+                      final cleanContent = content.replaceAll(
+                        RegExp(r'<[^>]*>'),
+                        '',
+                      );
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              context.push(
+                                '/texts/chapter',
+                                extra: {
+                                  'textId': textId,
+                                  'segmentId': segmentId,
+                                },
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.grey[200]!,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: _buildHighlightedText(
+                                    cleanContent,
+                                    _submittedQuery,
+                                    TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          if (segmentIndex < segments.length - 1)
+                            const SizedBox(height: 12),
+                        ],
+                      );
+                    }),
+                  ],
                 ),
               ),
             );
