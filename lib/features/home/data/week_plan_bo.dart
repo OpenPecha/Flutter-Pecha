@@ -2,19 +2,19 @@ const Map<String, dynamic> weekPlanBo = {
   "monday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "ཏདྱཐཱ།   ཨོཾ་  བྷཻཥཛྱེ་  བྷཻཥཛྱེ་  མཧཱ་  བྷཻཥཛྱེ་  བྷཻཥཛྱེ་  རཱཇཱཡ་  སམུདྒཏེ་  སྭཱཧཱ། ",
         "author": "སངས་རྒྱས་བཅོམ་ལྡན་འདས།",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=6F0ipKPUFCk",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=xq095RzdX-k",
       },
@@ -24,7 +24,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -34,19 +34,19 @@ const Map<String, dynamic> weekPlanBo = {
   "tuesday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "དགེ་བ་འདི་ཡིས་མྱུར་དུ་བདག །\nསངས་རྒྱས་སྨན་བླ་འགྲུབ་གྱུར་ནས།\nའགྲོ་བ་གཅིག་ཀྱང་མ་ལུས་པ།\nདེ་ཡི་ས་ལ་འགོད་པར་ཤོག\nསེམས་ཅན་ནད་པ་ཇི་སྙེད་པ།\nམྱུར་དུ་ནད་ལས་ཐར་གྱུར་ནས།\nའགྲོ་བའི་ནད་རྣམས་མ་ལུས་པ།\nརྟག་ཏུ་འབྱུང་བ་མེད་པར་ཤོག །",
         "author": "",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=MpoCYjeHfvI",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=ViJoFWcqSxk",
       },
@@ -56,7 +56,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -66,19 +66,19 @@ const Map<String, dynamic> weekPlanBo = {
   "wednesday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "དགྲ་དང་གནོད་པ་ནད་རིམས་བཟློག་པ་དང་། །\nའཐབ་རྩོད་ཀུན་ཞི་ལུས་སེམས་བདེ་བ་རྒྱས། །\nལོངས་སྤྱོད་དབང་ཕྱུག་ནོར་འབྲུ་ཚེ་འཕེལ་ཞིང་། །\nབསམ་པའི་དོན་རྣམས་ཡིད་བཞིན་འགྲུབ་པ་དང་། །\nརྟག་ཏུ་བསྲུང་སྐྱོབ་གཡེལ་བ་མེད་པར་མཛོད། །",
         "author": "ཀལྤ་བྷ་དྲ",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=H-2scl-X1m4",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=y2CF0bZ2k-U",
       },
@@ -88,7 +88,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -98,19 +98,19 @@ const Map<String, dynamic> weekPlanBo = {
   "thursday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "ཐུགས་རྗེ་ཀུན་ལ་སྙོམས་པའི་བཅོམ་ལྡན་འདས། །\nམཚན་ཙམ་ཐོས་པས་ངན་འགྲོའི་སྡུག་བསྔལ་སེལ། །\nདུག་གསུམ་ནད་སེལ་སངས་རྒྱས་སྨན་གྱི་བླ། །\nབཻཌཱུརྱ་ཡི་འོད་ལ་གསོལ་བ་འདེབས། །",
         "author": "གཡུ་ཐོག་ཡོན་ཏན་མགོན་པོ།",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=OxLcJWbr3r0",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=b5QfI3pTREw",
       },
@@ -120,7 +120,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -130,19 +130,19 @@ const Map<String, dynamic> weekPlanBo = {
   "friday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "དགྲ་དང་གནོད་པ་ནད་རིམས་བཟློག་པ་དང་། །\nའཐབ་རྩོད་ཀུན་ཞི་ལུས་སེམས་བདེ་བ་རྒྱས། །\nལོངས་སྤྱོད་དབང་ཕྱུག་ནོར་འབྲུ་ཚེ་འཕེལ་ཞིང་། །\nབསམ་པའི་དོན་རྣམས་ཡིད་བཞིན་འགྲུབ་པ་དང་། །\nརྟག་ཏུ་བསྲུང་སྐྱོབ་གཡེལ་བ་མེད་པར་མཛོད། །",
         "author": "ཀལྤ་བྷ་དྲ",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=H-2scl-X1m4",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=y2CF0bZ2k-U",
       },
@@ -152,7 +152,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -162,19 +162,19 @@ const Map<String, dynamic> weekPlanBo = {
   "saturday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "ཐུགས་རྗེ་ཀུན་ལ་སྙོམས་པའི་བཅོམ་ལྡན་འདས། །\nམཚན་ཙམ་ཐོས་པས་ངན་འགྲོའི་སྡུག་བསྔལ་སེལ། །\nདུག་གསུམ་ནད་སེལ་སངས་རྒྱས་སྨན་གྱི་བླ། །\nབཻཌཱུརྱ་ཡི་འོད་ལ་གསོལ་བ་འདེབས། །",
         "author": "གཡུ་ཐོག་ཡོན་ཏན་མགོན་པོ།",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=OxLcJWbr3r0",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=b5QfI3pTREw",
       },
@@ -184,7 +184,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -194,19 +194,19 @@ const Map<String, dynamic> weekPlanBo = {
   "sunday": {
     "plan": [
       {
-        "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+        "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
         "contentType": "text",
         "content":
             "ཏདྱཐཱ།   ཨོཾ་  བྷཻཥཛྱེ་  བྷཻཥཛྱེ་  མཧཱ་  བྷཻཥཛྱེ་  བྷཻཥཛྱེ་  རཱཇཱཡ་  སམུདྒཏེ་  སྭཱཧཱ།",
         "author": "སངས་རྒྱས་བཅོམ་ལྡན་འདས།",
       },
       {
-        "label": "ཞིབ་གཟིགས།",
+        "label": "འགྲེལ་བཤད།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=RxzYBQ_KD50",
       },
       {
-        "label": "སྒོམ་སྒྲུབ།",
+        "label": "དངོས་གཞི་སྒོམ།",
         "contentType": "video",
         "content": "https://www.youtube.com/watch?v=-IS9FPHRy0o",
       },
@@ -216,7 +216,7 @@ const Map<String, dynamic> weekPlanBo = {
         "content": "https://www.youtube.com/watch?v=xwHuaB4IAMc",
       },
       {
-        "label": "今日任務",
+        "label": "བློ་སྦྱོང་གོམས་འདྲིས།",
         "contentType": "image",
         "content":
             "https://drive.google.com/uc?export=view&id=1LX7smXG5sksg7r3RP0QNPPHlPPcdKXhF",
@@ -463,7 +463,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "monday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "བདག་ནི་སེམས་ཅན་ཐམས་ཅད་ལ། །་\nཡིད་བཞིན་ནོར་བུ་ལས་ལྷག་པའི། །\nདོན་མཆོག་སྒྲུབ་པའི་བསམ་པ་ཡིས། །\nརྟག་ཏུ་གཅེས་པར་འཛིན་པར་ཤོག །",
@@ -494,7 +494,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "tuesday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "གང་དུ་སུ་དང་འགྲོགས་པའི་ཚེ། །\nབདག་ཉིད་ཀུན་ལས་དམན་བལྟ་ཞིང༌། །་\nགཞན་ལ་བསམ་པ་ཐག་པ་ཡིས། །\nམཆོག་ཏུ་གཅེས་པར་འཛིན་པར་ཤོག །",
@@ -525,7 +525,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "wednesday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "སྤྱོད་ལམ་ཀུན་ཏུ་རང་རྒྱུད་ལ། །\nརྟོག་ཅིང་ཉོན་མོངས་སྐྱེས་མ་ཐག །\nབདག་གཞན་མ་རུངས་བྱེད་པས་ན། །\nབཙན་ཐབས་གདོང་ནས་བཟློག་པར་ཤོག །",
@@ -556,7 +556,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "thursday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "རང་བཞིན་ངན་པའི་སེམས་ཅན་རྣམས། །\nསྡིག་སྡུག་དྲག་པོས་ནོན་མཐོང་ཚེ། །\nརིན་ཆེན་གཏེར་དང་འཕྲད་པ་བཞིན། །\nརྙེད་པར་དཀའ་བས་གཅེས་འཛིན་ཤོག །",
@@ -587,7 +587,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "friday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "བདག་ལ་གཞན་གྱིས་ཕྲག་དོག་གིས། །\nགཤེ་བསྐུར་ལ་སོགས་མི་རིགས་པའི། །\nགྱོང་ཁ་རང་གིས་ལེན་པ་དང༌། །\nརྒྱལ་ཁ་གཞན་ལ་འབུལ་བར་ཤོག །",
@@ -618,7 +618,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "saturday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "གང་ལ་བདག་གིས་ཕན་བཏགས་པའི། །\nརེ་བ་ཆེ་བ་གང་ཞིག་གིས། །\nཤིན་ཏུ་མི་རིགས་གནོད་བྱེད་ནའང༌། །\nབཤེས་གཉེན་དམ་པར་བལྟ་བར་ཤོག །",
@@ -649,7 +649,7 @@ const Map<String, dynamic> weekPlanBo = {
 //   "sunday": {
 //     "plan": [
 //       {
-//         "label": "ཉིན་རེའི་རྩ་ཚིགས།",
+//         "label": "དེ་རིང་གི་སྦྱོང་ཚན།",
 //         "contentType": "text",
 //         "content":
 //             "མདོར་ན་དངོས་སམ་བརྒྱུད་པ་ཡིས། །\nཕན་བདེ་མ་རྣམས་ཀུན་ལ་འབུལ། །\nམ་ཡི་གནོད་དང་སྡུག་བསྔལ་ཀུན། །\nགསང་བས་བདག་ལ་ལེན་པར་ཤོག །",
