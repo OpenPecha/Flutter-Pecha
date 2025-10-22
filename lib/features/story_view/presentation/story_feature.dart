@@ -3,7 +3,6 @@ import 'package:flutter_pecha/features/plans/models/plan_subtasks_model.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/image_story.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/text_story.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/video_story.dart';
-import 'package:flutter_pecha/shared/widgets/reusable_youtube_player.dart';
 import 'package:go_router/go_router.dart';
 import 'package:story_view/story_view.dart';
 

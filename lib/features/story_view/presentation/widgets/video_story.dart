@@ -86,29 +86,17 @@ class _VideoStoryState extends State<VideoStory> {
     _youtubeController = controller;
   }
 
+  void _handleCenterTap() {
+    if (widget.controller.playbackNotifier.value == PlaybackState.play) {
+      widget.controller.pause();
+    } else {
+      widget.controller.play();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return
-    // return GestureDetector(
-    //   onLongPressUp: () {
-    //     widget.controller.play();
-    //   },
-    //   onLongPress: () {
-    //     widget.controller.pause();
-    //   },
-    //   onLongPressStart: (_) {
-    //     // Consume the long press gesture
-    //   },
-    //   // onTap: () {
-    //   //   // Toggle story pause/play on tap (not video controls)
-    //   //   if (widget.controller.playbackNotifier.value == PlaybackState.play) {
-    //   //     widget.controller.pause();
-    //   //   } else {
-    //   //     widget.controller.play();
-    //   //   }
-    //   // },
-    //   child:
-    Container(
+    return Container(
       width: double.infinity,
       height: double.infinity,
       color: Colors.black,
@@ -134,20 +122,21 @@ class _VideoStoryState extends State<VideoStory> {
             ),
           ),
 
-          // Gesture overlay to handle long press and prevent context menu
-          Positioned.fill(
+          // Center tap zone for play/pause only
+          // Let story_view package handle left/right navigation
+          Positioned(
+            left: 70, // Start after the left gesture zone (70px)
+            right: 70, // End before the right gesture zone (70px)
+            top: 0,
+            bottom: 0,
             child: GestureDetector(
-              onLongPressUp: () {
-                widget.controller.play();
-              },
-              onLongPress: () {
-                widget.controller.pause();
-              },
-              // Prevent any other gestures from reaching the video
-              onTap: () {},
-              onDoubleTap: () {},
+              onTap: _handleCenterTap,
               behavior: HitTestBehavior.opaque,
-              child: Container(color: Colors.transparent),
+              child: Container(
+                color: Colors.transparent,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
           ),
 
@@ -155,18 +144,16 @@ class _VideoStoryState extends State<VideoStory> {
           if (!_isVideoReady)
             const Center(child: CircularProgressIndicator(color: Colors.white)),
 
-          // Story pause indicator (only when story is paused, not video)
+          // Play/Pause indicator (shows when story is paused)
           StreamBuilder<PlaybackState>(
             stream: widget.controller.playbackNotifier.stream,
             builder: (context, snapshot) {
-              if (snapshot.data == PlaybackState.pause && _isVideoPlaying) {
-                return const Positioned(
-                  top: 50,
-                  right: 20,
+              if (snapshot.data == PlaybackState.pause) {
+                return const Center(
                   child: Icon(
-                    Icons.pause_circle_outline,
+                    Icons.play_arrow,
                     color: Colors.white70,
-                    size: 32,
+                    size: 64,
                   ),
                 );
               }

@@ -6,9 +6,6 @@ class ReusableYoutubePlayer extends StatefulWidget {
   final double aspectRatio;
   final bool autoPlay;
   final bool mute;
-  final bool showVideoProgressIndicator;
-  final Color progressIndicatorColor;
-  final ProgressBarColors? progressColors;
   final VoidCallback? onReady;
   final ValueChanged<bool>? onStateChanged;
   final ValueChanged<YoutubePlayerController>? onControllerCreated;
@@ -19,12 +16,6 @@ class ReusableYoutubePlayer extends StatefulWidget {
     this.aspectRatio = 16 / 9,
     this.autoPlay = false,
     this.mute = false,
-    this.showVideoProgressIndicator = true,
-    this.progressIndicatorColor = Colors.red,
-    this.progressColors = const ProgressBarColors(
-      playedColor: Colors.red,
-      handleColor: Colors.redAccent,
-    ),
     this.onReady,
     this.onStateChanged,
     this.onControllerCreated,
@@ -37,7 +28,7 @@ class ReusableYoutubePlayer extends StatefulWidget {
 class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
   late YoutubePlayerController _controller;
   bool _hasCalledOnReady = false;
-  PlayerState? _previousPlayerState;
+  bool? _previousIsPlaying;
 
   @override
   void initState() {
@@ -45,7 +36,13 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
     final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
     _controller = YoutubePlayerController(
       initialVideoId: videoId ?? '',
-      flags: YoutubePlayerFlags(autoPlay: widget.autoPlay, mute: widget.mute),
+      flags: YoutubePlayerFlags(
+        autoPlay: widget.autoPlay,
+        mute: widget.mute,
+        hideControls: true, // Hide controls to reduce context menu triggers
+        controlsVisibleAtStart: false,
+        useHybridComposition: true, // Better performance
+      ),
     );
 
     // Notify parent widget about controller creation
@@ -53,9 +50,8 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
       widget.onControllerCreated!(_controller);
     }
 
-    if (widget.onReady != null || widget.onStateChanged != null) {
-      _controller.addListener(_onControllerUpdate);
-    }
+    // Listen to player state changes
+    _controller.addListener(_onControllerUpdate);
   }
 
   void _onControllerUpdate() {
@@ -64,16 +60,24 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
         !_hasCalledOnReady &&
         widget.onReady != null) {
       _hasCalledOnReady = true;
-      widget.onReady!();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.onReady!();
+        }
+      });
     }
 
     // Handle state change callback
     if (widget.onStateChanged != null && _controller.value.isReady) {
       final currentState = _controller.value.playerState;
-      if (currentState != _previousPlayerState) {
-        _previousPlayerState = currentState;
-        final isPlaying = currentState == PlayerState.playing;
-        widget.onStateChanged!(isPlaying);
+      final isPlaying = currentState == PlayerState.playing;
+      if (isPlaying != _previousIsPlaying) {
+        _previousIsPlaying = isPlaying;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            widget.onStateChanged!(isPlaying);
+          }
+        });
       }
     }
   }
@@ -86,18 +90,14 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return YoutubePlayerBuilder(
-      player: YoutubePlayer(
-        aspectRatio: widget.aspectRatio,
+    return AspectRatio(
+      aspectRatio: widget.aspectRatio,
+      child: YoutubePlayer(
         controller: _controller,
-        showVideoProgressIndicator: widget.showVideoProgressIndicator,
-        progressIndicatorColor: widget.progressIndicatorColor,
-        progressColors: widget.progressColors,
+        aspectRatio: widget.aspectRatio,
+        showVideoProgressIndicator: false, // Hide progress indicator
         onReady: widget.onReady,
       ),
-      builder: (context, player) {
-        return player;
-      },
     );
   }
 }
