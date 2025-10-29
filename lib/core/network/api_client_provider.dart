@@ -11,6 +11,7 @@ class ApiClient extends http.BaseClient {
   static const List<String> _protectedPaths = [
     '/api/v1/users/me',
     '/api/v1/users/me/plans',
+    '/api/v1/users/me/onboarding-preferences',
     // Add more as needed
   ];
   final Logger _logger = Logger('ApiClient');

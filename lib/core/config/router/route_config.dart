@@ -3,6 +3,7 @@ class RouteConfig {
   RouteConfig._();
 
   // Route paths
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String home = '/home';
   static const String profile = '/profile';
@@ -19,7 +20,7 @@ class RouteConfig {
   };
 
   // Public routes that don't require authentication
-  static const Set<String> publicRoutes = {login};
+  static const Set<String> publicRoutes = {onboarding, login};
 
   /// Check if a given path requires authentication
   static bool isProtectedRoute(String path) {

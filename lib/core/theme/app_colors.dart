@@ -76,6 +76,11 @@ class AppColors {
   static const Color cardBackgroundLight = Color(0xFFF5F5F5);
   static const Color cardBackgroundDark = Color(0xFF232121);
 
+  // onboarding screen ring color
+  static const Color outerCircleColor = Color(0xFFAD2424);
+  static const Color middleCircleColor = Color(0xFF871C1C);
+  static const Color innerCircleColor = Color(0xFF611414);
+
   // ============ Design System Reference ============
   // Figma file: 0TE5qdViUvrisFZfNqODpX/WeBuddhist-App
   // Design system: Monlam Colors

@@ -414,6 +414,6 @@ class AppTheme {
     if (locale?.languageCode == 'bo') {
       return 'MonlamTibetan';
     }
-    return null; // Default font
+    return 'Inter'; // Default font
   }
 }

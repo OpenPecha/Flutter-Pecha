@@ -3,6 +3,7 @@ import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
 import 'package:flutter_pecha/features/auth/presentation/profile_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
 import 'package:flutter_pecha/features/creator_info/presentation/creator_info_screen.dart';
+import 'package:flutter_pecha/features/onboarding/presentation/onboarding_wrapper.dart';
 import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_text.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/view_illustration.dart';
@@ -40,6 +41,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ref.watch(authProvider.notifier).stream,
     ),
     routes: [
+      GoRoute(
+        path: RouteConfig.onboarding,
+        builder: (context, state) => const OnboardingWrapper(),
+      ),
       GoRoute(
         path: RouteConfig.login,
         builder: (context, state) => const LoginPage(),

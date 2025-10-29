@@ -27,7 +27,7 @@ class StoryAuthorAvatar extends StatelessWidget {
           ),
         ),
         padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top + 16,
+          top: MediaQuery.of(context).padding.top + 20,
           left: 16,
           right: 16,
           bottom: 16,
