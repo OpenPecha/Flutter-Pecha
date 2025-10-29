@@ -24,7 +24,10 @@ class _OnboardingScreen5State extends ConsumerState<OnboardingScreen5>
   void initState() {
     super.initState();
     _initializeAnimations();
-    _submitPreferencesAndNavigate();
+    // Use addPostFrameCallback to avoid modifying provider during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _submitPreferencesAndNavigate();
+    });
   }
 
   void _initializeAnimations() {
