@@ -55,3 +55,6 @@ ios/Runner/Runner.entitlements
 
 # warp
 warp.md
+
+# cursor rules
+.cursor/
