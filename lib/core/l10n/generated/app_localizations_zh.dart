@@ -51,6 +51,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_btnText => 'Start now';
 
   @override
+  String get home_scripture => 'Guided Scripture';
+
+  @override
+  String get home_meditation => 'Guided Meditation';
+
+  @override
   String get home_goDeeper => '深入了解';
 
   @override
@@ -117,7 +123,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dailyPractice => 'Daily Practice';
 
   @override
-  String get dailyPracticeRemindersDescription => 'Get reminded daily to practice your meditation and prayers';
+  String get dailyPracticeRemindersDescription =>
+      'Get reminded daily to practice your meditation and prayers';
 
   @override
   String get enableReminders => 'Enable Reminders';
@@ -141,7 +148,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get testNotifications => 'Test Notifications';
 
   @override
-  String get testNotificationsDescription => 'Send a test notification to verify everything is working';
+  String get testNotificationsDescription =>
+      'Send a test notification to verify everything is working';
 
   @override
   String get sendTestNotification => 'Send Test Notification';
