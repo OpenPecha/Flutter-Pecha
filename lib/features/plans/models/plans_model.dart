@@ -77,6 +77,8 @@ class PlansModel {
     PlanStatus? status,
     bool? featured,
     String? imageUrl,
+    int? subscriptionCount,
+    AuthorDtoModel? author,
   }) {
     return PlansModel(
       id: id ?? this.id,
@@ -86,8 +88,8 @@ class PlansModel {
       difficultyLevel: difficultyLevel ?? this.difficultyLevel,
       totalDays: totalDays ?? this.totalDays,
       status: status ?? this.status,
-      subscriptionCount: subscriptionCount,
-      author: author,
+      subscriptionCount: subscriptionCount ?? this.subscriptionCount,
+      author: author ?? this.author,
       imageUrl: imageUrl ?? this.imageUrl,
     );
   }

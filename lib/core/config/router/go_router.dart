@@ -11,6 +11,7 @@ import 'package:flutter_pecha/features/home/presentation/widgets/youtube_video_p
 import 'package:flutter_pecha/features/home/presentation/widgets/meditation_video.dart';
 import 'package:flutter_pecha/features/meditation_of_day/presentation/meditation_of_day_screen.dart';
 import 'package:flutter_pecha/features/story_view/presentation/story_feature.dart';
+import 'package:flutter_pecha/features/story_view/presentation/story_presenter.dart';
 import 'package:flutter_pecha/features/plans/models/plan_subtasks_model.dart';
 import 'package:flutter_pecha/features/notifications/presentation/notification_settings_screen.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_
 import 'package:flutter_pecha/features/story_view/presentation/widgets/image_story.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/text_story.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/video_story.dart';
+import 'package:flutter_pecha/features/story_view/utils/helper_functions.dart';
 import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/presentation/category_screen.dart';
@@ -274,6 +276,40 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 }
               }
               return storyItems;
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/home/stories-presenter',
+        builder: (context, state) {
+          final extra = state.extra;
+          List<PlanSubtasksModel> subtasks;
+          dynamic author;
+          Map<String, dynamic>? nextCard;
+          if (extra is Map<String, dynamic>) {
+            final subtasksValue = extra['subtasks'];
+            if (subtasksValue is! List<PlanSubtasksModel>) {
+              return const Scaffold(
+                body: Center(child: Text('Missing required parameters')),
+              );
+            }
+            subtasks = subtasksValue;
+            author = extra['author'];
+            nextCard = extra['nextCard'] as Map<String, dynamic>?;
+          } else if (extra is List<PlanSubtasksModel>) {
+            subtasks = extra;
+            author = null;
+            nextCard = null;
+          } else {
+            return const Scaffold(
+              body: Center(child: Text('Missing required parameters')),
+            );
+          }
+          return StoryPresenter(
+            author: author,
+            storyItemsBuilder: (controller) {
+              return createFlutterStoryItems(subtasks, controller, nextCard);
             },
           );
         },

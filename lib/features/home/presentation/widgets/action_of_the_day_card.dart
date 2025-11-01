@@ -8,14 +8,12 @@ class ActionOfTheDayCard extends ConsumerWidget {
     required this.title,
     required this.subtitle,
     required this.iconWidget,
-    this.isSpace = false,
     required this.onTap,
   });
   final String heading;
   final String title;
   final String subtitle;
   final Widget iconWidget;
-  final bool isSpace;
   final Function() onTap;
 
   @override

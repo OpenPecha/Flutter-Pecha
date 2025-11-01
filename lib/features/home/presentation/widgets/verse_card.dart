@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/models/plan_subtasks_model.dart';
+import 'package:flutter_pecha/features/story_view/utils/story_dialog_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class VerseCard extends ConsumerWidget {
   final String verseText;
   final String title;
-  const VerseCard({super.key, required this.verseText, required this.title});
+  final Map<String, dynamic>? nextCard;
+
+  const VerseCard({
+    super.key,
+    required this.verseText,
+    required this.title,
+    this.nextCard,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,10 +21,9 @@ class VerseCard extends ConsumerWidget {
         "https://images.unsplash.com/photo-1685495856559-5d96a0e51acb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2624";
     return GestureDetector(
       onTap: () {
-        // Navigate to story view with verse as image story
-        context.push(
-          '/home/stories',
-          extra: [
+        showStoryDialog(
+          context: context,
+          subtasks: [
             PlanSubtasksModel(
               id: 'verse-of-day',
               contentType: 'IMAGE',
@@ -25,6 +31,7 @@ class VerseCard extends ConsumerWidget {
               displayOrder: 0,
             ),
           ],
+          nextCard: nextCard,
         );
       },
       child: Stack(
@@ -57,18 +64,10 @@ class VerseCard extends ConsumerWidget {
                         Text(
                           title,
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            fontFamily: 'Instrument Serif',
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          'The Way Of Bodhisattva',
-                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.normal,
+                            fontFamily: 'Instrument Serif',
                             color: Colors.white,
                           ),
                         ),

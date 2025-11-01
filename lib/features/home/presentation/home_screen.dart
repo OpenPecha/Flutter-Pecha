@@ -2,24 +2,21 @@
 // It handles the UI for the main home screen after splash.
 
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/auth/application/auth_provider.dart';
 import 'package:flutter_pecha/features/home/data/week_plan.dart';
+import 'package:flutter_pecha/features/home/presentation/utils.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/action_of_the_day_card.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/calendar_banner_card.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_card.dart';
 import 'package:flutter_pecha/features/notifications/presentation/notification_settings_screen.dart';
-import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_pecha/features/plans/models/plan_subtasks_model.dart';
 import 'package:flutter_pecha/features/plans/models/plan_tasks_model.dart';
-import 'package:flutter_pecha/features/prayer_of_the_day/presentation/json_data.dart';
-import 'package:flutter_pecha/features/prayer_of_the_day/presentation/prayer_of_the_day_screen.dart';
+import 'package:flutter_pecha/features/story_view/utils/story_dialog_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:story_view/story_view.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -33,7 +30,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   late List<PlanTasksModel> planItems;
   Timer? _dayCheckTimer;
   String _currentDay = '';
-  late final StoryController _storyController;
 
   @override
   void initState() {
@@ -41,7 +37,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     WidgetsBinding.instance.addObserver(this);
     _initializeTodayPlan();
     _startDayCheckTimer();
-    _storyController = StoryController();
   }
 
   void _startDayCheckTimer() {
@@ -200,31 +195,83 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ...planItems.asMap().entries.map((entry) {
               final index = entry.key;
               final planItem = entry.value;
+
+              // Get next plan item for appending to story
+              final nextPlanItem =
+                  index < planItems.length - 1 ? planItems[index + 1] : null;
+
               switch (index) {
                 case 0:
+                  // Verse card
                   return Column(
                     children: [
                       VerseCard(
                         verseText: planItem.subtasks[0].content!,
                         title: planItem.title,
+                        nextCard:
+                            nextPlanItem != null
+                                ? {
+                                  'heading': localizations.home_scripture,
+                                  'title': nextPlanItem.title,
+                                  'subtitle': '1-2 min',
+                                  'iconWidget': getVideoThumbnail(
+                                    nextPlanItem.subtasks[0].content!,
+                                  ),
+                                  'subtasks': [
+                                    PlanSubtasksModel(
+                                      id: 'guided_scripture',
+                                      contentType: 'VIDEO',
+                                      content:
+                                          nextPlanItem.subtasks[0].content!,
+                                      displayOrder: 0,
+                                    ),
+                                  ],
+                                  'nextCard':
+                                      index + 2 < planItems.length
+                                          ? {
+                                            'heading':
+                                                localizations.home_meditation,
+                                            'title': planItems[index + 2].title,
+                                            'subtitle': '1-2 min',
+                                            'iconWidget': getVideoThumbnail(
+                                              planItems[index + 2]
+                                                  .subtasks[0]
+                                                  .label!,
+                                            ),
+                                            'subtasks': [
+                                              PlanSubtasksModel(
+                                                id: 'guided_meditation',
+                                                contentType: 'VIDEO',
+                                                content:
+                                                    planItems[index + 2]
+                                                        .subtasks[0]
+                                                        .content!,
+                                                displayOrder: 0,
+                                              ),
+                                            ],
+                                          }
+                                          : null,
+                                }
+                                : null,
                       ),
                       const SizedBox(height: 16),
                     ],
                   );
                 case 1:
+                  // Go deeper card
                   return Column(
                     children: [
                       ActionOfTheDayCard(
-                        heading: "Guided Scripture",
+                        heading: localizations.home_scripture,
                         title: planItem.title,
                         subtitle: "1-2 min",
-                        iconWidget: _getVideoThumbnail(
+                        iconWidget: getVideoThumbnail(
                           planItem.subtasks[0].content!,
                         ),
                         onTap:
-                            () => context.push(
-                              '/home/stories',
-                              extra: [
+                            () => showStoryDialog(
+                              context: context,
+                              subtasks: [
                                 PlanSubtasksModel(
                                   id: 'guided_scripture',
                                   contentType: 'VIDEO',
@@ -232,25 +279,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   displayOrder: 0,
                                 ),
                               ],
+                              nextCard:
+                                  nextPlanItem != null
+                                      ? {
+                                        'heading':
+                                            localizations.home_meditation,
+                                        'title': nextPlanItem.title,
+                                        'subtitle': '1-2 min',
+                                        'iconWidget': getVideoThumbnail(
+                                          nextPlanItem.subtasks[0].content!,
+                                        ),
+                                        'subtasks': [
+                                          PlanSubtasksModel(
+                                            id: 'guided_meditation',
+                                            contentType: 'VIDEO',
+                                            content:
+                                                nextPlanItem
+                                                    .subtasks[0]
+                                                    .content!,
+                                            displayOrder: 0,
+                                          ),
+                                        ],
+                                      }
+                                      : null,
                             ),
                       ),
                       const SizedBox(height: 16),
                     ],
                   );
                 case 2:
+                  // Meditation card - no next card (last item)
                   return Column(
                     children: [
                       ActionOfTheDayCard(
-                        heading: "Guided Meditation",
+                        heading: localizations.home_meditation,
                         title: planItem.title,
                         subtitle: "1-2 min",
-                        iconWidget: _getAudioThumbnail(
-                          planItem.subtasks[0].label!,
+                        iconWidget: getVideoThumbnail(
+                          planItem.subtasks[0].content!,
                         ),
                         onTap:
-                            () => context.push(
-                              '/home/stories',
-                              extra: [
+                            () => showStoryDialog(
+                              context: context,
+                              subtasks: [
                                 PlanSubtasksModel(
                                   id: 'guided_meditation',
                                   contentType: 'VIDEO',
@@ -271,63 +342,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ],
         ),
       ),
-    );
-  }
-
-  Widget _getVideoThumbnail(String videoUrl) {
-    // Extract YouTube video ID and create thumbnail
-    final uri = Uri.parse(videoUrl);
-    String? videoId;
-
-    if (uri.host.contains('youtube.com')) {
-      videoId = uri.queryParameters['v'];
-    } else if (uri.host.contains('youtu.be')) {
-      videoId = uri.pathSegments.firstOrNull;
-    }
-
-    if (videoId != null) {
-      return Image.network(
-        'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey.shade300,
-            child: const Icon(
-              Icons.video_library,
-              size: 48,
-              color: Colors.grey,
-            ),
-          );
-        },
-      );
-    }
-
-    return Container(
-      color: Colors.grey.shade300,
-      child: const Icon(Icons.video_library, size: 48, color: Colors.grey),
-    );
-  }
-
-  Widget _getAudioThumbnail(String label) {
-    if (label == "Meditation") {
-      return Image.asset(
-        'assets/images/meditation.png',
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey.shade300,
-            child: const Icon(
-              Icons.self_improvement,
-              size: 48,
-              color: Colors.grey,
-            ),
-          );
-        },
-      );
-    }
-    return Container(
-      color: Colors.grey.shade300,
-      child: const Icon(Icons.audiotrack, size: 48, color: Colors.grey),
     );
   }
 }
