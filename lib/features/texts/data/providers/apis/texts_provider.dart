@@ -2,7 +2,7 @@ import 'package:flutter_pecha/core/network/api_client_provider.dart';
 import 'package:flutter_pecha/features/texts/data/datasource/text_remote_datasource.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../repositories/texts_repository.dart';
-import 'package:flutter_pecha/core/config/locale_provider.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 
 class TextDetailsParams {
   final String textId;

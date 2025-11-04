@@ -56,7 +56,7 @@ class TextTocScreen extends ConsumerWidget {
       height: 40,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFC6A04D),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: () {
@@ -91,7 +91,7 @@ class TextTocScreen extends ConsumerWidget {
           TabBar(
             labelColor: Theme.of(context).textTheme.bodyMedium?.color,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Color(0xFFC6A04D),
+            indicatorColor: Theme.of(context).colorScheme.primary,
             indicatorWeight: 2.5,
             tabs: [
               Tab(text: localizations.text_toc_content),

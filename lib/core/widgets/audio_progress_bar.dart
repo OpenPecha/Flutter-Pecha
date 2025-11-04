@@ -1,6 +1,6 @@
 // audio progress bar widget
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/theme/theme_provider.dart';
+import 'package:flutter_pecha/core/theme/theme_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 

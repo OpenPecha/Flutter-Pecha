@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/font_size_notifier.dart';
 
 class FontSizeSelector extends ConsumerWidget {
   const FontSizeSelector({super.key});

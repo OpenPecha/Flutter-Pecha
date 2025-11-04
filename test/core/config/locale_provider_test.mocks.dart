@@ -5,7 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
-import 'package:flutter_pecha/core/storage/preferences_service.dart' as _i2;
+import 'package:flutter_pecha/core/utils/local_storage_service.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -21,15 +21,59 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
-/// A class which mocks [PreferencesService].
+/// A class which mocks [LocalStorageService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPreferencesService extends _i1.Mock
-    implements _i2.PreferencesService {
-  MockPreferencesService() {
+class MockLocalStorageService extends _i1.Mock
+    implements _i2.LocalStorageService {
+  MockLocalStorageService() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i3.Future<void> setUserData(Map<String, dynamic>? userData) =>
+      (super.noSuchMethod(
+            Invocation.method(#setUserData, [userData]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> getUserData() =>
+      (super.noSuchMethod(
+            Invocation.method(#getUserData, []),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<void> clearUserData() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearUserData, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setOnboardingCompleted(bool? completed) =>
+      (super.noSuchMethod(
+            Invocation.method(#setOnboardingCompleted, [completed]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> getOnboardingCompleted() =>
+      (super.noSuchMethod(
+            Invocation.method(#getOnboardingCompleted, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
   _i3.Future<T?> get<T>(String? key) =>

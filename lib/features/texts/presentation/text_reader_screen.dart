@@ -7,7 +7,7 @@ import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
-import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/font_size_notifier.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';

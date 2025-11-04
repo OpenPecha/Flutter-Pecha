@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/l10n.dart';
-import 'package:flutter_pecha/core/theme/theme_provider.dart';
+import 'package:flutter_pecha/core/theme/theme_notifier.dart';
 import 'package:flutter_pecha/features/notifications/services/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/config/router/go_router.dart';
-import 'package:flutter_pecha/core/config/locale_provider.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:fquery/fquery.dart';
 import 'core/theme/app_theme.dart';
 import 'core/localization/material_localizations_bo.dart';
