@@ -64,5 +64,9 @@
 	<string>Pecha needs access to photo library to save the image</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Pecha needs access to photo library to save the image</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

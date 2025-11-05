@@ -12,10 +12,18 @@ import 'core/theme/app_theme.dart';
 import 'core/localization/material_localizations_bo.dart';
 import 'core/localization/cupertino_localizations_bo.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
+  // Initialize background audio service
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'org.pecha.app.channel.audio',
+    androidNotificationChannelName: 'Recitation Audio',
+    androidNotificationOngoing: true,
+  );
 
   // Initialize notification service
   final notificationService = NotificationService();

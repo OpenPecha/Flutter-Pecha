@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:go_router/go_router.dart';
 
 class PrayerOfTheDayScreen extends ConsumerStatefulWidget {
@@ -31,14 +32,24 @@ class _PrayerOfTheDayScreenState extends ConsumerState<PrayerOfTheDayScreen> {
   final ScrollController _scrollController = ScrollController();
   int _currentSegmentIndex = 0;
   final Map<int, GlobalKey> _segmentKeys = {};
+  bool _isAudioInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeAudioPlayer();
+    // _initializeAudioPlayer();
     // Initialize keys for each segment
     for (int i = 0; i < widget.prayerData.length; i++) {
       _segmentKeys[i] = GlobalKey();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isAudioInitialized) {
+      _isAudioInitialized = true;
+      _initializeAudioPlayer();
     }
   }
 
@@ -118,18 +129,29 @@ class _PrayerOfTheDayScreenState extends ConsumerState<PrayerOfTheDayScreen> {
     _audioPlayer = AudioPlayer();
     try {
       final url = widget.audioUrl.trim();
+      final localizations = AppLocalizations.of(context)!;
       Duration? duration;
+
+      // Create MediaItem for background playback
+      final mediaItem = MediaItem(
+        id: 'prayer_of_day',
+        album: 'WeBuddhist',
+        title: localizations.home_prayerTitle,
+        artUri: Uri.parse('https://pecha.org/static/icons/favicon-pecha.png'),
+      );
 
       if (url.startsWith('http://') || url.startsWith('https://')) {
         // Remote URL (S3, CloudFront, etc.)
         final source = AudioSource.uri(
           Uri.parse(url),
           headers: widget.audioHeaders,
+          tag: mediaItem,
         );
         duration = await _audioPlayer.setAudioSource(source);
       } else {
         // Local asset path
-        duration = await _audioPlayer.setAsset(url);
+        final source = AudioSource.asset(url, tag: mediaItem);
+        duration = await _audioPlayer.setAudioSource(source);
       }
 
       if (mounted) {
