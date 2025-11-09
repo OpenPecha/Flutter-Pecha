@@ -19,6 +19,7 @@ class UserSubtasksDto {
       isCompleted: json['is_completed'] as bool,
       contentType: json['content_type'] as String,
       content: json['content'] as String,
+      displayOrder: json['display_order'] as int?,
     );
   }
 
@@ -28,6 +29,7 @@ class UserSubtasksDto {
       'is_completed': isCompleted,
       'content_type': contentType,
       'content': content,
+      'display_order': displayOrder,
     };
   }
 }

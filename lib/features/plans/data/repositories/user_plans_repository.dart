@@ -39,4 +39,16 @@ class UserPlansRepository {
       dayNumber,
     );
   }
+
+  Future<bool> completeSubTask(String subTaskId) async {
+    return await userPlansRemoteDatasource.completeSubTask(subTaskId);
+  }
+
+  Future<bool> completeTask(String taskId) async {
+    return await userPlansRemoteDatasource.completeTask(taskId);
+  }
+
+  Future<bool> deleteTask(String taskId) async {
+    return await userPlansRemoteDatasource.deleteTask(taskId);
+  }
 }

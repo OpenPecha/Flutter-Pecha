@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
-import 'package:flutter_pecha/features/plans/models/response/plan_list_response_model.dart';
+import 'package:flutter_pecha/features/plans/models/response/user_plan_list_response_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,15 +21,15 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
     final authState = ref.watch(authProvider);
     final isGuest = authState.isGuest;
     final isLoggedIn = authState.isLoggedIn;
-    var subscribedPlans = AsyncValue<PlanListResponseModel>.data(
-      PlanListResponseModel(plans: [], total: 0, skip: 0, limit: 0),
+    var subscribedPlans = AsyncValue<UserPlanListResponseModel>.data(
+      UserPlanListResponseModel(userPlans: [], total: 0, skip: 0, limit: 0),
     );
 
     if (!isGuest && isLoggedIn) {
       subscribedPlans = ref.watch(userPlansFutureProvider);
     }
     final subscribedPlansIds =
-        subscribedPlans.valueOrNull?.plans.map((e) => e.id).toList() ?? [];
+        subscribedPlans.valueOrNull?.userPlans.map((e) => e.id).toList() ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -141,6 +141,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
   // Updated handleStartPlan function
   Future<void> handleStartPlan() async {
     final planId = widget.plan.id;
+    debugPrint('planId: $planId');
 
     try {
       // Subscribe to plan using the authenticated HTTP client
@@ -151,7 +152,6 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
       if (success) {
         // Success: Show plan listed in my plans
         if (mounted) {
-          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Successfully enrolled in ${widget.plan.title}!'),
@@ -160,8 +160,9 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
             ),
           );
 
-          // Invalidate the user plans provider to refresh the data
+          // Invalidate both user plans providers to refresh the data
           ref.invalidate(userPlansFutureProvider);
+          ref.invalidate(myPlansPaginatedProvider);
 
           // Wait a moment for the data to refresh, then navigate
           await Future.delayed(Duration(milliseconds: 500));
@@ -205,10 +206,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Text(
-          widget.plan.description,
-          style: const TextStyle(fontSize: 16),
-        ),
+        Text(widget.plan.description, style: const TextStyle(fontSize: 16)),
       ],
     );
   }

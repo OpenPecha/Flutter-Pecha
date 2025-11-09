@@ -24,7 +24,13 @@ class UserTasksDto {
       estimatedTime: json['estimated_time'] as int?,
       displayOrder: json['display_order'] as int,
       isCompleted: json['is_completed'] as bool,
-      subTasks: json['sub_tasks'] as List<UserSubtasksDto>,
+      subTasks:
+          (json['sub_tasks'] as List<dynamic>)
+              .map(
+                (subtask) =>
+                    UserSubtasksDto.fromJson(subtask as Map<String, dynamic>),
+              )
+              .toList(),
     );
   }
 

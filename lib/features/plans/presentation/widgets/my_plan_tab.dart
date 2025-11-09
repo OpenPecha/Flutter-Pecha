@@ -100,7 +100,7 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
         if (today == startedAt) {
           selectedDay = 1;
         } else if (today.isAfter(startedAt)) {
-          final difference = today.difference(startedAt).inDays;
+          final difference = today.difference(startedAt).inDays + 1;
           if (difference > totalDays) {
             selectedDay = totalDays;
           } else {
@@ -113,7 +113,11 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
           onTap: () {
             context.push(
               '/plans/details',
-              extra: {'plan': plan, 'selectedDay': selectedDay},
+              extra: {
+                'plan': plan,
+                'selectedDay': selectedDay,
+                'startDate': startedAt,
+              },
             );
           },
         );

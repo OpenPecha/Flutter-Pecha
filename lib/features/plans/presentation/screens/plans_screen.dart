@@ -70,7 +70,10 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [MyPlansTab(controller: _tabController), FindPlansTab()],
+        children: [
+          MyPlansTab(controller: _tabController),
+          FindPlansTab(controller: _tabController),
+        ],
       ),
     );
   }

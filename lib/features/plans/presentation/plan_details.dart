@@ -2,24 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
+import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'widgets/plan_cover_image.dart';
 import 'widgets/day_carousel.dart';
 import 'widgets/activity_list.dart';
 
 class PlanDetails extends ConsumerStatefulWidget {
-  const PlanDetails({super.key, required this.plan, required this.selectedDay});
+  const PlanDetails({
+    super.key,
+    required this.plan,
+    required this.selectedDay,
+    required this.startDate,
+  });
   final UserPlansModel plan;
   final int selectedDay;
+  final DateTime startDate;
 
   @override
   ConsumerState<PlanDetails> createState() => _PlanDetailsState();
 }
 
 class _PlanDetailsState extends ConsumerState<PlanDetails> {
-  late final int selectedDay; // Day 1 is selected by default
-  Set<int> selectedActivities = {}; // No activities selected initially
-  int? previousSelectedDay; // Track previous day to reset activities
+  late int selectedDay; // Day 1 is selected by default
 
   @override
   void initState() {
@@ -29,31 +34,13 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
 
   @override
   Widget build(BuildContext context) {
-    final DateTime startDate = DateTime.now();
     final planDays = ref.watch(planDaysByPlanIdFutureProvider(widget.plan.id));
-    // final planDayContent = ref.watch(
-    //   planDayContentFutureProvider(
-    //     PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
-    //   ),
-    // );
 
     final userPlanDayContent = ref.watch(
       userPlanDayContentFutureProvider(
         PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
       ),
     );
-
-    // Reset selected activities when day changes
-    if (previousSelectedDay != null && previousSelectedDay != selectedDay) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            selectedActivities.clear();
-          });
-        }
-      });
-    }
-    previousSelectedDay = selectedDay;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +60,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
             DayCarousel(
               days: planDays.value ?? [],
               selectedDay: selectedDay,
-              startDate: startDate,
+              startDate: widget.startDate,
               onDaySelected: (day) {
                 setState(() {
                   selectedDay = day;
@@ -92,17 +79,10 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                         (dayContent) => ActivityList(
                           tasks: dayContent.tasks,
                           today: selectedDay,
-                          totalDays: widget.plan.totalDays,
-                          selectedActivities: selectedActivities,
-                          onActivityToggled: (activity) {
-                            setState(() {
-                              if (selectedActivities.contains(activity)) {
-                                selectedActivities.remove(activity);
-                              } else {
-                                selectedActivities.add(activity);
-                              }
-                            });
-                          },
+                          totalDays: dayContent.tasks.length,
+                          onActivityToggled:
+                              (taskId) =>
+                                  _handleTaskToggle(taskId, dayContent.tasks),
                         ),
                     loading:
                         () => const Center(child: CircularProgressIndicator()),
@@ -117,7 +97,9 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                             const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: () {
-                                ref.invalidate(planDayContentFutureProvider);
+                                ref.invalidate(
+                                  userPlanDayContentFutureProvider,
+                                );
                               },
                               child: const Text('Retry'),
                             ),
@@ -137,6 +119,44 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     return Text(
       "Day $day of ${widget.plan.totalDays}",
       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Future<void> _handleTaskToggle(
+    String taskId,
+    List<UserTasksDto> tasks,
+  ) async {
+    final task = tasks.firstWhere((t) => t.id == taskId);
+    final repository = ref.read(userPlansRepositoryProvider);
+
+    try {
+      bool success;
+      if (task.isCompleted) {
+        success = await repository.deleteTask(taskId);
+      } else {
+        success = await repository.completeTask(taskId);
+      }
+
+      if (success && mounted) {
+        ref.invalidate(
+          userPlanDayContentFutureProvider(
+            PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
+          ),
+        );
+      } else if (!success && mounted) {
+        _showErrorSnackbar('Failed to update task status');
+      }
+    } catch (e) {
+      debugPrint('Error toggling task: $e');
+      if (mounted) {
+        _showErrorSnackbar('Error: $e');
+      }
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 }

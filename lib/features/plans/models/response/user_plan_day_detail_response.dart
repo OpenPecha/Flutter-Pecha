@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
 
 class UserPlanDayDetailResponse {
@@ -17,7 +18,12 @@ class UserPlanDayDetailResponse {
     return UserPlanDayDetailResponse(
       id: json['id'] as String,
       dayNumber: json['day_number'] as int,
-      tasks: json['tasks'] as List<UserTasksDto>,
+      tasks:
+          (json['tasks'] as List<dynamic>)
+              .map(
+                (task) => UserTasksDto.fromJson(task as Map<String, dynamic>),
+              )
+              .toList(),
       isCompleted: json['is_completed'] as bool,
     );
   }
