@@ -26,9 +26,12 @@ class PlanStoryPresenter extends ConsumerStatefulWidget {
 class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
   late final FlutterStoryController flutterStoryController;
   late final List<StoryItem> storyItems;
+  late final Map<int, String> _storyIndexToSubtaskId; // NEW: Index mapping
+
   bool _isDisposing = false;
   Timer? _debounceTimer;
   final Set<String> _completedSubtaskIds = {};
+  final Set<String> _pendingSubtaskIds = {};
   int? _lastTrackedIndex;
 
   @override
@@ -36,38 +39,99 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
     super.initState();
     flutterStoryController = FlutterStoryController();
     storyItems = widget.storyItemsBuilder(flutterStoryController);
+
+    // CRITICAL FIX: Build index mapping
+    _storyIndexToSubtaskId = _buildIndexMapping();
   }
 
-  void _onStoryChanged(int index) {
+  /// Maps story item index to subtask ID
+  /// Handles cases where some subtasks are filtered out
+  Map<int, String> _buildIndexMapping() {
+    final mapping = <int, String>{};
+    int storyIndex = 0;
+
+    for (final subtask in widget.subtasks) {
+      // Same filtering logic as createFlutterStoryItems
+      if (subtask.content.isEmpty) {
+        continue; // This subtask was skipped in story creation
+      }
+
+      mapping[storyIndex] = subtask.id;
+      storyIndex++;
+    }
+
+    return mapping;
+  }
+
+  void _onStoryChanged(int storyIndex) {
+    // Guard: Check if disposing
+    if (_isDisposing) return;
+
     // Cancel previous debounce timer
     _debounceTimer?.cancel();
 
     // Set new debounce timer (300ms to prevent excessive API calls)
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      if (index != _lastTrackedIndex &&
-          index >= 0 &&
-          index < widget.subtasks.length) {
-        _lastTrackedIndex = index;
-        final subtask = widget.subtasks[index];
+      // Double check not disposing (timer might fire after disposal starts)
+      if (_isDisposing || !mounted) return;
 
-        // Mark as complete if not already done
-        if (!_completedSubtaskIds.contains(subtask.id) &&
-            !subtask.isCompleted) {
-          _completedSubtaskIds.add(subtask.id);
-          _markSubtaskComplete(subtask.id);
+      // Get actual subtask ID from mapping
+      final subtaskId = _storyIndexToSubtaskId[storyIndex];
+
+      if (subtaskId == null) {
+        debugPrint('Warning: No subtask mapping for story index $storyIndex');
+        return;
+      }
+
+      // Check if already tracked or in progress
+      if (storyIndex != _lastTrackedIndex &&
+          !_completedSubtaskIds.contains(subtaskId) &&
+          !_pendingSubtaskIds.contains(subtaskId)) {
+        _lastTrackedIndex = storyIndex;
+
+        // Find subtask to check isCompleted flag
+        final subtask = widget.subtasks.firstWhere(
+          (s) => s.id == subtaskId,
+          orElse: () => widget.subtasks.first, // Fallback
+        );
+
+        if (!subtask.isCompleted) {
+          _markSubtaskComplete(subtaskId);
         }
       }
     });
   }
 
   Future<void> _markSubtaskComplete(String subtaskId) async {
+    // Guard: Don't process if disposing
+    if (_isDisposing) return;
+
+    // Mark as pending to prevent duplicates
+    _pendingSubtaskIds.add(subtaskId);
+
     try {
       final repository = ref.read(userPlansRepositoryProvider);
-      await repository.completeSubTask(subtaskId);
-      debugPrint('Subtask $subtaskId marked complete');
+
+      // Make API call
+      final success = await repository.completeSubTask(subtaskId);
+
+      // Only update state if still mounted and not disposing
+      if (mounted && !_isDisposing) {
+        if (success) {
+          _completedSubtaskIds.add(subtaskId);
+          debugPrint('✅ Subtask $subtaskId marked complete');
+        } else {
+          debugPrint('⚠️ Subtask $subtaskId completion returned false');
+        }
+      }
     } catch (e) {
-      debugPrint('Error completing subtask: $e');
-      // Don't show error to user - this is background tracking
+      debugPrint('❌ Error completing subtask $subtaskId: $e');
+      // Note: subtaskId NOT added to _completedSubtaskIds, allowing retry
+    } finally {
+      // Always remove from pending (allows retry on next view)
+      if (mounted) {
+        _pendingSubtaskIds.remove(subtaskId);
+      }
     }
   }
 
@@ -75,8 +139,12 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
   void dispose() {
     _debounceTimer?.cancel();
     _isDisposing = true;
+
+    // Clear sets to prevent memory leaks
+    _completedSubtaskIds.clear();
+    _pendingSubtaskIds.clear();
+
     // Let the FlutterStoryPresenter package handle controller disposal
-    // The package manages its own controller lifecycle
     super.dispose();
   }
 

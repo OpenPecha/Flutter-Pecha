@@ -11,6 +11,7 @@ Implemented a production-ready plan search feature with debounced API calls and 
 **File**: `lib/features/plans/presentation/providers/plan_search_provider.dart`
 
 - Created `PlanSearchState` class to manage:
+
   - Search query
   - Results list
   - Loading states (initial and loadMore)
@@ -64,7 +65,33 @@ Implemented a production-ready plan search feature with debounced API calls and 
   - Loading indicator at bottom during pagination
   - Maintains all existing error/empty states
 
-### 5. Plans Screen Integration
+### 5. My Plans Tab Update
+
+**File**: `lib/features/plans/presentation/widgets/my_plan_tab.dart`
+
+- Converted from `ConsumerWidget` to `ConsumerStatefulWidget`
+- Added `ScrollController` for infinite scroll detection
+- Integrated with `myPlansPaginatedProvider`
+- Features:
+  - Loads more plans at 200px from bottom
+  - Pull-to-refresh support
+  - Loading indicator at bottom during pagination
+  - Maintains all existing error/empty states including "Browse Plans" CTA
+
+### 6. My Plans Pagination Provider
+
+**File**: `lib/features/plans/presentation/providers/my_plans_paginated_provider.dart`
+
+- Created `MyPlansState` class for paginated user plans
+- Implemented `MyPlansNotifier` with:
+  - Initial data loading
+  - Infinite scroll with load more
+  - Pull-to-refresh support
+  - Error handling and retry
+  - Tracks total count from API
+  - 20 items per page
+
+### 7. Plans Screen Integration
 
 **File**: `lib/features/plans/presentation/screens/plans_screen.dart`
 
@@ -72,42 +99,79 @@ Implemented a production-ready plan search feature with debounced API calls and 
 - Removed old commented-out search code
 - Cleaned up unused imports
 
-### 6. Repository Enhancement
+### 8. Repository Enhancements
 
-**File**: `lib/features/plans/data/repositories/plans_repository.dart`
+**Files**:
+
+- `lib/features/plans/data/repositories/plans_repository.dart`
+- `lib/features/plans/data/repositories/user_plans_repository.dart`
+
+Plans Repository:
 
 - Updated `getPlans()` method to accept:
   - `search` parameter for text query
   - `skip` parameter for pagination offset
   - `limit` parameter for page size
 
-### 7. Provider Updates
+User Plans Repository:
 
-**File**: `lib/features/plans/data/providers/plans_providers.dart`
+- Updated `getUserPlans()` method to accept:
+  - `skip` parameter for pagination offset
+  - `limit` parameter for page size
+
+### 9. Datasource Updates
+
+**Files**:
+
+- `lib/features/plans/data/datasource/plans_remote_datasource.dart`
+- `lib/features/plans/data/datasource/user_plans_remote_datasource.dart`
+
+Both datasources updated to:
+
+- Build query parameters dynamically
+- Support skip/limit for pagination
+- Maintain existing language filtering
+
+### 10. Provider Updates
+
+**Files**:
+
+- `lib/features/plans/data/providers/plans_providers.dart`
+- `lib/features/plans/data/providers/user_plans_provider.dart`
+
+Plans Providers:
 
 - Added `findPlansPaginatedProvider` for Find Plans tab
 - Added `planSearchProvider` for search functionality
-- Both providers use language from `localeProvider`
+
+User Plans Provider:
+
+- Added `myPlansPaginatedProvider` for My Plans tab
+- All providers use language from `localeProvider`
 
 ## Technical Decisions
 
 ### Debouncing
+
 - Used `dart:async Timer` (no external dependencies)
 - 500ms delay balances responsiveness and API efficiency
 - Cancels previous timers when query changes
 
 ### Pagination
+
 - 20 items per page (good balance for mobile)
 - Loads more at 200px from bottom threshold
 - Separate loading indicators for initial and pagination
 
 ### Architecture
+
 - Clean separation of concerns
 - StateNotifier for complex state management
 - Reusable components (`PlanCard`)
 - Consistent error/empty states across features
 
 ### User Experience
+
 - Immediate visual feedback on query change
 - Smooth infinite scroll
 - Pull-to-refresh support
@@ -129,33 +193,42 @@ PlansQueryParams(
 
 ## Files Created
 
-1. `lib/features/plans/presentation/providers/plan_search_provider.dart`
-2. `lib/features/plans/presentation/providers/find_plans_paginated_provider.dart`
-3. `lib/features/plans/presentation/search/plan_search_delegate.dart`
-4. `docs/implementation/PLAN_SEARCH_PAGINATION.md` (this file)
+1. `lib/features/plans/presentation/providers/plan_search_provider.dart` - Search state management
+2. `lib/features/plans/presentation/providers/find_plans_paginated_provider.dart` - Find Plans pagination
+3. `lib/features/plans/presentation/providers/my_plans_paginated_provider.dart` - My Plans pagination
+4. `lib/features/plans/presentation/search/plan_search_delegate.dart` - Search UI
+5. `docs/implementation/PLAN_SEARCH_PAGINATION.md` (this file)
 
 ## Files Modified
 
-1. `lib/features/plans/presentation/screens/plans_screen.dart`
-2. `lib/features/plans/presentation/widgets/find_plan_tab.dart`
-3. `lib/features/plans/data/providers/plans_providers.dart`
-4. `lib/features/plans/data/repositories/plans_repository.dart`
+1. `lib/features/plans/presentation/screens/plans_screen.dart` - Search integration
+2. `lib/features/plans/presentation/widgets/find_plan_tab.dart` - Added pagination
+3. `lib/features/plans/presentation/widgets/my_plan_tab.dart` - Added pagination
+4. `lib/features/plans/data/providers/plans_providers.dart` - Added Find Plans provider
+5. `lib/features/plans/data/providers/user_plans_provider.dart` - Added My Plans provider
+6. `lib/features/plans/data/repositories/plans_repository.dart` - Added search/pagination params
+7. `lib/features/plans/data/repositories/user_plans_repository.dart` - Added pagination params
+8. `lib/features/plans/data/datasource/plans_remote_datasource.dart` - Query param builder
+9. `lib/features/plans/data/datasource/user_plans_remote_datasource.dart` - Query param builder
 
 ## Testing Recommendations
 
 1. **Search Functionality**
+
    - Test debouncing: type quickly and verify only one API call
    - Test empty query handling
    - Test no results state
    - Test error handling and retry
 
 2. **Pagination**
+
    - Test initial load
    - Test scroll to bottom triggers load more
    - Test end of results (no more data)
    - Test pull-to-refresh
 
 3. **Performance**
+
    - Verify no memory leaks (proper disposal)
    - Test with slow network
    - Test with large result sets
@@ -174,4 +247,3 @@ PlansQueryParams(
 4. Cache search results
 5. Add analytics for popular searches
 6. Optimize image loading in results
-
