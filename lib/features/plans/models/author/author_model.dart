@@ -5,7 +5,7 @@ class AuthorModel {
   final String firstname;
   final String lastname;
   final String email;
-  final String? avatarUrl;
+  final String? imageUrl;
   final String? bio;
   final List<SocialProfileDto> socialProfiles; // Managed by admin
 
@@ -14,7 +14,7 @@ class AuthorModel {
     required this.firstname,
     required this.lastname,
     required this.email,
-    this.avatarUrl,
+    this.imageUrl,
     this.bio,
     required this.socialProfiles,
   });
@@ -25,7 +25,7 @@ class AuthorModel {
       firstname: json['firstname'] as String,
       lastname: json['lastname'] as String,
       email: json['email'] as String,
-      avatarUrl: json['avatar_url'] as String?,
+      imageUrl: json['image_url'] as String?,
       bio: json['bio'] as String?,
       socialProfiles:
           (json['social_profiles'] as List<dynamic>?)
@@ -41,7 +41,7 @@ class AuthorModel {
       'firstname': firstname,
       'lastname': lastname,
       'email': email,
-      'avatar_url': avatarUrl,
+      'image_url': imageUrl,
       'bio': bio,
       'social_profiles':
           socialProfiles.map((profile) => profile.toJson()).toList(),
@@ -54,7 +54,7 @@ class AuthorModel {
     String? firstname,
     String? lastname,
     String? email,
-    String? avatarUrl,
+    String? imageUrl,
     String? bio,
     List<SocialProfileDto>? socialProfiles,
   }) {
@@ -63,7 +63,7 @@ class AuthorModel {
       firstname: firstname ?? this.firstname,
       lastname: lastname ?? this.lastname,
       email: email ?? this.email,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
       bio: bio ?? this.bio,
       socialProfiles: socialProfiles ?? this.socialProfiles,
     );

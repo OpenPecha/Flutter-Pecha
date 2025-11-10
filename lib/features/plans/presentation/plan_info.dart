@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
+import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/response/user_plan_list_response_model.dart';
+import 'package:flutter_pecha/features/plans/presentation/author_detail_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class PlanInfo extends ConsumerStatefulWidget {
   // Changed to StatefulWidget
-  const PlanInfo({super.key, required this.plan});
+  const PlanInfo({super.key, required this.plan, required this.author});
   final PlansModel plan;
-
+  final AuthorDtoModel author;
   @override
   ConsumerState<PlanInfo> createState() => _PlanInfoState();
 }
@@ -33,6 +35,8 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        scrolledUnderElevation: 0,
         title: const Text(
           'Plan Info',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -75,22 +79,56 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
 
   Widget _buildPlanTitleDays(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(
-            widget.plan.title,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.plan.title,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 4),
+              Text(
+                '${widget.plan.totalDays} Days',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
         ),
         SizedBox(width: 10),
-        Text(
-          '${widget.plan.totalDays} Days',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
+        _buildAuthorAvatar(context),
       ],
+    );
+  }
+
+  Widget _buildAuthorAvatar(BuildContext context) {
+    final author = widget.author;
+    final authorImage = author.imageUrl;
+    final authorId = author.id;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AuthorDetailScreen(authorId: authorId),
+          ),
+        );
+      },
+      child: CircleAvatar(
+        radius: 20,
+        backgroundImage:
+            authorImage.isNotEmpty ? NetworkImage(authorImage) : null,
+        backgroundColor: Colors.grey[300],
+        child:
+            authorImage.isEmpty
+                ? Icon(Icons.person, color: Colors.grey[600], size: 20)
+                : null,
+      ),
     );
   }
 

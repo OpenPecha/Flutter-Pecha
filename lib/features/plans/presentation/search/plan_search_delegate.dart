@@ -147,10 +147,14 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
         }
 
         final plan = searchState.results[index];
+        final author = plan.author;
         return PlanCard(
           plan: plan,
           onTap: () {
-            context.push('/plans/info', extra: plan);
+            context.push(
+              '/plans/info',
+              extra: {'plan': plan, 'author': author},
+            );
           },
         );
       },

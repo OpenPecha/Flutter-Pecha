@@ -12,6 +12,7 @@ class StoryAuthorAvatar extends StatelessWidget {
     if (author == null) {
       return const SizedBox.shrink();
     }
+    final authorId = author!.id;
 
     return Positioned(
       top: 0,
@@ -37,7 +38,7 @@ class StoryAuthorAvatar extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AuthorDetailScreen(author: author!),
+                builder: (context) => AuthorDetailScreen(authorId: authorId),
               ),
             );
           },

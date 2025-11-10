@@ -15,8 +15,11 @@ class ConfigService {
 
   Future<void> loadConfig() async {
     if (_isLoaded) return;
-    final url = dotenv.env['AUTH0_API'];
-    final response = await http.get(Uri.parse(url!));
+    final baseUrl = dotenv.env['BASE_API_URL'];
+    if (baseUrl == null) {
+      throw Exception('BASE_API_URL not set in .env');
+    }
+    final response = await http.get(Uri.parse('$baseUrl/props'));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       auth0Domain = data['domain'];
