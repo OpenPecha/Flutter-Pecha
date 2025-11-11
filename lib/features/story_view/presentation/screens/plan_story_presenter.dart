@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_subtasks_dto.dart';
+import 'package:flutter_pecha/features/story_view/presentation/widgets/story_loading_overlay.dart';
+import 'package:flutter_pecha/features/story_view/services/story_media_preloader.dart';
 import 'package:flutter_story_presenter/flutter_story_presenter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -39,6 +41,13 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
   final Set<String> _pendingSubtaskIds = {};
   int? _lastTrackedIndex;
 
+  // Loading state management
+  bool _isFirstItemReady = false;
+  bool _showLoadingOverlay = false;
+  final StoryMediaPreloader _preloader = StoryMediaPreloader();
+  final GlobalKey<StoryLoadingOverlayState> _loadingOverlayKey =
+      GlobalKey<StoryLoadingOverlayState>();
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +59,108 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
 
     // Pre-populate completed Set from initial data
     _initializeCompletedSubtaskIds();
+
+    // Check if first item is ready and handle loading state
+    _checkFirstItemReady();
+  }
+
+  /// Checks if first story item is ready and shows loading overlay if needed
+  Future<void> _checkFirstItemReady() async {
+    if (widget.subtasks.isEmpty) {
+      _isFirstItemReady = true;
+      return;
+    }
+
+    final firstSubtask = widget.subtasks.firstWhere(
+      (s) => s.content.isNotEmpty,
+      orElse: () => widget.subtasks.first,
+    );
+
+    // Check if first item is already precached/prepared
+    _isFirstItemReady = _preloader.isFirstItemReady(firstSubtask);
+
+    if (!_isFirstItemReady) {
+      // Show loading overlay
+      if (mounted) {
+        setState(() {
+          _showLoadingOverlay = true;
+        });
+      }
+
+      // Pause story controller until first item is ready
+      flutterStoryController.pause();
+
+      // Start preloading first item if not already done
+      await _preloadFirstItem(firstSubtask);
+
+      // Preload remaining items in background
+      _preloadRemainingItems();
+    } else {
+      // First item is ready, start story immediately
+      if (mounted) {
+        flutterStoryController.play();
+      }
+    }
+  }
+
+  /// Preloads the first story item
+  Future<void> _preloadFirstItem(UserSubtasksDto firstSubtask) async {
+    if (firstSubtask.content.isEmpty) {
+      _isFirstItemReady = true;
+      return;
+    }
+
+    try {
+      switch (firstSubtask.contentType) {
+        case 'IMAGE':
+          await _preloader.preloadImage(firstSubtask.content, context);
+          break;
+        case 'VIDEO':
+          await _preloader.prepareVideoMetadata(firstSubtask.content);
+          break;
+        case 'AUDIO':
+        case 'TEXT':
+          // These load fast enough, no preloading needed
+          break;
+      }
+
+      // Mark as ready and hide loading overlay
+      if (mounted) {
+        setState(() {
+          _isFirstItemReady = true;
+          _showLoadingOverlay = false;
+        });
+
+        // Fade out loading overlay smoothly
+        await _loadingOverlayKey.currentState?.fadeOut();
+
+        // Start story
+        flutterStoryController.play();
+      }
+    } catch (e) {
+      debugPrint('Error preloading first item: $e');
+      // Even if preloading fails, show the story (graceful degradation)
+      if (mounted) {
+        setState(() {
+          _isFirstItemReady = true;
+          _showLoadingOverlay = false;
+        });
+        flutterStoryController.play();
+      }
+    }
+  }
+
+  /// Preloads remaining story items in background
+  void _preloadRemainingItems() {
+    if (widget.subtasks.length <= 1) return;
+
+    // Preload next 2-3 items in background
+    final remainingItems = widget.subtasks.skip(1).take(3).toList();
+    if (remainingItems.isNotEmpty) {
+      Future.microtask(() {
+        unawaited(_preloader.preloadStoryItems(remainingItems, context));
+      });
+    }
   }
 
   /// Pre-populate completed subtask IDs from initial data
@@ -226,7 +337,7 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
           },
         ),
         // if (widget.author != null) StoryAuthorAvatar(author: widget.author),
-        // Close button in top-left corner
+        // Close button in top-right corner
         Positioned(
           top: 24,
           right: 16,
@@ -241,6 +352,8 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
             ),
           ),
         ),
+        // Loading overlay - shown when first item is not ready
+        if (_showLoadingOverlay) StoryLoadingOverlay(key: _loadingOverlayKey),
       ],
     );
   }

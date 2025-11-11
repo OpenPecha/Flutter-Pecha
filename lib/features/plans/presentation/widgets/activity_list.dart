@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
+import 'package:flutter_pecha/features/story_view/services/story_media_preloader.dart';
 import 'package:go_router/go_router.dart';
 
 class ActivityList extends StatelessWidget {
@@ -100,6 +103,7 @@ class ActivityList extends StatelessWidget {
 
   void handleActivityTap(BuildContext context, UserTasksDto task) {
     if (task.subTasks.isNotEmpty) {
+      // Navigate immediately for best perceived performance
       context.push(
         '/home/plan-stories-presenter',
         extra: {
@@ -108,6 +112,11 @@ class ActivityList extends StatelessWidget {
           if (dayNumber != null) 'dayNumber': dayNumber,
         },
       );
+
+      // Start preloading in parallel (fire-and-forget background task)
+      // This doesn't block navigation and improves UX
+      final preloader = StoryMediaPreloader();
+      unawaited(preloader.preloadStoryItems(task.subTasks, context));
     }
   }
 }

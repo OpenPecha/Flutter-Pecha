@@ -32,7 +32,7 @@ List<StoryItem> createFlutterStoryItems(
             duration: durationForText,
             customWidget: (controller, audioPlayer) {
               return TextStory(
-                text: subtask.content!,
+                text: subtask.content,
                 backgroundColor: Colors.black38,
                 textStyle: const TextStyle(
                   fontSize: 18,
@@ -55,7 +55,7 @@ List<StoryItem> createFlutterStoryItems(
             duration: durationForVideo,
             customWidget: (controller, audioPlayer) {
               return CustomVideoStory(
-                videoUrl: subtask.content!,
+                videoUrl: subtask.content,
                 controller: controller!,
               );
             },
@@ -64,6 +64,10 @@ List<StoryItem> createFlutterStoryItems(
         break;
 
       case "IMAGE":
+        // Note: Images are precached via StoryMediaPreloader.preloadImage()
+        // which uses CachedNetworkImageProvider. FlutterStoryPresenter's
+        // StoryItem.image type respects Flutter's image cache, so precached
+        // images will load instantly.
         storyItems.add(
           StoryItem(
             url: subtask.content,
