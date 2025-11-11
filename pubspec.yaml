@@ -72,6 +72,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.17
   audio_service: ^0.18.18
   equatable: ^2.0.7
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

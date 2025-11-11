@@ -120,17 +120,20 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
           ),
         );
       },
-      child: CircleAvatar(
-        radius: 20,
-        backgroundImage:
-            authorImage.isNotEmpty
-                ? authorImage.cachedNetworkImageProvider
-                : null,
-        backgroundColor: Colors.grey[300],
-        child:
-            authorImage.isEmpty
-                ? Icon(Icons.person, color: Colors.grey[600], size: 20)
-                : null,
+      child: Hero(
+        tag: authorId,
+        child: CircleAvatar(
+          radius: 20,
+          backgroundImage:
+              authorImage.isNotEmpty
+                  ? authorImage.cachedNetworkImageProvider
+                  : null,
+          backgroundColor: Colors.grey[300],
+          child:
+              authorImage.isEmpty
+                  ? Icon(Icons.person, color: Colors.grey[600], size: 20)
+                  : null,
+        ),
       ),
     );
   }

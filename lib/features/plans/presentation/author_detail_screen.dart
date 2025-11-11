@@ -76,17 +76,24 @@ class AuthorDetailScreen extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage:
-                  authorData.imageUrl?.isNotEmpty ?? false
-                      ? authorData.imageUrl!.cachedNetworkImageProvider
-                      : null,
-              backgroundColor: Colors.grey[800],
-              child:
-                  authorData.imageUrl?.isEmpty ?? true
-                      ? const Icon(Icons.person, size: 50, color: Colors.white)
-                      : null,
+            Hero(
+              tag: authorData.id,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage:
+                    authorData.imageUrl?.isNotEmpty ?? false
+                        ? authorData.imageUrl!.cachedNetworkImageProvider
+                        : null,
+                backgroundColor: Colors.grey[800],
+                child:
+                    authorData.imageUrl?.isEmpty ?? true
+                        ? const Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.white,
+                        )
+                        : null,
+              ),
             ),
             const SizedBox(width: 20),
             Expanded(
