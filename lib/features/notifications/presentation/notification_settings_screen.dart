@@ -94,14 +94,9 @@ class _NotificationSettingsScreenState
     final selectedTime =
         state.reminderTime ?? const TimeOfDay(hour: 8, minute: 0);
     final hasPermission = state.hasPermission;
-
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)?.notificationSettings ??
-              'Notification Settings',
-        ),
-      ),
+      appBar: AppBar(title: Text(localizations.notification_settings)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

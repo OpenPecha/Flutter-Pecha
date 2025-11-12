@@ -39,8 +39,8 @@ class MoreScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: false,
-        title: const Text(
-          'More',
+        title: Text(
+          localizations.nav_settings,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         elevation: 0,
@@ -95,7 +95,7 @@ class MoreScreen extends ConsumerWidget {
             const SizedBox(height: 16),
           ],
           // Appearance Section
-          _buildSectionHeader(context, 'Appearance'),
+          _buildSectionHeader(context, localizations.settings_appearance),
           _buildSectionCard(
             context,
             children: [
@@ -131,7 +131,7 @@ class MoreScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 title: Text(
-                  'Language',
+                  localizations.language,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 subtitle: Text(
@@ -145,7 +145,7 @@ class MoreScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           // Notification Settings
-          _buildSectionHeader(context, 'Notifications'),
+          _buildSectionHeader(context, localizations.settings_notifications),
           _buildSectionCard(
             context,
             children: [
@@ -155,8 +155,7 @@ class MoreScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 title: Text(
-                  AppLocalizations.of(context)?.notificationSettings ??
-                      'Notification Settings',
+                  localizations.notification_settings,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 subtitle: Text(
@@ -170,7 +169,7 @@ class MoreScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           // Account Section
-          _buildSectionHeader(context, 'Account'),
+          _buildSectionHeader(context, localizations.settings_account),
           _buildSectionCard(
             context,
             children: [
@@ -195,7 +194,7 @@ class MoreScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.logout, color: Colors.red.shade600),
                   title: Text(
-                    'Logout',
+                    localizations.logout,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.red.shade600,
                       fontWeight: FontWeight.w500,

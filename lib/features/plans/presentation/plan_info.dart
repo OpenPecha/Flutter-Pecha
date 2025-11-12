@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
@@ -190,9 +191,10 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
   }
 
   String _getButtonText(bool isGuest, bool isSubscribed) {
-    if (isGuest) return 'Sign in';
-    if (isSubscribed) return 'Continue Plan';
-    return 'Start Plan';
+    final localizations = AppLocalizations.of(context)!;
+    if (isGuest) return localizations.sign_in;
+    if (isSubscribed) return localizations.continue_plan;
+    return localizations.start_plan;
   }
 
   Future<void> _handleButtonAction(

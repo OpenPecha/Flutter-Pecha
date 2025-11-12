@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -11,6 +12,7 @@ class PechaBottomNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(bottomNavIndexProvider);
+    final localizations = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.only(bottom: 16),
@@ -32,7 +34,7 @@ class PechaBottomNavBar extends ConsumerWidget {
               index: 0,
               icon: Icons.home_outlined,
               selectedIcon: Icons.home,
-              label: 'Home',
+              label: localizations.nav_home,
               isSelected: selectedIndex == 0,
             ),
             _buildNavItem(
@@ -41,7 +43,7 @@ class PechaBottomNavBar extends ConsumerWidget {
               index: 1,
               icon: Icons.menu_book_outlined,
               selectedIcon: Icons.menu_book,
-              label: 'Texts',
+              label: localizations.nav_texts,
               isSelected: selectedIndex == 1,
             ),
             _buildNavItem(
@@ -50,7 +52,7 @@ class PechaBottomNavBar extends ConsumerWidget {
               index: 2,
               icon: FontAwesomeIcons.handsPraying,
               selectedIcon: FontAwesomeIcons.handsPraying,
-              label: 'Recitations',
+              label: localizations.nav_recitations,
               isSelected: selectedIndex == 2,
             ),
             _buildNavItem(
@@ -59,7 +61,7 @@ class PechaBottomNavBar extends ConsumerWidget {
               index: 3,
               icon: Icons.check_box_outlined,
               selectedIcon: Icons.check_box,
-              label: 'Practice',
+              label: localizations.nav_practice,
               isSelected: selectedIndex == 3,
             ),
             _buildNavItem(
@@ -68,7 +70,7 @@ class PechaBottomNavBar extends ConsumerWidget {
               index: 4,
               icon: Icons.settings_outlined,
               selectedIcon: Icons.settings,
-              label: 'Setting',
+              label: localizations.nav_settings,
               isSelected: selectedIndex == 4,
             ),
           ],

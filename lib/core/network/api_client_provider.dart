@@ -41,7 +41,6 @@ class ApiClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    debugPrint('Sending request: ${request.method} ${request.url}');
     _logger.info('${request.method} ${request.url}');
 
     // Add authentication header for protected routes
@@ -94,7 +93,6 @@ class ApiClient extends http.BaseClient {
         _logger.warning('Token refresh returned null, returning original 401');
       }
     }
-    debugPrint('ApiClient Response: ${response.statusCode} ${request.url}');
     _logger.info('${response.statusCode} ${request.url}');
     return response;
   }

@@ -30,6 +30,12 @@ class AppLocalizationsBo extends AppLocalizations {
   String get switchToDark => 'ནག་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།';
 
   @override
+  String get sign_in => 'Sign in';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
   String get onboarding_welcome => 'Welcome to WeBuddhist';
 
   @override
@@ -56,6 +62,15 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get home_today => 'དེ་རིང་།';
+
+  @override
+  String get home_good_morning => 'སྔ་དྲོ་བདེ་ལེགས།';
+
+  @override
+  String get home_good_afternoon => 'ཉིན་གུང་བདེ་ལེགས།';
+
+  @override
+  String get home_good_evening => 'དགོང་དྲོ་བདེ་ལེགས།';
 
   @override
   String get home_dailyRefresh => 'Daily Refresh';
@@ -97,6 +112,21 @@ class AppLocalizationsBo extends AppLocalizations {
   String get home_profile => 'ངོ་སྤྲོད་སྙིང་བསྡུས།';
 
   @override
+  String get nav_home => 'Home';
+
+  @override
+  String get nav_texts => 'Texts';
+
+  @override
+  String get nav_recitations => 'Recitations';
+
+  @override
+  String get nav_practice => 'Practice';
+
+  @override
+  String get nav_settings => 'Settings';
+
+  @override
   String get text_browseTheLibrary => 'དཀར་ཆག';
 
   @override
@@ -121,6 +151,18 @@ class AppLocalizationsBo extends AppLocalizations {
   String get text_toc_revisionHistory => 'བཟོ་བཅོས་ཀྱི་ལོ་རྒྱུས།';
 
   @override
+  String get my_plans => 'My Plans';
+
+  @override
+  String get find_plans => 'Find Plans';
+
+  @override
+  String get start_plan => 'Start Plan';
+
+  @override
+  String get continue_plan => 'Continue Plan';
+
+  @override
   String get tibetan => 'བོད་སྐད།';
 
   @override
@@ -140,9 +182,6 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
-
-  @override
-  String get notificationSettings => 'Notification Settings';
 
   @override
   String get dailyPractice => 'Daily Practice';
@@ -236,4 +275,16 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get recitations_translation => 'བསྒྱུར་བ།';
+
+  @override
+  String get settings_appearance => 'Appearance';
+
+  @override
+  String get settings_notifications => 'Notifications';
+
+  @override
+  String get notification_settings => 'Notification Settings';
+
+  @override
+  String get settings_account => 'Account';
 }

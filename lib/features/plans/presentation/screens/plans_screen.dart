@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/find_plan_tab.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/my_plan_tab.dart';
 import 'package:flutter_pecha/features/plans/presentation/search/plan_search_delegate.dart';
@@ -29,10 +30,11 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Practice',
+        title: Text(
+          localizations.nav_practice,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         scrolledUnderElevation: 0,
@@ -58,7 +60,10 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: [Tab(text: 'My Plans'), Tab(text: 'All Plans')],
+          tabs: [
+            Tab(text: localizations.my_plans),
+            Tab(text: localizations.find_plans),
+          ],
           labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           unselectedLabelStyle: TextStyle(
             fontWeight: FontWeight.bold,

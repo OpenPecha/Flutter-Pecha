@@ -109,6 +109,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  /// Returns a time-based greeting based on the current hour
+  String _getTimeBasedGreeting(AppLocalizations localizations) {
+    final hour = DateTime.now().hour;
+    if (hour >= 1 && hour < 12) {
+      return localizations.home_good_morning;
+    } else if (hour >= 12 && hour < 17) {
+      return localizations.home_good_afternoon;
+    } else {
+      return localizations.home_good_evening;
+    }
+  }
+
   // Build the top bar
   Widget _buildTopBar(AuthState authState, AppLocalizations localizations) {
     // final url = s3AudioUrl;
@@ -135,6 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           //   child:
           Text(
             localizations.home_today,
+            // _getTimeBasedGreeting(localizations),
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
           ),
           // ),

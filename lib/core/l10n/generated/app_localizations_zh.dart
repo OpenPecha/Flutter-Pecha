@@ -30,6 +30,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get switchToDark => '切换到深色模式';
 
   @override
+  String get sign_in => 'Sign in';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
   String get onboarding_welcome => 'Welcome to WeBuddhist';
 
   @override
@@ -55,7 +61,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_all_set => 'You are All Setup';
 
   @override
-  String get home_today => 'Today';
+  String get home_today => '今天';
+
+  @override
+  String get home_good_morning => '早上好';
+
+  @override
+  String get home_good_afternoon => '下午好';
+
+  @override
+  String get home_good_evening => '晚上好';
 
   @override
   String get home_dailyRefresh => 'Daily Refresh';
@@ -97,10 +112,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_profile => 'Profile';
 
   @override
-  String get text_browseTheLibrary => 'Browse The Library';
+  String get nav_home => '首頁';
 
   @override
-  String get text_search => 'Search';
+  String get nav_texts => '文本';
+
+  @override
+  String get nav_recitations => '唱誦';
+
+  @override
+  String get nav_practice => '修持計劃';
+
+  @override
+  String get nav_settings => '設定';
+
+  @override
+  String get text_browseTheLibrary => '瀏覽文庫';
+
+  @override
+  String get text_search => '搜尋';
 
   @override
   String get text_detail_rootText => 'Root Text';
@@ -119,6 +149,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get text_toc_revisionHistory => 'Revision History';
+
+  @override
+  String get my_plans => '我的計畫';
+
+  @override
+  String get find_plans => '尋找計劃';
+
+  @override
+  String get start_plan => '開始計畫';
+
+  @override
+  String get continue_plan => 'Continue Plan';
 
   @override
   String get tibetan => 'Tibetan';
@@ -140,9 +182,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
-
-  @override
-  String get notificationSettings => 'Notification Settings';
 
   @override
   String get dailyPractice => 'Daily Practice';
@@ -235,4 +274,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get recitations_translation => '翻譯';
+
+  @override
+  String get settings_appearance => '外觀';
+
+  @override
+  String get settings_notifications => '通知';
+
+  @override
+  String get notification_settings => '通知設定';
+
+  @override
+  String get settings_account => '帳號';
 }

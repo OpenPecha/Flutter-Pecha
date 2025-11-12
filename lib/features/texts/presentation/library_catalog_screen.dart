@@ -76,7 +76,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
                             ),
                         error:
                             (error, stackTrace) => const Center(
-                              child: Text('Failed to load collections'),
+                              child: Text('Unable to load collections'),
                             ),
                       ),
             ),
