@@ -11,14 +11,17 @@
 // - Tibetan: MonlamTibetan (existing implementation)
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData lightTheme([Locale? locale]) {
+    final fontConfig = _getFontConfiguration(locale, Brightness.light);
     final baseTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: _fontFamilyForLocale(locale),
+      fontFamily: fontConfig.fontFamily,
+      textTheme: fontConfig.textTheme,
       scaffoldBackgroundColor: AppColors.surfaceWhite,
 
       // Color scheme based on Figma design
@@ -212,10 +215,12 @@ class AppTheme {
   }
 
   static ThemeData darkTheme([Locale? locale]) {
+    final fontConfig = _getFontConfiguration(locale, Brightness.dark);
     final baseTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: _fontFamilyForLocale(locale),
+      fontFamily: fontConfig.fontFamily,
+      textTheme: fontConfig.textTheme,
       scaffoldBackgroundColor: AppColors.backgroundDark,
 
       // Color scheme based on Figma dark mode design
@@ -414,10 +419,30 @@ class AppTheme {
     return baseTheme;
   }
 
-  static String? _fontFamilyForLocale(Locale? locale) {
+  static _FontConfiguration _getFontConfiguration(
+    Locale? locale,
+    Brightness brightness,
+  ) {
+    // For Tibetan locale, use MonlamTibetan fontFamily
     if (locale?.languageCode == 'bo') {
-      return 'MonlamTibetan';
+      return _FontConfiguration(
+        fontFamily: 'MonlamTibetan',
+        textTheme: null, // Use default textTheme to respect fontFamily
+      );
     }
-    return 'Inter'; // Default font
+    // For English and other locales, use Inter font via GoogleFonts
+    return _FontConfiguration(
+      fontFamily: null, // No fontFamily needed when using textTheme
+      textTheme: GoogleFonts.interTextTheme(
+        ThemeData(brightness: brightness).textTheme,
+      ),
+    );
   }
+}
+
+class _FontConfiguration {
+  final String? fontFamily;
+  final TextTheme? textTheme;
+
+  _FontConfiguration({required this.fontFamily, required this.textTheme});
 }
