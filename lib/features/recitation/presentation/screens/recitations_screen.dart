@@ -39,17 +39,24 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildAppBar(context, localizations),
-            // if (_isSearchVisible)
-            _buildSearchBar(context, localizations),
-            _buildTabBar(context, localizations),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const [RecitationsTab(), MyRecitationsTab()],
+            Center(
+              child: Text(
+                'Work in progress...',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            // _buildAppBar(context, localizations),
+            // // if (_isSearchVisible)
+            // _buildSearchBar(context, localizations),
+            // _buildTabBar(context, localizations),
+            // Expanded(
+            //   child: TabBarView(
+            //     controller: _tabController,
+            //     children: const [RecitationsTab(), MyRecitationsTab()],
+            //   ),
+            // ),
           ],
         ),
       ),

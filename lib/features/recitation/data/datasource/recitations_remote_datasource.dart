@@ -33,28 +33,29 @@ class RecitationsRemoteDatasource {
         '$baseUrl/api/v1/cms/recitations',
       ).replace(queryParameters: queryParams?.toQueryParams());
 
-      final response = await client.get(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-      );
+      // final response = await client.get(
+      //   uri,
+      //   headers: {'Content-Type': 'application/json'},
+      // );
 
-      if (response.statusCode == 200) {
-        final decoded = utf8.decode(response.bodyBytes);
-        final responseData = json.decode(decoded) as Map<String, dynamic>;
+      // if (response.statusCode == 200) {
+      //   final decoded = utf8.decode(response.bodyBytes);
+      //   final responseData = json.decode(decoded) as Map<String, dynamic>;
 
-        // Parse the nested "recitations" array from the response
-        final List<dynamic> recitationsData =
-            responseData['recitations'] as List<dynamic>? ?? [];
+      //   // Parse the nested "recitations" array from the response
+      //   final List<dynamic> recitationsData =
+      //       responseData['recitations'] as List<dynamic>? ?? [];
 
-        return recitationsData
-            .map(
-              (json) => RecitationModel.fromJson(json as Map<String, dynamic>),
-            )
-            .toList();
-      } else {
-        debugPrint('Failed to fetch recitations: ${response.statusCode}');
-        throw Exception('Failed to fetch recitations: ${response.statusCode}');
-      }
+      //   return recitationsData
+      //       .map(
+      //         (json) => RecitationModel.fromJson(json as Map<String, dynamic>),
+      //       )
+      //       .toList();
+      // } else {
+      //   debugPrint('Failed to fetch recitations: ${response.statusCode}');
+      //   throw Exception('Failed to fetch recitations: ${response.statusCode}');
+      // }
+      return mockRecitations;
     } catch (e) {
       debugPrint('Error fetching recitations: $e');
       throw Exception('Error fetching recitations: $e');
