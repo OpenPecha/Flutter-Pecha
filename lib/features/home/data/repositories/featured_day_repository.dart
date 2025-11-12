@@ -6,9 +6,11 @@ class FeaturedDayRepository {
 
   FeaturedDayRepository({required this.featuredDayRemoteDatasource});
 
-  Future<FeaturedDayResponse> getFeaturedDay() async {
+  Future<FeaturedDayResponse> getFeaturedDay({String? language}) async {
     try {
-      return await featuredDayRemoteDatasource.fetchFeaturedDay();
+      return await featuredDayRemoteDatasource.fetchFeaturedDay(
+        language: language,
+      );
     } catch (e) {
       throw Exception('Repository error: $e');
     }

@@ -66,6 +66,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     ref.invalidate(featuredDayFutureProvider);
   }
 
+  /// Manual refetch/retry method that can be called from UI
+  void refetchFeaturedDay() {
+    // Refresh the provider to immediately fetch fresh data
+    // ignore: unused_result
+    ref.refresh(featuredDayFutureProvider);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -231,7 +238,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           return Column(
                             children: [
                               VerseCard(
-                                verseText: planItem.subtasks[0].content!,
+                                verseText: planItem.subtasks[0].content,
                                 title: planItem.title,
                                 nextCard:
                                     nextPlanItem != null
@@ -241,7 +248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                           'title': nextPlanItem.title,
                                           'subtitle': '1-2 min',
                                           'iconWidget': getVideoThumbnail(
-                                            nextPlanItem.subtasks[0].content!,
+                                            nextPlanItem.subtasks[0].content,
                                           ),
                                           'subtasks': [
                                             FeaturedDaySubtask(
@@ -434,8 +441,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                           const SizedBox(height: 8),
                           TextButton(
-                            onPressed:
-                                () => ref.refresh(featuredDayFutureProvider),
+                            onPressed: refetchFeaturedDay,
                             child: Text('Retry'),
                           ),
                         ],

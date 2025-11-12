@@ -10,10 +10,13 @@ class FeaturedDayRemoteDatasource {
 
   FeaturedDayRemoteDatasource({required this.client});
 
-  Future<FeaturedDayResponse> fetchFeaturedDay() async {
+  Future<FeaturedDayResponse> fetchFeaturedDay({String? language}) async {
     try {
+      final uri = Uri.parse('$baseUrl/plans/featured/day').replace(
+        queryParameters: language != null ? {'language': language} : null,
+      );
       final response = await client.get(
-        Uri.parse('$baseUrl/plans/featured/day'),
+        uri,
         headers: {'Content-Type': 'application/json'},
       );
 
