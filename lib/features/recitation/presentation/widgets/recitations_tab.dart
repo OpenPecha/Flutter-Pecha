@@ -11,7 +11,6 @@ class RecitationsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    debugPrint('RecitationsTab build');
     final recitationsAsync = ref.watch(recitationsFutureProvider);
     final localizations = AppLocalizations.of(context)!;
 

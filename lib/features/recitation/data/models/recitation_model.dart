@@ -2,16 +2,13 @@ class RecitationModel {
   final String id;
   final String textId;
   final String title;
-  final String language;
-
-  final bool isSaved;
+  final String? language;
 
   RecitationModel({
     required this.id,
     required this.textId,
     required this.title,
-    required this.language,
-    this.isSaved = false,
+    this.language,
   });
 
   factory RecitationModel.fromJson(Map<String, dynamic> json) {
@@ -19,8 +16,7 @@ class RecitationModel {
       id: json['id'] as String,
       textId: json['text_id'] as String,
       title: json['title'] as String,
-      language: json['language'] as String,
-      isSaved: json['is_saved'] as bool? ?? false,
+      language: json['language'] as String?,
     );
   }
 
@@ -30,7 +26,6 @@ class RecitationModel {
       'text_id': textId,
       'title': title,
       'language': language,
-      'is_saved': isSaved,
     };
   }
 
@@ -39,14 +34,12 @@ class RecitationModel {
     String? textId,
     String? title,
     String? language,
-    bool? isSaved,
   }) {
     return RecitationModel(
       id: id ?? this.id,
       textId: textId ?? this.textId,
       title: title ?? this.title,
       language: language ?? this.language,
-      isSaved: isSaved ?? this.isSaved,
     );
   }
 
@@ -61,7 +54,7 @@ class RecitationModel {
 
   @override
   String toString() {
-    return 'RecitationModel(id: $id, textId: $textId, title: $title, language: $language, isSaved: $isSaved)';
+    return 'RecitationModel(id: $id, textId: $textId, title: $title, language: $language)';
   }
 }
 

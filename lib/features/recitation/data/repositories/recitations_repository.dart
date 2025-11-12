@@ -31,9 +31,21 @@ class RecitationsRepository {
     }
   }
 
-  Future<RecitationContentModel> getRecitationContent(String id) async {
+  Future<RecitationContentModel> getRecitationContent(
+    String id, {
+    required String language,
+    List<String>? translations,
+    List<String>? transliterations,
+    List<String>? adaptations,
+  }) async {
     try {
-      return await recitationsRemoteDatasource.fetchRecitationContent(id);
+      return await recitationsRemoteDatasource.fetchRecitationContent(
+        id,
+        language: language,
+        translations: translations,
+        transliterations: transliterations,
+        adaptations: adaptations,
+      );
     } catch (e) {
       throw Exception('Failed to load recitation content: $e');
     }
@@ -55,5 +67,3 @@ class RecitationsRepository {
     }
   }
 }
-
-

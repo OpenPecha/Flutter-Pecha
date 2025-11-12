@@ -20,10 +20,7 @@ class RecitationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        border: Border.all(
-          color: const Color(0xFFE4E4E4),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE4E4E4), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Material(
@@ -37,9 +34,7 @@ class RecitationCard extends StatelessWidget {
               children: [
                 _buildRecitationLogo(),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: _buildRecitationTitle(context),
-                ),
+                Expanded(child: _buildRecitationTitle(context)),
                 if (onMoreTap != null) _buildMoreButton(context),
               ],
             ),
@@ -71,7 +66,7 @@ class RecitationCard extends StatelessWidget {
           ),
           // Middle circle
           Positioned(
-            left: 6,
+            left: 7,
             top: 18,
             child: Container(
               width: 46,
@@ -95,12 +90,11 @@ class RecitationCard extends StatelessWidget {
               ),
             ),
           ),
-          // Logo/Icon
           Positioned(
-            left: 18,
-            top: 44,
+            left: 17,
+            top: 30,
             child: Image.asset(
-              'assets/images/pecha_logo.png',
+              'assets/images/favicon-pecha.png',
               width: 26,
               height: 26,
               fit: BoxFit.contain,
@@ -134,18 +128,9 @@ class RecitationCard extends StatelessWidget {
   Widget _buildMoreButton(BuildContext context) {
     return IconButton(
       onPressed: onMoreTap,
-      icon: const Icon(
-        Icons.more_vert,
-        size: 20,
-      ),
+      icon: const Icon(Icons.more_vert, size: 20),
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(
-        minWidth: 32,
-        minHeight: 32,
-      ),
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
     );
   }
 }
-
-
-

@@ -19,36 +19,43 @@ final recitationsRepositoryProvider = Provider<RecitationsRepository>((ref) {
 final recitationsFutureProvider = FutureProvider<List<RecitationModel>>((ref) {
   final locale = ref.watch(localeProvider);
   final languageCode = locale.languageCode;
-  return ref.watch(recitationsRepositoryProvider).getRecitations(
-    language: languageCode,
-  );
+  return ref
+      .watch(recitationsRepositoryProvider)
+      .getRecitations(language: languageCode);
 });
 
 // Get saved recitations provider
-final savedRecitationsFutureProvider = FutureProvider<List<RecitationModel>>((ref) {
+final savedRecitationsFutureProvider = FutureProvider<List<RecitationModel>>((
+  ref,
+) {
   return ref.watch(recitationsRepositoryProvider).getSavedRecitations();
 });
 
 // Get recitation content by ID
-final recitationContentProvider = FutureProvider.family<RecitationContentModel, String>((
-  ref,
-  id,
-) {
-  return ref.watch(recitationsRepositoryProvider).getRecitationContent(id);
-});
+final recitationContentProvider =
+    FutureProvider.family<RecitationContentModel, Map<String, dynamic>>((
+      ref,
+      params,
+    ) {
+      final locale = ref.watch(localeProvider);
+      final languageCode = locale.languageCode;
+      return ref
+          .watch(recitationsRepositoryProvider)
+          .getRecitationContent(
+            params['id'] as String,
+            language: languageCode,
+            translations: params['translations'] as List<String>?,
+            transliterations: params['transliterations'] as List<String>?,
+            adaptations: params['adaptations'] as List<String>?,
+          );
+    });
 
 // Search recitations provider
-final searchRecitationsProvider = FutureProvider.family<List<RecitationModel>, String>((
-  ref,
-  searchQuery,
-) {
-  final locale = ref.watch(localeProvider);
-  final languageCode = locale.languageCode;
-  return ref.watch(recitationsRepositoryProvider).getRecitations(
-    language: languageCode,
-    searchQuery: searchQuery,
-  );
-});
-
-
-
+final searchRecitationsProvider =
+    FutureProvider.family<List<RecitationModel>, String>((ref, searchQuery) {
+      final locale = ref.watch(localeProvider);
+      final languageCode = locale.languageCode;
+      return ref
+          .watch(recitationsRepositoryProvider)
+          .getRecitations(language: languageCode, searchQuery: searchQuery);
+    });

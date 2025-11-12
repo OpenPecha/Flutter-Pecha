@@ -124,22 +124,18 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
           _buildTabButton(
             context: context,
             label: 'Recitations',
-            isSelected: _tabController.index == 0,
+            tabIndex: 0,
             onTap: () {
-              setState(() {
-                _tabController.animateTo(0);
-              });
+              _tabController.animateTo(0);
             },
           ),
           const SizedBox(width: 9),
           _buildTabButton(
             context: context,
             label: 'My Recitations',
-            isSelected: _tabController.index == 1,
+            tabIndex: 1,
             onTap: () {
-              setState(() {
-                _tabController.animateTo(1);
-              });
+              _tabController.animateTo(1);
             },
           ),
         ],
@@ -150,7 +146,7 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
   Widget _buildTabButton({
     required BuildContext context,
     required String label,
-    required bool isSelected,
+    required int tabIndex,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -158,6 +154,7 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
       child: AnimatedBuilder(
         animation: _tabController,
         builder: (context, child) {
+          final isSelected = _tabController.index == tabIndex;
           return Container(
             height: 34,
             padding: const EdgeInsets.symmetric(horizontal: 16),

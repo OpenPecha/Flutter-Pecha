@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
+import 'package:flutter_pecha/features/recitation/data/models/recitation_content_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
-import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
-import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RecitationDetailScreen extends ConsumerStatefulWidget {
@@ -22,22 +22,23 @@ class _RecitationDetailScreenState
   @override
   void initState() {
     super.initState();
-    _isSaved = widget.recitation.isSaved;
+    _isSaved =
+        ref
+            .watch(savedRecitationsFutureProvider)
+            .value
+            ?.contains(widget.recitation) ??
+        false;
   }
 
   @override
   Widget build(BuildContext context) {
-    final textId = widget.recitation.textId;
+    final locale = ref.watch(localeProvider);
+    final languageCode = locale.languageCode;
     final contentAsync = ref.watch(
-      textDetailsFutureProvider(
-        TextDetailsParams(
-          textId: textId,
-          direction: 'next',
-          contentId: null,
-          segmentId: null,
-          versionId: null,
-        ),
-      ),
+      recitationContentProvider({
+        'id': widget.recitation.id,
+        'language': languageCode,
+      }),
     );
 
     return Scaffold(
@@ -65,7 +66,7 @@ class _RecitationDetailScreenState
     );
   }
 
-  Widget _buildContent(BuildContext context, ReaderResponse content) {
+  Widget _buildContent(BuildContext context, RecitationContentModel content) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -73,65 +74,83 @@ class _RecitationDetailScreenState
         children: [
           // Title
           Text(
-            content.textDetail.title,
+            content.title,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
-
+          const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          // Main content
-          // Text(
-          //   content.content,
-          //   style: Theme.of(
-          //     context,
-          //   ).textTheme.bodyLarge?.copyWith(height: 1.8, fontSize: 16),
-          // ),
-          // Phonetic if available
-          // if (content.phonetic != null && content.phonetic!.isNotEmpty) ...[
-          //   const SizedBox(height: 24),
-          //   const Divider(),
-          //   const SizedBox(height: 16),
-          //   Text(
-          //     'Phonetic',
-          //     style: Theme.of(
-          //       context,
-          //     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          //   ),
-          //   const SizedBox(height: 12),
-          //   Text(
-          //     content.phonetic!,
-          //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          //       height: 1.6,
-          //       fontStyle: FontStyle.italic,
-          //     ),
-          //   ),
-          // ],
-          // Translation if available
-          if (content.textDetail.categories.contains('translation') &&
-              content.textDetail.categories.contains('translation')) ...[
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 16),
-            Text(
-              'Translation',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            // Text(
-            //   content.textDetail.translation!.content,
-            //   style: Theme.of(
-            //     context,
-            //   ).textTheme.bodyMedium?.copyWith(height: 1.6),
-            // ),
-          ],
+          // Segments
+          ...content.segments.asMap().entries.map((entry) {
+            final index = entry.key;
+            final segment = entry.value;
+            return _buildSegment(context, segment, index);
+          }),
           const SizedBox(height: 32),
         ],
       ),
+    );
+  }
+
+  Widget _buildSegment(
+    BuildContext context,
+    RecitationSegmentModel segment,
+    int index,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (index > 0) ...[
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 24),
+        ],
+        // Recitation (original text)
+        if (segment.recitation != null && segment.recitation!.isNotEmpty) ...[
+          ...segment.recitation!.entries.map((entry) {
+            return _buildTextSection(context, entry.value.text);
+          }),
+        ],
+        // Translations
+        if (segment.translations != null &&
+            segment.translations!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ...segment.translations!.entries.map((entry) {
+            return _buildTextSection(context, entry.value.text);
+          }),
+        ],
+        // Transliterations
+        if (segment.transliterations != null &&
+            segment.transliterations!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ...segment.transliterations!.entries.map((entry) {
+            return _buildTextSection(context, entry.value.text);
+          }),
+        ],
+        // Adaptations
+        if (segment.adaptations != null && segment.adaptations!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ...segment.adaptations!.entries.map((entry) {
+            return _buildTextSection(context, entry.value.text);
+          }),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTextSection(BuildContext context, String text) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          text,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(height: 1.8, fontSize: 16),
+        ),
+      ],
     );
   }
 

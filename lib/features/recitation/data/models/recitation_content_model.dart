@@ -1,85 +1,140 @@
-class RecitationContentModel {
+class RecitationTextModel {
   final String id;
+  final String text;
+
+  RecitationTextModel({required this.id, required this.text});
+
+  factory RecitationTextModel.fromJson(Map<String, dynamic> json) {
+    return RecitationTextModel(
+      id: json['id'] as String,
+      text: json['text'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'text': text};
+  }
+}
+
+class RecitationSegmentModel {
+  final Map<String, RecitationTextModel>? recitation;
+  final Map<String, RecitationTextModel>? translations;
+  final Map<String, RecitationTextModel>? transliterations;
+  final Map<String, RecitationTextModel>? adaptations;
+
+  RecitationSegmentModel({
+    this.recitation,
+    this.translations,
+    this.transliterations,
+    this.adaptations,
+  });
+
+  factory RecitationSegmentModel.fromJson(Map<String, dynamic> json) {
+    Map<String, RecitationTextModel>? parseTextMap(Map<String, dynamic>? data) {
+      if (data == null) return null;
+      return data.map(
+        (key, value) => MapEntry(
+          key,
+          RecitationTextModel.fromJson(value as Map<String, dynamic>),
+        ),
+      );
+    }
+
+    return RecitationSegmentModel(
+      recitation:
+          json['recitation'] != null
+              ? parseTextMap(json['recitation'] as Map<String, dynamic>)
+              : null,
+      translations:
+          json['translations'] != null
+              ? parseTextMap(json['translations'] as Map<String, dynamic>)
+              : null,
+      transliterations:
+          json['transliterations'] != null
+              ? parseTextMap(json['transliterations'] as Map<String, dynamic>)
+              : null,
+      adaptations:
+          json['adaptations'] != null
+              ? parseTextMap(json['adaptations'] as Map<String, dynamic>)
+              : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic>? textMapToJson(
+      Map<String, RecitationTextModel>? data,
+    ) {
+      if (data == null) return null;
+      return data.map((key, value) => MapEntry(key, value.toJson()));
+    }
+
+    return {
+      if (recitation != null) 'recitation': textMapToJson(recitation),
+      if (translations != null) 'translations': textMapToJson(translations),
+      if (transliterations != null)
+        'transliterations': textMapToJson(transliterations),
+      if (adaptations != null) 'adaptations': textMapToJson(adaptations),
+    };
+  }
+}
+
+class RecitationContentModel {
+  final String textId;
   final String title;
-  final String content;
-  final String? phonetic;
-  final String? translation;
-  final String language;
-  final String? author;
-  final String? tradition;
+  final List<RecitationSegmentModel> segments;
 
   RecitationContentModel({
-    required this.id,
+    required this.textId,
     required this.title,
-    required this.content,
-    this.phonetic,
-    this.translation,
-    required this.language,
-    this.author,
-    this.tradition,
+    required this.segments,
   });
 
   factory RecitationContentModel.fromJson(Map<String, dynamic> json) {
     return RecitationContentModel(
-      id: json['id'] as String,
+      textId: json['text_id'] as String,
       title: json['title'] as String,
-      content: json['content'] as String,
-      phonetic: json['phonetic'] as String?,
-      translation: json['translation'] as String?,
-      language: json['language'] as String,
-      author: json['author'] as String?,
-      tradition: json['tradition'] as String?,
+      segments:
+          (json['segments'] as List<dynamic>)
+              .map(
+                (segment) => RecitationSegmentModel.fromJson(
+                  segment as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'text_id': textId,
       'title': title,
-      'content': content,
-      'phonetic': phonetic,
-      'translation': translation,
-      'language': language,
-      'author': author,
-      'tradition': tradition,
+      'segments': segments.map((segment) => segment.toJson()).toList(),
     };
   }
 
   RecitationContentModel copyWith({
-    String? id,
+    String? textId,
     String? title,
-    String? content,
-    String? phonetic,
-    String? translation,
-    String? language,
-    String? author,
-    String? tradition,
+    List<RecitationSegmentModel>? segments,
   }) {
     return RecitationContentModel(
-      id: id ?? this.id,
+      textId: textId ?? this.textId,
       title: title ?? this.title,
-      content: content ?? this.content,
-      phonetic: phonetic ?? this.phonetic,
-      translation: translation ?? this.translation,
-      language: language ?? this.language,
-      author: author ?? this.author,
-      tradition: tradition ?? this.tradition,
+      segments: segments ?? this.segments,
     );
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is RecitationContentModel && other.id == id;
+    return other is RecitationContentModel && other.textId == textId;
   }
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => textId.hashCode;
 
   @override
   String toString() {
-    return 'RecitationContentModel(id: $id, title: $title, language: $language)';
+    return 'RecitationContentModel(textId: $textId, title: $title, segments: ${segments.length})';
   }
 }
-
-
