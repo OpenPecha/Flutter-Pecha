@@ -35,6 +35,9 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
   @override
   Widget build(BuildContext context) {
     final planDays = ref.watch(planDaysByPlanIdFutureProvider(widget.plan.id));
+    final dayCompletionStatus = ref.watch(
+      userPlanDaysCompletionStatusProvider(widget.plan.id),
+    );
 
     final userPlanDayContent = ref.watch(
       userPlanDayContentFutureProvider(
@@ -58,17 +61,47 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               heroTag: widget.plan.title,
             ),
             planDays.when(
-              data:
-                  (days) => DayCarousel(
-                    days: days,
-                    selectedDay: selectedDay,
-                    startDate: widget.startDate,
-                    onDaySelected: (day) {
-                      setState(() {
-                        selectedDay = day;
-                      });
-                    },
-                  ),
+              data: (days) {
+                if (days.isEmpty) {
+                  return _buildEmptyDayCarouselState(context);
+                }
+                return dayCompletionStatus.when(
+                  data:
+                      (completionStatus) => DayCarousel(
+                        days: days,
+                        selectedDay: selectedDay,
+                        startDate: widget.startDate,
+                        dayCompletionStatus: completionStatus,
+                        onDaySelected: (day) {
+                          setState(() {
+                            selectedDay = day;
+                          });
+                        },
+                      ),
+                  loading:
+                      () => DayCarousel(
+                        days: days,
+                        selectedDay: selectedDay,
+                        startDate: widget.startDate,
+                        onDaySelected: (day) {
+                          setState(() {
+                            selectedDay = day;
+                          });
+                        },
+                      ),
+                  error:
+                      (error, stackTrace) => DayCarousel(
+                        days: days,
+                        selectedDay: selectedDay,
+                        startDate: widget.startDate,
+                        onDaySelected: (day) {
+                          setState(() {
+                            selectedDay = day;
+                          });
+                        },
+                      ),
+                );
+              },
               loading: () => _buildDayCarouselLoadingPlaceholder(),
               error: (error, stackTrace) => const SizedBox.shrink(),
             ),
@@ -119,6 +152,14 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildEmptyDayCarouselState(BuildContext context) {
+    return Container(
+      height: 80,
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      child: Center(child: Text('No days available')),
     );
   }
 
@@ -193,8 +234,10 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
             PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
           ),
         );
+        // Also invalidate completion status to refresh checkmarks
+        ref.invalidate(userPlanDaysCompletionStatusProvider(widget.plan.id));
       } else if (!success && mounted) {
-        _showErrorSnackbar('Failed to update task status');
+        _showErrorSnackbar('Unable to update task status');
       }
     } catch (e) {
       debugPrint('Error toggling task: $e');

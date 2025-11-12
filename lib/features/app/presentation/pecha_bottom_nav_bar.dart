@@ -59,7 +59,7 @@ class PechaBottomNavBar extends ConsumerWidget {
               index: 3,
               icon: Icons.check_box_outlined,
               selectedIcon: Icons.check_box,
-              label: 'Plans',
+              label: 'Practice',
               isSelected: selectedIndex == 3,
             ),
             _buildNavItem(

@@ -42,6 +42,7 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
         hideControls: true, // Hide controls to reduce context menu triggers
         controlsVisibleAtStart: false,
         useHybridComposition: true, // Better performance
+        enableCaption: false,
       ),
     );
 

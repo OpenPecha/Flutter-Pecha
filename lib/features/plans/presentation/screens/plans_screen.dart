@@ -32,7 +32,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Plans',
+          'Practice',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         scrolledUnderElevation: 0,
@@ -59,8 +59,11 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: [Tab(text: 'My Plans'), Tab(text: 'All Plans')],
-          labelStyle: TextStyle(fontWeight: FontWeight.bold),
-          unselectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          unselectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
           labelColor: Theme.of(context).colorScheme.secondary,
           unselectedLabelColor:
               Theme.of(context).brightness == Brightness.dark

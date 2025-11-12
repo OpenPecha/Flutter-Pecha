@@ -30,10 +30,17 @@ class TextStory extends StatelessWidget {
     final textColor =
         brightness == Brightness.dark ? Colors.white : Colors.black;
 
+    final imageUrl =
+        "https://images.unsplash.com/photo-1685495856559-5d96a0e51acb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2624";
+
     return Container(
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
+        image: DecorationImage(
+          image: Image.network(imageUrl).image,
+          fit: BoxFit.cover,
+        ),
         color: defaultBackgroundColor,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(roundedTop ? 8 : 0),

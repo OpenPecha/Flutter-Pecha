@@ -8,6 +8,7 @@ class DayCarousel extends StatelessWidget {
   final DateTime startDate;
   final int selectedDay;
   final Function(int) onDaySelected;
+  final Map<int, bool>? dayCompletionStatus;
 
   const DayCarousel({
     super.key,
@@ -15,6 +16,7 @@ class DayCarousel extends StatelessWidget {
     required this.startDate,
     required this.selectedDay,
     required this.onDaySelected,
+    this.dayCompletionStatus,
   });
 
   @override
@@ -25,8 +27,8 @@ class DayCarousel extends StatelessWidget {
       child: CarouselSlider.builder(
         options: CarouselOptions(
           aspectRatio: 1,
-          height: 60,
-          viewportFraction: 0.2, // Show ~4 items at once (60px + margins)
+          height: 70,
+          viewportFraction: 0.24, // Show ~4 items at once (60px + margins)
           enableInfiniteScroll: false,
           scrollPhysics: const ClampingScrollPhysics(), // Smoother scroll
           autoPlayCurve: Curves.easeInOut,
@@ -41,11 +43,12 @@ class DayCarousel extends StatelessWidget {
           //convert to 02 Jan type format
           final dayDateString = DateFormat('dd MMM').format(dayDate);
           final isSelected = selectedDay == day.dayNumber;
+          final isCompleted = dayCompletionStatus?[day.dayNumber] ?? false;
 
           return GestureDetector(
             onTap: () => onDaySelected(day.dayNumber),
             child: Container(
-              width: 70,
+              width: 80,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
@@ -58,26 +61,41 @@ class DayCarousel extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Text(
-                    '${day.dayNumber}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  if (isCompleted)
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: Icon(
+                        Icons.check,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dayDateString,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight:
-                          startDate == dayDate
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                    ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${day.dayNumber}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        dayDateString,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight:
+                              startDate == dayDate
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

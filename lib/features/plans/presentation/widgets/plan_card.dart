@@ -51,11 +51,11 @@ Widget _buildPlanInfo(PlansModel plan) {
       const SizedBox(height: 4),
       Text(
         '${plan.totalDays} Days',
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),
       Text(
         plan.title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

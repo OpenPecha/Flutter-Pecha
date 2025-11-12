@@ -84,7 +84,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                   subtitle: Text(
                     authState.userProfile?.email ?? '',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/profile'),
@@ -107,11 +107,11 @@ class MoreScreen extends ConsumerWidget {
                   isDarkMode
                       ? localizations.themeDark
                       : localizations.themeLight,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 subtitle: Text(
                   isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 trailing: Switch(
                   value: isDarkMode,
@@ -131,11 +131,11 @@ class MoreScreen extends ConsumerWidget {
                 ),
                 title: Text(
                   'Language',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 subtitle: Text(
-                  _getLanguageName(locale ?? Localizations.localeOf(context)),
-                  style: Theme.of(context).textTheme.bodySmall,
+                  _getLanguageName(locale),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showLanguageBottomSheet(context, ref, locale),
@@ -156,12 +156,12 @@ class MoreScreen extends ConsumerWidget {
                 title: Text(
                   AppLocalizations.of(context)?.notificationSettings ??
                       'Notification Settings',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 subtitle: Text(
                   AppLocalizations.of(context)?.manageDailyReminders ??
                       'Manage daily reminders',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 onTap: () => context.push(NotificationSettingsScreen.routeName),
               ),
@@ -189,7 +189,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                   subtitle: Text(
                     'Sign in to sync your progress',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   onTap: () => ref.read(authProvider.notifier).logout(),
                 ),
@@ -294,7 +294,7 @@ class MoreScreen extends ConsumerWidget {
                   return ListTile(
                     title: Text(
                       _getLanguageName(localeItem),
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     trailing:
                         isSelected

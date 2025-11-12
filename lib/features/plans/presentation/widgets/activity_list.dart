@@ -40,58 +40,15 @@ class ActivityList extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             children: [
-              GestureDetector(
+              _TaskCheckbox(
+                isCompleted: isCompleted,
                 onTap: () => onActivityToggled(taskId),
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color:
-                          isCompleted
-                              ? const Color(0xFF1E3A8A)
-                              : Theme.of(context).iconTheme.color!,
-                      width: 1,
-                    ),
-                    color:
-                        isCompleted
-                            ? const Color(0xFF1E3A8A)
-                            : Colors.transparent,
-                  ),
-                  child:
-                      isCompleted
-                          ? const Icon(
-                            Icons.check,
-                            size: 16,
-                            color: Colors.white,
-                          )
-                          : null,
-                ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: GestureDetector(
+                child: _TaskTitleButton(
+                  title: task.title,
                   onTap: () => handleActivityTap(context, task),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          task.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        size: 20,
-                        color: Theme.of(context).iconTheme.color!,
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -118,5 +75,84 @@ class ActivityList extends StatelessWidget {
       final preloader = StoryMediaPreloader();
       unawaited(preloader.preloadStoryItems(task.subTasks, context));
     }
+  }
+}
+
+/// Checkbox widget for task completion with ripple effect
+class _TaskCheckbox extends StatelessWidget {
+  const _TaskCheckbox({required this.isCompleted, required this.onTap});
+
+  final bool isCompleted;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color:
+                  isCompleted
+                      ? const Color(0xFF1E3A8A)
+                      : Theme.of(context).iconTheme.color!,
+              width: 1,
+            ),
+            color: isCompleted ? const Color(0xFF1E3A8A) : Colors.transparent,
+          ),
+          child:
+              isCompleted
+                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  : null,
+        ),
+      ),
+    );
+  }
+}
+
+/// Task title button with ripple effect
+class _TaskTitleButton extends StatelessWidget {
+  const _TaskTitleButton({required this.title, required this.onTap});
+
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+                color: Theme.of(context).iconTheme.color!,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

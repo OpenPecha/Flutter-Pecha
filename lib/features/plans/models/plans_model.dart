@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
 
 enum DifficultyLevel { beginner, intermediate, advanced }
@@ -9,7 +10,7 @@ class PlansModel {
   final String language;
   final String? difficultyLevel;
   final String? imageUrl;
-  final int totalDays;
+  final int? totalDays;
   final List<String>? tags;
   final AuthorDtoModel? author;
 
@@ -20,7 +21,7 @@ class PlansModel {
     required this.language,
     this.difficultyLevel,
     this.imageUrl,
-    required this.totalDays,
+    this.totalDays,
     this.tags,
     this.author,
   });
@@ -33,7 +34,7 @@ class PlansModel {
       language: json['language'] as String,
       difficultyLevel: json['difficulty_level'] as String?,
       imageUrl: json['image_url'] as String?,
-      totalDays: json['total_days'] as int,
+      totalDays: json['total_days'] as int?,
       tags:
           json['tags'] != null ? List<String>.from(json['tags'] as List) : null,
       author:
@@ -51,7 +52,7 @@ class PlansModel {
       'language': language,
       'difficulty_level': difficultyLevel,
       'image_url': imageUrl,
-      'total_days': totalDays,
+      'total_days': totalDays ?? 0,
       'tags': tags,
     };
   }
@@ -64,7 +65,7 @@ class PlansModel {
     String? language,
     String? difficultyLevel,
     String? imageUrl,
-    int? totalDays,
+    int? totalDays = 0,
     List<String>? tags,
   }) {
     return PlansModel(

@@ -162,10 +162,6 @@ class _CustomVideoStoryState extends State<CustomVideoStory> {
             ),
 
           // Play/Pause indicator
-          if (_isVideoReady && !_isVideoPlaying)
-            const Center(
-              child: Icon(Icons.play_arrow, color: Colors.white70, size: 64),
-            ),
         ],
       ),
     );

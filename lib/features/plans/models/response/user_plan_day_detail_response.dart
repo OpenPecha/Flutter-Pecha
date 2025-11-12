@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
 
 class UserPlanDayDetailResponse {

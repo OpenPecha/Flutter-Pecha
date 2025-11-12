@@ -172,7 +172,7 @@ class TextDetailScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 18),
-            if (currentLocale?.languageCode != 'bo')
+            if (currentLocale.languageCode != 'bo')
               ElevatedButton(
                 onPressed: () {
                   ref
