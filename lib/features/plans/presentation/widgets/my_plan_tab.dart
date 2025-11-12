@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/config/router/route_config.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/my_plans_paginated_provider.dart';
@@ -48,7 +48,7 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
     if (authState.isGuest) {
       return _GuestLoginPrompt(
         onLogin: () {
-          ref.read(authProvider.notifier).logout();
+          LoginDrawer.show(context, ref);
         },
       );
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
@@ -200,7 +201,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
     UserPlansModel? userPlan,
   ) async {
     if (isGuest) {
-      ref.read(authProvider.notifier).logout();
+      LoginDrawer.show(context, ref);
       return;
     }
 
