@@ -32,12 +32,11 @@ class VerseCard extends ConsumerWidget {
       },
       child: Stack(
         children: [
-          // Main card with Hero animation
           Hero(
             tag: 'verse-image-$imageUrl',
             child: Container(
               width: double.infinity,
-              height: 311,
+              height: 320,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 image:
@@ -49,43 +48,40 @@ class VerseCard extends ConsumerWidget {
                         : null,
                 color: imageUrl.isEmpty ? Colors.brown[700] : null,
               ),
-              child: Stack(
-                children: [
-                  // Content
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.normal,
-                            fontFamily: 'Instrument Serif',
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: Text(
-                              verseText,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w400,
-                                height: 0.97,
-                                color: Colors.white,
-                              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.normal,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      height: 320 * 0.7,
+                      child: Center(
+                        child: SingleChildScrollView(
+                          child: Text(
+                            verseText,
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    const Spacer(),
+                  ],
+                ),
               ),
             ),
           ),
