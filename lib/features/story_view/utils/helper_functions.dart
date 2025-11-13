@@ -20,7 +20,7 @@ List<StoryItem> createFlutterStoryItems(
   const durationForAudio = Duration(seconds: 15);
   const durationForActionCard = Duration(seconds: 15);
   for (final subtask in subtasks) {
-    if (subtask.content.isEmpty || subtask.content.isEmpty) {
+    if (subtask.content.isEmpty) {
       continue;
     }
 
@@ -46,7 +46,6 @@ List<StoryItem> createFlutterStoryItems(
           ),
         );
         break;
-
       case "VIDEO":
         // Use custom widget for YouTube videos
         storyItems.add(
@@ -62,7 +61,6 @@ List<StoryItem> createFlutterStoryItems(
           ),
         );
         break;
-
       case "IMAGE":
         // Note: Images are precached via StoryMediaPreloader.preloadImage()
         // which uses CachedNetworkImageProvider. FlutterStoryPresenter's
@@ -74,11 +72,18 @@ List<StoryItem> createFlutterStoryItems(
             storyItemType: StoryItemType.image,
             duration: durationForImage,
             storyItemSource: StoryItemSource.network,
-            imageConfig: const StoryViewImageConfig(fit: BoxFit.fill),
+            imageConfig: StoryViewImageConfig(
+              fit: BoxFit.fitWidth,
+              progressIndicatorBuilder:
+                  (context, url, progress) => Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+            ),
           ),
         );
         break;
-
       case "AUDIO":
         // For audio-only content, use custom widget with audioConfig
         storyItems.add(

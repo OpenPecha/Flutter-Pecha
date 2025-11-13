@@ -154,10 +154,9 @@ class _CustomVideoStoryState extends State<CustomVideoStory> {
           // Note: Even with preloading, YouTube player initialization takes time
           // The loading overlay in PlanStoryPresenter handles initial delay
           if (!_isVideoReady)
-            const Center(
+            Center(
               child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
 
