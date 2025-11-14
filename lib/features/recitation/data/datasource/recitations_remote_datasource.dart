@@ -96,25 +96,27 @@ class RecitationsRemoteDatasource {
   Future<RecitationContentModel> fetchRecitationContent(
     String id, {
     required String language,
+    List<String>? recitation,
     List<String>? translations,
     List<String>? transliterations,
     List<String>? adaptations,
   }) async {
     try {
-      final uri = Uri.parse(
-        '$baseUrl/api/v1/recitations/$id',
-      ).replace(queryParameters: {'language': language});
+      final uri = Uri.parse('$baseUrl/recitations/$id');
 
-      final requestBody = <String, dynamic>{};
-      if (translations != null && translations.isNotEmpty) {
-        requestBody['translations'] = translations;
-      }
-      if (transliterations != null && transliterations.isNotEmpty) {
-        requestBody['transliterations'] = transliterations;
-      }
-      if (adaptations != null && adaptations.isNotEmpty) {
-        requestBody['adaptations'] = adaptations;
-      }
+      // Build request body according to API spec
+      final requestBody = <String, dynamic>{
+        'language': language,
+        'recitation': recitation ?? [],
+        'translations': translations ?? [],
+        'transliterations': transliterations ?? [],
+        'adaptations': adaptations ?? [],
+      };
+
+      debugPrint('Recitation Content Request URL: $uri');
+      debugPrint(
+        'Recitation Content Request Body: ${json.encode(requestBody)}',
+      );
 
       final response = await client.post(
         uri,
@@ -122,9 +124,15 @@ class RecitationsRemoteDatasource {
         body: json.encode(requestBody),
       );
 
+      debugPrint('Recitation Content Response Status: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        debugPrint('Recitation Content Response Body: ${response.body}');
+      }
+
       if (response.statusCode == 200) {
         final decoded = utf8.decode(response.bodyBytes);
         final data = json.decode(decoded) as Map<String, dynamic>;
+        debugPrint('Recitation Content Response Data: $data');
         return RecitationContentModel.fromJson(data);
       } else {
         debugPrint(

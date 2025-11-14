@@ -1,18 +1,20 @@
+import 'package:flutter/material.dart';
+
 class RecitationTextModel {
   final String id;
-  final String text;
+  final String content;
 
-  RecitationTextModel({required this.id, required this.text});
+  RecitationTextModel({required this.id, required this.content});
 
   factory RecitationTextModel.fromJson(Map<String, dynamic> json) {
     return RecitationTextModel(
       id: json['id'] as String,
-      text: json['text'] as String,
+      content: json['content'] as String,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'text': text};
+    return {'id': id, 'content': content};
   }
 }
 

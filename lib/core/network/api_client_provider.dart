@@ -10,6 +10,10 @@ class ApiClient extends http.BaseClient {
   final AuthService _authService;
   final http.Client _inner = http.Client();
   static const List<String> _protectedPaths = [
+    // user profile
+    '/api/v1/users/info',
+    '/api/v1/users/upload',
+
     // public plans
     '/api/v1/plans/{planId}/days',
     '/api/v1/plans/{planId}/days/{dayNumber}',
@@ -17,15 +21,16 @@ class ApiClient extends http.BaseClient {
     // user progress
     '/api/v1/users/me',
     '/api/v1/users/me/plans',
-    '/api/v1/users/me/onboarding-preferences',
-    '/api/v1/users/info',
-    '/api/v1/users/upload',
-    '/api/v1/users/me/plan',
-    '/api/v1/users/me/task',
+    '/api/v1/users/me/plans/{planId}',
     '/api/v1/users/me/tasks',
-    '/api/v1/users/me/tasks/{taskId}/completion',
+    '/api/v1/users/me/tasks/{taskId}/complete',
     '/api/v1/users/me/sub-tasks',
     '/api/v1/users/me/sub-tasks/{subTaskId}/complete',
+    '/api/v1/users/me/task/{taskId}',
+    '/api/v1/users/me/plan/{planId}/days/{dayNumber}',
+
+    // recitations
+    '/api/v1/users/me/recitations',
     // Add more as needed
   ];
   final Logger _logger = Logger('ApiClient');

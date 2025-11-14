@@ -32,15 +32,17 @@ class RecitationsRepository {
   }
 
   Future<RecitationContentModel> getRecitationContent(
-    String id, {
-    required String language,
+    String id,
+    String language,
+    List<String>? recitations,
     List<String>? translations,
     List<String>? transliterations,
     List<String>? adaptations,
-  }) async {
+  ) async {
     try {
       return await recitationsRemoteDatasource.fetchRecitationContent(
         id,
+        recitation: recitations,
         language: language,
         translations: translations,
         transliterations: transliterations,

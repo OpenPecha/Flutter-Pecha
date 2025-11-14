@@ -22,31 +22,48 @@ class _RecitationDetailScreenState
   @override
   void initState() {
     super.initState();
-    _isSaved =
-        ref
-            .watch(savedRecitationsFutureProvider)
-            .value
-            ?.contains(widget.recitation) ??
-        false;
   }
 
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     final languageCode = locale.languageCode;
-    final contentAsync = ref.watch(
-      recitationContentProvider({
-        'text_id': widget.recitation.textId,
-        'language': languageCode,
-      }),
+
+    // Build params based on language
+    List<String>? recitations;
+    List<String>? translations;
+    List<String>? transliterations;
+    List<String>? adaptations;
+
+    if (languageCode == "bo") {
+      recitations = ["bo"];
+      adaptations = ["bo"];
+      translations = ["en"];
+    } else if (languageCode == "en") {
+      translations = ["en"];
+      recitations = ["bo"];
+      transliterations = ["en"];
+    } else if (languageCode == "zh") {
+      translations = ["zh", "en"];
+      transliterations = ["en"];
+    }
+
+    final recitationParams = RecitationContentParams(
+      textId: widget.recitation.textId,
+      recitations: recitations,
+      translations: translations,
+      transliterations: transliterations,
+      adaptations: adaptations,
     );
+
+    final contentAsync = ref.watch(recitationContentProvider(recitationParams));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.recitation.title,
-          style: const TextStyle(fontSize: 18),
-        ),
+        // title: Text(
+        //   widget.recitation.title,
+        //   style: const TextStyle(fontSize: 18),
+        // ),
         actions: [
           IconButton(
             onPressed: _toggleSave,
@@ -77,7 +94,7 @@ class _RecitationDetailScreenState
             content.title,
             style: Theme.of(
               context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           const Divider(),
@@ -110,7 +127,7 @@ class _RecitationDetailScreenState
         // Recitation (original text)
         if (segment.recitation != null && segment.recitation!.isNotEmpty) ...[
           ...segment.recitation!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.text);
+            return _buildTextSection(context, entry.value.content);
           }),
         ],
         // Translations
@@ -118,7 +135,7 @@ class _RecitationDetailScreenState
             segment.translations!.isNotEmpty) ...[
           const SizedBox(height: 16),
           ...segment.translations!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.text);
+            return _buildTextSection(context, entry.value.content);
           }),
         ],
         // Transliterations
@@ -126,14 +143,14 @@ class _RecitationDetailScreenState
             segment.transliterations!.isNotEmpty) ...[
           const SizedBox(height: 16),
           ...segment.transliterations!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.text);
+            return _buildTextSection(context, entry.value.content);
           }),
         ],
         // Adaptations
         if (segment.adaptations != null && segment.adaptations!.isNotEmpty) ...[
           const SizedBox(height: 16),
           ...segment.adaptations!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.text);
+            return _buildTextSection(context, entry.value.content);
           }),
         ],
       ],

@@ -6,6 +6,33 @@ import '../../data/datasource/recitations_remote_datasource.dart';
 import '../../data/models/recitation_model.dart';
 import '../../data/models/recitation_content_model.dart';
 
+// Params class for recitation content
+class RecitationContentParams {
+  final String textId;
+  final List<String>? recitations;
+  final List<String>? translations;
+  final List<String>? transliterations;
+  final List<String>? adaptations;
+
+  const RecitationContentParams({
+    required this.textId,
+    this.recitations,
+    this.translations,
+    this.transliterations,
+    this.adaptations,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RecitationContentParams &&
+          runtimeType == other.runtimeType &&
+          textId == other.textId;
+
+  @override
+  int get hashCode => textId.hashCode;
+}
+
 // Repository provider
 final recitationsRepositoryProvider = Provider<RecitationsRepository>((ref) {
   return RecitationsRepository(
@@ -33,7 +60,7 @@ final savedRecitationsFutureProvider = FutureProvider<List<RecitationModel>>((
 
 // Get recitation content by ID
 final recitationContentProvider =
-    FutureProvider.family<RecitationContentModel, Map<String, dynamic>>((
+    FutureProvider.family<RecitationContentModel, RecitationContentParams>((
       ref,
       params,
     ) {
@@ -42,11 +69,12 @@ final recitationContentProvider =
       return ref
           .watch(recitationsRepositoryProvider)
           .getRecitationContent(
-            params['id'] as String,
-            language: languageCode,
-            translations: params['translations'] as List<String>?,
-            transliterations: params['transliterations'] as List<String>?,
-            adaptations: params['adaptations'] as List<String>?,
+            params.textId,
+            languageCode,
+            params.recitations,
+            params.translations,
+            params.transliterations,
+            params.adaptations,
           );
     });
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_card.dart';
@@ -113,6 +115,7 @@ class RecitationsTab extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       builder: (context) {
+        final authState = ref.watch(authProvider);
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -121,6 +124,10 @@ class RecitationsTab extends ConsumerWidget {
                 leading: const Icon(Icons.bookmark_add_outlined),
                 title: const Text('Save Recitation'),
                 onTap: () async {
+                  if (authState.isGuest) {
+                    LoginDrawer.show(context, ref);
+                    return;
+                  }
                   final result = await ref
                       .watch(recitationsRepositoryProvider)
                       .saveRecitation(recitation.textId);
