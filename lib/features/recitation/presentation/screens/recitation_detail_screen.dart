@@ -36,7 +36,7 @@ class _RecitationDetailScreenState
     final languageCode = locale.languageCode;
     final contentAsync = ref.watch(
       recitationContentProvider({
-        'id': widget.recitation.id,
+        'text_id': widget.recitation.textId,
         'language': languageCode,
       }),
     );
@@ -180,28 +180,17 @@ class _RecitationDetailScreenState
     );
   }
 
-  void _toggleSave() {
-    setState(() {
-      _isSaved = !_isSaved;
-    });
-    // TODO: Call repository to save/unsave
+  void _toggleSave() async {
     final repository = ref.read(recitationsRepositoryProvider);
-    if (_isSaved) {
-      repository.saveRecitation(widget.recitation.id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Recitation saved'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    final result = await repository.saveRecitation(widget.recitation.textId);
+    if (mounted && result) {
+      setState(() {
+        _isSaved = true;
+      });
     } else {
-      repository.unsaveRecitation(widget.recitation.id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Recitation removed'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      setState(() {
+        _isSaved = false;
+      });
     }
   }
 

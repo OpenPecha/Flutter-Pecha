@@ -115,11 +115,7 @@ class RecitationCard extends StatelessWidget {
   Widget _buildRecitationTitle(BuildContext context) {
     return Text(
       recitation.title,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        height: 1.4,
-      ),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );

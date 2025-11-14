@@ -25,46 +25,47 @@ class RecitationsRemoteDatasource {
 
   RecitationsRemoteDatasource({required this.client});
 
+  // Get all recitations
   Future<List<RecitationModel>> fetchRecitations({
     RecitationsQueryParams? queryParams,
   }) async {
     try {
       final uri = Uri.parse(
-        '$baseUrl/api/v1/cms/recitations',
+        '$baseUrl/recitations',
       ).replace(queryParameters: queryParams?.toQueryParams());
 
-      // final response = await client.get(
-      //   uri,
-      //   headers: {'Content-Type': 'application/json'},
-      // );
+      final response = await client.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
 
-      // if (response.statusCode == 200) {
-      //   final decoded = utf8.decode(response.bodyBytes);
-      //   final responseData = json.decode(decoded) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        final decoded = utf8.decode(response.bodyBytes);
+        final responseData = json.decode(decoded) as Map<String, dynamic>;
 
-      //   // Parse the nested "recitations" array from the response
-      //   final List<dynamic> recitationsData =
-      //       responseData['recitations'] as List<dynamic>? ?? [];
+        // Parse the nested "recitations" array from the response
+        final List<dynamic> recitationsData =
+            responseData['recitations'] as List<dynamic>? ?? [];
 
-      //   return recitationsData
-      //       .map(
-      //         (json) => RecitationModel.fromJson(json as Map<String, dynamic>),
-      //       )
-      //       .toList();
-      // } else {
-      //   debugPrint('Failed to fetch recitations: ${response.statusCode}');
-      //   throw Exception('Failed to fetch recitations: ${response.statusCode}');
-      // }
-      return mockRecitations;
+        return recitationsData
+            .map(
+              (json) => RecitationModel.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
+      } else {
+        debugPrint('Failed to fetch recitations: ${response.statusCode}');
+        throw Exception('Failed to fetch recitations: ${response.statusCode}');
+      }
     } catch (e) {
       debugPrint('Error fetching recitations: $e');
       throw Exception('Error fetching recitations: $e');
     }
   }
 
+  // Get saved recitations
   Future<List<RecitationModel>> fetchSavedRecitations() async {
     try {
-      final uri = Uri.parse('$baseUrl/api/v1/cms/recitations/saved');
+      final uri = Uri.parse('$baseUrl/users/me/recitations');
       final response = await client.get(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -91,6 +92,7 @@ class RecitationsRemoteDatasource {
     }
   }
 
+  // Get recitation content by text ID
   Future<RecitationContentModel> fetchRecitationContent(
     String id, {
     required String language,
@@ -138,37 +140,43 @@ class RecitationsRemoteDatasource {
     }
   }
 
-  Future<void> saveRecitation(String id) async {
+  // Save recitation
+  Future<bool> saveRecitation(String id) async {
     try {
-      final uri = Uri.parse('$baseUrl/api/v1/cms/recitations/$id/save');
+      final uri = Uri.parse('$baseUrl/users/me/recitations');
+      final body = json.encode({'text_id': id});
       final response = await client.post(
         uri,
         headers: {'Content-Type': 'application/json'},
+        body: body,
       );
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        debugPrint('Failed to save recitation: ${response.statusCode}');
-        throw Exception('Failed to save recitation: ${response.statusCode}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      debugPrint('Error saving recitation: $e');
-      throw Exception('Error saving recitation: $e');
+      debugPrint('Failed to save recitation: $e');
+      throw Exception('Failed to save recitation: $e');
     }
   }
 
-  Future<void> unsaveRecitation(String id) async {
+  // Unsave recitation
+  Future<bool> unsaveRecitation(String id) async {
     try {
-      final uri = Uri.parse('$baseUrl/api/v1/cms/recitations/$id/save');
+      final uri = Uri.parse('$baseUrl/users/me/recitations/$id');
       final response = await client.delete(
         uri,
         headers: {'Content-Type': 'application/json'},
       );
-      if (response.statusCode != 200 && response.statusCode != 204) {
-        debugPrint('Failed to unsave recitation: ${response.statusCode}');
-        throw Exception('Failed to unsave recitation: ${response.statusCode}');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      debugPrint('Error unsaving recitation: $e');
-      throw Exception('Error unsaving recitation: $e');
+      debugPrint('Failed to unsave recitation: $e');
+      throw Exception('Failed to unsave recitation: $e');
     }
   }
 }

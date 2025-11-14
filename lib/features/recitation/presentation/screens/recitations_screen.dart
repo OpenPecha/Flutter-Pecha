@@ -41,22 +41,25 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(
-              child: Text(
-                'Work in progress...',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-            // _buildAppBar(context, localizations),
-            // // if (_isSearchVisible)
-            // _buildSearchBar(context, localizations),
-            // _buildTabBar(context, localizations),
-            // Expanded(
-            //   child: TabBarView(
-            //     controller: _tabController,
-            //     children: const [RecitationsTab(), MyRecitationsTab()],
+            // Center(
+            //   child: Text(
+            //     'Work in progress...',
+            //     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             //   ),
             // ),
+            _buildAppBar(context, localizations),
+            // if (_isSearchVisible)
+            _buildSearchBar(context, localizations),
+            _buildTabBar(context, localizations),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  RecitationsTab(controller: _tabController),
+                  MyRecitationsTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

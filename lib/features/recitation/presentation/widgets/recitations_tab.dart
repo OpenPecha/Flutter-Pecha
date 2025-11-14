@@ -7,7 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class RecitationsTab extends ConsumerWidget {
-  const RecitationsTab({super.key});
+  final TabController controller;
+  const RecitationsTab({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,7 +20,7 @@ class RecitationsTab extends ConsumerWidget {
         if (recitations.isEmpty) {
           return _buildEmptyState(context, localizations);
         }
-        return _buildRecitationsList(context, recitations);
+        return _buildRecitationsList(context, recitations, ref);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => _buildErrorState(context, error, localizations),
@@ -29,6 +30,7 @@ class RecitationsTab extends ConsumerWidget {
   Widget _buildRecitationsList(
     BuildContext context,
     List<RecitationModel> recitations,
+    WidgetRef ref,
   ) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
@@ -41,7 +43,7 @@ class RecitationsTab extends ConsumerWidget {
             context.push('/recitations/detail', extra: recitation);
           },
           onMoreTap: () {
-            _showRecitationOptions(context, recitation);
+            _showRecitationOptions(context, recitation, ref);
           },
         );
       },
@@ -89,12 +91,12 @@ class RecitationsTab extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Failed to load recitations',
+            'Unable to load recitations',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
-            error.toString(),
+            "Please try again later",
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
@@ -106,6 +108,7 @@ class RecitationsTab extends ConsumerWidget {
   void _showRecitationOptions(
     BuildContext context,
     RecitationModel recitation,
+    WidgetRef ref,
   ) {
     showModalBottomSheet(
       context: context,
@@ -117,19 +120,41 @@ class RecitationsTab extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.bookmark_add_outlined),
                 title: const Text('Save Recitation'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Implement save functionality
+                onTap: () async {
+                  final result = await ref
+                      .watch(recitationsRepositoryProvider)
+                      .saveRecitation(recitation.textId);
+                  ref.invalidate(savedRecitationsFutureProvider);
+                  if (context.mounted && result) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Recitation saved'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    controller.animateTo(1);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Unable to save recitation'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.share_outlined),
-                title: const Text('Share'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Implement share functionality
-                },
-              ),
+              // ListTile(
+              //   leading: const Icon(Icons.share_outlined),
+              //   title: const Text('Share'),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //     // TODO: Implement share functionality
+              //   },
+              // ),
             ],
           ),
         );

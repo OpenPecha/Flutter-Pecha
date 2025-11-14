@@ -19,7 +19,7 @@ class RecitationsRepository {
         ),
       );
     } catch (e) {
-      throw Exception('Failed to load recitations: $e');
+      throw Exception('Unable to load recitations: $e');
     }
   }
 
@@ -51,17 +51,17 @@ class RecitationsRepository {
     }
   }
 
-  Future<void> saveRecitation(String id) async {
+  Future<bool> saveRecitation(String id) async {
     try {
-      await recitationsRemoteDatasource.saveRecitation(id);
+      return await recitationsRemoteDatasource.saveRecitation(id);
     } catch (e) {
       throw Exception('Failed to save recitation: $e');
     }
   }
 
-  Future<void> unsaveRecitation(String id) async {
+  Future<bool> unsaveRecitation(String id) async {
     try {
-      await recitationsRemoteDatasource.unsaveRecitation(id);
+      return await recitationsRemoteDatasource.unsaveRecitation(id);
     } catch (e) {
       throw Exception('Failed to unsave recitation: $e');
     }
