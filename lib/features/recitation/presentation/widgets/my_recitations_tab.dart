@@ -27,7 +27,7 @@ class MyRecitationsTab extends ConsumerWidget {
         if (recitations.isEmpty) {
           return _buildEmptyState(context, localizations);
         }
-        return _buildRecitationsList(context, recitations);
+        return _buildRecitationsList(context, recitations, ref);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => _buildErrorState(context, error, localizations),
@@ -37,6 +37,7 @@ class MyRecitationsTab extends ConsumerWidget {
   Widget _buildRecitationsList(
     BuildContext context,
     List<RecitationModel> recitations,
+    WidgetRef ref,
   ) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
@@ -49,7 +50,7 @@ class MyRecitationsTab extends ConsumerWidget {
             context.push('/recitations/detail', extra: recitation);
           },
           onMoreTap: () {
-            _showRecitationOptions(context, recitation);
+            _showRecitationOptions(context, recitation, ref);
           },
         );
       },
@@ -147,6 +148,7 @@ class MyRecitationsTab extends ConsumerWidget {
   void _showRecitationOptions(
     BuildContext context,
     RecitationModel recitation,
+    WidgetRef ref,
   ) {
     showModalBottomSheet(
       context: context,
@@ -158,19 +160,40 @@ class MyRecitationsTab extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.bookmark_remove_outlined),
                 title: const Text('Remove from Saved'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Implement unsave functionality
+                onTap: () async {
+                  final result = await ref
+                      .watch(recitationsRepositoryProvider)
+                      .unsaveRecitation(recitation.textId);
+                  ref.invalidate(savedRecitationsFutureProvider);
+                  if (context.mounted && result) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Recitation unsaved'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Unable to unsave recitation'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.share_outlined),
-                title: const Text('Share'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Implement share functionality
-                },
-              ),
+              // ListTile(
+              //   leading: const Icon(Icons.share_outlined),
+              //   title: const Text('Share'),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //     // TODO: Implement share functionality
+              //   },
+              // ),
             ],
           ),
         );

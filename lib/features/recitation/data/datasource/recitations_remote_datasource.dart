@@ -170,9 +170,9 @@ class RecitationsRemoteDatasource {
   }
 
   // Unsave recitation
-  Future<bool> unsaveRecitation(String id) async {
+  Future<bool> unsaveRecitation(String textId) async {
     try {
-      final uri = Uri.parse('$baseUrl/users/me/recitations/$id');
+      final uri = Uri.parse('$baseUrl/users/me/recitations/$textId');
       final response = await client.delete(
         uri,
         headers: {'Content-Type': 'application/json'},

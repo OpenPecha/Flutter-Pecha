@@ -85,7 +85,7 @@ class _RecitationDetailScreenState
 
   Widget _buildContent(BuildContext context, RecitationContentModel content) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -96,9 +96,7 @@ class _RecitationDetailScreenState
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
           const Divider(),
-          const SizedBox(height: 16),
           // Segments
           ...content.segments.asMap().entries.map((entry) {
             final index = entry.key;
@@ -116,48 +114,113 @@ class _RecitationDetailScreenState
     RecitationSegmentModel segment,
     int index,
   ) {
+    final locale = ref.watch(localeProvider);
+    final languageCode = locale.languageCode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (index > 0) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           const Divider(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
         ],
-        // Recitation (original text)
-        if (segment.recitation != null && segment.recitation!.isNotEmpty) ...[
-          ...segment.recitation!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.content);
-          }),
-        ],
-        // Translations
-        if (segment.translations != null &&
-            segment.translations!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          ...segment.translations!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.content);
-          }),
-        ],
-        // Transliterations
-        if (segment.transliterations != null &&
-            segment.transliterations!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          ...segment.transliterations!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.content);
-          }),
-        ],
-        // Adaptations
-        if (segment.adaptations != null && segment.adaptations!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          ...segment.adaptations!.entries.map((entry) {
-            return _buildTextSection(context, entry.value.content);
-          }),
+        // Order content based on language
+        if (languageCode == "bo") ...[
+          // Tibetan: 1. Recitation, 2. Adaptation, 3. Translation
+          if (segment.recitation != null && segment.recitation!.isNotEmpty) ...[
+            ...segment.recitation!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.adaptations != null &&
+              segment.adaptations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.adaptations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.translations != null &&
+              segment.translations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.translations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+        ] else if (languageCode == "en") ...[
+          // English: 1. Translation, 2. Recitation, 3. Transliteration
+          if (segment.translations != null &&
+              segment.translations!.isNotEmpty) ...[
+            ...segment.translations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.recitation != null && segment.recitation!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.recitation!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.transliterations != null &&
+              segment.transliterations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.transliterations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+        ] else if (languageCode == "zh") ...[
+          // Chinese: 1. Translation (Chinese), 2. Translation (English), 3. Transliteration (English)
+          if (segment.translations != null &&
+              segment.translations!.isNotEmpty) ...[
+            ...segment.translations!.entries.map((entry) {
+              // Display all translations (Chinese first, then English)
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.transliterations != null &&
+              segment.transliterations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.transliterations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+        ] else ...[
+          // Default order for other languages
+          if (segment.recitation != null && segment.recitation!.isNotEmpty) ...[
+            ...segment.recitation!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.translations != null &&
+              segment.translations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.translations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.transliterations != null &&
+              segment.transliterations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.transliterations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
+          if (segment.adaptations != null &&
+              segment.adaptations!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...segment.adaptations!.entries.map((entry) {
+              return _buildTextSection(context, entry.value.content);
+            }),
+          ],
         ],
       ],
     );
   }
 
   Widget _buildTextSection(BuildContext context, String text) {
+    // replace <br> with \n
+    text = text.replaceAll('<br>', '\n');
+    text = text.replaceAll('<br/>', '\n');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
