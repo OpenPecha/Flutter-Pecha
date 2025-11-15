@@ -4,13 +4,11 @@ import 'package:flutter_pecha/features/recitation/data/models/recitation_model.d
 class RecitationCard extends StatelessWidget {
   final RecitationModel recitation;
   final VoidCallback onTap;
-  final VoidCallback? onMoreTap;
 
   const RecitationCard({
     super.key,
     required this.recitation,
     required this.onTap,
-    this.onMoreTap,
   });
 
   @override
@@ -35,7 +33,6 @@ class RecitationCard extends StatelessWidget {
                 _buildRecitationLogo(),
                 const SizedBox(width: 12),
                 Expanded(child: _buildRecitationTitle(context)),
-                if (onMoreTap != null) _buildMoreButton(context),
               ],
             ),
           ),
@@ -118,15 +115,6 @@ class RecitationCard extends StatelessWidget {
       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildMoreButton(BuildContext context) {
-    return IconButton(
-      onPressed: onMoreTap,
-      icon: const Icon(Icons.more_vert, size: 20),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
     );
   }
 }

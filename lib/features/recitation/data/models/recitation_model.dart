@@ -2,26 +2,44 @@ class RecitationModel {
   final String textId;
   final String title;
   final String? language;
+  final int? displayOrder;
 
-  RecitationModel({required this.textId, required this.title, this.language});
+  RecitationModel({
+    required this.textId,
+    required this.title,
+    this.language,
+    this.displayOrder,
+  });
 
   factory RecitationModel.fromJson(Map<String, dynamic> json) {
     return RecitationModel(
       textId: json['text_id'] as String,
       title: json['title'] as String,
       language: json['language'] as String?,
+      displayOrder: json['display_order'] as int?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'text_id': textId, 'title': title, 'language': language};
+    return {
+      'text_id': textId,
+      'title': title,
+      'language': language,
+      if (displayOrder != null) 'display_order': displayOrder,
+    };
   }
 
-  RecitationModel copyWith({String? textId, String? title, String? language}) {
+  RecitationModel copyWith({
+    String? textId,
+    String? title,
+    String? language,
+    int? displayOrder,
+  }) {
     return RecitationModel(
       textId: textId ?? this.textId,
       title: title ?? this.title,
       language: language ?? this.language,
+      displayOrder: displayOrder ?? this.displayOrder,
     );
   }
 
@@ -36,7 +54,7 @@ class RecitationModel {
 
   @override
   String toString() {
-    return 'RecitationModel(textId: $textId, title: $title, language: $language)';
+    return 'RecitationModel(textId: $textId, title: $title, language: $language, displayOrder: $displayOrder)';
   }
 }
 

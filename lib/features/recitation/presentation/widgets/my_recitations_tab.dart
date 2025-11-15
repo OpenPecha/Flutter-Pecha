@@ -40,19 +40,59 @@ class MyRecitationsTab extends ConsumerWidget {
     List<RecitationModel> recitations,
     WidgetRef ref,
   ) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
+    return ReorderableListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       itemCount: recitations.length,
+      onReorder: (oldIndex, newIndex) async {
+        // Handle reorder
+        // 2 - 5 -> 2 - 4 (oldIndex < newIndex)
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+
+        final updatedList = List<RecitationModel>.from(recitations);
+        final item = updatedList.removeAt(oldIndex);
+        updatedList.insert(newIndex, item);
+
+        // Build the request payload with id (text_id) and display_order
+        final recitationsPayload = updatedList.asMap().entries.map((entry) {
+          final index = entry.key;
+          final recitation = entry.value;
+          return {
+            'id': recitation.textId,
+            'display_order': index,
+          };
+        }).toList();
+
+        try {
+          await ref
+              .read(recitationsRepositoryProvider)
+              .updateRecitationsOrder(recitationsPayload);
+
+          // Refresh the list
+          ref.invalidate(savedRecitationsFutureProvider);
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to update order'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      },
       itemBuilder: (context, index) {
         final recitation = recitations[index];
-        return RecitationCard(
-          recitation: recitation,
-          onTap: () {
-            context.push('/recitations/detail', extra: recitation);
-          },
-          onMoreTap: () {
-            _showRecitationOptions(context, recitation, ref);
-          },
+        return Container(
+          key: ValueKey(recitation.textId),
+          margin: const EdgeInsets.only(bottom: 12),
+          child: RecitationCard(
+            recitation: recitation,
+            onTap: () {
+              context.push('/recitations/detail', extra: recitation);
+            },
+          ),
         );
       },
     );
@@ -157,69 +197,6 @@ class MyRecitationsTab extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showRecitationOptions(
-    BuildContext context,
-    RecitationModel recitation,
-    WidgetRef ref,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(
-                  Icons.bookmark_remove_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: Text(
-                  'Remove from Saved',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                onTap: () async {
-                  final result = await ref
-                      .read(recitationsRepositoryProvider)
-                      .unsaveRecitation(recitation.textId);
-                  ref.invalidate(savedRecitationsFutureProvider);
-                  if (context.mounted) Navigator.pop(context);
-                  if (context.mounted && result) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Recitation unsaved'),
-                        backgroundColor: Colors.green,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  } else {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Unable to unsave recitation'),
-                          backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  }
-                },
-              ),
-              // ListTile(
-              //   leading: const Icon(Icons.share_outlined),
-              //   title: const Text('Share'),
-              //   onTap: () {
-              //     Navigator.pop(context);
-              //     // TODO: Implement share functionality
-              //   },
-              // ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

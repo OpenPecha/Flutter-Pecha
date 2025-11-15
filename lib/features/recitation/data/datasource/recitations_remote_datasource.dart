@@ -189,11 +189,13 @@ class RecitationsRemoteDatasource {
   }
 
   // Update recitations order
-  Future<bool> updateRecitationsOrder(List<String> textIds) async {
+  Future<bool> updateRecitationsOrder(
+    List<Map<String, dynamic>> recitations,
+  ) async {
     try {
       final uri = Uri.parse('$baseUrl/users/me/recitations/order');
-      final body = json.encode({'text_ids': textIds});
-      debugPrint('Updating recitations order: $textIds');
+      final body = json.encode({'recitations': recitations});
+      debugPrint('Updating recitations order: $recitations');
       final response = await client.put(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -202,6 +204,8 @@ class RecitationsRemoteDatasource {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
       } else {
+        debugPrint('Failed to update recitations order: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
         return false;
       }
     } catch (e) {

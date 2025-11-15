@@ -25,7 +25,17 @@ class RecitationsRepository {
 
   Future<List<RecitationModel>> getSavedRecitations() async {
     try {
-      return await recitationsRemoteDatasource.fetchSavedRecitations();
+      final recitations =
+          await recitationsRemoteDatasource.fetchSavedRecitations();
+
+      // Sort by display_order, treating null as highest value
+      recitations.sort((a, b) {
+        final orderA = a.displayOrder ?? double.maxFinite.toInt();
+        final orderB = b.displayOrder ?? double.maxFinite.toInt();
+        return orderA.compareTo(orderB);
+      });
+
+      return recitations;
     } catch (e) {
       throw Exception('Failed to load saved recitations: $e');
     }
@@ -66,6 +76,18 @@ class RecitationsRepository {
       return await recitationsRemoteDatasource.unsaveRecitation(id);
     } catch (e) {
       throw Exception('Failed to unsave recitation: $e');
+    }
+  }
+
+  Future<bool> updateRecitationsOrder(
+    List<Map<String, dynamic>> recitations,
+  ) async {
+    try {
+      return await recitationsRemoteDatasource.updateRecitationsOrder(
+        recitations,
+      );
+    } catch (e) {
+      throw Exception('Failed to update recitations order: $e');
     }
   }
 }

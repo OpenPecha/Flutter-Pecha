@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
-import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
-import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_card.dart';
@@ -34,34 +32,15 @@ class RecitationsTab extends ConsumerWidget {
     List<RecitationModel> recitations,
     WidgetRef ref,
   ) {
-    final authState = ref.watch(authProvider);
-    final isGuest = authState.isGuest;
-
-    var savedRecitationsAsync = AsyncValue<List<RecitationModel>>.data([]);
-
-    if (!isGuest) {
-      savedRecitationsAsync = ref.watch(savedRecitationsFutureProvider);
-    }
-    final savedRecitationIds =
-        savedRecitationsAsync.valueOrNull?.map((e) => e.textId).toList() ?? [];
-
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
       itemCount: recitations.length,
       itemBuilder: (context, index) {
         final recitation = recitations[index];
-        final isSaved = savedRecitationIds.contains(recitation.textId);
         return RecitationCard(
           recitation: recitation,
           onTap: () {
             context.push('/recitations/detail', extra: recitation);
-          },
-          onMoreTap: () {
-            if (isGuest) {
-              LoginDrawer.show(context, ref);
-            } else {
-              _showRecitationOptions(context, recitation, isSaved, ref);
-            }
           },
         );
       },
