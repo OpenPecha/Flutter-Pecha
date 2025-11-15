@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_card.dart';
@@ -23,7 +24,10 @@ class RecitationsTab extends ConsumerWidget {
         return _buildRecitationsList(context, recitations, ref);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => _buildErrorState(context, error, localizations),
+      error: (error, stack) => ErrorStateWidget(
+        error: error,
+        customMessage: 'Unable to load recitations.\nPlease try again later.',
+      ),
     );
   }
 
@@ -66,36 +70,6 @@ class RecitationsTab extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).textTheme.bodySmall?.color,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(
-    BuildContext context,
-    Object error,
-    AppLocalizations localizations,
-  ) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Unable to load recitations',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Please try again later",
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
           ),
         ],
       ),

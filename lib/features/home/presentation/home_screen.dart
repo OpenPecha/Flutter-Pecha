@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_pecha/features/home/data/providers/featured_day_provider.dart';
@@ -224,39 +225,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   child: CircularProgressIndicator(),
                 ),
               ),
-              error: (error, stackTrace) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(
-                    HomeScreenConstants.emptyStatePadding,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: HomeScreenConstants.errorIconSize,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(
-                        height: HomeScreenConstants.errorSpacing,
-                      ),
-                      Text(
-                        HomeScreenConstants.errorMessage,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(
-                        height: HomeScreenConstants.errorTextSpacing,
-                      ),
-                      TextButton(
-                        onPressed: refetchFeaturedDay,
-                        child: const Text(
-                          HomeScreenConstants.retryButtonText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              error: (error, stackTrace) => ErrorStateWidget(
+                error: error,
+                onRetry: refetchFeaturedDay,
               ),
             ),
           ],

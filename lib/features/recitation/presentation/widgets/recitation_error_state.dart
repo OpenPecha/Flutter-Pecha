@@ -1,53 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 
 /// A widget that displays an error state for recitation loading failures.
 ///
-/// This widget provides a user-friendly error display with:
-/// - An error icon
-/// - A descriptive error message
-/// - The error details (for debugging)
+/// This is a wrapper around the generic ErrorStateWidget with recitation-specific messaging.
 class RecitationErrorState extends StatelessWidget {
   /// The error object to display
   final Object error;
 
+  /// Optional callback for retry action
+  final VoidCallback? onRetry;
+
   const RecitationErrorState({
     super.key,
     required this.error,
+    this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Error icon
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-
-            // Error title
-            Text(
-              'Failed to load recitation',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-
-            // Error details
-            Text(
-              error.toString(),
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return ErrorStateWidget(
+      error: error,
+      onRetry: onRetry,
+      customMessage: _getRecitationSpecificMessage(error.toString()),
     );
+  }
+
+  /// Returns recitation-specific error messages for known error types
+  String? _getRecitationSpecificMessage(String error) {
+    if (error.contains('404')) {
+      return 'This recitation content is currently unavailable.\nPlease try again later or contact support.';
+    } else if (error.contains('401')) {
+      return 'Please sign in to access this recitation.';
+    }
+    // Return null to use the generic error messages from ErrorStateWidget
+    return null;
   }
 }
