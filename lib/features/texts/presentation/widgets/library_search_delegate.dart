@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/utils/text_highlight_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,11 +124,9 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
             return const Center(child: CircularProgressIndicator());
           },
           error: (error, stackTrace) {
-            return Center(
-              child: Text(
-                'Error searching: ${error.toString()}',
-                style: const TextStyle(fontSize: 16),
-              ),
+            return ErrorStateWidget(
+              error: error,
+              customMessage: 'Unable to perform search.\nPlease try again.',
             );
           },
           data: (searchResponse) {

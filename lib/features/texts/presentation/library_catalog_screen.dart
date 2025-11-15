@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/collections_providers.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/utils/text_highlight_helper.dart';
@@ -162,11 +163,9 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
     return searchResults.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error:
-          (error, stackTrace) => Center(
-            child: Text(
-              'Error searching: ${error.toString()}',
-              style: const TextStyle(fontSize: 16),
-            ),
+          (error, stackTrace) => ErrorStateWidget(
+            error: error,
+            customMessage: 'Unable to perform search.\nPlease try again.',
           ),
       data: (searchResponse) {
         if (searchResponse.sources == null || searchResponse.sources!.isEmpty) {

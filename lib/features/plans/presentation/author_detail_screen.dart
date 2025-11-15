@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/plans/data/providers/author_providers.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_model.dart';
 import 'package:flutter_pecha/features/plans/models/author/social_profile_dto.dart';
@@ -30,25 +31,12 @@ class AuthorDetailScreen extends ConsumerWidget {
         data: (authorData) => _buildAuthorContent(context, authorData),
         loading: () => const Center(child: CircularProgressIndicator()),
         error:
-            (error, stackTrace) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Unable to load author details',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.invalidate(authorByIdFutureProvider(authorId));
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+            (error, stackTrace) => ErrorStateWidget(
+              error: error,
+              customMessage: 'Unable to load author details.\nPlease try again.',
+              onRetry: () {
+                ref.invalidate(authorByIdFutureProvider(authorId));
+              },
             ),
       ),
     );

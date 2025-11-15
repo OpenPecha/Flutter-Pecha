@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/segment_match.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
@@ -117,11 +118,9 @@ class TextSearchDelegate extends SearchDelegate<String?> {
             return const Center(child: CircularProgressIndicator());
           },
           error: (error, stackTrace) {
-            return Center(
-              child: Text(
-                'Error searching: ${error.toString()}',
-                style: const TextStyle(fontSize: 16),
-              ),
+            return ErrorStateWidget(
+              error: error,
+              customMessage: 'Unable to perform search.\nPlease try again.',
             );
           },
           data: (searchResponse) {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/texts/models/search/search_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
@@ -55,6 +56,7 @@ class TextRemoteDatasource {
       final Map<String, dynamic> jsonMap = json.decode(decoded);
       return TocResponse.fromJson(jsonMap);
     } else {
+      debugPrint('Failed to load text content: ${response.body}');
       throw Exception('Failed to load text content');
     }
   }

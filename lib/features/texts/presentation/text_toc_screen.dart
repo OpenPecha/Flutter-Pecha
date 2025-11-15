@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
@@ -108,8 +109,10 @@ class TextTocScreen extends ConsumerWidget {
                   loading:
                       () => const Center(child: CircularProgressIndicator()),
                   error:
-                      (error, stackTrace) =>
-                          Center(child: Text(error.toString())),
+                      (error, stackTrace) => ErrorStateWidget(
+                        error: error,
+                        customMessage: 'Unable to load table of contents.\nPlease try again later.',
+                      ),
                   data:
                       (contentResponse) =>
                           TableOfContents(toc: contentResponse),
@@ -119,8 +122,10 @@ class TextTocScreen extends ConsumerWidget {
                   loading:
                       () => const Center(child: CircularProgressIndicator()),
                   error:
-                      (error, stackTrace) =>
-                          Center(child: Text(error.toString())),
+                      (error, stackTrace) => ErrorStateWidget(
+                        error: error,
+                        customMessage: 'Unable to load versions.\nPlease try again later.',
+                      ),
                   data:
                       (versionResponse) =>
                           _buildVersionsTab(versionResponse.versions, context),
