@@ -187,4 +187,26 @@ class RecitationsRemoteDatasource {
       throw Exception('Failed to unsave recitation: $e');
     }
   }
+
+  // Update recitations order
+  Future<bool> updateRecitationsOrder(List<String> textIds) async {
+    try {
+      final uri = Uri.parse('$baseUrl/users/me/recitations/order');
+      final body = json.encode({'text_ids': textIds});
+      debugPrint('Updating recitations order: $textIds');
+      final response = await client.put(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Failed to update recitations order: $e');
+      throw Exception('Failed to update recitations order: $e');
+    }
+  }
 }

@@ -1,5 +1,6 @@
 // function to add story items to a list
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/image_story.dart';
 import 'package:flutter_pecha/features/story_view/presentation/widgets/text_story.dart';
@@ -75,4 +76,16 @@ Widget getVideoThumbnail(String videoUrl) {
     color: Colors.grey.shade300,
     child: const Icon(Icons.video_library, size: 48, color: Colors.grey),
   );
+}
+
+// Returns a time-based greeting based on the current hour
+String getTimeBasedGreeting(AppLocalizations localizations) {
+  final hour = DateTime.now().hour;
+  if (hour >= 1 && hour < 12) {
+    return localizations.home_good_morning;
+  } else if (hour >= 12 && hour < 17) {
+    return localizations.home_good_afternoon;
+  } else {
+    return localizations.home_good_evening;
+  }
 }

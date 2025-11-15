@@ -106,6 +106,7 @@ flutter:
     - assets/images/
     - assets/images/home/
     - assets/images/segment-bg/
+    - assets/images/verse-bg/
     - assets/fonts/
     - assets/audios/
     - .env

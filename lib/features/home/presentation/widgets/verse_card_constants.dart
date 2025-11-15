@@ -8,9 +8,21 @@ class VerseCardConstants {
   static const double verseFontSize = 18.0;
   static const double verseContentHeightRatio = 0.7;
 
-  // Default Image
-  static const String defaultImageUrl =
-      'https://images.unsplash.com/photo-1685495856559-5d96a0e51acb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2624';
+  // Background Images from assets
+  static const List<String> backgroundImages = [
+    'assets/images/verse-bg/001.jpg',
+    'assets/images/verse-bg/002.JPG',
+    'assets/images/verse-bg/003.JPG',
+    'assets/images/verse-bg/004.JPG',
+    'assets/images/verse-bg/005.JPG',
+    'assets/images/verse-bg/006.JPG',
+    'assets/images/verse-bg/007.JPG',
+    'assets/images/verse-bg/008.jpg',
+    'assets/images/verse-bg/009.JPG',
+    'assets/images/verse-bg/010.jpg',
+    'assets/images/verse-bg/011.JPG',
+    'assets/images/verse-bg/012.jpg',
+  ];
 
   // Private constructor to prevent instantiation
   VerseCardConstants._();
