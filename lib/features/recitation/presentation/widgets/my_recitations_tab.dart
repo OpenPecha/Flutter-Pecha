@@ -32,10 +32,12 @@ class MyRecitationsTab extends ConsumerWidget {
         return _buildRecitationsList(context, recitations, ref);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => ErrorStateWidget(
-        error: error,
-        customMessage: 'Unable to load your saved recitations.\nPlease try again later.',
-      ),
+      error:
+          (error, stack) => ErrorStateWidget(
+            error: error,
+            customMessage:
+                'Unable to load your saved recitations.\nPlease try again later.',
+          ),
     );
   }
 
@@ -59,14 +61,12 @@ class MyRecitationsTab extends ConsumerWidget {
         updatedList.insert(newIndex, item);
 
         // Build the request payload with id (text_id) and display_order
-        final recitationsPayload = updatedList.asMap().entries.map((entry) {
-          final index = entry.key;
-          final recitation = entry.value;
-          return {
-            'id': recitation.textId,
-            'display_order': index,
-          };
-        }).toList();
+        final recitationsPayload =
+            updatedList.asMap().entries.map((entry) {
+              final index = entry.key;
+              final recitation = entry.value;
+              return {'text_id': recitation.textId, 'display_order': index};
+            }).toList();
 
         try {
           await ref
@@ -179,5 +179,4 @@ class MyRecitationsTab extends ConsumerWidget {
       ),
     );
   }
-
 }
