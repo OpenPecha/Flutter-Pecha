@@ -22,7 +22,6 @@ List<Widget> createWidgetList(
         widgetList.add(
           TextStory(
             text: planItem.content!,
-            backgroundColor: Colors.black38,
             textStyle: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,

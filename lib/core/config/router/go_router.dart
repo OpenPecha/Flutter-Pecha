@@ -246,7 +246,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       StoryItem(
                         TextStory(
                           text: subtask.content,
-                          backgroundColor: Colors.black38,
                           textStyle: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -293,7 +292,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   StoryItem(
                     TextStory(
                       text: 'No content available',
-                      backgroundColor: Colors.black38,
                       textStyle: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -687,9 +685,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         // This is the single source of truth per requirements
         final hasCompletedOnboarding =
             await onboardingRepo.hasCompletedOnboarding();
-        debugPrint(
-          '📋 Onboarding status: $hasCompletedOnboarding',
-        );
+        debugPrint('📋 Onboarding status: $hasCompletedOnboarding');
 
         // Redirect to onboarding if not completed (unless already there or on login)
         if (!hasCompletedOnboarding &&

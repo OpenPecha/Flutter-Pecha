@@ -33,7 +33,6 @@ List<StoryItem> createFlutterStoryItems(
             customWidget: (controller, audioPlayer) {
               return TextStory(
                 text: subtask.content,
-                backgroundColor: Colors.black38,
                 textStyle: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
