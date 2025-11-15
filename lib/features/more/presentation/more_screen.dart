@@ -20,9 +20,9 @@ class MoreScreen extends ConsumerWidget {
       case 'en':
         return 'English';
       case 'zh':
-        return '中文 (Chinese)';
+        return '中文';
       case 'bo':
-        return 'བོད་སྐད་ (Tibetan)';
+        return 'བོད་ཡིག';
       default:
         return locale.languageCode;
     }

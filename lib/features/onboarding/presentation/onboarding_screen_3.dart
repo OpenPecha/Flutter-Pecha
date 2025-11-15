@@ -21,9 +21,9 @@ class OnboardingScreen3 extends ConsumerWidget {
   final VoidCallback onBack;
 
   static const List<_LanguageOption> _languages = [
-    _LanguageOption(id: PreferredLanguage.tibetan, label: 'Tibetan'),
+    _LanguageOption(id: PreferredLanguage.tibetan, label: 'བོད་ཡིག'),
     _LanguageOption(id: PreferredLanguage.english, label: 'English'),
-    _LanguageOption(id: PreferredLanguage.chinese, label: 'Chinese'),
+    _LanguageOption(id: PreferredLanguage.chinese, label: '中文'),
   ];
 
   @override
