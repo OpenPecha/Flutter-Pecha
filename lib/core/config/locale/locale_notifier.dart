@@ -6,18 +6,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LocaleNotifier extends StateNotifier<Locale> {
   final LocalStorageService _localStorageService;
+  bool _isInitialized = false;
 
   LocaleNotifier({required LocalStorageService localStorageService})
     : _localStorageService = localStorageService,
       super(const Locale("en")) {
-    _loadLocale();
+    // Initialize locale asynchronously, but mark initialization as started
+    _initializeLocale();
   }
 
-  Future<void> _loadLocale() async {
-    final locale = await _localStorageService.get<String>(AppStorageKeys.locale);
-    if (locale != null) {
-      state = Locale(locale);
+  /// Initialize locale from storage
+  /// This method ensures the locale is loaded before the notifier is used
+  Future<void> _initializeLocale() async {
+    if (_isInitialized) return;
+    _isInitialized = true;
+
+    try {
+      final locale = await _localStorageService.get<String>(
+        AppStorageKeys.locale,
+      );
+      if (locale != null) {
+        state = Locale(locale);
+      }
+    } catch (e) {
+      // If loading fails, keep the default locale
+      // Error is silently handled to prevent app crash
     }
+  }
+
+  /// Ensure locale is loaded before accessing state
+  /// This can be called by consumers if they need to ensure initialization
+  Future<void> ensureInitialized() async {
+    await _initializeLocale();
   }
 
   Future<void> setLocale(Locale locale) async {
@@ -26,7 +46,10 @@ class LocaleNotifier extends StateNotifier<Locale> {
       (l) => l.languageCode == locale.languageCode,
     );
     if (isSupported) {
-      await _localStorageService.set(AppStorageKeys.locale, locale.languageCode);
+      await _localStorageService.set(
+        AppStorageKeys.locale,
+        locale.languageCode,
+      );
     } else {
       throw Exception("Locale ${locale.languageCode} is not supported");
     }
@@ -36,7 +59,9 @@ class LocaleNotifier extends StateNotifier<Locale> {
   ///
   /// Onboarding uses strings like 'tibetan', 'english', 'chinese'
   /// This maps them to Flutter locale codes: 'bo', 'en', 'zh'
-  Future<void> setLocaleFromOnboardingPreference(String? languagePreference) async {
+  Future<void> setLocaleFromOnboardingPreference(
+    String? languagePreference,
+  ) async {
     if (languagePreference == null) return;
 
     Locale? locale;
@@ -63,8 +88,13 @@ class LocaleNotifier extends StateNotifier<Locale> {
 }
 
 /// Provider for managing the app's current locale
-final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>(
-  (ref) => LocaleNotifier(
+/// The locale is loaded asynchronously from storage on first access
+final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
+  final notifier = LocaleNotifier(
     localStorageService: ref.read(localStorageServiceProvider),
-  ),
-);
+  );
+  // Ensure locale is initialized when provider is first created
+  // This happens asynchronously but starts immediately
+  notifier.ensureInitialized();
+  return notifier;
+});

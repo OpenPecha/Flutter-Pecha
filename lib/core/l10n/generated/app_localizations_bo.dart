@@ -231,10 +231,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get common_sign_in => 'ནང་འཛུལ་གྱིས།';
 
   @override
-  String get recitations_title => 'བཟླས་པ།';
+  String get recitations_title => 'Recitations';
 
   @override
-  String get recitations_my_recitations => 'ངའི་བཟླས་པ།';
+  String get recitations_my_recitations => 'My Recitations';
 
   @override
   String get recitations_search => 'འཚོལ་ས།';
