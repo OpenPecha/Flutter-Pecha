@@ -5,6 +5,7 @@ import 'package:flutter_pecha/features/plans/data/providers/author_providers.dar
 import 'package:flutter_pecha/features/plans/models/author/author_model.dart';
 import 'package:flutter_pecha/features/plans/models/author/social_profile_dto.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
+import 'package:flutter_pecha/features/plans/presentation/widgets/plan_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,7 +34,8 @@ class AuthorDetailScreen extends ConsumerWidget {
         error:
             (error, stackTrace) => ErrorStateWidget(
               error: error,
-              customMessage: 'Unable to load author details.\nPlease try again.',
+              customMessage:
+                  'Unable to load author details.\nPlease try again.',
               onRetry: () {
                 ref.invalidate(authorByIdFutureProvider(authorId));
               },
@@ -63,24 +65,17 @@ class AuthorDetailScreen extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: authorData.id,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage:
-                    authorData.imageUrl?.isNotEmpty ?? false
-                        ? authorData.imageUrl!.cachedNetworkImageProvider
-                        : null,
-                backgroundColor: Colors.grey[800],
-                child:
-                    authorData.imageUrl?.isEmpty ?? true
-                        ? const Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.white,
-                        )
-                        : null,
-              ),
+            CircleAvatar(
+              radius: 50,
+              backgroundImage:
+                  authorData.imageUrl?.isNotEmpty ?? false
+                      ? authorData.imageUrl!.cachedNetworkImageProvider
+                      : null,
+              backgroundColor: Colors.grey[800],
+              child:
+                  authorData.imageUrl?.isEmpty ?? true
+                      ? const Icon(Icons.person, size: 50, color: Colors.white)
+                      : null,
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -254,61 +249,22 @@ class AuthorDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildPlansList(BuildContext context, List<PlansModel> plans) {
-    return SizedBox(
-      height: 140,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: plans.length,
-        itemBuilder: (context, index) {
-          final plan = plans[index];
-          return _buildPlanCard(context, plan);
-        },
-      ),
-    );
-  }
-
-  Widget _buildPlanCard(BuildContext context, PlansModel plan) {
-    return GestureDetector(
-      onTap: () {
-        // context.push(
-        //   '/plans/info',
-        //   extra: {'plan': plan, 'author': plan.author},
-        // );
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: plans.length,
+      itemBuilder: (context, index) {
+        final plan = plans[index];
+        return PlanCard(
+          plan: plan,
+          onTap: () {
+            // context.push(
+            //   '/plans/info',
+            //   extra: {'plan': plan, 'author': plan.author},
+            // );
+          },
+        );
       },
-      child: Container(
-        width: 120,
-        margin: const EdgeInsets.only(right: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CachedNetworkImageWidget(
-              imageUrl: plan.imageUrl ?? '',
-              width: 120,
-              height: 90,
-              fit: BoxFit.cover,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${plan.totalDays} days',
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 2),
-            Flexible(
-              child: Text(
-                plan.title,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

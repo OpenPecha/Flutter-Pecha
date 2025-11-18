@@ -157,6 +157,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get find_plans => '尋找計劃';
 
   @override
+  String get browse_plans => 'Browse Plans';
+
+  @override
   String get start_plan => '開始計畫';
 
   @override
@@ -235,6 +238,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get recitations_my_recitations => '我的清單';
+
+  @override
+  String get browse_recitations => 'Browse Recitations';
 
   @override
   String get recitations_search => '搜索';

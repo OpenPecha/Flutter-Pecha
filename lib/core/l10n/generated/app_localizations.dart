@@ -388,6 +388,12 @@ abstract class AppLocalizations {
   /// **'Find Plans'**
   String get find_plans;
 
+  /// No description provided for @browse_plans.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Plans'**
+  String get browse_plans;
+
   /// No description provided for @start_plan.
   ///
   /// In en, this message translates to:
@@ -543,6 +549,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Recitations'**
   String get recitations_my_recitations;
+
+  /// No description provided for @browse_recitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Recitations'**
+  String get browse_recitations;
 
   /// No description provided for @recitations_search.
   ///

@@ -57,7 +57,7 @@ class _LibraryCatalogScreenState extends ConsumerState<LibraryCatalogScreen> {
                               return GestureDetector(
                                 onTap: () {
                                   context.push(
-                                    '/texts/category',
+                                    '/texts/detail',
                                     extra: collection,
                                   );
                                 },

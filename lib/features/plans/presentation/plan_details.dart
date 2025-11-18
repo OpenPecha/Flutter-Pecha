@@ -3,7 +3,6 @@ import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
-import 'package:flutter_pecha/features/plans/presentation/providers/my_plans_paginated_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'widgets/plan_cover_image.dart';
 import 'widgets/day_carousel.dart';
@@ -61,28 +60,26 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                 _showUnenrollDialog(context);
               }
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'unenroll',
-                child: Row(
-                  children: [
-                    Icon(Icons.exit_to_app, size: 20),
-                    SizedBox(width: 12),
-                    Text('Unenroll from Plan'),
-                  ],
-                ),
-              ),
-            ],
+            itemBuilder:
+                (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'unenroll',
+                    child: Row(
+                      children: [
+                        Icon(Icons.exit_to_app, size: 20),
+                        SizedBox(width: 12),
+                        Text('Unenroll from Plan'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            PlanCoverImage(
-              imageUrl: widget.plan.imageUrl ?? '',
-              heroTag: widget.plan.title,
-            ),
+            PlanCoverImage(imageUrl: widget.plan.imageUrl ?? ''),
             planDays.when(
               data: (days) {
                 if (days.isEmpty) {
@@ -302,9 +299,9 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
 
   Future<void> _handleUnenroll() async {
     try {
-      final success = await ref.read(
-        userPlansRepositoryProvider,
-      ).unenrollFromPlan(widget.plan.id);
+      final success = await ref
+          .read(userPlansRepositoryProvider)
+          .unenrollFromPlan(widget.plan.id);
 
       if (success) {
         // Invalidate plans to refresh the list
@@ -317,7 +314,9 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('You have been unenrolled from "${widget.plan.title}"'),
+              content: Text(
+                'You have been unenrolled from "${widget.plan.title}"',
+              ),
               backgroundColor: Theme.of(context).colorScheme.primary,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 3),
@@ -326,7 +325,9 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
         }
       } else {
         if (mounted) {
-          _showErrorSnackbar('Unable to unenroll at this time. Please try again.');
+          _showErrorSnackbar(
+            'Unable to unenroll at this time. Please try again.',
+          );
         }
       }
     } catch (e) {

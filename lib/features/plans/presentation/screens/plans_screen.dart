@@ -62,7 +62,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
           controller: _tabController,
           tabs: [
             Tab(text: localizations.my_plans),
-            Tab(text: localizations.find_plans),
+            Tab(text: localizations.browse_plans),
           ],
           labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           unselectedLabelStyle: TextStyle(

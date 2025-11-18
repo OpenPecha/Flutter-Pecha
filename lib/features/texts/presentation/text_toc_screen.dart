@@ -61,10 +61,7 @@ class TextTocScreen extends ConsumerWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: () {
-          context.push(
-            '/texts/chapter',
-            extra: {'textId': text.id, 'contentId': text.id},
-          );
+          context.push('/texts/chapter', extra: {'textId': text.id});
         },
         child: Text(
           localizations.text_toc_continueReading,
@@ -84,6 +81,7 @@ class TextTocScreen extends ConsumerWidget {
     BuildContext context,
     AsyncValue<TocResponse> textContentResponse,
     AsyncValue<VersionResponse> textVersionResponse,
+    bool showContentsTab,
   ) {
     return Expanded(
       child: Column(
@@ -94,8 +92,11 @@ class TextTocScreen extends ConsumerWidget {
             unselectedLabelColor: Colors.grey,
             indicatorColor: Theme.of(context).colorScheme.primary,
             indicatorWeight: 2.5,
+            isScrollable: !showContentsTab, // Left-align when single tab
+            tabAlignment:
+                showContentsTab ? TabAlignment.fill : TabAlignment.start,
             tabs: [
-              Tab(text: localizations.text_toc_content),
+              if (showContentsTab) Tab(text: localizations.text_toc_content),
               Tab(text: localizations.text_toc_versions),
             ],
             dividerColor: Color(0xFFDEE2E6),
@@ -105,18 +106,24 @@ class TextTocScreen extends ConsumerWidget {
             child: TabBarView(
               children: [
                 // Contents Tab
-                textContentResponse.when(
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
-                  error:
-                      (error, stackTrace) => ErrorStateWidget(
-                        error: error,
-                        customMessage: 'Unable to load table of contents.\nPlease try again later.',
-                      ),
-                  data:
-                      (contentResponse) =>
-                          TableOfContents(toc: contentResponse),
-                ),
+                if (showContentsTab)
+                  textContentResponse.when(
+                    loading:
+                        () => const Center(child: CircularProgressIndicator()),
+                    error:
+                        (error, stackTrace) => ErrorStateWidget(
+                          error: error,
+                          customMessage:
+                              'Unable to load table of contents.\nPlease try again later.',
+                        ),
+                    data: (contentResponse) {
+                      if (contentResponse.contents[0].sections.length > 1) {
+                        return TableOfContents(toc: contentResponse);
+                      } else {
+                        return const Center(child: Text('No content found'));
+                      }
+                    },
+                  ),
                 // Versions Tab
                 textVersionResponse.when(
                   loading:
@@ -124,7 +131,8 @@ class TextTocScreen extends ConsumerWidget {
                   error:
                       (error, stackTrace) => ErrorStateWidget(
                         error: error,
-                        customMessage: 'Unable to load versions.\nPlease try again later.',
+                        customMessage:
+                            'Unable to load versions.\nPlease try again later.',
                       ),
                   data:
                       (versionResponse) =>
@@ -144,8 +152,19 @@ class TextTocScreen extends ConsumerWidget {
     final textContentResponse = ref.watch(textContentFutureProvider(text.id));
     final textVersionResponse = ref.watch(textVersionFutureProvider(text.id));
 
+    // Determine if we should show the contents tab
+    final showContentsTab = textContentResponse.maybeWhen(
+      data:
+          (contentResponse) =>
+              contentResponse.contents.isNotEmpty &&
+              contentResponse.contents[0].sections.length > 1,
+      orElse: () => null, // Return null while loading
+    );
+
+    final tabCount = showContentsTab == true ? 2 : 1;
+
     return DefaultTabController(
-      length: 2,
+      length: tabCount,
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -171,12 +190,19 @@ class TextTocScreen extends ConsumerWidget {
               const SizedBox(height: 18),
               _buildContinueReadingButton(text, localizations, context),
               const SizedBox(height: 22),
-              _buildTabs(
-                localizations,
-                context,
-                textContentResponse,
-                textVersionResponse,
-              ),
+              // Show loading state until we know whether to show contents tab
+              if (showContentsTab == null)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else
+                _buildTabs(
+                  localizations,
+                  context,
+                  textContentResponse,
+                  textVersionResponse,
+                  showContentsTab,
+                ),
             ],
           ),
         ),

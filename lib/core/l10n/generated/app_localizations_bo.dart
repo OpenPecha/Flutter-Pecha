@@ -157,6 +157,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get find_plans => 'Find Plans';
 
   @override
+  String get browse_plans => 'Browse Plans';
+
+  @override
   String get start_plan => 'Start Plan';
 
   @override
@@ -235,6 +238,9 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get recitations_my_recitations => 'My Recitations';
+
+  @override
+  String get browse_recitations => 'Browse Recitations';
 
   @override
   String get recitations_search => 'འཚོལ་ས།';

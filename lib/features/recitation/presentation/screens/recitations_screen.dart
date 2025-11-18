@@ -79,7 +79,7 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
       controller: _tabController,
       tabs: [
         Tab(text: localizations.recitations_my_recitations),
-        Tab(text: localizations.recitations_title),
+        Tab(text: localizations.browse_recitations),
       ],
       labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       unselectedLabelStyle: const TextStyle(

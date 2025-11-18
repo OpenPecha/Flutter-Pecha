@@ -105,12 +105,16 @@ class _NotificationSettingsScreenState
             // Permission Status Card
             if (!hasPermission) ...[
               Card(
-                color: Colors.orange.shade50,
+                color: Theme.of(context).colorScheme.surface,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      Icon(Icons.warning, color: Colors.orange, size: 48),
+                      Icon(
+                        Icons.warning,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 48,
+                      ),
                       SizedBox(height: 8),
                       Text(
                         'Please turn on Notifications',

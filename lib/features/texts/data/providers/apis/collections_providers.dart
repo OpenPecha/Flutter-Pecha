@@ -25,7 +25,7 @@ final collectionsCategoryFutureProvider = FutureProvider.family((
   String parentId,
 ) {
   final locale = ref.watch(localeProvider);
-  final languageCode = locale?.languageCode;
+  final languageCode = locale.languageCode;
   return ref
       .watch(collectionsRepositoryProvider)
       .getCollections(language: languageCode, parentId: parentId);

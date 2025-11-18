@@ -95,7 +95,6 @@ Widget _buildPlanImage(UserPlansModel plan) {
     height: 90,
     fit: BoxFit.cover,
     borderRadius: BorderRadius.circular(12),
-    heroTag: plan.title,
   );
 }
 

@@ -10,10 +10,7 @@ import 'package:go_router/go_router.dart';
 class RecitationsTab extends ConsumerWidget {
   final TabController controller;
 
-  const RecitationsTab({
-    super.key,
-    required this.controller,
-  });
+  const RecitationsTab({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

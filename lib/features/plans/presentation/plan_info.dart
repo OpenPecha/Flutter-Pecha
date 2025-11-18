@@ -73,18 +73,12 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
   }
 
   Widget _buildPlanImage(BuildContext context) {
-    return Hero(
-      tag: widget.plan.title,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: CachedNetworkImageWidget(
-          imageUrl: widget.plan.imageUrl ?? '',
-          width: double.infinity,
-          height: MediaQuery.of(context).size.height * 0.25,
-          fit: BoxFit.cover,
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
+    return CachedNetworkImageWidget(
+      imageUrl: widget.plan.imageUrl ?? '',
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.25,
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(12),
     );
   }
 
@@ -130,20 +124,17 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
           ),
         );
       },
-      child: Hero(
-        tag: authorId,
-        child: CircleAvatar(
-          radius: 20,
-          backgroundImage:
-              authorImage?.isNotEmpty ?? false
-                  ? authorImage!.cachedNetworkImageProvider
-                  : null,
-          backgroundColor: Colors.grey[300],
-          child:
-              authorImage?.isEmpty ?? true
-                  ? Icon(Icons.person, color: Colors.grey[600], size: 20)
-                  : null,
-        ),
+      child: CircleAvatar(
+        radius: 20,
+        backgroundImage:
+            authorImage?.isNotEmpty ?? false
+                ? authorImage!.cachedNetworkImageProvider
+                : null,
+        backgroundColor: Colors.grey[300],
+        child:
+            authorImage?.isEmpty ?? true
+                ? Icon(Icons.person, color: Colors.grey[600], size: 20)
+                : null,
       ),
     );
   }
