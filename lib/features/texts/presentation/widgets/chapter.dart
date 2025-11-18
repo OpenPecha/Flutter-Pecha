@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/features/texts/data/providers/font_size_notifier.dart';
+import 'package:flutter_pecha/features/texts/data/providers/font_size_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
-import 'package:flutter_pecha/features/texts/utils/helper_functions.dart';
+import 'package:flutter_pecha/features/texts/utils/hepler_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fquery/fquery.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -45,56 +45,10 @@ class _ChapterState extends ConsumerState<Chapter> {
   bool _hasTriggeredNext = false;
   Timer? _debounceTimer;
 
-  // Store current position before loading to calculate correct offset
-  int? _currentPositionBeforeLoad;
-
   @override
   void initState() {
     super.initState();
     itemPositionsListener.itemPositions.addListener(_onScrollPositionChanged);
-  }
-
-  @override
-  void didUpdateWidget(Chapter oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // Detect when previous page finishes loading and adjust scroll
-    if (oldWidget.infiniteQuery.isFetchingPreviousPage &&
-        !widget.infiniteQuery.isFetchingPreviousPage &&
-        _currentPositionBeforeLoad != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _adjustScrollAfterPreviousLoad();
-      });
-    }
-  }
-
-  void _adjustScrollAfterPreviousLoad() {
-    // Get the last loaded page to calculate items added
-    final pages = widget.infiniteQuery.data?.pages;
-    if (pages != null && pages.isNotEmpty) {
-      // Find the most recently loaded previous page
-      final newlyLoadedPage = pages.last; // Assuming it's appended
-      final newItemsCount = getTotalSegmentsCount(
-        newlyLoadedPage.content.sections,
-      );
-      // debugPrint("newItemsCount: $newItemsCount");
-
-      if (_currentPositionBeforeLoad != null) {
-        final targetIndex = _currentPositionBeforeLoad! + newItemsCount;
-        // debugPrint(
-        //   "Adjusting scroll to: $targetIndex (was: $_currentPositionBeforeLoad, added: $newItemsCount)",
-        // );
-
-        if (widget.itemScrollController.isAttached && targetIndex >= 0) {
-          widget.itemScrollController.scrollTo(
-            index: targetIndex,
-            duration: const Duration(milliseconds: 1),
-          );
-        }
-      }
-    }
-
-    _currentPositionBeforeLoad = null;
   }
 
   @override
@@ -116,6 +70,7 @@ class _ChapterState extends ConsumerState<Chapter> {
           positionsSet.toList()..sort((a, b) => a.index.compareTo(b.index));
       final firstVisibleIndex = positions.first.index;
       final lastVisibleIndex = positions.last.index;
+      print("firstVisibleIndex: $firstVisibleIndex");
 
       final currentSegmentPosition =
           widget.infiniteQuery.data?.pages.first.currentSegmentPosition ?? 1;
@@ -127,8 +82,6 @@ class _ChapterState extends ConsumerState<Chapter> {
           !widget.infiniteQuery.isFetchingPreviousPage &&
           !_hasTriggeredPrevious) {
         _hasTriggeredPrevious = true;
-        // Store current position before loading
-        _currentPositionBeforeLoad = firstVisibleIndex;
         _loadPreviousPage(anchorIndex: firstVisibleIndex);
       }
 
@@ -151,12 +104,12 @@ class _ChapterState extends ConsumerState<Chapter> {
       final newItemsCount = getTotalSegmentsCount(widget.newPageSections);
 
       final targetIndex = anchorIndex + newItemsCount;
-      // if (widget.itemScrollController.isAttached && targetIndex >= 0) {
-      //   widget.itemScrollController.scrollTo(
-      //     index: targetIndex,
-      //     duration: const Duration(milliseconds: 1),
-      //   );
-      // }
+      if (widget.itemScrollController.isAttached && targetIndex >= 0) {
+        widget.itemScrollController.scrollTo(
+          index: targetIndex,
+          duration: const Duration(milliseconds: 1),
+        );
+      }
     } finally {
       _hasTriggeredPrevious = false;
     }
