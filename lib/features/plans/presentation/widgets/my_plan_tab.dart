@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
+import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
@@ -54,6 +55,8 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
       if (success) {
         // Refresh the plans list
         ref.invalidate(myPlansPaginatedProvider);
+        ref.invalidate(findPlansPaginatedProvider);
+        ref.invalidate(userPlansFutureProvider);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

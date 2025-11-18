@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
+import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
@@ -306,6 +307,8 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
       if (success) {
         // Invalidate plans to refresh the list
         ref.invalidate(myPlansPaginatedProvider);
+        ref.invalidate(findPlansPaginatedProvider);
+        ref.invalidate(userPlansFutureProvider);
 
         if (mounted) {
           // Pop back to plans list
