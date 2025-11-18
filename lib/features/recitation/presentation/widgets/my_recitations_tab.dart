@@ -80,6 +80,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
   /// Builds the reorderable list of recitations
   Widget _buildRecitationsList(List<RecitationModel> displayRecitations) {
     return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
       padding: const EdgeInsets.symmetric(
         horizontal: _horizontalPadding,
         vertical: _verticalPadding,
@@ -90,7 +91,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
               _handleReorder(oldIndex, newIndex, displayRecitations),
       itemBuilder:
           (context, index) =>
-              _buildRecitationItem(context, displayRecitations[index]),
+              _buildRecitationItem(context, displayRecitations[index], index),
     );
   }
 
@@ -98,6 +99,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
   Widget _buildRecitationItem(
     BuildContext context,
     RecitationModel recitation,
+    int index,
   ) {
     return Container(
       key: ValueKey(recitation.textId),
@@ -105,6 +107,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
       child: RecitationCard(
         recitation: recitation,
         onTap: () => context.push('/recitations/detail', extra: recitation),
+        dragIndex: index, // Use list index for drag handle, not displayOrder
       ),
     );
   }

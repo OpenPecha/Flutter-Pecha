@@ -4,18 +4,19 @@ import 'package:flutter_pecha/features/recitation/data/models/recitation_model.d
 class RecitationCard extends StatelessWidget {
   final RecitationModel recitation;
   final VoidCallback onTap;
+  final int? dragIndex;
 
   const RecitationCard({
     super.key,
     required this.recitation,
     required this.onTap,
+    this.dragIndex,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 75,
-      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border.all(color: const Color(0xFFE4E4E4), width: 1),
@@ -33,9 +34,24 @@ class RecitationCard extends StatelessWidget {
                 _buildRecitationLogo(),
                 const SizedBox(width: 12),
                 Expanded(child: _buildRecitationTitle(context)),
+                if (dragIndex != null) _buildDragHandle(context, dragIndex!),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDragHandle(BuildContext context, int index) {
+    return ReorderableDragStartListener(
+      index: index,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: Icon(
+          Icons.drag_handle,
+          color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.5),
+          size: 24,
         ),
       ),
     );
