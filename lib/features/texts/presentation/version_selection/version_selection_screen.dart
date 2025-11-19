@@ -150,16 +150,15 @@ class VersionSelectionScreen extends ConsumerWidget {
       itemCount: versions.length,
       itemBuilder: (context, index) {
         final version = versions[index];
+        final versionId = version.id;
+        final contentId =
+            version.tableOfContents.isNotEmpty
+                ? version.tableOfContents[0]
+                : null;
+
         return ListTile(
           onTap: () {
-            context.pop();
-            context.replace(
-              '/texts/chapter',
-              extra: {
-                'textId': version.id,
-                'contentId': version.tableOfContents[0],
-              },
-            );
+            context.pop({'textId': versionId, 'contentId': contentId});
           },
           contentPadding: EdgeInsets.zero,
           title: Text(

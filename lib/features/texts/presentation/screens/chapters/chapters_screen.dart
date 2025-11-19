@@ -267,14 +267,21 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     final textDetail = infiniteQuery.data!.pages.first.textDetail;
     return LanguageSelectorBadge(
       language: textDetail.language,
-      onTap: () {
+      onTap: () async {
         ref
             .read(textVersionLanguageProvider.notifier)
             .setLanguage(textDetail.language);
-        context.push(
+        final result = await context.push(
           TextRoutes.versionSelection,
           extra: {"textId": currentTextId},
         );
+        if (result != null && result is Map<String, dynamic>) {
+          final newTextId = result['textId'] as String?;
+          final newContentId = result['contentId'] as String?;
+          if (newTextId != null && newContentId != null) {
+            updateTextAndSegment(newTextId, newContentId: newContentId);
+          }
+        }
       },
     );
   }
