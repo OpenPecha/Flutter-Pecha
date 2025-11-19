@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
 /// A widget that displays a section of recitation text.
 ///
@@ -33,10 +33,10 @@ class RecitationTextSection extends StatelessWidget {
     return Text(
       processedText,
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            height: lineHeight,
-            fontSize: fontSize,
-            fontFamily: fontFamily,
-          ),
+        height: lineHeight,
+        fontSize: fontSize,
+        fontFamily: fontFamily,
+      ),
     );
   }
 

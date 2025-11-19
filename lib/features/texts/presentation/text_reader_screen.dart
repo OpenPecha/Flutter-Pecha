@@ -12,7 +12,7 @@ import 'package:flutter_pecha/features/texts/data/providers/selected_segment_pro
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
 import 'package:flutter_pecha/features/texts/utils/helper_functions.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';

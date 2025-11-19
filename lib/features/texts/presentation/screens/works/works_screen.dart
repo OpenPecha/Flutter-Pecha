@@ -3,13 +3,20 @@ import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
+import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
+import 'package:flutter_pecha/features/texts/constants/text_routes.dart';
 import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/loading_state_widget.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/section_header.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/text_list_item.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/text_screen_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// Screen displaying works (texts) within a collection
+/// Separates root texts and commentaries
 class WorksScreen extends ConsumerWidget {
   const WorksScreen({super.key, required this.collection});
   final Collections collection;
@@ -19,56 +26,25 @@ class WorksScreen extends ConsumerWidget {
     final textDetailResponse = ref.watch(textsFutureProvider(collection.id));
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context),
-        ),
-        shape: Border(bottom: BorderSide(color: Color(0xFFB6D7D7), width: 3)),
-      ),
+      appBar: TextScreenAppBar(onBackPressed: () => Navigator.pop(context)),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+          padding: TextScreenConstants.screenLargePaddingValue,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 textDetailResponse.value?.collections.title ?? '',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: TextScreenConstants.titleFontSize,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TextScreenConstants.largeVerticalSpacing),
               textDetailResponse.when(
-                data: (response) {
-                  final texts = response.texts;
-                  final rootTexts =
-                      response.texts
-                          .where((t) => t.type.toLowerCase() == 'root_text')
-                          .toList();
-                  final commentaries =
-                      response.texts
-                          .where((t) => t.type.toLowerCase() == 'commentary')
-                          .toList();
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (texts.isEmpty)
-                        _buildEmptyState(context, ref)
-                      else ...[
-                        _buildRootTexts(rootTexts, context),
-                        const SizedBox(height: 12),
-                        _buildCommentaries(commentaries, context),
-                      ],
-                    ],
-                  );
-                },
-                loading:
-                    () => const Padding(
-                      padding: EdgeInsets.only(top: 40.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
+                data:
+                    (response) => _buildTextsList(context, ref, response.texts),
+                loading: () => const LoadingStateWidget(topPadding: 40.0),
                 error:
                     (e, st) => ErrorStateWidget(
                       error: e,
@@ -84,71 +60,29 @@ class WorksScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRootTexts(List<Texts> texts, BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final buildTitle = Text(
-      localizations.text_detail_rootText,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-        color: Colors.grey[700],
-      ),
-    );
-    if (texts.isEmpty) return const SizedBox.shrink();
+  Widget _buildTextsList(
+    BuildContext context,
+    WidgetRef ref,
+    List<Texts> texts,
+  ) {
+    if (texts.isEmpty) {
+      return _buildEmptyState(context, ref);
+    }
+
+    final rootTexts =
+        texts.where((t) => t.type.toLowerCase() == 'root_text').toList();
+    final commentaries =
+        texts.where((t) => t.type.toLowerCase() == 'commentary').toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildTitle,
-        ...texts.map((text) => _buildTextList([text], context)),
+        if (rootTexts.isNotEmpty) ...[
+          _RootTextsSection(texts: rootTexts),
+          const SizedBox(height: TextScreenConstants.contentVerticalSpacing),
+        ],
+        if (commentaries.isNotEmpty) _CommentariesSection(texts: commentaries),
       ],
-    );
-  }
-
-  Widget _buildCommentaries(List<Texts> texts, BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    final buildTitle = Text(
-      localizations.text_detail_commentaryText,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-        color: Colors.grey[700],
-      ),
-    );
-    if (texts.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTitle,
-        ...texts.map((text) => _buildTextList([text], context)),
-      ],
-    );
-  }
-
-  Widget _buildTextList(List<Texts> texts, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          texts.map((text) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Divider(thickness: 1, color: Color(0xFFB6D7D7)),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    text.title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: getFontSize(text.language),
-                      fontFamily: getFontFamily(text.language),
-                    ),
-                  ),
-                  onTap: () {
-                    context.push('/texts/texts', extra: text);
-                  },
-                ),
-              ],
-            );
-          }).toList(),
     );
   }
 
@@ -166,9 +100,9 @@ class WorksScreen extends ConsumerWidget {
               localizations.text_noContent,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: TextScreenConstants.bodyFontSize,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: Colors.grey[TextScreenConstants.greyShade700],
               ),
             ),
             const SizedBox(height: 18),
@@ -187,13 +121,15 @@ class WorksScreen extends ConsumerWidget {
                     vertical: 12,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(
+                      TextScreenConstants.buttonBorderRadius,
+                    ),
                   ),
                 ),
                 child: Text(
                   localizations.text_switchToTibetan,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: TextScreenConstants.bodyFontSize,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -201,6 +137,62 @@ class WorksScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Root texts section widget
+class _RootTextsSection extends StatelessWidget {
+  final List<Texts> texts;
+
+  const _RootTextsSection({required this.texts});
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(title: localizations.text_detail_rootText),
+        ...texts.map(
+          (text) => TextListItem(
+            title: text.title,
+            language: text.language,
+            onTap: () {
+              context.push(TextRoutes.texts, extra: text);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Commentaries section widget
+class _CommentariesSection extends StatelessWidget {
+  final List<Texts> texts;
+
+  const _CommentariesSection({required this.texts});
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(title: localizations.text_detail_commentaryText),
+        ...texts.map(
+          (text) => TextListItem(
+            title: text.title,
+            language: text.language,
+            onTap: () {
+              context.push(TextRoutes.texts, extra: text);
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
+import 'package:flutter_pecha/features/texts/constants/text_routes.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
@@ -8,17 +10,20 @@ import 'package:flutter_pecha/features/texts/models/segment.dart';
 import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/chapter_header.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/contents_chapter.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/language_selector_badge.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/segment_action_bar.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/library_search_delegate.dart';
 import 'package:flutter_pecha/features/texts/utils/helper_functions.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
 import 'package:fquery/fquery.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+/// Screen for reading chapter content with infinite scroll pagination
+/// Supports searching within text, font size adjustment, and language selection
 class ChaptersScreen extends StatefulHookConsumerWidget {
   final String textId;
   final String? contentId;
@@ -52,7 +57,7 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     currentSegmentId = widget.segmentId;
   }
 
-  // Method to update the text and segment
+  /// Update the text and segment when navigating within the chapter
   void updateTextAndSegment(
     String newTextId, {
     String? newSegmentId,
@@ -68,7 +73,7 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedSegment = ref.watch(selectedSegmentProvider);
-    final size = 20;
+    const size = 20;
     final newPageSections = useState<List<Section>>([]);
 
     // Initialize the infinite query using current state values
@@ -84,7 +89,6 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
         currentSegmentId ?? '',
         size,
       ],
-
       (Map<String, dynamic> pageParam) async {
         final segmentId = pageParam['segmentId'] ?? currentSegmentId;
         final contentId = pageParam['contentId'] ?? currentContentId;
@@ -104,17 +108,6 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
         return response;
       },
       initialPageParam: {'segmentId': currentSegmentId, 'direction': 'next'},
-
-      // Function to fetch data for each page
-      // (TextDetailsParams params) async {
-      //   debugPrint("calling textDetailsFutureProvider $params");
-      //   final response = await ref.read(
-      //     textDetailsFutureProvider(params).future,
-      //   );
-      //   newPageSections.value = response.content.sections;
-      //   return response;
-      // },
-      // Get the next page parameter
       getNextPageParam: (lastPage, allPages, lastPageParam, allParams) {
         if (lastPage.currentSegmentPosition == lastPage.totalSegments) {
           return null;
@@ -123,8 +116,6 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
         if (lastSegmentId == null) return null;
         return {'segmentId': lastSegmentId, 'direction': 'next'};
       },
-
-      // Get the previous page parameter
       getPreviousPageParam: (firstPage, allPages, firstPageParam, allParams) {
         if (firstPage.currentSegmentPosition <= 1) return null;
         final firstSegmentId = getFirstSegmentId(firstPage.content.sections);
@@ -135,8 +126,8 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
       refetchOnMount: RefetchOnMount.never,
     );
 
-    // Merge all loaded sections for rendering
-    final ReaderResponse? allContent = useMemoized(() {
+    // Memoize merged content to avoid recalculation on every rebuild
+    final allContent = useMemoized(() {
       if (infiniteQuery.data?.pages == null ||
           infiniteQuery.data!.pages.isEmpty) {
         return null;
@@ -158,7 +149,6 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
           }
         }
 
-        // Create proper Toc object instead of Map
         final mergedToc = Toc(
           id: infiniteQuery.data!.pages[0].content.id,
           textId: infiniteQuery.data!.pages[0].content.textId,
@@ -194,58 +184,55 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     //   return null;
     // }, [allContent?.content.id, segmentId]);
 
-    Widget chapter;
-    if (infiniteQuery.isLoading) {
-      chapter = const Center(child: Text("Loading..."));
-    } else if (infiniteQuery.isError) {
-      chapter = const Center(child: Text('No data found'));
-    } else {
-      chapter = Column(
-        children: [
-          _buildChapterHeader(context, ref, allContent!.textDetail),
-          _buildChapter(
-            context,
-            ref,
-            allContent.content,
-            allContent.textDetail,
-            infiniteQuery,
-            selectedSegment,
-            newPageSections.value,
-          ),
-        ],
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            ref.read(selectedSegmentProvider.notifier).state = null;
-            context.pop();
-          },
-        ),
-        toolbarHeight: 50,
-        actions: [
-          _buildSearchButton(context, ref),
-          _buildFontSizeSelector(context, ref),
-          if (infiniteQuery.data != null)
-            _buildLanguageSelector(context, ref, infiniteQuery),
-        ],
-        actionsPadding: const EdgeInsets.only(right: 20),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2),
-          child: Container(height: 2, color: const Color(0xFFB6D7D7)),
-        ),
+      appBar: _buildAppBar(context, infiniteQuery),
+      body: _buildBody(
+        context,
+        infiniteQuery,
+        allContent,
+        selectedSegment,
+        newPageSections.value,
       ),
-      body: chapter,
     );
   }
 
-  Widget _buildSearchButton(BuildContext context, WidgetRef ref) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    UseInfiniteQueryResult<ReaderResponse, dynamic, Map<String, dynamic>>
+    infiniteQuery,
+  ) {
+    return AppBar(
+      elevation: TextScreenConstants.appBarElevation,
+      scrolledUnderElevation: TextScreenConstants.appBarElevation,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios),
+        onPressed: () {
+          ref.read(selectedSegmentProvider.notifier).state = null;
+          context.pop();
+        },
+      ),
+      toolbarHeight: TextScreenConstants.appBarToolbarHeight,
+      actions: [
+        _buildSearchButton(context),
+        _buildFontSizeButton(context),
+        if (infiniteQuery.data != null)
+          _buildLanguageSelector(context, infiniteQuery),
+      ],
+      actionsPadding: TextScreenConstants.appBarActionsPadding,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(
+          TextScreenConstants.appBarBottomHeight,
+        ),
+        child: Container(
+          height: TextScreenConstants.appBarBottomHeight,
+          color: TextScreenConstants.primaryBorderColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchButton(BuildContext context) {
     return IconButton(
       onPressed: () async {
         final result = await showSearch<Map<String, String>?>(
@@ -265,104 +252,80 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     );
   }
 
-  Widget _buildFontSizeSelector(BuildContext context, WidgetRef ref) {
+  Widget _buildFontSizeButton(BuildContext context) {
     return IconButton(
-      onPressed: () => showFontSizeSelector(context, ref),
+      onPressed: () => _showFontSizeSelector(context),
       icon: const Icon(Icons.text_increase),
     );
   }
 
   Widget _buildLanguageSelector(
     BuildContext context,
-    WidgetRef ref,
     UseInfiniteQueryResult<ReaderResponse, dynamic, Map<String, dynamic>>
     infiniteQuery,
   ) {
     final textDetail = infiniteQuery.data!.pages.first.textDetail;
-    return GestureDetector(
-      onTap: () async {
+    return LanguageSelectorBadge(
+      language: textDetail.language,
+      onTap: () {
         ref
             .read(textVersionLanguageProvider.notifier)
             .setLanguage(textDetail.language);
         context.push(
-          '/texts/version_selection',
+          TextRoutes.versionSelection,
           extra: {"textId": currentTextId},
         );
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.language, size: 18),
-            const SizedBox(width: 4),
-            Text(
-              textDetail.language.toUpperCase(),
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _buildChapterHeader(
+  Widget _buildBody(
     BuildContext context,
-    WidgetRef ref,
-    TextDetail textDetail,
-  ) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Text(
-        textDetail.title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontSize: getFontSize(textDetail.language),
-          fontFamily: getFontFamily(textDetail.language),
-          fontWeight: FontWeight.w600,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildChapter(
-    BuildContext context,
-    WidgetRef ref,
-    Toc content,
-    TextDetail textDetail,
     UseInfiniteQueryResult<ReaderResponse, dynamic, Map<String, dynamic>>
     infiniteQuery,
+    ReaderResponse? allContent,
     Segment? selectedSegment,
     List<Section> newPageSections,
   ) {
-    return Expanded(
-      child: Stack(
-        children: [
-          // Main content
-          ContentsChapter(
-            itemScrollController: itemScrollController,
-            textDetail: textDetail,
-            content: content,
-            selectedSegmentId: selectedSegment?.segmentId,
-            infiniteQuery: infiniteQuery,
-            newPageSections: newPageSections,
+    if (infiniteQuery.isLoading) {
+      return const Center(child: Text("Loading..."));
+    }
+
+    if (infiniteQuery.isError) {
+      return const Center(child: Text('No data found'));
+    }
+
+    return Column(
+      children: [
+        ChapterHeader(textDetail: allContent!.textDetail),
+        Expanded(
+          child: Stack(
+            children: [
+              // Main content
+              ContentsChapter(
+                itemScrollController: itemScrollController,
+                textDetail: allContent.textDetail,
+                content: allContent.content,
+                selectedSegmentId: selectedSegment?.segmentId,
+                infiniteQuery: infiniteQuery,
+                newPageSections: newPageSections,
+              ),
+              // Segment action bar
+              if (selectedSegment != null)
+                _buildSegmentActionBar(
+                  context,
+                  selectedSegment,
+                  allContent.textDetail,
+                ),
+            ],
           ),
-          // Segment action bar
-          if (selectedSegment != null)
-            _buildSegmentActionBar(context, ref, selectedSegment, textDetail),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildSegmentActionBar(
     BuildContext context,
-    WidgetRef ref,
     Segment selectedSegment,
     TextDetail textDetail,
   ) {
@@ -377,9 +340,12 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
       onClose: () => ref.read(selectedSegmentProvider.notifier).state = null,
     );
   }
-}
 
-// Utility function to show font size selector
-void showFontSizeSelector(BuildContext context, WidgetRef ref) {
-  showDialog(context: context, builder: (context) => const FontSizeSelector());
+  /// Show font size selector dialog
+  void _showFontSizeSelector(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const FontSizeSelector(),
+    );
+  }
 }

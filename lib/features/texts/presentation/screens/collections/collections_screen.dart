@@ -1,35 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
+import 'package:flutter_pecha/features/texts/constants/text_routes.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/collections_providers.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
+import 'package:flutter_pecha/features/texts/data/providers/library_search_state_provider.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/collections_section.dart';
-import 'package:flutter_pecha/features/texts/utils/text_highlight_helper.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/loading_state_widget.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/search_result_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class CollectionsScreen extends ConsumerStatefulWidget {
+class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});
 
   @override
-  ConsumerState<CollectionsScreen> createState() => _CollectionsScreenState();
-}
-
-class _CollectionsScreenState extends ConsumerState<CollectionsScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  String _submittedQuery = '';
-  bool _hasSubmitted = false;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final collectionsListResponse = ref.watch(collectionsListFutureProvider);
+    final searchState = ref.watch(librarySearchStateProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -37,48 +26,14 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            _buildSearchField(context),
+            _SearchField(),
             Expanded(
               child:
-                  _hasSubmitted && _submittedQuery.isNotEmpty
-                      ? _buildSearchResults(context)
-                      : collectionsListResponse.when(
-                        data: (response) {
-                          final collections = response.collections;
-                          if (collections.isEmpty) {
-                            return const Center(
-                              child: Text('No collections available'),
-                            );
-                          }
-                          return ListView.builder(
-                            itemCount: collections.length,
-                            itemBuilder: (context, index) {
-                              final collection = collections[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  context.push(
-                                    '/texts/works',
-                                    extra: collection,
-                                  );
-                                },
-                                child: CollectionsSection(
-                                  title: collection.title,
-                                  subtitle: collection.description,
-                                  dividerColor: Color(0xFF8B3A50),
-                                  slug: collection.slug,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        loading:
-                            () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                        error:
-                            (error, stackTrace) => const Center(
-                              child: Text('Unable to load collections'),
-                            ),
+                  searchState.hasSubmitted &&
+                          searchState.submittedQuery.isNotEmpty
+                      ? _SearchResultsView(query: searchState.submittedQuery)
+                      : _CollectionsListView(
+                        collectionsResponse: collectionsListResponse,
                       ),
             ),
           ],
@@ -89,56 +44,64 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: TextScreenConstants.screenPadding,
       child: Text(
         AppLocalizations.of(context)!.text_browseTheLibrary,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: TextScreenConstants.headerFontSize,
+        ),
       ),
     );
   }
+}
 
-  Widget _buildSearchField(BuildContext context) {
+/// Search field widget with state management
+class _SearchField extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends ConsumerState<_SearchField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final searchNotifier = ref.read(librarySearchStateProvider.notifier);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: TextScreenConstants.screenPadding,
       child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-            // Reset submitted state when user starts typing again
-            if (_hasSubmitted && value != _submittedQuery) {
-              _hasSubmitted = false;
-              _submittedQuery = '';
-            }
-            // Clear search if query is empty
-            if (value.isEmpty) {
-              _hasSubmitted = false;
-              _submittedQuery = '';
-            }
-          });
-        },
+        controller: _controller,
+        onChanged: (value) => searchNotifier.updateSearchQuery(value),
         onSubmitted: (value) {
           if (value.isNotEmpty) {
-            setState(() {
-              _submittedQuery = value;
-              _hasSubmitted = true;
-            });
+            searchNotifier.submitSearch(value);
           }
         },
         decoration: InputDecoration(
-          hintText: AppLocalizations.of(context)!.text_search,
-          prefixIcon: Icon(Icons.search),
+          hintText: localizations.text_search,
+          prefixIcon: const Icon(Icons.search),
           suffixIcon:
-              _searchQuery.isNotEmpty
+              _controller.text.isNotEmpty
                   ? IconButton(
-                    icon: Icon(Icons.clear),
+                    icon: const Icon(Icons.clear),
                     onPressed: () {
-                      setState(() {
-                        _searchController.clear();
-                        _searchQuery = '';
-                        _submittedQuery = '';
-                        _hasSubmitted = false;
-                      });
+                      _controller.clear();
+                      searchNotifier.clearSearch();
                     },
                   )
                   : null,
@@ -146,22 +109,73 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSearchResults(BuildContext context) {
-    if (_submittedQuery.isEmpty) {
+/// Collections list view
+class _CollectionsListView extends StatelessWidget {
+  final AsyncValue collectionsResponse;
+
+  const _CollectionsListView({required this.collectionsResponse});
+
+  @override
+  Widget build(BuildContext context) {
+    return collectionsResponse.when(
+      data: (response) {
+        final collections = response.collections;
+        if (collections.isEmpty) {
+          return const Center(child: Text('No collections available'));
+        }
+        return ListView.builder(
+          itemCount: collections.length,
+          itemBuilder: (context, index) {
+            final collection = collections[index];
+            return GestureDetector(
+              onTap: () {
+                context.push(TextRoutes.works, extra: collection);
+              },
+              child: CollectionsSection(
+                title: collection.title,
+                subtitle: collection.description,
+                dividerColor: TextScreenConstants.collectionDividerColor,
+                slug: collection.slug,
+              ),
+            );
+          },
+        );
+      },
+      loading: () => const LoadingStateWidget(),
+      error:
+          (error, stackTrace) =>
+              const Center(child: Text('Unable to load collections')),
+    );
+  }
+}
+
+/// Search results view
+class _SearchResultsView extends ConsumerWidget {
+  final String query;
+
+  const _SearchResultsView({required this.query});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (query.isEmpty) {
       return Center(
         child: Text(
           AppLocalizations.of(context)!.text_search,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
+          style: const TextStyle(
+            fontSize: TextScreenConstants.bodyFontSize,
+            color: Colors.grey,
+          ),
         ),
       );
     }
 
-    final searchParams = LibrarySearchParams(query: _submittedQuery);
+    final searchParams = LibrarySearchParams(query: query);
     final searchResults = ref.watch(librarySearchProvider(searchParams));
 
     return searchResults.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const LoadingStateWidget(),
       error:
           (error, stackTrace) => ErrorStateWidget(
             error: error,
@@ -169,134 +183,73 @@ class _CollectionsScreenState extends ConsumerState<CollectionsScreen> {
           ),
       data: (searchResponse) {
         if (searchResponse.sources == null || searchResponse.sources!.isEmpty) {
-          return Center(
-            child: Text(
-              'No results found for "$_submittedQuery"',
-              style: const TextStyle(fontSize: 16),
-            ),
-          );
+          return _buildNoResults(query);
         }
 
-        // Group segment matches by textId
-        final groupedResults = <String, Map<String, dynamic>>{};
-        for (final source in searchResponse.sources!) {
-          if (!groupedResults.containsKey(source.text.textId)) {
-            groupedResults[source.text.textId] = {
-              'textId': source.text.textId,
-              'textTitle': source.text.title,
-              'segments': <Map<String, String>>[],
-            };
-          }
-          for (final segmentMatch in source.segmentMatches) {
-            (groupedResults[source.text.textId]!['segments'] as List).add({
-              'segmentId': segmentMatch.segmentId,
-              'content': segmentMatch.content,
-            });
-          }
-        }
+        final groupedResults = _groupSearchResults(searchResponse.sources!);
 
         if (groupedResults.isEmpty) {
-          return Center(
-            child: Text(
-              'No results found for "$_submittedQuery"',
-              style: const TextStyle(fontSize: 16),
-            ),
-          );
+          return _buildNoResults(query);
         }
 
-        final groupedList = groupedResults.values.toList();
+        return _buildSearchResultsList(groupedResults, query);
+      },
+    );
+  }
 
-        return ListView.builder(
-          itemCount: groupedList.length,
-          itemBuilder: (context, index) {
-            final textGroup = groupedList[index];
-            final textId = textGroup['textId'] as String;
-            final textTitle = textGroup['textTitle'] as String;
-            final segments = textGroup['segments'] as List<Map<String, String>>;
+  Widget _buildNoResults(String query) {
+    return Center(
+      child: Text(
+        'No results found for "$query"',
+        style: const TextStyle(fontSize: TextScreenConstants.bodyFontSize),
+      ),
+    );
+  }
 
-            return Card(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Text title shown once
-                    Text(
-                      textTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(height: 1),
-                    const SizedBox(height: 12),
-                    // List all segments for this text
-                    ...segments.asMap().entries.map((entry) {
-                      final segmentIndex = entry.key;
-                      final segment = entry.value;
-                      final segmentId = segment['segmentId']!;
-                      final content = segment['content']!;
-                      final cleanContent = content.replaceAll(
-                        RegExp(r'<[^>]*>'),
-                        '',
-                      );
+  /// Group segment matches by textId
+  Map<String, Map<String, dynamic>> _groupSearchResults(List<dynamic> sources) {
+    final groupedResults = <String, Map<String, dynamic>>{};
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              context.push(
-                                '/texts/chapters',
-                                extra: {
-                                  'textId': textId,
-                                  'segmentId': segmentId,
-                                },
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(12.0),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.grey[200]!,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text.rich(
-                                TextSpan(
-                                  children: buildHighlightedText(
-                                    cleanContent,
-                                    _submittedQuery,
-                                    TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                          if (segmentIndex < segments.length - 1)
-                            const SizedBox(height: 12),
-                        ],
-                      );
-                    }),
-                  ],
-                ),
-              ),
-            );
-          },
+    for (final source in sources) {
+      if (!groupedResults.containsKey(source.text.textId)) {
+        groupedResults[source.text.textId] = {
+          'textId': source.text.textId,
+          'textTitle': source.text.title,
+          'segments': <Map<String, String>>[],
+        };
+      }
+      for (final segmentMatch in source.segmentMatches) {
+        (groupedResults[source.text.textId]!['segments']
+                as List<Map<String, String>>)
+            .add({
+              'segmentId': segmentMatch.segmentId as String,
+              'content': segmentMatch.content as String,
+            });
+      }
+    }
+
+    return groupedResults;
+  }
+
+  Widget _buildSearchResultsList(
+    Map<String, Map<String, dynamic>> groupedResults,
+    String query,
+  ) {
+    final groupedList = groupedResults.values.toList();
+
+    return ListView.builder(
+      itemCount: groupedList.length,
+      itemBuilder: (context, index) {
+        final textGroup = groupedList[index];
+        final textId = textGroup['textId'] as String;
+        final textTitle = textGroup['textTitle'] as String;
+        final segments = textGroup['segments'] as List<Map<String, String>>;
+
+        return SearchResultCard(
+          textId: textId,
+          textTitle: textTitle,
+          segments: segments,
+          searchQuery: query,
         );
       },
     );

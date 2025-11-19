@@ -2,19 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
+import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
+import 'package:flutter_pecha/features/texts/constants/text_routes.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/models/text/texts.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/version_response.dart';
 import 'package:flutter_pecha/features/texts/models/version.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/continue_reading_button.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/loading_state_widget.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/table_of_contens.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/text_screen_app_bar.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/version_list_item.dart';
+import 'package:flutter_pecha/features/texts/utils/language_helper.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// Screen displaying text details with table of contents and versions
 class TextsScreen extends ConsumerWidget {
   const TextsScreen({super.key, required this.text});
   final Texts text;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context)!;
+    final textContentResponse = ref.watch(textContentFutureProvider(text.id));
+    final textVersionResponse = ref.watch(textVersionFutureProvider(text.id));
+
+    // Determine if we should show the contents tab
+    final showContentsTab = textContentResponse.maybeWhen(
+      data:
+          (contentResponse) =>
+              contentResponse.contents.isNotEmpty &&
+              contentResponse.contents[0].sections.length > 1,
+      orElse: () => null, // Return null while loading
+    );
+
+    final tabCount = showContentsTab == true ? 2 : 1;
+
+    return DefaultTabController(
+      length: tabCount,
+      child: Scaffold(
+        appBar: TextScreenAppBar(onBackPressed: () => Navigator.pop(context)),
+        body: Padding(
+          padding: TextScreenConstants.screenLargePaddingNoBottom,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextHeader(context, text),
+              const SizedBox(height: 4),
+              _buildTextType(text, localizations),
+              const SizedBox(height: TextScreenConstants.largeTitleFontSize),
+              ContinueReadingButton(
+                label: localizations.text_toc_continueReading,
+                onPressed: () {
+                  context.push(TextRoutes.chapters, extra: {'textId': text.id});
+                },
+              ),
+              const SizedBox(
+                height: TextScreenConstants.extraLargeVerticalSpacing,
+              ),
+              // Show loading state until we know whether to show contents tab
+              if (showContentsTab == null)
+                const Expanded(child: LoadingStateWidget())
+              else
+                _buildTabs(
+                  localizations,
+                  context,
+                  textContentResponse,
+                  textVersionResponse,
+                  showContentsTab,
+                ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: const PechaBottomNavBar(),
+      ),
+    );
+  }
 
   Widget _buildTextHeader(BuildContext context, Texts text) {
     return Row(
@@ -39,39 +105,9 @@ class TextsScreen extends ConsumerWidget {
           ? localizations.text_detail_rootText.toUpperCase()
           : localizations.text_detail_commentaryText.toUpperCase(),
       style: TextStyle(
-        fontSize: 16,
+        fontSize: TextScreenConstants.bodyFontSize,
         fontWeight: FontWeight.w500,
-        color: Colors.grey[600],
-      ),
-    );
-  }
-
-  Widget _buildContinueReadingButton(
-    Texts text,
-    AppLocalizations localizations,
-    BuildContext context,
-  ) {
-    return SizedBox(
-      width: 160,
-      height: 40,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        onPressed: () {
-          context.push('/texts/chapters', extra: {'textId': text.id});
-        },
-        child: Text(
-          localizations.text_toc_continueReading,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        color: Colors.grey[TextScreenConstants.greyShade600],
       ),
     );
   }
@@ -99,17 +135,16 @@ class TextsScreen extends ConsumerWidget {
               if (showContentsTab) Tab(text: localizations.text_toc_content),
               Tab(text: localizations.text_toc_versions),
             ],
-            dividerColor: Color(0xFFDEE2E6),
+            dividerColor: const Color(0xFFDEE2E6),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TextScreenConstants.largeVerticalSpacing),
           Expanded(
             child: TabBarView(
               children: [
                 // Contents Tab
                 if (showContentsTab)
                   textContentResponse.when(
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
+                    loading: () => const LoadingStateWidget(),
                     error:
                         (error, stackTrace) => ErrorStateWidget(
                           error: error,
@@ -126,8 +161,7 @@ class TextsScreen extends ConsumerWidget {
                   ),
                 // Versions Tab
                 textVersionResponse.when(
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const LoadingStateWidget(),
                   error:
                       (error, stackTrace) => ErrorStateWidget(
                         error: error,
@@ -136,7 +170,7 @@ class TextsScreen extends ConsumerWidget {
                       ),
                   data: (versionResponse) {
                     if (versionResponse.versions.isNotEmpty) {
-                      return _buildVersionsTab(
+                      return _buildVersionsList(
                         versionResponse.versions,
                         context,
                       );
@@ -153,157 +187,34 @@ class TextsScreen extends ConsumerWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final localizations = AppLocalizations.of(context)!;
-    final textContentResponse = ref.watch(textContentFutureProvider(text.id));
-    final textVersionResponse = ref.watch(textVersionFutureProvider(text.id));
-
-    // Determine if we should show the contents tab
-    final showContentsTab = textContentResponse.maybeWhen(
-      data:
-          (contentResponse) =>
-              contentResponse.contents.isNotEmpty &&
-              contentResponse.contents[0].sections.length > 1,
-      orElse: () => null, // Return null while loading
-    );
-
-    final tabCount = showContentsTab == true ? 2 : 1;
-
-    return DefaultTabController(
-      length: tabCount,
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.pop(context),
-          ),
-          toolbarHeight: 50,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(2),
-            child: Container(height: 2, color: const Color(0xFFB6D7D7)),
-          ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTextHeader(context, text),
-              const SizedBox(height: 4),
-              _buildTextType(text, localizations),
-              const SizedBox(height: 18),
-              _buildContinueReadingButton(text, localizations, context),
-              const SizedBox(height: 22),
-              // Show loading state until we know whether to show contents tab
-              if (showContentsTab == null)
-                const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else
-                _buildTabs(
-                  localizations,
-                  context,
-                  textContentResponse,
-                  textVersionResponse,
-                  showContentsTab,
-                ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: PechaBottomNavBar(),
-      ),
-    );
-  }
-
-  Widget _buildVersionsTab(List<Version> versions, BuildContext context) {
+  Widget _buildVersionsList(List<Version> versions, BuildContext context) {
     return ListView.separated(
       itemCount: versions.length,
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       separatorBuilder:
-          (context, idx) =>
-              const Divider(height: 32, thickness: 1, color: Color(0xFFF0F0F0)),
+          (context, idx) => const Divider(
+            height: 32,
+            thickness: TextScreenConstants.thinDividerThickness,
+            color: Color(0xFFF0F0F0),
+          ),
       itemBuilder: (context, idx) {
         final version = versions[idx];
         final contentId =
             version.tableOfContents.isNotEmpty
                 ? version.tableOfContents[0]
                 : null;
-        return GestureDetector(
+
+        return VersionListItem(
+          version: version,
+          languageLabel: getLanguageLabel(version.language, context),
           onTap: () {
             context.push(
-              '/texts/chapters',
+              TextRoutes.chapters,
               extra: {'textId': version.id, 'contentId': contentId},
             );
           },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      version.title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: getFontFamily(version.language),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 8, top: 2),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F3F3),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Text(
-                      _getLanguageLabel(version.language, context),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "License: ${version.license}",
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade800),
-              ),
-            ],
-          ),
         );
       },
     );
-  }
-
-  String _getLanguageLabel(String code, BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    switch (code.toLowerCase()) {
-      case 'bo':
-      case 'tibetan':
-        return localizations.tibetan;
-      case 'sa':
-      case 'sanskrit':
-        return localizations.sanskrit;
-      case 'en':
-      case 'english':
-        return localizations.english;
-      case "zh":
-      case "chinese":
-        return localizations.chinese;
-      default:
-        return code;
-    }
   }
 }
