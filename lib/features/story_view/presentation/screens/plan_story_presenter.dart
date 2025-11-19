@@ -335,6 +335,9 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
               context.pop();
             }
           },
+          storyViewIndicatorConfig: StoryViewIndicatorConfig(
+            activeColor: Theme.of(context).colorScheme.primary,
+          ),
         ),
         // if (widget.author != null) StoryAuthorAvatar(author: widget.author),
         // Close button in top-right corner
