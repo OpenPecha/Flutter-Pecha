@@ -1,5 +1,3 @@
-// This file contains helper functions that are used throughout the app
-
 import 'package:flutter/material.dart';
 
 extension HelperFunctions on BuildContext {
