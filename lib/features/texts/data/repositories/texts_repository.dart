@@ -1,4 +1,5 @@
 import 'package:flutter_pecha/features/texts/data/datasource/text_remote_datasource.dart';
+import 'package:flutter_pecha/features/texts/models/search/multilingual_search_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/search_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/commentary_text_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
@@ -83,7 +84,7 @@ class TextsRepository {
     return result;
   }
 
-  Future<SearchResponse> multilingualSearchRepository({
+  Future<MultilingualSearchResponse> multilingualSearchRepository({
     required String query,
     String? language,
     String? textId,

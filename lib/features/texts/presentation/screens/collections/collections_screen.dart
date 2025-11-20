@@ -188,11 +188,11 @@ class _SearchResultsView extends ConsumerWidget {
             customMessage: 'Unable to perform search.\nPlease try again.',
           ),
       data: (searchResponse) {
-        if (searchResponse.sources == null || searchResponse.sources!.isEmpty) {
+        if (searchResponse.sources.isEmpty) {
           return _buildNoResults(query);
         }
 
-        final groupedResults = _groupSearchResults(searchResponse.sources!);
+        final groupedResults = _groupSearchResults(searchResponse.sources);
 
         if (groupedResults.isEmpty) {
           return _buildNoResults(query);

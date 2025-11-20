@@ -225,10 +225,10 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(12.0),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[50],
+                                      color: Theme.of(context).cardColor,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: Colors.grey[200]!,
+                                        color: Theme.of(context).dividerColor,
                                         width: 1,
                                       ),
                                     ),
@@ -237,10 +237,7 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
                                         children: buildHighlightedText(
                                           cleanContent,
                                           _submittedQuery,
-                                          TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[800],
-                                          ),
+                                          TextStyle(fontSize: 14),
                                         ),
                                       ),
                                       maxLines: 3,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/features/texts/models/search/multilingual_search_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/search_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/commentary_text_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
@@ -171,7 +172,7 @@ class TextRemoteDatasource {
   }
 
   // multilingual search
-  Future<SearchResponse> multilingualSearch({
+  Future<MultilingualSearchResponse> multilingualSearch({
     required String query,
     String? language,
     String? textId,
@@ -191,13 +192,16 @@ class TextRemoteDatasource {
       try {
         final decoded = utf8.decode(response.bodyBytes);
         final Map<String, dynamic> jsonMap = json.decode(decoded);
-        final searchResponse = SearchResponse.fromJson(jsonMap);
-        return searchResponse;
+        final multilingualSearchResponse = MultilingualSearchResponse.fromJson(
+          jsonMap,
+        );
+        return multilingualSearchResponse;
       } catch (e) {
-        throw Exception('Failed to search text');
+        debugPrint('MultilingualSearchResponse::: Failed to search text: $e');
+        throw Exception('MultilingualSearchResponse::: Failed to search text');
       }
     } else {
-      throw Exception('Failed to search text');
+      throw Exception('MultilingualSearchResponse::: Failed to search text');
     }
   }
 }

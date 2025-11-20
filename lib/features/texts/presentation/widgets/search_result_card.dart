@@ -82,12 +82,12 @@ class SearchResultCard extends StatelessWidget {
         width: double.infinity,
         padding: TextScreenConstants.cardInnerPaddingValue,
         decoration: BoxDecoration(
-          color: Colors.grey[TextScreenConstants.greyShade50],
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(
             TextScreenConstants.cardBorderRadius,
           ),
           border: Border.all(
-            color: Colors.grey[TextScreenConstants.greyShade200]!,
+            color: Theme.of(context).dividerColor,
             width: TextScreenConstants.thinDividerThickness,
           ),
         ),
@@ -96,10 +96,7 @@ class SearchResultCard extends StatelessWidget {
             children: buildHighlightedText(
               content,
               searchQuery,
-              TextStyle(
-                fontSize: TextScreenConstants.subtitleFontSize,
-                color: Colors.grey[TextScreenConstants.greyShade800],
-              ),
+              TextStyle(fontSize: TextScreenConstants.subtitleFontSize),
             ),
           ),
           maxLines: TextScreenConstants.searchResultMaxLines,
