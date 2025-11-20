@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/notifications/provider/notification_provider.dart';
+import 'package:flutter_pecha/features/notifications/provider/recitation_notification_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
-// import 'package:flutter_pecha/features/notifications/application/notification_provider.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -72,6 +72,67 @@ class _NotificationSettingsScreenState
     }
   }
 
+  // Recitation notification methods
+  Future<void> _toggleRecitationNotifications(
+    bool value,
+    TimeOfDay selectedTime,
+  ) async {
+    if (value) {
+      try {
+        await ref
+            .read(recitationNotificationProvider.notifier)
+            .enableRecitationReminder(
+              time: selectedTime,
+              title: 'Recitations Reminder',
+              body: 'Take a moment to pray',
+            );
+
+        _showSuccessMessage('Recitation reminders enabled');
+      } catch (e) {
+        _showErrorMessage(
+          'Failed to enable notifications. Please try again later.',
+        );
+      }
+    } else {
+      try {
+        await ref
+            .read(recitationNotificationProvider.notifier)
+            .disableRecitationReminder();
+        _showSuccessMessage('Recitation reminders disabled');
+      } catch (e) {
+        _showErrorMessage(
+          'Failed to disable notifications. Please try again later.',
+        );
+      }
+    }
+  }
+
+  Future<void> _updateRecitationReminderTime(TimeOfDay time) async {
+    try {
+      await ref
+          .read(recitationNotificationProvider.notifier)
+          .updateReminderTime(time);
+      _showSuccessMessage('Recitation reminder time updated');
+    } catch (e) {
+      _showErrorMessage(
+        'Failed to update reminder time. Please try again later.',
+      );
+    }
+  }
+
+  Future<void> _selectRecitationTime(
+    BuildContext context,
+    TimeOfDay selectedTime,
+  ) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (pickedTime != null && selectedTime != pickedTime) {
+      _updateRecitationReminderTime(pickedTime);
+    }
+  }
+
   void _showSuccessMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.green),
@@ -86,14 +147,21 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    // Watch the provider to rebuild when data changes
+    // Watch the providers to rebuild when data changes
     final state = ref.watch(notificationProvider);
+    final recitationState = ref.watch(recitationNotificationProvider);
 
     // Use provider state directly
     final isEnabled = state.isEnabled;
     final selectedTime =
         state.reminderTime ?? const TimeOfDay(hour: 8, minute: 0);
     final hasPermission = state.hasPermission;
+
+    // Recitation state
+    final isRecitationEnabled = recitationState.isEnabled;
+    final recitationSelectedTime =
+        recitationState.reminderTime ?? const TimeOfDay(hour: 18, minute: 0);
+
     final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(localizations.notification_settings)),
@@ -150,6 +218,7 @@ class _NotificationSettingsScreenState
               SizedBox(height: 16),
             ],
             if (hasPermission) ...[
+              // Daily Practice Card
               Card(
                 color: Theme.of(context).cardColor,
                 child: Padding(
@@ -160,7 +229,7 @@ class _NotificationSettingsScreenState
                       SwitchListTile(
                         activeTrackColor: Theme.of(context).colorScheme.primary,
                         inactiveTrackColor: Colors.grey,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 0,
                         ),
@@ -193,8 +262,61 @@ class _NotificationSettingsScreenState
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              // Recitation Reminder Card
+              Card(
+                color: Theme.of(context).cardColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SwitchListTile(
+                        activeTrackColor: Theme.of(context).colorScheme.primary,
+                        inactiveTrackColor: Colors.grey,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 0,
+                        ),
+                        title: Text(
+                          'Recitations Reminder',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        subtitle: Text(
+                          'Take a moment to pray',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        value: isRecitationEnabled,
+                        onChanged:
+                            (v) => _toggleRecitationNotifications(
+                              v,
+                              recitationSelectedTime,
+                            ),
+                      ),
+                      if (isRecitationEnabled) ...[
+                        ListTile(
+                          title: Text(
+                            'Select Time',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          subtitle: Text(
+                            recitationSelectedTime.format(context),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          trailing: const Icon(Icons.access_time),
+                          onTap:
+                              () => _selectRecitationTime(
+                                context,
+                                recitationSelectedTime,
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
             ],
-            if (state.isLoading) ...[
+            if (state.isLoading || recitationState.isLoading) ...[
               const SizedBox(height: 16),
               const Center(child: CircularProgressIndicator()),
             ],

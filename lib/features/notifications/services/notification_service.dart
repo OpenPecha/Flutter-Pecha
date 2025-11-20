@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -19,12 +21,18 @@ class NotificationService {
   bool _isInitialized = false;
   static const String _dailyReminderKey = 'daily_reminder_time';
   static const String _dailyReminderEnabledKey = 'daily_reminder_enabled';
-  // Add a static router reference
+  // Add static references for navigation
   static GoRouter? _router;
+  static ProviderContainer? _container;
 
   // Method to set the router reference
   static void setRouter(GoRouter router) {
     _router = router;
+  }
+
+  // Method to set the provider container
+  static void setContainer(ProviderContainer container) {
+    _container = container;
   }
 
   bool get isInitialized => _isInitialized;
@@ -39,8 +47,9 @@ class NotificationService {
     tz.setLocalLocation(tz.getLocation(currentTimezone));
 
     // Android initialization - do NOT request permissions
+    // Use drawable resource for notification icon (not mipmap)
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/launcher_icon');
+        AndroidInitializationSettings('ic_notification');
 
     // iOS initialization - do NOT request permissions
     const DarwinInitializationSettings iosSettings =
@@ -62,7 +71,65 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
+    // Create notification channels for Android
+    if (Platform.isAndroid) {
+      await _createNotificationChannels();
+    }
+
     _isInitialized = true;
+  }
+
+  /// Create Android notification channels
+  Future<void> _createNotificationChannels() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+
+    if (androidImplementation != null) {
+      // Daily practice channel
+      const AndroidNotificationChannel dailyPracticeChannel =
+          AndroidNotificationChannel(
+            androidNotificationChannelId,
+            androidNotificationChannelName,
+            description: androidNotificationChannelDescription,
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+          );
+
+      // Recitation reminder channel
+      const AndroidNotificationChannel recitationChannel =
+          AndroidNotificationChannel(
+            recitationNotificationChannelId,
+            recitationNotificationChannelName,
+            description: recitationNotificationChannelDescription,
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+          );
+
+      // Test notification channel
+      const AndroidNotificationChannel testChannel =
+          AndroidNotificationChannel(
+            'test_notification',
+            'Test Notifications',
+            description: 'For testing notifications',
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+          );
+
+      // Create all channels
+      await androidImplementation.createNotificationChannel(
+        dailyPracticeChannel,
+      );
+      await androidImplementation.createNotificationChannel(recitationChannel);
+      await androidImplementation.createNotificationChannel(testChannel);
+
+      debugPrint('✅ Android notification channels created successfully');
+    }
   }
 
   /// Initialize with permission request (legacy method)
@@ -71,7 +138,7 @@ class NotificationService {
     await requestPermission();
   }
 
-  // TODO: request permission for notifications
+  // Request permission for notifications
   Future<bool> requestPermission() async {
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
@@ -80,8 +147,15 @@ class NotificationService {
                 AndroidFlutterLocalNotificationsPlugin
               >();
 
+      // Request notification permission
       final bool? granted =
           await androidImplementation?.requestNotificationsPermission();
+
+      // For Android 12+, also request exact alarm permission
+      if (granted == true && Platform.isAndroid) {
+        await androidImplementation?.requestExactAlarmsPermission();
+      }
+
       return granted ?? false;
     } else if (Platform.isIOS) {
       final IOSFlutterLocalNotificationsPlugin? iosImplementation =
@@ -124,8 +198,16 @@ class NotificationService {
   }
 
   void _onNotificationTapped(NotificationResponse response) {
-    // Navigate to home using the global router
-    if (_router != null) {
+    // Navigate based on notification ID
+    if (_router != null && _container != null) {
+      // Check notification ID to determine which tab to open
+      if (response.id == recitationNotificationId) {
+        // Recitation notification - go to recitation tab (index 2)
+        _container!.read(bottomNavIndexProvider.notifier).state = 2;
+      } else {
+        // Daily practice or default - go to home tab (index 0)
+        _container!.read(bottomNavIndexProvider.notifier).state = 0;
+      }
       _router!.go('/home');
     }
   }
@@ -136,47 +218,67 @@ class NotificationService {
     required String body,
     required TimeOfDay scheduledTime,
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      scheduledTime.hour,
-      scheduledTime.minute,
-    );
+    try {
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        scheduledTime.hour,
+        scheduledTime.minute,
+      );
 
-    // save the reminder time and enable the notification in shared preferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _dailyReminderKey,
-      '${scheduledTime.hour}:${scheduledTime.minute}',
-    );
-    await prefs.setBool(_dailyReminderEnabledKey, true);
+      // If the scheduled time has already passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
 
-    // schedule the notification
-    await notificationsPlugin.zonedSchedule(
-      dailyNotificationId,
-      title,
-      body,
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          androidNotificationChannelId,
-          androidNotificationChannelName,
-          channelDescription: androidNotificationChannelDescription,
-          importance: Importance.high,
-          priority: Priority.high,
+      debugPrint('📅 Scheduling notification for: $scheduledDate');
+      debugPrint('🔔 Title: $title, Body: $body');
+
+      // save the reminder time and enable the notification in shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _dailyReminderKey,
+        '${scheduledTime.hour}:${scheduledTime.minute}',
+      );
+      await prefs.setBool(_dailyReminderEnabledKey, true);
+
+      // schedule the notification
+      await notificationsPlugin.zonedSchedule(
+        dailyNotificationId,
+        title,
+        body,
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            androidNotificationChannelId,
+            androidNotificationChannelName,
+            channelDescription: androidNotificationChannelDescription,
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: 'ic_notification',
+            enableVibration: true,
+            playSound: true,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+
+      debugPrint(
+        '✅ Notification scheduled successfully with ID: $dailyNotificationId',
+      );
+    } catch (e) {
+      debugPrint('❌ Error scheduling notification: $e');
+      rethrow;
+    }
   }
 
   Future<void> cancelNotification() async {
@@ -237,7 +339,7 @@ class NotificationService {
           channelDescription: 'For testing notifications',
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@mipmap/launcher_icon',
+          icon: 'ic_notification',
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
@@ -249,9 +351,16 @@ class NotificationService {
   }
 }
 
-// Notification channel constants
+// Daily practice notification channel constants
 const androidNotificationChannelId = 'daily_practice_reminder';
 const androidNotificationChannelName = 'Daily Practice Reminder';
 const androidNotificationChannelDescription =
     'Notification for daily practice reminders';
 const dailyNotificationId = 1;
+
+// Recitation notification constants (shared with recitation service)
+const recitationNotificationChannelId = 'recitation_reminder';
+const recitationNotificationChannelName = 'Recitation Reminder';
+const recitationNotificationChannelDescription =
+    'Notification for recitation reminders';
+const recitationNotificationId = 2;

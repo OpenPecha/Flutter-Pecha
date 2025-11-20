@@ -15,9 +15,10 @@ class PechaBottomNavBar extends ConsumerWidget {
     final localizations = AppLocalizations.of(context)!;
 
     return Container(
-      padding: const EdgeInsets.only(bottom: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.primaryDark, // MAN 800 - #871C1C
+      padding: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        // color: AppColors.primaryDark, // MAN 800 - #871C1C
+        color: Theme.of(context).cardColor, // MAN 800 - #871C1C
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
@@ -107,14 +108,14 @@ class PechaBottomNavBar extends ConsumerWidget {
             children: [
               Icon(
                 isSelected ? selectedIcon : icon,
-                color: AppColors.surfaceLight,
+                // color: AppColors.surfaceLight,
                 size: isSelected ? 26 : 24,
               ),
               const SizedBox(height: 2),
               Text(
                 label,
                 style: TextStyle(
-                  color: AppColors.surfaceLight,
+                  // color: AppColors.surfaceLight,
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.w400 : FontWeight.w300,
                 ),

@@ -93,6 +93,7 @@ class _SearchFieldState extends ConsumerState<_SearchField> {
           }
         },
         decoration: InputDecoration(
+          fillColor: Theme.of(context).colorScheme.surface,
           hintText: localizations.text_search,
           prefixIcon: const Icon(Icons.search),
           suffixIcon:
