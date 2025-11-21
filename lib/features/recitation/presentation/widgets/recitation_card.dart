@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class RecitationCard extends StatelessWidget {
+class RecitationCard extends ConsumerWidget {
   final RecitationModel recitation;
   final VoidCallback onTap;
   final int? dragIndex;
@@ -15,9 +18,9 @@ class RecitationCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      height: 75,
+      height: 80,
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border.all(color: const Color(0xFFE4E4E4), width: 1),
@@ -36,7 +39,7 @@ class RecitationCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildRecitationLogo(),
                 const SizedBox(width: 6),
-                Expanded(child: _buildRecitationTitle(context)),
+                Expanded(child: _buildRecitationTitle(context, ref)),
               ],
             ),
           ),
@@ -128,11 +131,23 @@ class RecitationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRecitationTitle(BuildContext context) {
+  Widget _buildRecitationTitle(BuildContext context, WidgetRef ref) {
+    final systemLanguage = ref.watch(localeProvider).languageCode;
+    final recitationLanguage = recitation.language;
+    final language =
+        recitationLanguage != null && recitationLanguage.isNotEmpty
+            ? recitationLanguage
+            : systemLanguage;
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Text(
       recitation.title,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-      maxLines: 2,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w500,
+        fontFamily: getFontFamily(language),
+        height: lineHeight,
+      ),
       overflow: TextOverflow.ellipsis,
     );
   }

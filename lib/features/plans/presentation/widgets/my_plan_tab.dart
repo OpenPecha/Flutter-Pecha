@@ -120,12 +120,10 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
   }
 
   Widget _buildContent(BuildContext context, MyPlansState myPlansState) {
-    // Initial loading state
     if (myPlansState.isLoading && myPlansState.plans.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Error state with no plans
     if (myPlansState.error != null && myPlansState.plans.isEmpty) {
       return _ErrorState(
         message: myPlansState.error!,
@@ -133,7 +131,6 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
       );
     }
 
-    // Empty state
     if (myPlansState.plans.isEmpty && !myPlansState.isLoading) {
       return _EmptyMyPlansState(
         onBrowsePlans: () {
@@ -142,14 +139,12 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
       );
     }
 
-    // Plans list with pagination
     return ListView.separated(
       controller: _scrollController,
       separatorBuilder: (context, index) => const SizedBox(height: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       itemCount: myPlansState.plans.length + (myPlansState.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        // Loading indicator at bottom
         if (index == myPlansState.plans.length) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class PlanCard extends StatelessWidget {
+class PlanCard extends ConsumerWidget {
   final PlansModel plan;
   final VoidCallback onTap;
   const PlanCard({super.key, required this.plan, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       color: Theme.of(context).cardColor,
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -24,7 +27,7 @@ class PlanCard extends StatelessWidget {
             children: [
               _buildPlanImage(plan),
               const SizedBox(width: 24),
-              Expanded(child: _buildPlanInfo(plan)),
+              Expanded(child: _buildPlanInfo(plan, ref)),
             ],
           ),
         ),
@@ -44,18 +47,32 @@ Widget _buildPlanImage(PlansModel plan) {
   );
 }
 
-Widget _buildPlanInfo(PlansModel plan) {
+Widget _buildPlanInfo(PlansModel plan, WidgetRef ref) {
+  final languageCode = ref.watch(localeProvider).languageCode;
+  final fontFamily = getFontFamily(languageCode);
+  final lineHeight = getLineHeight(languageCode);
+  final fontSize = languageCode == 'bo' ? 22.0 : 18.0;
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const SizedBox(height: 4),
       Text(
         '${plan.totalDays} Days',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
+          height: lineHeight,
+        ),
       ),
       Text(
         plan.title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          fontFamily: fontFamily,
+          height: lineHeight,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

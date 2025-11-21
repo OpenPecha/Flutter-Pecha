@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
 class UserPlanCard extends StatelessWidget {
   final UserPlansModel plan;
@@ -29,7 +30,6 @@ class UserPlanCard extends StatelessWidget {
       ),
     );
 
-    // Wrap with Dismissible if onDelete is provided
     if (onDelete != null) {
       return Dismissible(
         key: Key(plan.id),
@@ -99,17 +99,32 @@ Widget _buildPlanImage(UserPlansModel plan) {
 }
 
 Widget _buildPlanInfo(UserPlansModel plan) {
+  final planLanguage = plan.language;
+  final fontFamily = getFontFamily(planLanguage);
+  final lineHeight = getLineHeight(planLanguage);
+  final fontSize = planLanguage == 'bo' ? 22.0 : 18.0;
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const SizedBox(height: 4),
       Text(
         '${plan.totalDays} Days',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
+          height: lineHeight,
+        ),
       ),
       Text(
         plan.title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          fontFamily: fontFamily,
+          height: lineHeight,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

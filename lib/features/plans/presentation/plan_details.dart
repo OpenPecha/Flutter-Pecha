@@ -4,6 +4,7 @@ import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'widgets/plan_cover_image.dart';
 import 'widgets/day_carousel.dart';
@@ -45,12 +46,21 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
         PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
       ),
     );
+    final language = widget.plan.language;
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.plan.title,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: fontFamily,
+            height: lineHeight,
+            fontSize: fontSize,
+          ),
         ),
         elevation: 0,
         actions: [
@@ -89,6 +99,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                 return dayCompletionStatus.when(
                   data:
                       (completionStatus) => DayCarousel(
+                        language: language,
                         days: days,
                         selectedDay: selectedDay,
                         startDate: widget.startDate,
@@ -101,6 +112,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                       ),
                   loading:
                       () => DayCarousel(
+                        language: language,
                         days: days,
                         selectedDay: selectedDay,
                         startDate: widget.startDate,
@@ -112,6 +124,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                       ),
                   error:
                       (error, stackTrace) => DayCarousel(
+                        language: language,
                         days: days,
                         selectedDay: selectedDay,
                         startDate: widget.startDate,
@@ -131,11 +144,12 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDayTitle(selectedDay),
+                  _buildDayTitle(language, selectedDay),
                   const SizedBox(height: 8),
                   userPlanDayContent.when(
                     data:
                         (dayContent) => ActivityList(
+                          language: language,
                           tasks: dayContent.tasks,
                           today: selectedDay,
                           totalDays: dayContent.tasks.length,
@@ -184,10 +198,18 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     );
   }
 
-  Widget _buildDayTitle(int day) {
+  Widget _buildDayTitle(String language, int day) {
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Text(
       "Day $day of ${widget.plan.totalDays}",
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        fontFamily: fontFamily,
+        height: lineHeight,
+      ),
     );
   }
 
