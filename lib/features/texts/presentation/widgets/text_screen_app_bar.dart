@@ -8,6 +8,7 @@ class TextScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showBottomBorder;
   final double toolbarHeight;
+  final Color? borderColor;
 
   const TextScreenAppBar({
     super.key,
@@ -15,6 +16,7 @@ class TextScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.showBottomBorder = true,
     this.toolbarHeight = TextScreenConstants.appBarToolbarHeight,
+    this.borderColor,
   });
 
   @override
@@ -38,7 +40,7 @@ class TextScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 child: Container(
                   height: TextScreenConstants.appBarBottomHeight,
-                  color: TextScreenConstants.primaryBorderColor,
+                  color: borderColor ?? TextScreenConstants.primaryBorderColor,
                 ),
               )
               : null,

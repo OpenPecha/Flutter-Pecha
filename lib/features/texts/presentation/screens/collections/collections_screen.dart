@@ -131,14 +131,22 @@ class _CollectionsListView extends StatelessWidget {
           itemCount: collections.length,
           itemBuilder: (context, index) {
             final collection = collections[index];
+            final colorIndex = index % 9;
             return GestureDetector(
               onTap: () {
-                context.push(TextRoutes.works, extra: collection);
+                context.push(
+                  TextRoutes.works,
+                  extra: {
+                    'collection': collection,
+                    'colorIndex': colorIndex,
+                  },
+                );
               },
               child: CollectionsSection(
                 title: collection.title,
                 subtitle: collection.description,
-                dividerColor: TextScreenConstants.collectionDividerColor,
+                dividerColor:
+                    TextScreenConstants.collectionCyclingColors[colorIndex],
                 slug: collection.slug,
               ),
             );

@@ -11,6 +11,19 @@ class TextScreenConstants {
   static const Color collectionDividerColor = Color(0xFF8B3A50);
   static const Color sectionDividerColor = Color(0xFFB6D7D7);
 
+  /// Cycling colors for collection dividers and app bar borders
+  static const List<Color> collectionCyclingColors = [
+    Color(0xFF802F3E), // red
+    Color(0xFF5B99B7), // green/blue
+    Color(0xFF5D956F), // light green
+    Color(0xFF004E5F), // blue
+    Color(0xFF594176), // purple
+    Color(0xFF7F85A9), // light purple
+    Color(0xFFD4896C), // orange
+    Color(0xFFC6A7B4), // pink
+    Color(0xFFCCB478), // gold
+  ];
+
   // ============ Spacing ============
   /// Horizontal padding for screen content
   static const double screenHorizontalPadding = 16.0;

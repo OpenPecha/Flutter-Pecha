@@ -497,14 +497,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extra = state.extra;
           late Collections collection;
+          int? colorIndex;
+
           if (extra is Collections) {
             collection = extra;
           } else if (extra is Map<String, dynamic>) {
-            collection = Collections.fromJson(extra);
+            if (extra.containsKey('collection')) {
+              // New format with collection and colorIndex
+              collection = extra['collection'] as Collections;
+              colorIndex = extra['colorIndex'] as int?;
+            } else {
+              // Legacy format - try to parse as Collections JSON
+              collection = Collections.fromJson(extra);
+            }
           } else {
             throw Exception('Invalid extra type for /texts/works');
           }
-          return WorksScreen(collection: collection);
+          return WorksScreen(
+            collection: collection,
+            colorIndex: colorIndex,
+          );
         },
       ),
       GoRoute(
@@ -512,14 +524,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extra = state.extra;
           late Texts text;
+          int? colorIndex;
+
           if (extra is Texts) {
             text = extra;
           } else if (extra is Map<String, dynamic>) {
-            text = Texts.fromJson(extra);
+            if (extra.containsKey('text')) {
+              // New format with text and colorIndex
+              text = extra['text'] as Texts;
+              colorIndex = extra['colorIndex'] as int?;
+            } else {
+              // Legacy format - try to parse as Texts JSON
+              text = Texts.fromJson(extra);
+            }
           } else {
             throw Exception('Invalid extra type for /texts/texts');
           }
-          return TextsScreen(text: text);
+          return TextsScreen(text: text, colorIndex: colorIndex);
         },
       ),
       GoRoute(
@@ -535,6 +556,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             textId: extra['textId'] as String,
             contentId: extra['contentId'] as String?,
             segmentId: extra['segmentId'] as String?,
+            colorIndex: extra['colorIndex'] as int?,
           );
         },
       ),

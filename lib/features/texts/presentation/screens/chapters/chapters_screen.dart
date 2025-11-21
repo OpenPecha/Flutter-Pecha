@@ -29,12 +29,14 @@ class ChaptersScreen extends StatefulHookConsumerWidget {
   final String textId;
   final String? contentId;
   final String? segmentId;
+  final int? colorIndex;
 
   const ChaptersScreen({
     super.key,
     required this.textId,
     this.contentId,
     this.segmentId,
+    this.colorIndex,
   });
 
   @override
@@ -202,6 +204,11 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     UseInfiniteQueryResult<ReaderResponse, dynamic, Map<String, dynamic>>
     infiniteQuery,
   ) {
+    // Get the border color from the color index
+    final borderColor = widget.colorIndex != null
+        ? TextScreenConstants.collectionCyclingColors[widget.colorIndex! % 9]
+        : TextScreenConstants.primaryBorderColor;
+
     return AppBar(
       elevation: TextScreenConstants.appBarElevation,
       scrolledUnderElevation: TextScreenConstants.appBarElevation,
@@ -227,7 +234,7 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
         ),
         child: Container(
           height: TextScreenConstants.appBarBottomHeight,
-          color: TextScreenConstants.primaryBorderColor,
+          color: borderColor,
         ),
       ),
     );

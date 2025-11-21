@@ -23,8 +23,9 @@ import 'package:go_router/go_router.dart';
 
 /// Screen displaying text details with table of contents and versions
 class TextsScreen extends ConsumerWidget {
-  const TextsScreen({super.key, required this.text});
+  const TextsScreen({super.key, required this.text, this.colorIndex});
   final Texts text;
+  final int? colorIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,10 +47,19 @@ class TextsScreen extends ConsumerWidget {
 
     final tabCount = showContentsTab == true ? 3 : 2;
 
+    // Get the border color from the color index
+    final borderColor =
+        colorIndex != null
+            ? TextScreenConstants.collectionCyclingColors[colorIndex! % 9]
+            : null;
+
     return DefaultTabController(
       length: tabCount,
       child: Scaffold(
-        appBar: TextScreenAppBar(onBackPressed: () => Navigator.pop(context)),
+        appBar: TextScreenAppBar(
+          onBackPressed: () => context.pop(),
+          borderColor: borderColor,
+        ),
         body: Padding(
           padding: TextScreenConstants.screenLargePaddingNoBottom,
           child: Column(
@@ -61,7 +71,10 @@ class TextsScreen extends ConsumerWidget {
                 label: localizations.text_toc_continueReading,
                 language: text.language ?? 'en',
                 onPressed: () {
-                  context.push(TextRoutes.chapters, extra: {'textId': text.id});
+                  context.push(
+                    TextRoutes.chapters,
+                    extra: {'textId': text.id, 'colorIndex': colorIndex},
+                  );
                 },
               ),
               const SizedBox(
@@ -244,7 +257,11 @@ class TextsScreen extends ConsumerWidget {
           onTap: () {
             context.push(
               TextRoutes.chapters,
-              extra: {'textId': version.id, 'contentId': contentId},
+              extra: {
+                'textId': version.id,
+                'contentId': contentId,
+                'colorIndex': colorIndex,
+              },
             );
           },
         );

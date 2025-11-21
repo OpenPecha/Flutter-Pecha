@@ -18,8 +18,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class WorksScreen extends ConsumerWidget {
-  const WorksScreen({super.key, required this.collection});
+  const WorksScreen({
+    super.key,
+    required this.collection,
+    this.colorIndex,
+  });
   final Collections collection;
+  final int? colorIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,8 +36,16 @@ class WorksScreen extends ConsumerWidget {
     final lineHeight = getLineHeight(locale.languageCode);
     final fontSize = locale.languageCode == 'bo' ? 28.0 : 24.0;
 
+    // Get the border color from the color index
+    final borderColor = colorIndex != null
+        ? TextScreenConstants.collectionCyclingColors[colorIndex! % 9]
+        : null;
+
     return Scaffold(
-      appBar: TextScreenAppBar(onBackPressed: () => Navigator.pop(context)),
+      appBar: TextScreenAppBar(
+        onBackPressed: () => Navigator.pop(context),
+        borderColor: borderColor,
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: TextScreenConstants.screenLargePaddingValue,
@@ -89,10 +102,11 @@ class WorksScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (rootTexts.isNotEmpty) ...[
-          _RootTextsSection(texts: rootTexts),
+          _RootTextsSection(texts: rootTexts, colorIndex: colorIndex),
           const SizedBox(height: TextScreenConstants.contentVerticalSpacing),
         ],
-        if (commentaries.isNotEmpty) _CommentariesSection(texts: commentaries),
+        if (commentaries.isNotEmpty)
+          _CommentariesSection(texts: commentaries, colorIndex: colorIndex),
       ],
     );
   }
@@ -155,8 +169,9 @@ class WorksScreen extends ConsumerWidget {
 /// Root texts section widget
 class _RootTextsSection extends StatelessWidget {
   final List<Texts> texts;
+  final int? colorIndex;
 
-  const _RootTextsSection({required this.texts});
+  const _RootTextsSection({required this.texts, this.colorIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +183,13 @@ class _RootTextsSection extends StatelessWidget {
             title: text.title,
             language: text.language ?? '',
             onTap: () {
-              context.push(TextRoutes.texts, extra: text);
+              context.push(
+                TextRoutes.texts,
+                extra: {
+                  'text': text,
+                  'colorIndex': colorIndex,
+                },
+              );
             },
           ),
         ),
@@ -180,8 +201,9 @@ class _RootTextsSection extends StatelessWidget {
 /// Commentaries section widget
 class _CommentariesSection extends StatelessWidget {
   final List<Texts> texts;
+  final int? colorIndex;
 
-  const _CommentariesSection({required this.texts});
+  const _CommentariesSection({required this.texts, this.colorIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +218,13 @@ class _CommentariesSection extends StatelessWidget {
             title: text.title,
             language: text.language ?? '',
             onTap: () {
-              context.push(TextRoutes.texts, extra: text);
+              context.push(
+                TextRoutes.texts,
+                extra: {
+                  'text': text,
+                  'colorIndex': colorIndex,
+                },
+              );
             },
           ),
         ),
