@@ -26,9 +26,8 @@ class FeaturedContentFactory {
       return const SizedBox.shrink();
     }
 
-    final nextPlanItem = index < allPlanItems.length - 1
-        ? allPlanItems[index + 1]
-        : null;
+    final nextPlanItem =
+        index < allPlanItems.length - 1 ? allPlanItems[index + 1] : null;
 
     switch (index) {
       case HomeScreenConstants.verseCardIndex:
@@ -74,20 +73,22 @@ class FeaturedContentFactory {
           verseText: planItem.subtasks[0].content,
           title: planItem.title,
           subtask: _createSubtaskDto(planItem.subtasks[0]),
-          nextCard: nextPlanItem != null
-              ? _buildNextCardData(
-                  planItem: nextPlanItem,
-                  heading: localizations.home_scripture,
-                  subtitle: HomeScreenConstants.defaultDuration,
-                  nextNextCard: index + 2 < allPlanItems.length
-                      ? _buildNextCardData(
-                          planItem: allPlanItems[index + 2],
-                          heading: localizations.home_meditation,
-                          subtitle: HomeScreenConstants.defaultDuration,
-                        )
-                      : null,
-                )
-              : null,
+          nextCard:
+              nextPlanItem != null
+                  ? _buildNextCardData(
+                    planItem: nextPlanItem,
+                    heading: localizations.home_scripture,
+                    subtitle: HomeScreenConstants.defaultDuration,
+                    nextNextCard:
+                        index + 2 < allPlanItems.length
+                            ? _buildNextCardData(
+                              planItem: allPlanItems[index + 2],
+                              heading: localizations.home_meditation,
+                              subtitle: HomeScreenConstants.defaultDuration,
+                            )
+                            : null,
+                  )
+                  : null,
         ),
         const SizedBox(height: HomeScreenConstants.cardSpacing),
       ],
@@ -104,21 +105,22 @@ class FeaturedContentFactory {
     return Column(
       children: [
         ActionOfTheDayCard(
-          heading: localizations.home_scripture,
           title: planItem.title,
-          subtitle: HomeScreenConstants.defaultDuration,
+          duration: HomeScreenConstants.defaultDuration,
           iconWidget: getVideoThumbnail(planItem.subtasks[0].content),
-          onTap: () => showStoryDialog(
-            context: context,
-            subtasks: [_createSubtaskDto(planItem.subtasks[0])],
-            nextCard: nextPlanItem != null
-                ? _buildNextCardData(
-                    planItem: nextPlanItem,
-                    heading: localizations.home_meditation,
-                    subtitle: HomeScreenConstants.defaultDuration,
-                  )
-                : null,
-          ),
+          onTap:
+              () => showStoryDialog(
+                context: context,
+                subtasks: [_createSubtaskDto(planItem.subtasks[0])],
+                nextCard:
+                    nextPlanItem != null
+                        ? _buildNextCardData(
+                          planItem: nextPlanItem,
+                          heading: localizations.home_meditation,
+                          subtitle: HomeScreenConstants.defaultDuration,
+                        )
+                        : null,
+              ),
         ),
         const SizedBox(height: HomeScreenConstants.cardSpacing),
       ],
@@ -134,14 +136,14 @@ class FeaturedContentFactory {
     return Column(
       children: [
         ActionOfTheDayCard(
-          heading: localizations.home_meditation,
           title: planItem.title,
-          subtitle: HomeScreenConstants.defaultDuration,
+          duration: HomeScreenConstants.defaultDuration,
           iconWidget: getVideoThumbnail(planItem.subtasks[0].content),
-          onTap: () => showStoryDialog(
-            context: context,
-            subtasks: [_createSubtaskDto(planItem.subtasks[0])],
-          ),
+          onTap:
+              () => showStoryDialog(
+                context: context,
+                subtasks: [_createSubtaskDto(planItem.subtasks[0])],
+              ),
         ),
         const SizedBox(height: HomeScreenConstants.cardSpacing),
       ],

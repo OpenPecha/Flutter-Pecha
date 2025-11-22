@@ -12,10 +12,8 @@ class RecitationSegment extends StatelessWidget {
   /// The segment data to display
   final RecitationSegmentModel segment;
 
-  /// The order in which to display different content types
   final List<ContentType> contentOrder;
 
-  /// Whether this is the first segment (affects divider display)
   final bool isFirstSegment;
 
   const RecitationSegment({
@@ -46,10 +44,7 @@ class RecitationSegment extends StatelessWidget {
   /// Returns an empty list if the content type is not available
   /// in this segment.
   List<Widget> _buildContentForType(ContentType contentType) {
-    // Get the appropriate content map based on content type
     final contentMap = _getContentMap(contentType);
-
-    // Return empty list if this content type is not available
     if (contentMap == null || contentMap.isEmpty) {
       return [];
     }
