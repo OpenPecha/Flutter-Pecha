@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/features/notifications/provider/notification_provider.dart';
 import 'package:flutter_pecha/features/notifications/provider/recitation_notification_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -163,6 +164,11 @@ class _NotificationSettingsScreenState
         recitationState.reminderTime ?? const TimeOfDay(hour: 18, minute: 0);
 
     final localizations = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeProvider);
+    final languageCode = locale.languageCode;
+    final titleFontSize = languageCode == 'bo' ? 20.0 : 16.0;
+    final subtitleFontSize = languageCode == 'bo' ? 18.0 : 14.0;
+    final bodyFontSize = languageCode == 'bo' ? 16.0 : 12.0;
     return Scaffold(
       appBar: AppBar(title: Text(localizations.notification_settings)),
       body: Padding(
@@ -186,12 +192,13 @@ class _NotificationSettingsScreenState
                       SizedBox(height: 8),
                       Text(
                         'Please turn on Notifications',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: TextStyle(fontSize: titleFontSize),
                       ),
                       SizedBox(height: 8),
                       Text(
                         'Please enable notifications to receive daily practice reminders.',
                         textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: subtitleFontSize),
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(
@@ -235,11 +242,11 @@ class _NotificationSettingsScreenState
                         ),
                         title: Text(
                           'Daily Practice',
-                          style: Theme.of(context).textTheme.titleSmall,
+                          style: TextStyle(fontSize: titleFontSize),
                         ),
                         subtitle: Text(
                           "Get notification of your daily to practices",
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: TextStyle(fontSize: bodyFontSize),
                         ),
                         value: isEnabled,
                         onChanged: (v) => _toggleNotifications(v, selectedTime),
@@ -248,11 +255,11 @@ class _NotificationSettingsScreenState
                         ListTile(
                           title: Text(
                             'Select Time',
-                            style: Theme.of(context).textTheme.titleSmall,
+                            style: TextStyle(fontSize: subtitleFontSize),
                           ),
                           subtitle: Text(
                             selectedTime.format(context),
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: TextStyle(fontSize: bodyFontSize),
                           ),
                           trailing: const Icon(Icons.access_time),
                           onTap: () => _selectTime(context, selectedTime),
@@ -280,11 +287,11 @@ class _NotificationSettingsScreenState
                         ),
                         title: Text(
                           'Recitations Reminder',
-                          style: Theme.of(context).textTheme.titleSmall,
+                          style: TextStyle(fontSize: titleFontSize),
                         ),
                         subtitle: Text(
                           'Take a moment to pray',
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: TextStyle(fontSize: bodyFontSize),
                         ),
                         value: isRecitationEnabled,
                         onChanged:
@@ -297,11 +304,11 @@ class _NotificationSettingsScreenState
                         ListTile(
                           title: Text(
                             'Select Time',
-                            style: Theme.of(context).textTheme.titleSmall,
+                            style: TextStyle(fontSize: subtitleFontSize),
                           ),
                           subtitle: Text(
                             recitationSelectedTime.format(context),
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: TextStyle(fontSize: bodyFontSize),
                           ),
                           trailing: const Icon(Icons.access_time),
                           onTap:
