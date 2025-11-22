@@ -151,6 +151,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get text_toc_revisionHistory => 'Revision History';
 
   @override
+  String get text_commentary => 'Commentary';
+
+  @override
+  String get text_close_commentary => 'Close commentary';
+
+  @override
+  String get commentary_total => 'Total';
+
+  @override
+  String get show_less => 'Show less';
+
+  @override
+  String get read_more => 'Read more';
+
+  @override
+  String get no_commentary => 'No commentary found';
+
+  @override
+  String get no_commentary_message =>
+      'There are no commentaries available for this segment.';
+
+  @override
   String get my_plans => '我的計畫';
 
   @override
@@ -273,9 +295,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_unsave => '從已保存中移除';
 
   @override
-  String get recitations_share => '分享';
-
-  @override
   String get recitations_phonetic => '讀音';
 
   @override
@@ -305,4 +324,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cancel => '取消';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get image => 'Image';
 }

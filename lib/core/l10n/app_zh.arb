@@ -72,7 +72,6 @@
   "recitations_login_prompt": "請登錄以查看您保存的持誦",
   "recitations_save": "保存持誦",
   "recitations_unsave": "從已保存中移除",
-  "recitations_share": "分享",
   "recitations_phonetic": "讀音",
   "recitations_translation": "翻譯",
   "settings_appearance": "外觀",
@@ -81,4 +80,8 @@
   "settings_account": "帳號",
   "logout_confirmation": "您確定要登出嗎？",
   "cancel": "取消"
+  "copy": "Copy",
+  "copied": "Copied",
+  "share": "Share",
+  "image": "Image"
 }

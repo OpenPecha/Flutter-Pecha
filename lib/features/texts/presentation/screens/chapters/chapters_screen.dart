@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
 import 'package:flutter_pecha/features/texts/constants/text_routes.dart';
 import 'package:flutter_pecha/features/texts/data/providers/selected_segment_provider.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
 import 'package:flutter_pecha/features/texts/models/text_detail.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/chapter_header.dart';
+import 'package:flutter_pecha/features/texts/presentation/widgets/commentary_panel.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/contents_chapter.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/font_size_selector.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/language_selector_badge.dart';
@@ -205,9 +207,11 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     infiniteQuery,
   ) {
     // Get the border color from the color index
-    final borderColor = widget.colorIndex != null
-        ? TextScreenConstants.collectionCyclingColors[widget.colorIndex! % 9]
-        : TextScreenConstants.primaryBorderColor;
+    final borderColor =
+        widget.colorIndex != null
+            ? TextScreenConstants.collectionCyclingColors[widget.colorIndex! %
+                9]
+            : TextScreenConstants.primaryBorderColor;
 
     return AppBar(
       elevation: TextScreenConstants.appBarElevation,
@@ -217,6 +221,7 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
         icon: const Icon(Icons.arrow_back_ios),
         onPressed: () {
           ref.read(selectedSegmentProvider.notifier).state = null;
+          ref.read(commentarySplitSegmentProvider.notifier).state = null;
           context.pop();
         },
       ),
@@ -276,6 +281,10 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     return LanguageSelectorBadge(
       language: textDetail.language,
       onTap: () async {
+        // Close split view and action bar before navigating
+        ref.read(commentarySplitSegmentProvider.notifier).state = null;
+        ref.read(selectedSegmentProvider.notifier).state = null;
+
         ref
             .read(textVersionLanguageProvider.notifier)
             .setLanguage(textDetail.language);
@@ -310,29 +319,89 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
       return const Center(child: Text('No data found'));
     }
 
+    final commentarySegmentId = ref.watch(commentarySplitSegmentProvider);
+    final isCommentaryOpen = commentarySegmentId != null;
+    final splitRatio = ref.watch(commentarySplitRatioProvider);
+
     return Column(
       children: [
         ChapterHeader(textDetail: allContent!.textDetail),
         Expanded(
-          child: Stack(
-            children: [
-              // Main content
-              ContentsChapter(
-                itemScrollController: itemScrollController,
-                textDetail: allContent.textDetail,
-                content: allContent.content,
-                selectedSegmentId: selectedSegment?.segmentId,
-                infiniteQuery: infiniteQuery,
-                newPageSections: newPageSections,
-              ),
-              // Segment action bar
-              if (selectedSegment != null)
-                _buildSegmentActionBar(
-                  context,
-                  selectedSegment,
-                  allContent.textDetail,
-                ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
+              final dividerHeight = isCommentaryOpen ? 8.0 : 0.0;
+              final commentaryHeight =
+                  isCommentaryOpen
+                      ? availableHeight * (1 - splitRatio) - dividerHeight
+                      : 0.0;
+              final mainHeight =
+                  availableHeight - commentaryHeight - dividerHeight;
+
+              return Column(
+                children: [
+                  // Main text content (top)
+                  SizedBox(
+                    height: mainHeight,
+                    child: Stack(
+                      children: [
+                        ContentsChapter(
+                          itemScrollController: itemScrollController,
+                          textDetail: allContent.textDetail,
+                          content: allContent.content,
+                          selectedSegmentId: selectedSegment?.segmentId,
+                          infiniteQuery: infiniteQuery,
+                          newPageSections: newPageSections,
+                        ),
+                        // Show action bar only when commentary is not open
+                        if (selectedSegment != null && !isCommentaryOpen)
+                          _buildSegmentActionBar(
+                            context,
+                            selectedSegment,
+                            allContent.textDetail,
+                            allContent.content,
+                          ),
+                      ],
+                    ),
+                  ),
+                  // Resizable divider (only when commentary is open)
+                  if (isCommentaryOpen)
+                    GestureDetector(
+                      onVerticalDragUpdate: (details) {
+                        final newRatio =
+                            (mainHeight + details.delta.dy) / availableHeight;
+                        // Clamp between 0.2 and 0.8 to prevent panels from being too small
+                        final clampedRatio = newRatio.clamp(0.2, 0.8);
+                        ref.read(commentarySplitRatioProvider.notifier).state =
+                            clampedRatio;
+                      },
+                      child: Container(
+                        height: dividerHeight,
+                        color:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.greyMedium
+                                : Colors.grey[300],
+                        child: Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).dividerColor,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Commentary panel (bottom, only when open)
+                  if (isCommentaryOpen)
+                    SizedBox(
+                      height: commentaryHeight,
+                      child: CommentaryPanel(segmentId: commentarySegmentId),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ],
@@ -343,6 +412,7 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
     BuildContext context,
     Segment selectedSegment,
     TextDetail textDetail,
+    Toc content,
   ) {
     if (selectedSegment.content == null) return const SizedBox.shrink();
 
@@ -353,6 +423,19 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
       segmentId: selectedSegment.segmentId,
       language: textDetail.language,
       onClose: () => ref.read(selectedSegmentProvider.notifier).state = null,
+      onOpenCommentary: () {
+        // Scroll to the selected segment so it's visible with commentary
+        final segmentIndex = findSegmentIndex(
+          content,
+          selectedSegment.segmentId,
+        );
+        if (segmentIndex != -1 && itemScrollController.isAttached) {
+          itemScrollController.scrollTo(
+            index: segmentIndex,
+            duration: const Duration(milliseconds: 300),
+          );
+        }
+      },
     );
   }
 

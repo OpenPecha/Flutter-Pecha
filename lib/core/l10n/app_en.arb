@@ -46,6 +46,13 @@
   "text_toc_content": "Contents",
   "text_toc_versions": "Versions",
   "text_toc_revisionHistory": "Revision History",
+  "text_commentary":"Commentary",
+  "text_close_commentary": "Close commentary",
+  "commentary_total": "Total",
+  "show_less":"Show less",
+  "read_more":"Read more",
+  "no_commentary": "No commentary found",
+  "no_commentary_message": "There are no commentaries available for this segment.",
   "my_plans": "My Plans",
   "find_plans": "Find Plans",
   "browse_plans": "Browse Plans",
@@ -86,7 +93,6 @@
   "recitations_login_prompt": "Sign in to view your saved recitations",
   "recitations_save": "Save Recitation",
   "recitations_unsave": "Unsave recitation",
-  "recitations_share": "Share",
   "recitations_phonetic": "Phonetic",
   "recitations_translation": "Translation",
   "no_availabel": "Not available",
@@ -96,5 +102,9 @@
   "notification_settings": "Notification Settings",
   "settings_account": "Account",
   "logout_confirmation": "Are you sure you want to log out?",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "copy": "Copy",
+  "copied": "Copied",
+  "share": "Share",
+  "image": "Image"
 }

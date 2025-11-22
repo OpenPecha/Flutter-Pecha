@@ -309,18 +309,30 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            ref.read(selectedSegmentProvider.notifier).state =
-                selectedSegment?.segmentId == segment.segmentId
-                    ? null
-                    : segment;
+            final isSameSegment = selectedSegment?.segmentId == segment.segmentId;
+            final isCommentaryOpen = ref.read(commentarySplitSegmentProvider) != null;
+
+            if (isSameSegment) {
+              // Tapping the same segment - close split view if open and deselect
+              ref.read(commentarySplitSegmentProvider.notifier).state = null;
+              ref.read(selectedSegmentProvider.notifier).state = null;
+            } else {
+              // Selecting a different segment
+              ref.read(selectedSegmentProvider.notifier).state = segment;
+              // If commentary is open, update it to show this segment's commentary
+              if (isCommentaryOpen) {
+                ref.read(commentarySplitSegmentProvider.notifier).state = segment.segmentId;
+              }
+            }
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
-              color:
-                  isSelected
-                      ? Theme.of(context).colorScheme.primary.withAlpha(25)
-                      : null,
+              color: isSelected
+                  ? Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.primary.withAlpha(60)
+                      : Theme.of(context).colorScheme.primary.withAlpha(30)
+                  : null,
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: Row(

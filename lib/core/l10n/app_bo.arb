@@ -86,7 +86,6 @@
   "recitations_login_prompt": "Sign in to view your saved recitations",
   "recitations_save": "Save Recitation",
   "recitations_unsave": "Unsave recitation",
-  "recitations_share": "Share",
   "recitations_phonetic": "Phonetic",
   "recitations_translation": "Translation",
   "no_availabel": "Not available",
@@ -96,5 +95,9 @@
   "notification_settings": "Notification Settings",
   "settings_account": "Account",
   "logout_confirmation": "Are you sure you want to log out?",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "copy": "Copy",
+  "copied": "Copied",
+  "share": "Share",
+  "image": "Image"
 }

@@ -151,6 +151,28 @@ class AppLocalizationsBo extends AppLocalizations {
   String get text_toc_revisionHistory => 'བཟོ་བཅོས་ཀྱི་ལོ་རྒྱུས།';
 
   @override
+  String get text_commentary => 'Commentary';
+
+  @override
+  String get text_close_commentary => 'Close commentary';
+
+  @override
+  String get commentary_total => 'Total';
+
+  @override
+  String get show_less => 'Show less';
+
+  @override
+  String get read_more => 'Read more';
+
+  @override
+  String get no_commentary => 'No commentary found';
+
+  @override
+  String get no_commentary_message =>
+      'There are no commentaries available for this segment.';
+
+  @override
   String get my_plans => 'My Plans';
 
   @override
@@ -274,9 +296,6 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_unsave => 'Unsave recitation';
 
   @override
-  String get recitations_share => 'Share';
-
-  @override
   String get recitations_phonetic => 'Phonetic';
 
   @override
@@ -306,4 +325,16 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get image => 'Image';
 }

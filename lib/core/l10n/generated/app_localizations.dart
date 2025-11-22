@@ -376,6 +376,48 @@ abstract class AppLocalizations {
   /// **'Revision History'**
   String get text_toc_revisionHistory;
 
+  /// No description provided for @text_commentary.
+  ///
+  /// In en, this message translates to:
+  /// **'Commentary'**
+  String get text_commentary;
+
+  /// No description provided for @text_close_commentary.
+  ///
+  /// In en, this message translates to:
+  /// **'Close commentary'**
+  String get text_close_commentary;
+
+  /// No description provided for @commentary_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get commentary_total;
+
+  /// No description provided for @show_less.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get show_less;
+
+  /// No description provided for @read_more.
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get read_more;
+
+  /// No description provided for @no_commentary.
+  ///
+  /// In en, this message translates to:
+  /// **'No commentary found'**
+  String get no_commentary;
+
+  /// No description provided for @no_commentary_message.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no commentaries available for this segment.'**
+  String get no_commentary_message;
+
   /// No description provided for @my_plans.
   ///
   /// In en, this message translates to:
@@ -616,12 +658,6 @@ abstract class AppLocalizations {
   /// **'Unsave recitation'**
   String get recitations_unsave;
 
-  /// No description provided for @recitations_share.
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get recitations_share;
-
   /// No description provided for @recitations_phonetic.
   ///
   /// In en, this message translates to:
@@ -681,6 +717,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @image.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get image;
 }
 
 class _AppLocalizationsDelegate

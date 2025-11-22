@@ -56,7 +56,8 @@ class RecitationContent extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final languageCode = locale.languageCode;
     final fontFamily = getFontFamily(languageCode);
-    final fontSize = languageCode == 'bo' ? 22.0 : 18.0;
+    final fontSize = languageCode == 'bo' ? 26.0 : 22.0;
+
     return Text(
       content.title,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(

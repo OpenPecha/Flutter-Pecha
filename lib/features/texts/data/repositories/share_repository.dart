@@ -7,21 +7,16 @@ class ShareRepository {
 
   Future<String> getShareUrl({
     required String textId,
-    required String contentId,
     required String segmentId,
     required String language,
   }) async {
-    if (textId.isEmpty ||
-        contentId.isEmpty ||
-        segmentId.isEmpty ||
-        language.isEmpty) {
+    if (textId.isEmpty || segmentId.isEmpty || language.isEmpty) {
       throw ArgumentError('All parameters must be non-empty');
     }
 
     try {
       final shortUrl = await remoteDatasource.getShareUrl(
         textId: textId,
-        contentId: contentId,
         segmentId: segmentId,
         language: language,
       );
