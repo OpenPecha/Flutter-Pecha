@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
-import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'skeleton_screen.dart';
@@ -17,8 +16,7 @@ class PechaBottomNavBar extends ConsumerWidget {
     return Container(
       padding: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        // color: AppColors.primaryDark, // MAN 800 - #871C1C
-        color: Theme.of(context).cardColor, // MAN 800 - #871C1C
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),

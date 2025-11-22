@@ -8,7 +8,9 @@
 // - Font weights: Light (300), Regular (400), Medium (500), Semi Bold (600), Bold (700), Extra Bold (800)
 // - Primary font: System default (Roboto on Android, SF Pro on iOS)
 // - Accent font: Serif fallback for special headings
-// - Tibetan: MonlamTibetan (existing implementation)
+// - Tibetan: Atisha (local) for content and Noto Serif Tibetan for system UI
+// - English: Inter for system UI and EB Garamond for content
+// - Chinese: Inter for system UI and EB Garamond for content
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';

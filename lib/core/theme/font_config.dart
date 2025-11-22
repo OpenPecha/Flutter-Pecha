@@ -41,12 +41,12 @@ class AppFontConfig {
 
   /// Font configurations mapped by language code
   static const Map<String, LanguageFontConfig> _languageFonts = {
-    // Tibetan - Google Noto Serif Tibetan for UI, Jomolhari for content
+    // Tibetan - Google Noto Serif Tibetan for UI, Atisha (local) for content
     'bo': LanguageFontConfig(
       systemFont: 'Noto Serif Tibetan',
-      contentFont: 'Jomolhari',
+      contentFont: 'Atisha',
       systemFontIsGoogle: true,
-      contentFontIsGoogle: true,
+      contentFontIsGoogle: false,
     ),
 
     // English - Google Inter for UI, EB Garamond for content
@@ -61,14 +61,6 @@ class AppFontConfig {
     'zh': LanguageFontConfig(
       systemFont: 'Inter',
       contentFont: 'EB Garamond',
-      systemFontIsGoogle: true,
-      contentFontIsGoogle: true,
-    ),
-
-    // Sanskrit - Using Tibetan fonts for now
-    'sa': LanguageFontConfig(
-      systemFont: 'Noto Serif Tibetan',
-      contentFont: 'Jomolhari',
       systemFontIsGoogle: true,
       contentFontIsGoogle: true,
     ),
@@ -92,10 +84,12 @@ class AppFontConfig {
   /// Returns the actual font family string that can be used with TextStyle
   static String getFontFamily(String? languageCode, FontType fontType) {
     final config = getConfig(languageCode);
-    final fontName = fontType == FontType.system ? config.systemFont : config.contentFont;
-    final isGoogle = fontType == FontType.system
-        ? config.systemFontIsGoogle
-        : config.contentFontIsGoogle;
+    final fontName =
+        fontType == FontType.system ? config.systemFont : config.contentFont;
+    final isGoogle =
+        fontType == FontType.system
+            ? config.systemFontIsGoogle
+            : config.contentFontIsGoogle;
 
     if (!isGoogle) {
       // Return local font family name as-is
@@ -114,9 +108,8 @@ class AppFontConfig {
       case 'EB Garamond':
         return GoogleFonts.ebGaramond().fontFamily ?? 'EB Garamond';
       case 'Noto Serif Tibetan':
-        return GoogleFonts.notoSerifTibetan().fontFamily ?? 'Noto Serif Tibetan';
-      case 'Jomolhari':
-        return GoogleFonts.jomolhari().fontFamily ?? 'Jomolhari';
+        return GoogleFonts.notoSerifTibetan().fontFamily ??
+            'Noto Serif Tibetan';
       default:
         return GoogleFonts.inter().fontFamily ?? 'Inter';
     }
@@ -130,10 +123,12 @@ class AppFontConfig {
     Brightness brightness,
   ) {
     final config = getConfig(languageCode);
-    final fontName = fontType == FontType.system ? config.systemFont : config.contentFont;
-    final isGoogle = fontType == FontType.system
-        ? config.systemFontIsGoogle
-        : config.contentFontIsGoogle;
+    final fontName =
+        fontType == FontType.system ? config.systemFont : config.contentFont;
+    final isGoogle =
+        fontType == FontType.system
+            ? config.systemFontIsGoogle
+            : config.contentFontIsGoogle;
 
     if (!isGoogle) {
       // For local fonts, return null to use fontFamily in ThemeData
@@ -145,7 +140,10 @@ class AppFontConfig {
   }
 
   /// Helper method to get Google Font TextTheme by font name
-  static TextTheme _getGoogleFontTextTheme(String fontName, Brightness brightness) {
+  static TextTheme _getGoogleFontTextTheme(
+    String fontName,
+    Brightness brightness,
+  ) {
     final baseTextTheme = ThemeData(brightness: brightness).textTheme;
 
     switch (fontName) {
@@ -155,8 +153,6 @@ class AppFontConfig {
         return GoogleFonts.ebGaramondTextTheme(baseTextTheme);
       case 'Noto Serif Tibetan':
         return GoogleFonts.notoSerifTibetanTextTheme(baseTextTheme);
-      case 'Jomolhari':
-        return GoogleFonts.jomolhariTextTheme(baseTextTheme);
       default:
         return GoogleFonts.interTextTheme(baseTextTheme);
     }
@@ -179,7 +175,10 @@ class AppFontConfig {
   }
 
   /// Helper method to get Google Font TextStyle by font name
-  static TextStyle? _getGoogleFontTextStyle(String fontName, TextStyle? baseStyle) {
+  static TextStyle? _getGoogleFontTextStyle(
+    String fontName,
+    TextStyle? baseStyle,
+  ) {
     switch (fontName) {
       case 'Inter':
         return GoogleFonts.inter(textStyle: baseStyle);
@@ -187,8 +186,6 @@ class AppFontConfig {
         return GoogleFonts.ebGaramond(textStyle: baseStyle);
       case 'Noto Serif Tibetan':
         return GoogleFonts.notoSerifTibetan(textStyle: baseStyle);
-      case 'Jomolhari':
-        return GoogleFonts.jomolhari(textStyle: baseStyle);
       default:
         return GoogleFonts.inter(textStyle: baseStyle);
     }
