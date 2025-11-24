@@ -15,6 +15,7 @@ class VersionSelectionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context)!;
     final textVersionResponse = ref.watch(textVersionFutureProvider(textId));
     final currentLanguage = ref.watch(textVersionLanguageProvider);
     final numberOfVersions =
@@ -74,7 +75,7 @@ class VersionSelectionScreen extends ConsumerWidget {
             _buildLanguageCard(uniqueLanguages ?? [], context, ref),
             // Versions Title
             Text(
-              '${getLanguageLabel(currentLanguage, context)} Versions ($numberOfVersions)',
+              '${localizations.text_toc_versions} ($numberOfVersions)',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),

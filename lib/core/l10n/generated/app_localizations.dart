@@ -400,6 +400,12 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get commentary_total;
 
+  /// No description provided for @show_more.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get show_more;
+
   /// No description provided for @show_less.
   ///
   /// In en, this message translates to:
@@ -441,6 +447,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading...'**
   String get loading;
+
+  /// No description provided for @choose_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Image'**
+  String get choose_image;
+
+  /// No description provided for @choose_bg_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Background Image'**
+  String get choose_bg_image;
+
+  /// No description provided for @create_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Image'**
+  String get create_image;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @download_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Image'**
+  String get download_image;
 
   /// No description provided for @practice_nav_title.
   ///

@@ -139,7 +139,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get text_detail_rootText => 'Root Text';
 
   @override
-  String get text_detail_commentaryText => 'Commentary Text';
+  String get text_detail_commentaryText => 'Commentary';
 
   @override
   String get text_toc_continueReading => 'Continue Reading';
@@ -163,6 +163,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commentary_total => 'Total';
 
   @override
+  String get show_more => 'Show more';
+
+  @override
   String get show_less => 'Show less';
 
   @override
@@ -183,6 +186,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get loading => 'Loading...';
+
+  @override
+  String get choose_image => 'Choose Image';
+
+  @override
+  String get choose_bg_image => 'Choose Your Background Image';
+
+  @override
+  String get create_image => 'Create Image';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get download_image => 'Download Image';
 
   @override
   String get practice_nav_title => '修持計劃';

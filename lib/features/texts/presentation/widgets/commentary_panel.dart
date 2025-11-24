@@ -359,7 +359,7 @@ class _CommentaryExpansionButton extends StatelessWidget {
       child: TextButton(
         onPressed: onPressed,
         child: Text(
-          isExpanded ? localizations.show_less : localizations.read_more,
+          isExpanded ? localizations.show_less : localizations.show_more,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ),
@@ -396,16 +396,6 @@ class _EmptyState extends StatelessWidget {
                 color: Theme.of(
                   context,
                 ).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              localizations.no_commentary_message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
               textAlign: TextAlign.center,
             ),

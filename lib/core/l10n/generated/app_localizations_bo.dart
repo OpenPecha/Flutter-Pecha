@@ -154,7 +154,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get text_toc_revisionHistory => 'བཟོ་བཅོས་ཀྱི་ལོ་རྒྱུས།';
 
   @override
-  String get text_commentary => 'Commentary';
+  String get text_commentary => 'འགྲེལ་བ།';
 
   @override
   String get text_close_commentary => 'Close commentary';
@@ -163,10 +163,13 @@ class AppLocalizationsBo extends AppLocalizations {
   String get commentary_total => 'Total';
 
   @override
+  String get show_more => 'Show more';
+
+  @override
   String get show_less => 'Show less';
 
   @override
-  String get read_more => 'Read more';
+  String get read_more => 'མང་ཙམ་ཀློགས།';
 
   @override
   String get no_content => 'རྙེད་མ་བྱུང།';
@@ -183,6 +186,24 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get loading => 'ལེན་བཞིན་པ་་་';
+
+  @override
+  String get choose_image => 'Choose Image';
+
+  @override
+  String get choose_bg_image => 'Choose Your Background Image';
+
+  @override
+  String get create_image => 'Create Image';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get done => 'བྱས་ཟིན།';
+
+  @override
+  String get download_image => 'Download Image';
 
   @override
   String get practice_nav_title => 'ཉིན་རེ་ཉམས་ལེན།';
@@ -400,16 +421,16 @@ class AppLocalizationsBo extends AppLocalizations {
   String get cancel => 'རྩིས་མེད།';
 
   @override
-  String get copy => 'Copy';
+  String get copy => 'ངོ་བཤུ།';
 
   @override
-  String get copied => 'Copied';
+  String get copied => 'ངོ་བཤུ་བྱས་ཟིན།';
 
   @override
-  String get share => 'Share';
+  String get share => 'བརྒྱུད་སྐུར་གྱིས།';
 
   @override
-  String get image => 'Image';
+  String get image => 'འདྲ་པར།';
 
   @override
   String get author => 'རྩོམ་སྒྲིག་པ།';
