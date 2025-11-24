@@ -169,13 +169,13 @@ class AppLocalizationsBo extends AppLocalizations {
   String get read_more => 'Read more';
 
   @override
-  String get no_content => 'No content found';
+  String get no_content => 'རྙེད་མ་བྱུང།';
 
   @override
-  String get no_version => 'No versions found';
+  String get no_version => 'རྙེད་མ་བྱུང།';
 
   @override
-  String get no_commentary => 'No commentary found';
+  String get no_commentary => 'རྙེད་མ་བྱུང།';
 
   @override
   String get no_commentary_message =>
