@@ -112,6 +112,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_profile => 'Profile';
 
   @override
+  String get no_feature_content => 'No featured content available';
+
+  @override
   String get nav_home => 'Home';
 
   @override
@@ -173,6 +176,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'There are no commentaries available for this segment.';
 
   @override
+  String get practice_nav_title => 'Practice';
+
+  @override
   String get my_plans => 'My Plans';
 
   @override
@@ -180,6 +186,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get browse_plans => 'Browse Plans';
+
+  @override
+  String get plan_info => 'Plan Info';
 
   @override
   String get start_plan => 'Start Plan';
@@ -209,11 +218,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
 
   @override
-  String get dailyPractice => 'Daily Practice';
+  String get plan_unenroll => 'Unenroll';
 
   @override
-  String get dailyPracticeRemindersDescription =>
-      'Get reminded daily to practice your meditation and prayers';
+  String get unenroll_confirmation => 'Are you sure you want to unenroll from';
+
+  @override
+  String get unenroll_message =>
+      'Your progress will be permanently lost and cannot be recovered.';
+
+  @override
+  String get practice_plan =>
+      'Practice plans help you stay consistent with your practice. We have a variety of plans to choose from and for different durations.';
+
+  @override
+  String get search_plans => 'Search plans...';
+
+  @override
+  String get search_for_plans => 'Search for plans';
+
+  @override
+  String get no_plans_found => 'No plans found';
+
+  @override
+  String get notification_daily_practice => 'Daily Practice';
+
+  @override
+  String get notification_select_time => 'Select Time';
 
   @override
   String get enableReminders => 'Enable Reminders';
@@ -231,7 +262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectTime => 'Select Time';
 
   @override
-  String get updateTime => 'Update Time';
+  String get notification_daily_recitation => 'Daily Recitation';
 
   @override
   String get testNotifications => 'Test Notifications';
@@ -265,7 +296,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browse_recitations => 'Browse Recitations';
 
   @override
-  String get recitations_search => 'Search';
+  String get recitations_search => 'Search recitation...';
+
+  @override
+  String get recitations_search_for => 'Search for recitations';
+
+  @override
+  String get recitations_no_found => 'No recitations found';
 
   @override
   String get recitations_saved => 'Recitation saved';
@@ -345,6 +382,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_account => 'Account';
 
   @override
+  String get select_language => 'Select Language';
+
+  @override
   String get logout_confirmation => 'Are you sure you want to log out?';
 
   @override
@@ -361,4 +401,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get image => 'Image';
+
+  @override
+  String get author => 'Author';
+
+  @override
+  String get plans_created => 'Plan created';
 }

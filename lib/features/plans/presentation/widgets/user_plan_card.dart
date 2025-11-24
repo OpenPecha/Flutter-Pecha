@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -45,25 +46,29 @@ class UserPlanCard extends StatelessWidget {
   }
 
   Future<bool?> _showConfirmationDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final languageCode = Localizations.localeOf(context).languageCode;
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Unenroll from Plan'),
+          title: Text(localizations.plan_unenroll),
           content: Text(
-            'Are you sure you want to unenroll from "${plan.title}"? Your progress will be lost.',
+            languageCode == 'bo'
+                ? '${plan.title} ${localizations.unenroll_confirmation}\n\n ${localizations.unenroll_message}'
+                : '${localizations.unenroll_confirmation} "${plan.title}"?\n\n ${localizations.unenroll_message}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: const Text('Unenroll'),
+              child: Text(localizations.plan_unenroll),
             ),
           ],
         );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
@@ -127,9 +129,10 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
     }
 
     if (myPlansState.error != null && myPlansState.plans.isEmpty) {
-      return _ErrorState(
-        message: myPlansState.error!,
+      return ErrorStateWidget(
+        error: myPlansState.error!,
         onRetry: () => ref.read(myPlansPaginatedProvider.notifier).retry(),
+        customMessage: 'Unable to load plans.\nPlease try again later.',
       );
     }
 
@@ -245,6 +248,8 @@ class _EmptyMyPlansState extends ConsumerWidget {
     final fontFamily = getFontFamily(language);
     final lineHeight = getLineHeight(language);
     final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final localizations = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -254,7 +259,7 @@ class _EmptyMyPlansState extends ConsumerWidget {
             Icon(Icons.assignment_outlined, size: 60, color: Colors.grey[400]),
             const SizedBox(height: 8),
             Text(
-              'Practice plans help you stay consistent with your practice. We have a variety of plans to choose from and for different durations.',
+              localizations.practice_plan,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.grey[600],
                 fontFamily: fontFamily,
@@ -267,7 +272,7 @@ class _EmptyMyPlansState extends ConsumerWidget {
             ElevatedButton.icon(
               onPressed: onBrowsePlans,
               icon: const Icon(Icons.explore),
-              label: const Text('Browse Plans'),
+              label: Text(localizations.browse_plans),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,

@@ -232,11 +232,6 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
               color: theme.textTheme.bodySmall?.color,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            localizations.recitations_save_prompt,
-            style: theme.textTheme.bodySmall,
-          ),
         ],
       ),
     );

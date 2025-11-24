@@ -54,7 +54,10 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: PlanSearchDelegate(ref: ref),
+                      delegate: PlanSearchDelegate(
+                        ref: ref,
+                        hintText: localizations.search_plans,
+                      ),
                     );
                   },
                   icon: const Icon(Icons.search),

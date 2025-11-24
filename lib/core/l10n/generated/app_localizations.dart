@@ -298,6 +298,12 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get home_profile;
 
+  /// No description provided for @no_feature_content.
+  ///
+  /// In en, this message translates to:
+  /// **'No featured content available'**
+  String get no_feature_content;
+
   /// No description provided for @nav_home.
   ///
   /// In en, this message translates to:
@@ -418,6 +424,12 @@ abstract class AppLocalizations {
   /// **'There are no commentaries available for this segment.'**
   String get no_commentary_message;
 
+  /// No description provided for @practice_nav_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice'**
+  String get practice_nav_title;
+
   /// No description provided for @my_plans.
   ///
   /// In en, this message translates to:
@@ -435,6 +447,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Browse Plans'**
   String get browse_plans;
+
+  /// No description provided for @plan_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Info'**
+  String get plan_info;
 
   /// No description provided for @start_plan.
   ///
@@ -490,17 +508,59 @@ abstract class AppLocalizations {
   /// **'It\'s time for your daily practice.'**
   String get timeForDailyPractice;
 
-  /// No description provided for @dailyPractice.
+  /// No description provided for @plan_unenroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Unenroll'**
+  String get plan_unenroll;
+
+  /// No description provided for @unenroll_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to unenroll from'**
+  String get unenroll_confirmation;
+
+  /// No description provided for @unenroll_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress will be permanently lost and cannot be recovered.'**
+  String get unenroll_message;
+
+  /// No description provided for @practice_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice plans help you stay consistent with your practice. We have a variety of plans to choose from and for different durations.'**
+  String get practice_plan;
+
+  /// No description provided for @search_plans.
+  ///
+  /// In en, this message translates to:
+  /// **'Search plans...'**
+  String get search_plans;
+
+  /// No description provided for @search_for_plans.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for plans'**
+  String get search_for_plans;
+
+  /// No description provided for @no_plans_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No plans found'**
+  String get no_plans_found;
+
+  /// No description provided for @notification_daily_practice.
   ///
   /// In en, this message translates to:
   /// **'Daily Practice'**
-  String get dailyPractice;
+  String get notification_daily_practice;
 
-  /// No description provided for @dailyPracticeRemindersDescription.
+  /// No description provided for @notification_select_time.
   ///
   /// In en, this message translates to:
-  /// **'Get reminded daily to practice your meditation and prayers'**
-  String get dailyPracticeRemindersDescription;
+  /// **'Select Time'**
+  String get notification_select_time;
 
   /// No description provided for @enableReminders.
   ///
@@ -532,11 +592,11 @@ abstract class AppLocalizations {
   /// **'Select Time'**
   String get selectTime;
 
-  /// No description provided for @updateTime.
+  /// No description provided for @notification_daily_recitation.
   ///
   /// In en, this message translates to:
-  /// **'Update Time'**
-  String get updateTime;
+  /// **'Daily Recitation'**
+  String get notification_daily_recitation;
 
   /// No description provided for @testNotifications.
   ///
@@ -601,8 +661,20 @@ abstract class AppLocalizations {
   /// No description provided for @recitations_search.
   ///
   /// In en, this message translates to:
-  /// **'Search'**
+  /// **'Search recitation...'**
   String get recitations_search;
+
+  /// No description provided for @recitations_search_for.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for recitations'**
+  String get recitations_search_for;
+
+  /// No description provided for @recitations_no_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No recitations found'**
+  String get recitations_no_found;
 
   /// No description provided for @recitations_saved.
   ///
@@ -754,6 +826,12 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settings_account;
 
+  /// No description provided for @select_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get select_language;
+
   /// No description provided for @logout_confirmation.
   ///
   /// In en, this message translates to:
@@ -789,6 +867,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image'**
   String get image;
+
+  /// No description provided for @author.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get author;
+
+  /// No description provided for @plans_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan created'**
+  String get plans_created;
 }
 
 class _AppLocalizationsDelegate

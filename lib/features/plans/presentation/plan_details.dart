@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
@@ -50,6 +52,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     final fontFamily = getFontFamily(language);
     final lineHeight = getLineHeight(language);
     final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,13 +76,13 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
             },
             itemBuilder:
                 (BuildContext context) => [
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'unenroll',
                     child: Row(
                       children: [
                         Icon(Icons.exit_to_app, size: 20),
                         SizedBox(width: 12),
-                        Text('Unenroll from Plan'),
+                        Text(localizations.plan_unenroll),
                       ],
                     ),
                   ),
@@ -290,18 +293,23 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
   }
 
   void _showUnenrollDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeProvider);
+    final language = locale.languageCode;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Unenroll from Plan'),
+          title: Text(localizations.plan_unenroll),
           content: Text(
-            'Are you sure you want to unenroll from "${widget.plan.title}"?\n\nYour progress will be permanently lost and cannot be recovered.',
+            language == 'bo'
+                ? '${widget.plan.title} ${localizations.unenroll_confirmation}\n\n ${localizations.unenroll_message}'
+                : '${localizations.unenroll_confirmation} "${widget.plan.title}"?\n\n ${localizations.unenroll_message}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -311,7 +319,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: const Text('Unenroll'),
+              child: Text(localizations.plan_unenroll),
             ),
           ],
         );

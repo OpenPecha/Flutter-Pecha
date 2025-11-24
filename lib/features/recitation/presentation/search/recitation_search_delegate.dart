@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_card.dart';
@@ -7,11 +8,11 @@ import 'package:go_router/go_router.dart';
 
 class RecitationSearchDelegate extends SearchDelegate<RecitationModel?> {
   final WidgetRef ref;
-
-  RecitationSearchDelegate({required this.ref});
+  final String hintText;
+  RecitationSearchDelegate({required this.ref, required this.hintText});
 
   @override
-  String get searchFieldLabel => 'Search recitations...';
+  String get searchFieldLabel => hintText;
 
   @override
   TextStyle? get searchFieldStyle => const TextStyle(fontSize: 14);
@@ -70,13 +71,13 @@ class _SearchResultsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(recitationSearchProvider);
-
+    final localizations = AppLocalizations.of(context)!;
     // Empty query state
     if (searchState.query.trim().isEmpty) {
       return _EmptySearchState(
         icon: Icons.search,
-        title: 'Search for recitations',
-        subtitle: 'Enter keywords to find recitations',
+        title: localizations.recitations_search_for,
+        // subtitle: 'Enter keywords to find recitations',
       );
     }
 
@@ -97,8 +98,8 @@ class _SearchResultsView extends ConsumerWidget {
     if (searchState.results.isEmpty && !searchState.isLoading) {
       return _EmptySearchState(
         icon: Icons.search_off,
-        title: 'No recitations found',
-        subtitle: 'Try different keywords',
+        title: localizations.recitations_no_found,
+        // subtitle: 'Try different keywords',
       );
     }
 
@@ -126,12 +127,12 @@ class _SearchResultsView extends ConsumerWidget {
 class _EmptySearchState extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
 
   const _EmptySearchState({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
   });
 
   @override
@@ -152,13 +153,14 @@ class _EmptySearchState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
+            if (subtitle != null)
+              Text(
+                subtitle!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
           ],
         ),
       ),

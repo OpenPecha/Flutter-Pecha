@@ -18,10 +18,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get learnLiveShare => 'སློབ་སྦྱོང་དང་འཚོ་བ་དང་མཉམ་འབྲེལ།';
 
   @override
-  String get themeLight => 'དཀར་པོའི་ཚད་གཞི་།';
+  String get themeLight => 'འཆར་ངོས་དཀར་པོ།';
 
   @override
-  String get themeDark => 'ནག་པོའི་ཚད་གཞི་།';
+  String get themeDark => 'འཆར་ངོས་ནག་པོ།';
 
   @override
   String get switchToLight => 'དཀར་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།';
@@ -33,7 +33,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get sign_in => 'Sign in';
 
   @override
-  String get logout => 'Logout';
+  String get logout => 'ཕྱིར་ཐོན།';
 
   @override
   String get onboarding_welcome => 'Welcome to WeBuddhist';
@@ -112,19 +112,22 @@ class AppLocalizationsBo extends AppLocalizations {
   String get home_profile => 'ངོ་སྤྲོད་སྙིང་བསྡུས།';
 
   @override
-  String get nav_home => 'Home';
+  String get no_feature_content => 'རྒྱུ་ཆ་མིན་འདུག';
 
   @override
-  String get nav_texts => 'Texts';
+  String get nav_home => 'འདུན་ངོས།';
 
   @override
-  String get nav_recitations => 'Recitations';
+  String get nav_texts => 'ཡིག་མཛོད།';
 
   @override
-  String get nav_practice => 'Practice';
+  String get nav_recitations => 'ཞལ་འདོན།';
 
   @override
-  String get nav_settings => 'Settings';
+  String get nav_practice => 'ཉམས་ལེན།';
+
+  @override
+  String get nav_settings => 'སྒྲིག་འགོད།';
 
   @override
   String get text_browseTheLibrary => 'དཀར་ཆག';
@@ -173,16 +176,22 @@ class AppLocalizationsBo extends AppLocalizations {
       'There are no commentaries available for this segment.';
 
   @override
-  String get my_plans => 'My Plans';
+  String get practice_nav_title => 'ཉིན་རེ་ཉམས་ལེན།';
 
   @override
-  String get find_plans => 'Find Plans';
+  String get my_plans => 'ངའི་ཉམས་ལེན།';
 
   @override
-  String get browse_plans => 'Browse Plans';
+  String get find_plans => 'ཉམས་ལེན་འཚོལ།';
 
   @override
-  String get start_plan => 'Start Plan';
+  String get browse_plans => 'ཉམས་ལེན་འཚོལ།';
+
+  @override
+  String get plan_info => 'ཉམས་ལེན་ངོས་སྤྲོད།';
+
+  @override
+  String get start_plan => 'ཉམས་ལེན་འགོ་འཛུགས།';
 
   @override
   String get continue_plan => 'Continue Plan';
@@ -209,11 +218,33 @@ class AppLocalizationsBo extends AppLocalizations {
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
 
   @override
-  String get dailyPractice => 'Daily Practice';
+  String get plan_unenroll => 'ཉམས་ལེན་ནས་ཕྱིར་ཐོན།';
 
   @override
-  String get dailyPracticeRemindersDescription =>
-      'Get reminded daily to practice your meditation and prayers';
+  String get unenroll_confirmation => 'ནས་ཕྱིར་འཐེན་བྱེད་རྒྱུ་གཏན་ཁེལ་ཡིན་ནམ།';
+
+  @override
+  String get unenroll_message =>
+      'ཉམས་ལེན་ནས་ཕྱིར་ཐོན་ཚེ་དེ་དང་འབྲེལ་ཡོད་གནས་ཚུལ་མེད་པར་འགྱུར་གྱི་རེད།';
+
+  @override
+  String get practice_plan =>
+      'ཉམས་ལེན་འཆར་གཞི་ཡིས་ཁྱེད་རང་ཉམས་ལེན་ལ་རྒྱུན་མཐུད་ནས་གནས་པར་རོགས་རམ་བྱེད་ཀྱི་ཡོད། ང་ཚོར་འདེམས་རྒྱུའི་འཆར་གཞི་སྣ་ཚོགས་ཡོད་པ་དང་དུས་ཡུན་མི་འདྲ་བ་ཡོད།';
+
+  @override
+  String get search_plans => 'ཉམས་ལེན་འཚོལ།';
+
+  @override
+  String get search_for_plans => 'ཉམས་ལེན་འཚོལ་ཞིབ་བྱེད།';
+
+  @override
+  String get no_plans_found => 'No plans found';
+
+  @override
+  String get notification_daily_practice => 'ཉམས་ལེན་དྲན་བརྡ།';
+
+  @override
+  String get notification_select_time => 'དུས་ཚོད་འདེམ།';
 
   @override
   String get enableReminders => 'Enable Reminders';
@@ -231,7 +262,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get selectTime => 'Select Time';
 
   @override
-  String get updateTime => 'Update Time';
+  String get notification_daily_recitation => 'ཞལ་འདོན་དྲན་བརྡ།';
 
   @override
   String get testNotifications => 'Test Notifications';
@@ -247,25 +278,31 @@ class AppLocalizationsBo extends AppLocalizations {
   String get manageDailyReminders => 'Manage daily reminders';
 
   @override
-  String get text_noContent => 'No texts available in the selected language';
+  String get text_noContent => 'སྡེ་ཚན་དེའི་ནང་དཔེ་ཆ་མིན་འདུག';
 
   @override
   String get text_switchToTibetan => 'Switch to Tibetan';
 
   @override
-  String get common_sign_in => 'ནང་འཛུལ་གྱིས།';
+  String get common_sign_in => 'ནང་འཛུལ།';
 
   @override
-  String get recitations_title => 'Recitations';
+  String get recitations_title => 'ཞལ་འདོན།';
 
   @override
-  String get recitations_my_recitations => 'My Recitations';
+  String get recitations_my_recitations => 'ངའི་ཞལ་འདོན།';
 
   @override
-  String get browse_recitations => 'Browse Recitations';
+  String get browse_recitations => 'ཞལ་འདོན་འཚོལ།';
 
   @override
-  String get recitations_search => 'འཚོལ་ས།';
+  String get recitations_search => 'ཞལ་འདོན་འཚོལ།';
+
+  @override
+  String get recitations_search_for => 'ཞལ་འདོན་འཚོལ་ཞིབ་བྱེད།';
+
+  @override
+  String get recitations_no_found => 'No recitations found';
 
   @override
   String get recitations_saved => 'Recitation saved';
@@ -277,7 +314,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_no_content => 'No recitations available';
 
   @override
-  String get recitations_no_saved => 'No saved recitations';
+  String get recitations_no_saved => 'ཞལ་འདོན་ཉར་ཚག་བྱས་མིན་འདུག';
 
   @override
   String get recitations_save_prompt => 'Save recitations to access them here';
@@ -333,22 +370,25 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_hide_adaptation => 'བསྒྱུར་བཅོས་སྦས།';
 
   @override
-  String get settings_appearance => 'Appearance';
+  String get settings_appearance => 'རྣམ་པ།';
 
   @override
-  String get settings_notifications => 'Notifications';
+  String get settings_notifications => 'གསལ་བརྡ།';
 
   @override
-  String get notification_settings => 'Notification Settings';
+  String get notification_settings => 'གསལ་བརྡ་སྒྲིག་འགོད།';
 
   @override
-  String get settings_account => 'Account';
+  String get settings_account => 'མིང་ཐོ།';
+
+  @override
+  String get select_language => 'སྐད་ཡིག་འདེམས།';
 
   @override
   String get logout_confirmation => 'Are you sure you want to log out?';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'རྩིས་མེད།';
 
   @override
   String get copy => 'Copy';
@@ -361,4 +401,10 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get image => 'Image';
+
+  @override
+  String get author => 'རྩོམ་སྒྲིག་པ།';
+
+  @override
+  String get plans_created => 'ཉམས་ལེན་ཁག';
 }

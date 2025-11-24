@@ -241,12 +241,8 @@ class _NotificationSettingsScreenState
                           vertical: 0,
                         ),
                         title: Text(
-                          'Daily Practice',
+                          localizations.notification_daily_practice,
                           style: TextStyle(fontSize: titleFontSize),
-                        ),
-                        subtitle: Text(
-                          "Get notification of your daily to practices",
-                          style: TextStyle(fontSize: bodyFontSize),
                         ),
                         value: isEnabled,
                         onChanged: (v) => _toggleNotifications(v, selectedTime),
@@ -254,7 +250,7 @@ class _NotificationSettingsScreenState
                       if (isEnabled) ...[
                         ListTile(
                           title: Text(
-                            'Select Time',
+                            localizations.notification_select_time,
                             style: TextStyle(fontSize: subtitleFontSize),
                           ),
                           subtitle: Text(
@@ -286,12 +282,8 @@ class _NotificationSettingsScreenState
                           vertical: 0,
                         ),
                         title: Text(
-                          'Recitations Reminder',
+                          localizations.notification_daily_recitation,
                           style: TextStyle(fontSize: titleFontSize),
-                        ),
-                        subtitle: Text(
-                          'Take a moment to pray',
-                          style: TextStyle(fontSize: bodyFontSize),
                         ),
                         value: isRecitationEnabled,
                         onChanged:
@@ -303,7 +295,7 @@ class _NotificationSettingsScreenState
                       if (isRecitationEnabled) ...[
                         ListTile(
                           title: Text(
-                            'Select Time',
+                            localizations.notification_select_time,
                             style: TextStyle(fontSize: subtitleFontSize),
                           ),
                           subtitle: Text(

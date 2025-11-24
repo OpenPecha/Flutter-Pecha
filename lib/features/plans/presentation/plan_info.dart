@@ -42,13 +42,14 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
     final fontFamily = getFontFamily(language);
     final lineHeight = getLineHeight(language);
     final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
         title: Text(
-          'Plan Info',
+          localizations.plan_info,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontFamily: fontFamily,

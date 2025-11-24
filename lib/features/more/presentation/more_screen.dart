@@ -155,10 +155,6 @@ class MoreScreen extends ConsumerWidget {
                   localizations.notification_settings,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                subtitle: Text(
-                  localizations.manageDailyReminders,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
                 onTap: () => context.push(NotificationSettingsScreen.routeName),
               ),
             ],
@@ -195,10 +191,6 @@ class MoreScreen extends ConsumerWidget {
                       color: Colors.red.shade600,
                       fontWeight: FontWeight.w500,
                     ),
-                  ),
-                  subtitle: Text(
-                    'Sign out of your account',
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   onTap: () => _showLogoutDialog(context, ref),
                 ),
@@ -248,6 +240,7 @@ class MoreScreen extends ConsumerWidget {
     WidgetRef ref,
     Locale? currentLocale,
   ) {
+    final localizations = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -273,7 +266,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  'Select Language',
+                  localizations.select_language,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),

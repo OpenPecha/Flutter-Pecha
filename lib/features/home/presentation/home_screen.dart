@@ -197,7 +197,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         HomeScreenConstants.emptyStatePadding,
                       ),
                       child: Text(
-                        HomeScreenConstants.emptyStateMessage,
+                        localizations.no_feature_content,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),

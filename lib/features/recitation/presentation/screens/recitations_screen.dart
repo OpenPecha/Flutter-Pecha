@@ -50,7 +50,10 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: RecitationSearchDelegate(ref: ref),
+                      delegate: RecitationSearchDelegate(
+                        ref: ref,
+                        hintText: localizations.recitations_search,
+                      ),
                     );
                   },
                   icon: const Icon(Icons.search),
