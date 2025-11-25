@@ -58,12 +58,12 @@ class RecitationSaveController {
 
   /// Saves a recitation.
   Future<void> _saveRecitation(String textId) async {
-    await ref.read(recitationsRepositoryProvider).saveRecitation(textId);
+    await ref.read(saveRecitationProvider(textId).future);
   }
 
   /// Unsaves a recitation.
   Future<void> _unsaveRecitation(String textId) async {
-    await ref.read(recitationsRepositoryProvider).unsaveRecitation(textId);
+    await ref.read(unsaveRecitationProvider(textId).future);
   }
 
   /// Shows the login drawer for guest users.

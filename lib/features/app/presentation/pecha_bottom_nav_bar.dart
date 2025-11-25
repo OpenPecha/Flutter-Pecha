@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
-import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'skeleton_screen.dart';
@@ -15,9 +15,9 @@ class PechaBottomNavBar extends ConsumerWidget {
     final localizations = AppLocalizations.of(context)!;
 
     return Container(
-      padding: const EdgeInsets.only(bottom: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.primaryDark, // MAN 800 - #871C1C
+      padding: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
@@ -88,6 +88,8 @@ class PechaBottomNavBar extends ConsumerWidget {
     required String label,
     required bool isSelected,
   }) {
+    final locale = ref.watch(localeProvider);
+    final fontSize = locale.languageCode == 'bo' ? 14.0 : 12.0;
     return Expanded(
       child: InkWell(
         onTap: () {
@@ -107,15 +109,13 @@ class PechaBottomNavBar extends ConsumerWidget {
             children: [
               Icon(
                 isSelected ? selectedIcon : icon,
-                color: AppColors.surfaceLight,
                 size: isSelected ? 26 : 24,
               ),
               const SizedBox(height: 2),
               Text(
                 label,
                 style: TextStyle(
-                  color: AppColors.surfaceLight,
-                  fontSize: 10,
+                  fontSize: fontSize,
                   fontWeight: isSelected ? FontWeight.w400 : FontWeight.w300,
                 ),
                 maxLines: 1,

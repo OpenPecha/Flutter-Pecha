@@ -63,6 +63,17 @@ final textVersionFutureProvider = FutureProvider.family((ref, String textId) {
       .fetchTextVersion(textId: textId, language: languageCode);
 });
 
+final commentaryTextFutureProvider = FutureProvider.family((
+  ref,
+  String textId,
+) {
+  final locale = ref.watch(localeProvider);
+  final languageCode = locale.languageCode;
+  return ref
+      .watch(textsRepositoryProvider)
+      .fetchCommentaryText(textId: textId, language: languageCode);
+});
+
 final textDetailsFutureProvider = FutureProvider.family((
   ref,
   TextDetailsParams params,
@@ -107,17 +118,19 @@ final searchTextFutureProvider = FutureProvider.family((
 
 class LibrarySearchParams {
   final String query;
-  const LibrarySearchParams({required this.query});
+  final String? textId;
+  const LibrarySearchParams({required this.query, this.textId});
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is LibrarySearchParams &&
           runtimeType == other.runtimeType &&
-          query == other.query;
+          query == other.query &&
+          textId == other.textId;
 
   @override
-  int get hashCode => query.hashCode;
+  int get hashCode => query.hashCode ^ textId.hashCode;
 }
 
 final librarySearchProvider = FutureProvider.family((
@@ -126,6 +139,16 @@ final librarySearchProvider = FutureProvider.family((
 ) {
   final result = ref
       .watch(textsRepositoryProvider)
-      .searchTextRepository(query: params.query, textId: null);
+      .searchTextRepository(query: params.query, textId: params.textId);
+  return result;
+});
+
+final multilingualSearchProvider = FutureProvider.family((
+  ref,
+  LibrarySearchParams params,
+) {
+  final result = ref
+      .watch(textsRepositoryProvider)
+      .multilingualSearchRepository(query: params.query, textId: params.textId);
   return result;
 });

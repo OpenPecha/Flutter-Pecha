@@ -1,6 +1,5 @@
-// This file contains helper functions that are used throughout the app
-
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 
 extension HelperFunctions on BuildContext {
   void showSnackBar(String message) {
@@ -8,20 +7,16 @@ extension HelperFunctions on BuildContext {
   }
 }
 
-// Helper function to get the font family for a given language
+// Helper function to get the font family for content text (backend texts, recitations, etc.)
+// This returns the content font for the given language
 String? getFontFamily(String language) {
-  switch (language) {
-    case "bo":
-      return "MonlamTibetan";
-    case "en":
-      return "Inter";
-    case "sa":
-      return "MonlamTibetan";
-    case "zh":
-      return null;
-    default:
-      return null;
-  }
+  return AppFontConfig.getFontFamily(language, FontType.content);
+}
+
+// Helper function to get TextStyle for content with appropriate font
+// Use this for content widgets that need Google Fonts or local fonts
+TextStyle? getContentTextStyle(String? language, TextStyle? baseStyle) {
+  return AppFontConfig.getContentTextStyle(language, baseStyle);
 }
 
 // Helper function to get the line height for a given language

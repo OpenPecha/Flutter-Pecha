@@ -31,13 +31,6 @@ final planByIdFutureProvider = FutureProvider.family<PlansModel, String>((
   return ref.watch(plansRepositoryProvider).getPlanById(id);
 });
 
-// Upgrade: find plans provider
-final findPlansProvider = FutureProvider<List<PlansModel>>((ref) {
-  final locale = ref.watch(localeProvider);
-  final languageCode = locale.languageCode;
-  return ref.watch(plansRepositoryProvider).getPlans(language: languageCode);
-});
-
 // Find plans with pagination provider
 final findPlansPaginatedProvider =
     StateNotifierProvider<FindPlansNotifier, FindPlansState>((ref) {

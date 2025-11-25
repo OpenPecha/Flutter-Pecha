@@ -18,7 +18,6 @@ class HomeScreenConstants {
 
   // Text Content
   static const String defaultDuration = '1-2 min';
-  static const String emptyStateMessage = 'No featured content available';
   static const String errorMessage = 'Failed to load featured day content';
   static const String retryButtonText = 'Retry';
 

@@ -13,7 +13,6 @@ class ShareRemoteDatasource {
   // POST request to share a short url
   Future<String> getShareUrl({
     required String textId,
-    required String contentId,
     required String segmentId,
     required String language,
   }) async {
@@ -22,7 +21,6 @@ class ShareRemoteDatasource {
       final body = json.encode({
         'logo': false,
         'segment_id': segmentId,
-        'content_id': contentId,
         'text_id': textId,
         'content_index': 0,
         'language': language,

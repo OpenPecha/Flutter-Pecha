@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/services/service_providers.dart';
-import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
-import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_pecha/features/home/data/providers/featured_day_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/featured_content_factory.dart';
 import 'package:flutter_pecha/features/home/presentation/home_screen_constants.dart';
@@ -176,10 +175,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  // Build the scrollable body
   Widget _buildBody(BuildContext context, AppLocalizations localizations) {
     final featuredDayAsync = ref.watch(featuredDayFutureProvider);
-
+    final language = ref.watch(localeProvider).languageCode;
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Expanded(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
@@ -189,7 +188,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle loading, error, and data states
             featuredDayAsync.when(
               data: (planItems) {
                 if (planItems.isEmpty) {
@@ -199,13 +197,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         HomeScreenConstants.emptyStatePadding,
                       ),
                       child: Text(
-                        HomeScreenConstants.emptyStateMessage,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        localizations.no_feature_content,
+                        style: TextStyle(fontSize: fontSize),
                       ),
                     ),
                   );
                 }
-
                 return Column(
                   children: [
                     ...planItems.asMap().entries.map((entry) {

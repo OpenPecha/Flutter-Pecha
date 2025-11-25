@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/utils/text_highlight_helper.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
   final WidgetRef ref;
-  final String? textId; // If provided, search only within this text
+  final String textId;
   String _submittedQuery = '';
   bool _hasSubmitted = false;
 
-  LibrarySearchDelegate({required this.ref, this.textId});
+  LibrarySearchDelegate({required this.ref, required this.textId});
 
   @override
   ThemeData appBarTheme(BuildContext context) {
+    final language = ref.watch(localeProvider).languageCode;
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
+
     return Theme.of(context).copyWith(
       appBarTheme: AppBarTheme(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -23,7 +28,8 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
           color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
       ),
-      inputDecorationTheme: const InputDecorationTheme(
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: TextStyle(fontSize: fontSize),
         border: InputBorder.none,
       ),
     );
@@ -102,22 +108,19 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
       );
     }
 
-    // Use Consumer to ensure rebuilds when provider changes
     return Consumer(
       builder: (context, ref, child) {
-        // Use text-specific search if textId is provided, otherwise global search
-        final searchResults =
-            textId != null
-                ? ref.watch(
-                  searchTextFutureProvider(
-                    SearchTextParams(query: _submittedQuery, textId: textId!),
-                  ),
-                )
-                : ref.watch(
-                  librarySearchProvider(
-                    LibrarySearchParams(query: _submittedQuery),
-                  ),
-                );
+        // final searchResults = ref.watch(
+        //   searchTextFutureProvider(
+        //     SearchTextParams(query: _submittedQuery, textId: textId),
+        //   ),
+        // );
+
+        final searchResults = ref.watch(
+          multilingualSearchProvider(
+            LibrarySearchParams(query: _submittedQuery, textId: textId),
+          ),
+        );
 
         return searchResults.when(
           loading: () {
@@ -130,8 +133,7 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
             );
           },
           data: (searchResponse) {
-            if (searchResponse.sources == null ||
-                searchResponse.sources!.isEmpty) {
+            if (searchResponse.sources.isEmpty) {
               return Center(
                 child: Text(
                   'No results found for "$_submittedQuery"',
@@ -142,7 +144,7 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
 
             // Group segment matches by textId
             final groupedResults = <String, Map<String, dynamic>>{};
-            for (final source in searchResponse.sources!) {
+            for (final source in searchResponse.sources) {
               if (!groupedResults.containsKey(source.text.textId)) {
                 groupedResults[source.text.textId] = {
                   'textId': source.text.textId,
@@ -168,9 +170,13 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
             }
 
             final groupedList = groupedResults.values.toList();
+            final language = ref.watch(localeProvider).languageCode;
+            final fontFamily = getFontFamily(language);
+            final lineHeight = getLineHeight(language);
+            final fontSize = language == 'bo' ? 22.0 : 18.0;
 
             return Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
+              color: Colors.transparent,
               child: ListView.builder(
                 itemCount: groupedList.length,
                 itemBuilder: (context, index) {
@@ -181,20 +187,22 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
                       textGroup['segments'] as List<Map<String, String>>;
 
                   return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
+                    color: Colors.transparent,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Text title shown once
                           Text(
                             textTitle,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontFamily: fontFamily,
+                              height: lineHeight,
+                              fontSize: fontSize,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -228,21 +236,23 @@ class LibrarySearchDelegate extends SearchDelegate<Map<String, String>?> {
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(12.0),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[50],
+                                      color: Theme.of(context).cardColor,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: Colors.grey[200]!,
+                                        color: Theme.of(context).dividerColor,
                                         width: 1,
                                       ),
                                     ),
                                     child: Text.rich(
                                       TextSpan(
                                         children: buildHighlightedText(
+                                          context,
                                           cleanContent,
                                           _submittedQuery,
                                           TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[800],
+                                            fontSize: fontSize,
+                                            fontFamily: fontFamily,
+                                            height: lineHeight,
                                           ),
                                         ),
                                       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
 class UserPlanCard extends StatelessWidget {
   final UserPlansModel plan;
@@ -29,7 +31,6 @@ class UserPlanCard extends StatelessWidget {
       ),
     );
 
-    // Wrap with Dismissible if onDelete is provided
     if (onDelete != null) {
       return Dismissible(
         key: Key(plan.id),
@@ -45,25 +46,29 @@ class UserPlanCard extends StatelessWidget {
   }
 
   Future<bool?> _showConfirmationDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final languageCode = Localizations.localeOf(context).languageCode;
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Unenroll from Plan'),
+          title: Text(localizations.plan_unenroll),
           content: Text(
-            'Are you sure you want to unenroll from "${plan.title}"? Your progress will be lost.',
+            languageCode == 'bo'
+                ? '${plan.title} ${localizations.unenroll_confirmation}\n\n ${localizations.unenroll_message}'
+                : '${localizations.unenroll_confirmation} "${plan.title}"?\n\n ${localizations.unenroll_message}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: const Text('Unenroll'),
+              child: Text(localizations.plan_unenroll),
             ),
           ],
         );
@@ -99,17 +104,32 @@ Widget _buildPlanImage(UserPlansModel plan) {
 }
 
 Widget _buildPlanInfo(UserPlansModel plan) {
+  final planLanguage = plan.language;
+  final fontFamily = getFontFamily(planLanguage);
+  final lineHeight = getLineHeight(planLanguage);
+  final fontSize = planLanguage == 'bo' ? 22.0 : 18.0;
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const SizedBox(height: 4),
       Text(
         '${plan.totalDays} Days',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
+          height: lineHeight,
+        ),
       ),
       Text(
         plan.title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          fontFamily: fontFamily,
+          height: lineHeight,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

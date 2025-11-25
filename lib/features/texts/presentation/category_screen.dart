@@ -57,7 +57,7 @@ class CategoryScreen extends ConsumerWidget {
                   ...response.collections.map(
                     (c) => GestureDetector(
                       onTap: () {
-                        context.push('/texts/detail', extra: c);
+                        context.push('/texts/works', extra: c);
                       },
                       child: _CategoryBookItem(
                         title: c.title,

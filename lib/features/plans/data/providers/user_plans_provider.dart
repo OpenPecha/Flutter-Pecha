@@ -28,26 +28,45 @@ final userPlansFutureProvider = FutureProvider<UserPlanListResponseModel>((
 });
 
 final userPlanProgressDetailsFutureProvider =
-    FutureProvider.family<List<PlanProgressModel>, String>((ref, planId) {
+    FutureProvider.autoDispose.family<List<PlanProgressModel>, String>((ref, planId) {
       return ref
           .watch(userPlansRepositoryProvider)
           .getUserPlanProgressDetails(planId);
     });
 
-final userPlanSubscribeFutureProvider = FutureProvider.family<bool, String>((
+final userPlanSubscribeFutureProvider = FutureProvider.autoDispose.family<bool, String>((
   ref,
   planId,
 ) {
   return ref.watch(userPlansRepositoryProvider).subscribeToPlan(planId);
 });
 
-// Upgrade: my plans provider
-final myPlansProvider = FutureProvider<UserPlanListResponseModel>((ref) {
-  final locale = ref.watch(localeProvider);
-  final languageCode = locale.languageCode;
-  return ref
-      .watch(userPlansRepositoryProvider)
-      .getUserPlans(language: languageCode);
+final userPlanUnsubscribeFutureProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  planId,
+) {
+  return ref.watch(userPlansRepositoryProvider).unenrollFromPlan(planId);
+});
+
+final completeTaskFutureProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  taskId,
+) {
+  return ref.watch(userPlansRepositoryProvider).completeTask(taskId);
+});
+
+final deleteTaskFutureProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  taskId,
+) {
+  return ref.watch(userPlansRepositoryProvider).deleteTask(taskId);
+});
+
+final completeSubTaskFutureProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  subTaskId,
+) {
+  return ref.watch(userPlansRepositoryProvider).completeSubTask(subTaskId);
 });
 
 // My plans with pagination provider
@@ -63,7 +82,7 @@ final myPlansPaginatedProvider =
 
 // User plan day content provider
 final userPlanDayContentFutureProvider =
-    FutureProvider.family<UserPlanDayDetailResponse, PlanDaysParams>((
+    FutureProvider.autoDispose.family<UserPlanDayDetailResponse, PlanDaysParams>((
       ref,
       params,
     ) {
@@ -75,7 +94,7 @@ final userPlanDayContentFutureProvider =
 /// Provider that fetches completion status for all days in a plan
 /// Returns a Map where key is dayNumber and value is isCompleted status
 final userPlanDaysCompletionStatusProvider =
-    FutureProvider.family<Map<int, bool>, String>((ref, planId) async {
+    FutureProvider.autoDispose.family<Map<int, bool>, String>((ref, planId) async {
       // First get the list of days to know how many days to fetch
       final planDays = await ref.watch(
         planDaysByPlanIdFutureProvider(planId).future,

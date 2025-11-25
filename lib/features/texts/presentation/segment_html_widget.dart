@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SegmentHtmlWidget extends ConsumerStatefulWidget {
@@ -76,10 +76,10 @@ class _SegmentHtmlWidgetState extends ConsumerState<SegmentHtmlWidget> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 4, right: 4),
                     child: DefaultTextStyle.merge(
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFF007bff),
                         fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                        fontSize: widget.fontSize,
                       ),
                       child:
                           (context.element?.text ?? '').isNotEmpty

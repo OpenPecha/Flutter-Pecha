@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
@@ -7,6 +10,7 @@ import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/my_plans_paginated_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/user_plan_card.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -47,10 +51,10 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
     UserPlansModel plan,
   ) async {
     try {
-      // Call the repository to unenroll
-      final success = await ref
-          .read(userPlansRepositoryProvider)
-          .unenrollFromPlan(plan.id);
+      // Call the provider to unenroll
+      final success = await ref.read(
+        userPlanUnsubscribeFutureProvider(plan.id).future,
+      );
 
       if (success) {
         // Refresh the plans list
@@ -120,20 +124,18 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
   }
 
   Widget _buildContent(BuildContext context, MyPlansState myPlansState) {
-    // Initial loading state
     if (myPlansState.isLoading && myPlansState.plans.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Error state with no plans
     if (myPlansState.error != null && myPlansState.plans.isEmpty) {
-      return _ErrorState(
-        message: myPlansState.error!,
+      return ErrorStateWidget(
+        error: myPlansState.error!,
         onRetry: () => ref.read(myPlansPaginatedProvider.notifier).retry(),
+        customMessage: 'Unable to load plans.\nPlease try again later.',
       );
     }
 
-    // Empty state
     if (myPlansState.plans.isEmpty && !myPlansState.isLoading) {
       return _EmptyMyPlansState(
         onBrowsePlans: () {
@@ -142,14 +144,12 @@ class _MyPlansTabState extends ConsumerState<MyPlansTab> {
       );
     }
 
-    // Plans list with pagination
     return ListView.separated(
       controller: _scrollController,
       separatorBuilder: (context, index) => const SizedBox(height: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       itemCount: myPlansState.plans.length + (myPlansState.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        // Loading indicator at bottom
         if (index == myPlansState.plans.length) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -237,41 +237,42 @@ class _GuestLoginPrompt extends StatelessWidget {
   }
 }
 
-class _EmptyMyPlansState extends StatelessWidget {
+class _EmptyMyPlansState extends ConsumerWidget {
   final VoidCallback onBrowsePlans;
 
   const _EmptyMyPlansState({required this.onBrowsePlans});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final language = ref.watch(localeProvider).languageCode;
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final localizations = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_outlined, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 24),
-            Text(
-              'No enrolled plans yet',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: Colors.grey[700]),
-              textAlign: TextAlign.center,
-            ),
+            Icon(Icons.assignment_outlined, size: 60, color: Colors.grey[400]),
             const SizedBox(height: 8),
             Text(
-              'Start your practice journey by enrolling in a plan',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              localizations.practice_plan,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+                fontFamily: fontFamily,
+                height: lineHeight,
+                fontSize: fontSize,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onBrowsePlans,
               icon: const Icon(Icons.explore),
-              label: const Text('Browse Plans'),
+              label: Text(localizations.browse_plans),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,

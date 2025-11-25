@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/features/texts/models/search/multilingual_search_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/search_response.dart';
+import 'package:flutter_pecha/features/texts/models/text/commentary_text_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/detail_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/reader_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc_response.dart';
@@ -18,7 +20,7 @@ class TextRemoteDatasource {
     required String termId,
     String? language,
     int skip = 0,
-    int limit = 10,
+    int limit = 20,
   }) async {
     final uri = Uri.parse('${dotenv.env['BASE_API_URL']}/texts').replace(
       queryParameters: {
@@ -77,7 +79,27 @@ class TextRemoteDatasource {
       final Map<String, dynamic> jsonMap = json.decode(decoded);
       return VersionResponse.fromJson(jsonMap);
     } else {
+      debugPrint('Failed to load text version: ${response.body}');
       throw Exception('Failed to load text version');
+    }
+  }
+
+  // get the commentary text of the text
+  Future<CommentaryTextResponse> fetchCommentaryText({
+    required String textId,
+    String? language,
+  }) async {
+    final uri = Uri.parse(
+      '${dotenv.env['BASE_API_URL']}/texts/$textId/commentaries',
+    ).replace(queryParameters: {'language': language ?? 'en'});
+    final response = await client.get(uri);
+    if (response.statusCode == 200) {
+      final decoded = utf8.decode(response.bodyBytes);
+      final List<dynamic> jsonMap = json.decode(decoded) as List<dynamic>;
+      return CommentaryTextResponse.fromJson(jsonMap);
+    } else {
+      debugPrint('Failed to load commentary text: ${response.body}');
+      throw Exception('Failed to load commentary text');
     }
   }
 
@@ -130,6 +152,7 @@ class TextRemoteDatasource {
       queryParameters: {
         'query': query,
         'search_type': 'SOURCE',
+        if (language != null) 'language': language,
         if (textId != null) 'text_id': textId,
       },
     );
@@ -145,6 +168,40 @@ class TextRemoteDatasource {
       }
     } else {
       throw Exception('Failed to search text');
+    }
+  }
+
+  // multilingual search
+  Future<MultilingualSearchResponse> multilingualSearch({
+    required String query,
+    String? language,
+    String? textId,
+  }) async {
+    final uri = Uri.parse(
+      '${dotenv.env['BASE_API_URL']}/search/multilingual',
+    ).replace(
+      queryParameters: {
+        'query': query,
+        'search_type': 'exact',
+        if (language != null) 'language': language,
+        if (textId != null) 'text_id': textId,
+      },
+    );
+    final response = await client.get(uri);
+    if (response.statusCode == 200) {
+      try {
+        final decoded = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> jsonMap = json.decode(decoded);
+        final multilingualSearchResponse = MultilingualSearchResponse.fromJson(
+          jsonMap,
+        );
+        return multilingualSearchResponse;
+      } catch (e) {
+        debugPrint('MultilingualSearchResponse::: Failed to search text: $e');
+        throw Exception('MultilingualSearchResponse::: Failed to search text');
+      }
+    } else {
+      throw Exception('MultilingualSearchResponse::: Failed to search text');
     }
   }
 }

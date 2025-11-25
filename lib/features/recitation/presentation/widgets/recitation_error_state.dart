@@ -11,11 +11,7 @@ class RecitationErrorState extends StatelessWidget {
   /// Optional callback for retry action
   final VoidCallback? onRetry;
 
-  const RecitationErrorState({
-    super.key,
-    required this.error,
-    this.onRetry,
-  });
+  const RecitationErrorState({super.key, required this.error, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +29,6 @@ class RecitationErrorState extends StatelessWidget {
     } else if (error.contains('401')) {
       return 'Please sign in to access this recitation.';
     }
-    // Return null to use the generic error messages from ErrorStateWidget
-    return null;
+    return ErrorStateWidget(error: error, onRetry: onRetry).customMessage;
   }
 }

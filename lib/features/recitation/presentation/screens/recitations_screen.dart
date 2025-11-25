@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/recitation/presentation/search/recitation_search_delegate.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/my_recitations_tab.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitations_tab.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RecitationsScreen extends ConsumerStatefulWidget {
@@ -49,7 +50,10 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: RecitationSearchDelegate(ref: ref),
+                      delegate: RecitationSearchDelegate(
+                        ref: ref,
+                        hintText: localizations.recitations_search,
+                      ),
                     );
                   },
                   icon: const Icon(Icons.search),
@@ -75,16 +79,26 @@ class _RecitationsScreenState extends ConsumerState<RecitationsScreen>
     BuildContext context,
     AppLocalizations localizations,
   ) {
+    final locale = Localizations.localeOf(context);
+    final languageCode = locale.languageCode;
+    final fontFamily = getFontFamily(languageCode);
+    final fontSize = languageCode == 'bo' ? 22.0 : 18.0;
+
     return TabBar(
       controller: _tabController,
       tabs: [
         Tab(text: localizations.recitations_my_recitations),
         Tab(text: localizations.browse_recitations),
       ],
-      labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-      unselectedLabelStyle: const TextStyle(
+      labelStyle: TextStyle(
         fontWeight: FontWeight.bold,
-        fontSize: 16,
+        fontSize: fontSize,
+        fontFamily: fontFamily,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: fontSize,
+        fontFamily: fontFamily,
       ),
       labelColor: Theme.of(context).colorScheme.secondary,
       unselectedLabelColor:

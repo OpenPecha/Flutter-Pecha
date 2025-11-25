@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'widgets/plan_cover_image.dart';
 import 'widgets/day_carousel.dart';
@@ -45,12 +48,22 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
         PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
       ),
     );
+    final language = widget.plan.language;
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.plan.title,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: fontFamily,
+            height: lineHeight,
+            fontSize: fontSize,
+          ),
         ),
         elevation: 0,
         actions: [
@@ -63,13 +76,13 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
             },
             itemBuilder:
                 (BuildContext context) => [
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'unenroll',
                     child: Row(
                       children: [
                         Icon(Icons.exit_to_app, size: 20),
                         SizedBox(width: 12),
-                        Text('Unenroll from Plan'),
+                        Text(localizations.plan_unenroll),
                       ],
                     ),
                   ),
@@ -89,6 +102,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                 return dayCompletionStatus.when(
                   data:
                       (completionStatus) => DayCarousel(
+                        language: language,
                         days: days,
                         selectedDay: selectedDay,
                         startDate: widget.startDate,
@@ -101,6 +115,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                       ),
                   loading:
                       () => DayCarousel(
+                        language: language,
                         days: days,
                         selectedDay: selectedDay,
                         startDate: widget.startDate,
@@ -112,6 +127,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
                       ),
                   error:
                       (error, stackTrace) => DayCarousel(
+                        language: language,
                         days: days,
                         selectedDay: selectedDay,
                         startDate: widget.startDate,
@@ -131,11 +147,12 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDayTitle(selectedDay),
+                  _buildDayTitle(language, selectedDay),
                   const SizedBox(height: 8),
                   userPlanDayContent.when(
                     data:
                         (dayContent) => ActivityList(
+                          language: language,
                           tasks: dayContent.tasks,
                           today: selectedDay,
                           totalDays: dayContent.tasks.length,
@@ -184,10 +201,18 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     );
   }
 
-  Widget _buildDayTitle(int day) {
+  Widget _buildDayTitle(String language, int day) {
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Text(
       "Day $day of ${widget.plan.totalDays}",
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        fontFamily: fontFamily,
+        height: lineHeight,
+      ),
     );
   }
 
@@ -239,14 +264,13 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     List<UserTasksDto> tasks,
   ) async {
     final task = tasks.firstWhere((t) => t.id == taskId);
-    final repository = ref.read(userPlansRepositoryProvider);
 
     try {
       bool success;
       if (task.isCompleted) {
-        success = await repository.deleteTask(taskId);
+        success = await ref.read(deleteTaskFutureProvider(taskId).future);
       } else {
-        success = await repository.completeTask(taskId);
+        success = await ref.read(completeTaskFutureProvider(taskId).future);
       }
 
       if (success && mounted) {
@@ -269,18 +293,23 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
   }
 
   void _showUnenrollDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeProvider);
+    final language = locale.languageCode;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Unenroll from Plan'),
+          title: Text(localizations.plan_unenroll),
           content: Text(
-            'Are you sure you want to unenroll from "${widget.plan.title}"?\n\nYour progress will be permanently lost and cannot be recovered.',
+            language == 'bo'
+                ? '${widget.plan.title} ${localizations.unenroll_confirmation}\n\n ${localizations.unenroll_message}'
+                : '${localizations.unenroll_confirmation} "${widget.plan.title}"?\n\n ${localizations.unenroll_message}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
+              child: Text(localizations.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -290,7 +319,7 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: const Text('Unenroll'),
+              child: Text(localizations.plan_unenroll),
             ),
           ],
         );
@@ -300,9 +329,9 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
 
   Future<void> _handleUnenroll() async {
     try {
-      final success = await ref
-          .read(userPlansRepositoryProvider)
-          .unenrollFromPlan(widget.plan.id);
+      final success = await ref.read(
+        userPlanUnsubscribeFutureProvider(widget.plan.id).future,
+      );
 
       if (success) {
         // Invalidate plans to refresh the list

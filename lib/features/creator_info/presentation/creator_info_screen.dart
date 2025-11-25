@@ -39,7 +39,7 @@ class CreatorInfoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final language = ref.watch(localeProvider);
-    final currentLanguage = language?.languageCode ?? 'en';
+    final currentLanguage = language.languageCode;
     final currentCredits = credits.firstWhere(
       (credit) => credit['language'] == currentLanguage,
       orElse: () => credits.firstWhere((credit) => credit['language'] == 'en'),

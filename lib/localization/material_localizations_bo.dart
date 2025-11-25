@@ -533,8 +533,7 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => throw UnimplementedError();
 
   @override
-  // TODO: implement timePickerInputHelpText
-  String get timePickerInputHelpText => throw UnimplementedError();
+  String get timePickerInputHelpText => 'དུས་ཚོད་འདེམ།';
 
   @override
   // TODO: implement timePickerMinuteModeAnnouncement
@@ -560,8 +559,11 @@ class _MaterialLocalizationsBoDelegate
   Future<MaterialLocalizations> load(Locale locale) async {
     final String localeName = intl.Intl.canonicalizedLocale(locale.toString());
     // Fallback to 'en' for intl DateFormat/NumberFormat if 'bo' is not supported
-    final String formatLocale = ['bo', 'bo_CN', 'bo_IN'].contains(localeName) ? 'en' : localeName;
-    final en = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+    final String formatLocale =
+        ['bo', 'bo_CN', 'bo_IN'].contains(localeName) ? 'en' : localeName;
+    final en = await GlobalMaterialLocalizations.delegate.load(
+      const Locale('en'),
+    );
     return SynchronousFuture<MaterialLocalizations>(
       MaterialLocalizationsBo(
         localeName: localeName,

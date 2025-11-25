@@ -15,23 +15,26 @@ class VersionSelectionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context)!;
     final textVersionResponse = ref.watch(textVersionFutureProvider(textId));
     final currentLanguage = ref.watch(textVersionLanguageProvider);
-    final numberOfVersions = textVersionResponse.value?.versions
-        .map((version) {
-          if (version.language == currentLanguage) {
-            return 1;
-          }
-          return 0;
-        })
-        .reduce((a, b) => a + b);
+    final numberOfVersions =
+        textVersionResponse.value?.versions
+            ?.map((version) {
+              if (version.language == currentLanguage) {
+                return 1;
+              }
+              return 0;
+            })
+            .reduce((a, b) => a + b) ??
+        0;
     final filteredVersions =
         textVersionResponse.value?.versions
-            .where((version) => version.language == currentLanguage)
+            ?.where((version) => version.language == currentLanguage)
             .toList();
     final uniqueLanguages =
         textVersionResponse.value?.versions
-            .map((version) => version.language)
+            ?.map((version) => version.language)
             .toSet()
             .toList();
 
@@ -72,7 +75,7 @@ class VersionSelectionScreen extends ConsumerWidget {
             _buildLanguageCard(uniqueLanguages ?? [], context, ref),
             // Versions Title
             Text(
-              '${getLanguageLabel(currentLanguage, context)} Versions ($numberOfVersions)',
+              '${localizations.text_toc_versions} ($numberOfVersions)',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
@@ -150,16 +153,15 @@ class VersionSelectionScreen extends ConsumerWidget {
       itemCount: versions.length,
       itemBuilder: (context, index) {
         final version = versions[index];
+        final versionId = version.id;
+        final contentId =
+            version.tableOfContents.isNotEmpty
+                ? version.tableOfContents[0]
+                : null;
+
         return ListTile(
           onTap: () {
-            context.pop();
-            context.replace(
-              '/texts/chapter',
-              extra: {
-                'textId': version.id,
-                'contentId': version.tableOfContents[0],
-              },
-            );
+            context.pop({'textId': versionId, 'contentId': contentId});
           },
           contentPadding: EdgeInsets.zero,
           title: Text(

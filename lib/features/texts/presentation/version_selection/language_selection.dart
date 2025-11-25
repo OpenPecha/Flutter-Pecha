@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/utils/get_language.dart';
 import 'package:flutter_pecha/features/texts/data/providers/text_version_language_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLanguage = ref.watch(textVersionLanguageProvider);
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -20,7 +22,10 @@ class LanguageSelectionScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         toolbarHeight: 50,
-        title: const Text('Select a language', style: TextStyle(fontSize: 20)),
+        title: Text(
+          localizations.select_language,
+          style: TextStyle(fontSize: 20),
+        ),
         centerTitle: true,
         scrolledUnderElevation: 0,
         bottom: PreferredSize(

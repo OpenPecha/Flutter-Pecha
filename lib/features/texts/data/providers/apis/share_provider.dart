@@ -14,13 +14,11 @@ final shareRepositoryProvider = Provider<ShareRepository>((ref) {
 // Share parameters model
 class ShareUrlParams {
   final String textId;
-  final String contentId;
   final String segmentId;
   final String language;
 
   const ShareUrlParams({
     required this.textId,
-    required this.contentId,
     required this.segmentId,
     required this.language,
   });
@@ -31,36 +29,28 @@ class ShareUrlParams {
       other is ShareUrlParams &&
           runtimeType == other.runtimeType &&
           textId == other.textId &&
-          contentId == other.contentId &&
           segmentId == other.segmentId &&
           language == other.language;
 
   @override
-  int get hashCode =>
-      textId.hashCode ^
-      contentId.hashCode ^
-      segmentId.hashCode ^
-      language.hashCode;
+  int get hashCode => textId.hashCode ^ segmentId.hashCode ^ language.hashCode;
 }
 
 // Share URL provider
-final shareUrlProvider = FutureProvider.family<String, ShareUrlParams>((
-  ref,
-  params,
-) async {
-  final repository = ref.watch(shareRepositoryProvider);
-  try {
-    final shortUrl = await repository.getShareUrl(
-      textId: params.textId,
-      contentId: params.contentId,
-      segmentId: params.segmentId,
-      language: params.language,
-    );
-    if (shortUrl.isEmpty) {
-      throw Exception('Failed to generate share URL');
-    }
-    return shortUrl;
-  } catch (e) {
-    throw Exception('Failed to generate share URL: $e');
-  }
-});
+final shareUrlProvider = FutureProvider.autoDispose
+    .family<String, ShareUrlParams>((ref, params) async {
+      final repository = ref.watch(shareRepositoryProvider);
+      try {
+        final shortUrl = await repository.getShareUrl(
+          textId: params.textId,
+          segmentId: params.segmentId,
+          language: params.language,
+        );
+        if (shortUrl.isEmpty) {
+          throw Exception('Failed to generate share URL');
+        }
+        return shortUrl;
+      } catch (e) {
+        throw Exception('Failed to generate share URL: $e');
+      }
+    });

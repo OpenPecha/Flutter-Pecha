@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/presentation/screens/plans_screen.dart';
-import 'package:flutter_pecha/features/texts/presentation/library_catalog_screen.dart';
+import 'package:flutter_pecha/features/texts/presentation/screens/collections/collections_screen.dart';
 import 'package:flutter_pecha/features/recitation/presentation/screens/recitations_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/home/presentation/home_screen.dart';
@@ -18,10 +18,9 @@ class SkeletonScreen extends ConsumerWidget {
 
   static final List<Widget> _pages = <Widget>[
     HomeScreen(), // Home tab
-    LibraryCatalogScreen(), // Texts tab
+    CollectionsScreen(), // Texts tab
     RecitationsScreen(), // Recitations tab
-    // PlanList(), // Plans tab
-    PlansScreen(),
+    PlansScreen(), // Practice Plans tab
     MoreScreen(), // Settings/More tab
   ];
 

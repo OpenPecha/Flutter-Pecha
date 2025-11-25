@@ -111,21 +111,17 @@ class MoreScreen extends ConsumerWidget {
                       : localizations.themeLight,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                subtitle: Text(
-                  isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
                 trailing: Switch(
                   value: isDarkMode,
                   onChanged:
                       (_) => ref.read(themeModeProvider.notifier).toggleTheme(),
-                  activeColor: Theme.of(context).colorScheme.primary,
+                  activeThumbColor: Theme.of(context).colorScheme.primary,
                   thumbColor: WidgetStateProperty.all(
                     themeMode == ThemeMode.dark ? Colors.white : Colors.black,
                   ),
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(height: 2),
               ListTile(
                 leading: Icon(
                   Icons.language,
@@ -158,11 +154,6 @@ class MoreScreen extends ConsumerWidget {
                 title: Text(
                   localizations.notification_settings,
                   style: Theme.of(context).textTheme.titleMedium,
-                ),
-                subtitle: Text(
-                  AppLocalizations.of(context)?.manageDailyReminders ??
-                      'Manage daily reminders',
-                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 onTap: () => context.push(NotificationSettingsScreen.routeName),
               ),
@@ -200,10 +191,6 @@ class MoreScreen extends ConsumerWidget {
                       color: Colors.red.shade600,
                       fontWeight: FontWeight.w500,
                     ),
-                  ),
-                  subtitle: Text(
-                    'Sign out of your account',
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   onTap: () => _showLogoutDialog(context, ref),
                 ),
@@ -253,6 +240,7 @@ class MoreScreen extends ConsumerWidget {
     WidgetRef ref,
     Locale? currentLocale,
   ) {
+    final localizations = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -278,7 +266,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  'Select Language',
+                  localizations.select_language,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -314,19 +302,20 @@ class MoreScreen extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             title: Text(
-              'Log Out',
+              localizations.logout,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             content: Text(
-              'Are you sure you want to log out?',
+              localizations.logout_confirmation,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
@@ -334,7 +323,7 @@ class MoreScreen extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(localizations.cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -344,7 +333,7 @@ class MoreScreen extends ConsumerWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.red.shade600,
                 ),
-                child: const Text('Logout'),
+                child: Text(localizations.logout),
               ),
             ],
           ),

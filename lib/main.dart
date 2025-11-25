@@ -34,7 +34,13 @@ void main() async {
     // Continue app initialization even if .env fails
   }
 
-  runApp(const ProviderScope(child: MyApp()));
+  // Create provider container for notification service access
+  final container = ProviderContainer();
+
+  // Set the container reference for notifications
+  NotificationService.setContainer(container);
+
+  runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
 }
 
 class MyApp extends ConsumerWidget {

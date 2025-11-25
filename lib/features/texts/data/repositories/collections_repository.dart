@@ -10,14 +10,10 @@ class CollectionsRepository {
   Future<CollectionsResponse> getCollections({
     String? parentId,
     String? language,
-    int skip = 0,
-    int limit = 10,
   }) {
     return remoteDatasource.fetchCollections(
       parentId: parentId,
       language: language,
-      skip: skip,
-      limit: limit,
     );
   }
 }

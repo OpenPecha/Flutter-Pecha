@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 /// Builds a list of TextSpan with highlighted matches for the search query
 ///
+/// [context] The BuildContext to access theme information
 /// [text] The full text to display
 /// [query] The search query to highlight
 /// [baseStyle] The base TextStyle for non-highlighted text
 ///
-/// Returns a list of TextSpan with highlighted matches using yellow background
+/// Returns a list of TextSpan with highlighted matches using theme-aware background color
 List<TextSpan> buildHighlightedText(
+  BuildContext context,
   String text,
   String query,
   TextStyle? baseStyle,
@@ -15,6 +17,13 @@ List<TextSpan> buildHighlightedText(
   if (query.isEmpty) {
     return [TextSpan(text: text, style: baseStyle)];
   }
+
+  // Choose highlight color based on theme brightness
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final highlightColor =
+      isDark
+          ? const Color(0xFFB8860B) // Dark goldenrod for dark theme
+          : const Color(0xFFFFF59D); // Amber 200 for light theme
 
   final List<TextSpan> spans = [];
   final lowerText = text.toLowerCase();
@@ -41,7 +50,7 @@ List<TextSpan> buildHighlightedText(
     spans.add(
       TextSpan(
         text: matchText,
-        style: baseStyle?.copyWith(backgroundColor: const Color(0xFFFFFF00)),
+        style: baseStyle?.copyWith(backgroundColor: highlightColor),
       ),
     );
 

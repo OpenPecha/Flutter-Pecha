@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/find_plan_tab.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/my_plan_tab.dart';
 import 'package:flutter_pecha/features/plans/presentation/search/plan_search_delegate.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PlansScreen extends ConsumerStatefulWidget {
@@ -31,6 +32,11 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final languageCode = locale.languageCode;
+    final fontFamily = getFontFamily(languageCode);
+    final fontSize = languageCode == 'bo' ? 22.0 : 18.0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -48,7 +54,10 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: PlanSearchDelegate(ref: ref),
+                      delegate: PlanSearchDelegate(
+                        ref: ref,
+                        hintText: localizations.search_plans,
+                      ),
                     );
                   },
                   icon: const Icon(Icons.search),
@@ -64,10 +73,15 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
             Tab(text: localizations.my_plans),
             Tab(text: localizations.browse_plans),
           ],
-          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          labelStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: fontSize,
+            fontFamily: fontFamily,
+          ),
           unselectedLabelStyle: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: fontSize,
+            fontFamily: fontFamily,
           ),
           labelColor: Theme.of(context).colorScheme.secondary,
           unselectedLabelColor:

@@ -99,3 +99,30 @@ final recitationSearchProvider = StateNotifierProvider<
     languageCode: locale.languageCode,
   );
 });
+
+// Mutation providers for recitations
+final saveRecitationProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  recitationId,
+) {
+  return ref.watch(recitationsRepositoryProvider).saveRecitation(recitationId);
+});
+
+final unsaveRecitationProvider = FutureProvider.autoDispose.family<bool, String>((
+  ref,
+  recitationId,
+) {
+  return ref.watch(recitationsRepositoryProvider).unsaveRecitation(recitationId);
+});
+
+final updateRecitationsOrderProvider = FutureProvider.autoDispose.family<bool, List<Map<String, dynamic>>>((
+  ref,
+  recitations,
+) {
+  return ref.watch(recitationsRepositoryProvider).updateRecitationsOrder(recitations);
+});
+
+// Toggle providers for showing/hiding second and third content segments
+// The actual content type depends on the language's content order
+final showSecondSegmentProvider = StateProvider<bool>((ref) => true);
+final showThirdSegmentProvider = StateProvider<bool>((ref) => true);

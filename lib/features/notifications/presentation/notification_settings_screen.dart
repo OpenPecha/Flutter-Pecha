@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/features/notifications/provider/notification_provider.dart';
+import 'package:flutter_pecha/features/notifications/provider/recitation_notification_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
-// import 'package:flutter_pecha/features/notifications/application/notification_provider.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -72,6 +73,67 @@ class _NotificationSettingsScreenState
     }
   }
 
+  // Recitation notification methods
+  Future<void> _toggleRecitationNotifications(
+    bool value,
+    TimeOfDay selectedTime,
+  ) async {
+    if (value) {
+      try {
+        await ref
+            .read(recitationNotificationProvider.notifier)
+            .enableRecitationReminder(
+              time: selectedTime,
+              title: 'Recitations Reminder',
+              body: 'Take a moment to pray',
+            );
+
+        _showSuccessMessage('Recitation reminders enabled');
+      } catch (e) {
+        _showErrorMessage(
+          'Failed to enable notifications. Please try again later.',
+        );
+      }
+    } else {
+      try {
+        await ref
+            .read(recitationNotificationProvider.notifier)
+            .disableRecitationReminder();
+        _showSuccessMessage('Recitation reminders disabled');
+      } catch (e) {
+        _showErrorMessage(
+          'Failed to disable notifications. Please try again later.',
+        );
+      }
+    }
+  }
+
+  Future<void> _updateRecitationReminderTime(TimeOfDay time) async {
+    try {
+      await ref
+          .read(recitationNotificationProvider.notifier)
+          .updateReminderTime(time);
+      _showSuccessMessage('Recitation reminder time updated');
+    } catch (e) {
+      _showErrorMessage(
+        'Failed to update reminder time. Please try again later.',
+      );
+    }
+  }
+
+  Future<void> _selectRecitationTime(
+    BuildContext context,
+    TimeOfDay selectedTime,
+  ) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (pickedTime != null && selectedTime != pickedTime) {
+      _updateRecitationReminderTime(pickedTime);
+    }
+  }
+
   void _showSuccessMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.green),
@@ -86,15 +148,27 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    // Watch the provider to rebuild when data changes
+    // Watch the providers to rebuild when data changes
     final state = ref.watch(notificationProvider);
+    final recitationState = ref.watch(recitationNotificationProvider);
 
     // Use provider state directly
     final isEnabled = state.isEnabled;
     final selectedTime =
-        state.reminderTime ?? const TimeOfDay(hour: 8, minute: 0);
+        state.reminderTime ?? const TimeOfDay(hour: 9, minute: 0);
     final hasPermission = state.hasPermission;
+
+    // Recitation state
+    final isRecitationEnabled = recitationState.isEnabled;
+    final recitationSelectedTime =
+        recitationState.reminderTime ?? const TimeOfDay(hour: 8, minute: 0);
+
     final localizations = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeProvider);
+    final languageCode = locale.languageCode;
+    final titleFontSize = languageCode == 'bo' ? 20.0 : 16.0;
+    final subtitleFontSize = languageCode == 'bo' ? 18.0 : 14.0;
+    final bodyFontSize = languageCode == 'bo' ? 16.0 : 12.0;
     return Scaffold(
       appBar: AppBar(title: Text(localizations.notification_settings)),
       body: Padding(
@@ -117,13 +191,9 @@ class _NotificationSettingsScreenState
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'Please turn on Notifications',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Please enable notifications to receive daily practice reminders.',
+                        localizations.notification_enable_message,
                         textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: subtitleFontSize),
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(
@@ -137,11 +207,13 @@ class _NotificationSettingsScreenState
                                 .read(notificationProvider.notifier)
                                 .checkPermissionStatus();
                           } else {
-                            // open app settings
                             openNotificationSettings();
                           }
                         },
-                        child: Text('Enable Notifications'),
+                        child: Text(
+                          localizations.enable_notification,
+                          style: TextStyle(fontSize: titleFontSize),
+                        ),
                       ),
                     ],
                   ),
@@ -160,17 +232,13 @@ class _NotificationSettingsScreenState
                       SwitchListTile(
                         activeTrackColor: Theme.of(context).colorScheme.primary,
                         inactiveTrackColor: Colors.grey,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 0,
                         ),
                         title: Text(
-                          'Daily Practice',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        subtitle: Text(
-                          "Get notification of your daily to practices",
-                          style: Theme.of(context).textTheme.bodySmall,
+                          localizations.notification_daily_practice,
+                          style: TextStyle(fontSize: titleFontSize),
                         ),
                         value: isEnabled,
                         onChanged: (v) => _toggleNotifications(v, selectedTime),
@@ -178,12 +246,12 @@ class _NotificationSettingsScreenState
                       if (isEnabled) ...[
                         ListTile(
                           title: Text(
-                            'Select Time',
-                            style: Theme.of(context).textTheme.titleSmall,
+                            localizations.notification_select_time,
+                            style: TextStyle(fontSize: subtitleFontSize),
                           ),
                           subtitle: Text(
                             selectedTime.format(context),
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: TextStyle(fontSize: bodyFontSize),
                           ),
                           trailing: const Icon(Icons.access_time),
                           onTap: () => _selectTime(context, selectedTime),
@@ -193,8 +261,56 @@ class _NotificationSettingsScreenState
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              Card(
+                color: Theme.of(context).cardColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SwitchListTile(
+                        activeTrackColor: Theme.of(context).colorScheme.primary,
+                        inactiveTrackColor: Colors.grey,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 0,
+                        ),
+                        title: Text(
+                          localizations.notification_daily_recitation,
+                          style: TextStyle(fontSize: titleFontSize),
+                        ),
+                        value: isRecitationEnabled,
+                        onChanged:
+                            (v) => _toggleRecitationNotifications(
+                              v,
+                              recitationSelectedTime,
+                            ),
+                      ),
+                      if (isRecitationEnabled) ...[
+                        ListTile(
+                          title: Text(
+                            localizations.notification_select_time,
+                            style: TextStyle(fontSize: subtitleFontSize),
+                          ),
+                          subtitle: Text(
+                            recitationSelectedTime.format(context),
+                            style: TextStyle(fontSize: bodyFontSize),
+                          ),
+                          trailing: const Icon(Icons.access_time),
+                          onTap:
+                              () => _selectRecitationTime(
+                                context,
+                                recitationSelectedTime,
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
             ],
-            if (state.isLoading) ...[
+            if (state.isLoading || recitationState.isLoading) ...[
               const SizedBox(height: 16),
               const Center(child: CircularProgressIndicator()),
             ],

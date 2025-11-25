@@ -185,9 +185,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
     ScaffoldMessengerState messenger,
   ) async {
     try {
-      await ref
-          .read(recitationsRepositoryProvider)
-          .updateRecitationsOrder(payload);
+      await ref.read(updateRecitationsOrderProvider(payload).future);
 
       _handleReorderSuccess();
     } catch (error) {
@@ -207,7 +205,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
 
     messenger.showSnackBar(
       const SnackBar(
-        content: Text('Failed to update order. Please try again.'),
+        content: Text('Unable to update order. Please try again.'),
         backgroundColor: Colors.red,
         duration: _errorSnackBarDuration,
       ),
@@ -217,7 +215,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
   /// Builds the empty state when no recitations are saved
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-
+    final localizations = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -229,15 +227,10 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No saved recitations',
+            localizations.recitations_no_saved,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.textTheme.bodySmall?.color,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Save recitations to access them here',
-            style: theme.textTheme.bodySmall,
           ),
         ],
       ),
@@ -264,7 +257,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Sign in to view your saved recitations',
+              localizations.recitations_login_prompt,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -274,7 +267,7 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
             ElevatedButton.icon(
               onPressed: () => LoginDrawer.show(context, ref),
               icon: const Icon(Icons.login),
-              label: const Text('Sign In'),
+              label: Text(localizations.sign_in),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/plans/data/providers/author_providers.dart';
@@ -19,10 +21,16 @@ class AuthorDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Fetch full author details using the author ID
     final authorDetails = ref.watch(authorByIdFutureProvider(authorId));
-
+    final language = ref.watch(localeProvider).languageCode;
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Author'),
+        centerTitle: false,
+        title: Text(
+          localizations.author,
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+        ),
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -214,13 +222,13 @@ class AuthorDetailScreen extends ConsumerWidget {
     return Consumer(
       builder: (context, ref, child) {
         final plansAsync = ref.watch(authorPlansFutureProvider(authorId));
-
+        final localizations = AppLocalizations.of(context)!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            const Text(
-              'Plans Created',
+            Text(
+              localizations.plans_created,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),

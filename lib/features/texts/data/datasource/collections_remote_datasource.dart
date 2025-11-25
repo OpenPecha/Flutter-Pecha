@@ -12,7 +12,7 @@ class CollectionsRemoteDatasource {
     String? parentId,
     String? language,
     int skip = 0,
-    int limit = 10,
+    int limit = 50,
   }) async {
     final uri = Uri.parse('${dotenv.env['BASE_API_URL']}/collections').replace(
       queryParameters: {

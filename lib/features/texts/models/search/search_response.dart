@@ -1,11 +1,18 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_pecha/features/texts/models/collections/collections_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/search.dart';
 import 'package:flutter_pecha/features/texts/models/search/source_result_item.dart';
 
 class SearchResponse {
   final Search search;
   final List<SourceResultItem>? sources;
+  final Pagination pagination;
 
-  SearchResponse({required this.search, required this.sources});
+  SearchResponse({
+    required this.search,
+    required this.sources,
+    required this.pagination,
+  });
 
   factory SearchResponse.fromJson(Map<String, dynamic> json) {
     return SearchResponse(
@@ -14,6 +21,7 @@ class SearchResponse {
           (json['sources'] as List)
               .map((e) => SourceResultItem.fromJson(e))
               .toList(),
+      pagination: Pagination.fromJson(json['pagination']),
     );
   }
 
@@ -21,6 +29,7 @@ class SearchResponse {
     return {
       'search': search.toJson(),
       'sources': sources?.map((e) => e.toJson()).toList(),
+      'pagination': pagination.toJson(),
     };
   }
 }

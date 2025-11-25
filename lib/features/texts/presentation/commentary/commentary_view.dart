@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/texts/data/providers/apis/segment_provider.dart';
 import 'package:flutter_pecha/features/texts/models/commentary/segment_commentary.dart';
-import 'package:flutter_pecha/shared/utils/helper_fucntions.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -172,8 +172,8 @@ class _CommentaryHeader extends StatelessWidget {
         bottom: _CommentaryViewConstants.cardSpacing,
       ),
       child: Text(
-        'All Commentary ($totalCount)',
-        style: Theme.of(context).textTheme.titleMedium,
+        'Commentary ($totalCount)',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       ),
     );
   }
@@ -198,36 +198,21 @@ class _CommentaryCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(
         bottom: _CommentaryViewConstants.cardSpacing,
-      ),
-      padding: const EdgeInsets.all(_CommentaryViewConstants.horizontalPadding),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(
-          _CommentaryViewConstants.cardBorderRadius,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: _CommentaryViewConstants.shadowAlpha,
-            ),
-            blurRadius: _CommentaryViewConstants.shadowBlurRadius,
-            offset: const Offset(0, _CommentaryViewConstants.shadowOffset),
-          ),
-        ],
+        top: _CommentaryViewConstants.cardSpacing,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _CommentaryTitle(
             title: commentary.title,
-            contentCount: commentary.content.length,
+            contentCount: commentary.segments.length,
             language: commentary.language,
           ),
           const SizedBox(height: _CommentaryViewConstants.contentSpacing),
           const _CommentaryDivider(),
           const SizedBox(height: _CommentaryViewConstants.contentSpacing),
           _CommentaryContentText(
-            content: commentary.content,
+            content: commentary.segments.map((e) => e.content).toList(),
             isExpanded: isExpanded,
             language: commentary.language,
           ),

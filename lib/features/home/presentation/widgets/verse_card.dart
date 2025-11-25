@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/services/background_image/background_image_service.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_card_constants.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_subtasks_dto.dart';
 import 'package:flutter_pecha/features/story_view/utils/story_dialog_helper.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class VerseCard extends ConsumerWidget {
@@ -21,10 +23,15 @@ class VerseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get consistent background image for this verse
+    final locale = ref.watch(localeProvider);
+    final languageCode = locale.languageCode;
+    final fontFamily = getFontFamily(languageCode);
+    final lineHeight = getLineHeight(languageCode);
+
     final backgroundImagePath = BackgroundImageService().getImageForContent(
       verseText,
     );
+
     return GestureDetector(
       onTap: () {
         showStoryDialog(
@@ -36,7 +43,7 @@ class VerseCard extends ConsumerWidget {
       child: Stack(
         children: [
           Hero(
-            tag: 'verse-image-$backgroundImagePath',
+            tag: backgroundImagePath,
             child: Container(
               width: double.infinity,
               height: VerseCardConstants.cardHeight,
@@ -60,10 +67,12 @@ class VerseCard extends ConsumerWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: VerseCardConstants.titleFontSize,
                         fontWeight: FontWeight.w400,
                         color: Colors.black87,
+                        fontFamily: fontFamily,
+                        height: lineHeight,
                       ),
                     ),
                     const Spacer(),
@@ -76,10 +85,12 @@ class VerseCard extends ConsumerWidget {
                           child: Text(
                             verseText,
                             textAlign: TextAlign.left,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: VerseCardConstants.verseFontSize,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
+                              fontFamily: fontFamily,
+                              height: lineHeight,
                             ),
                           ),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 class ChooseImage extends StatelessWidget {
@@ -6,6 +7,7 @@ class ChooseImage extends StatelessWidget {
   final String text;
 
   void showImageConfirmation(BuildContext context, String imagePath) {
+    final localizations = AppLocalizations.of(context)!;
     showModalBottomSheet(
       isDismissible: false,
       context: context,
@@ -50,8 +52,8 @@ class ChooseImage extends StatelessWidget {
                       extra: {'text': text, 'imagePath': imagePath},
                     );
                   },
-                  child: const Text(
-                    'Choose Image',
+                  child: Text(
+                    localizations.choose_image,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                 ),
@@ -66,6 +68,7 @@ class ChooseImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -77,7 +80,7 @@ class ChooseImage extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Choose Image',
+          localizations.choose_image,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -97,13 +100,9 @@ class ChooseImage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Create Image',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
                     Text(
-                      'Choose Your Background Image',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      localizations.choose_bg_image,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                   ],
                 ),

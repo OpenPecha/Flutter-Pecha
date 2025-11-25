@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
 import 'package:flutter_pecha/features/story_view/services/story_media_preloader.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:go_router/go_router.dart';
 
 class ActivityList extends StatelessWidget {
+  final String language;
   final List<UserTasksDto> tasks;
   final int today;
   final int totalDays;
@@ -17,6 +19,7 @@ class ActivityList extends StatelessWidget {
 
   const ActivityList({
     super.key,
+    required this.language,
     required this.tasks,
     required this.today,
     required this.totalDays,
@@ -28,12 +31,15 @@ class ActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sortedTasks = List<UserTasksDto>.from(tasks)
+      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: tasks.length,
+      itemCount: sortedTasks.length,
       itemBuilder: (context, index) {
-        final task = tasks[index];
+        final task = sortedTasks[index];
         final isCompleted = task.isCompleted;
         final taskId = task.id;
         return Container(
@@ -47,6 +53,7 @@ class ActivityList extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _TaskTitleButton(
+                  language: language,
                   title: task.title,
                   onTap: () => handleActivityTap(context, task),
                 ),
@@ -118,13 +125,20 @@ class _TaskCheckbox extends StatelessWidget {
 
 /// Task title button with ripple effect
 class _TaskTitleButton extends StatelessWidget {
-  const _TaskTitleButton({required this.title, required this.onTap});
+  const _TaskTitleButton({
+    required this.title,
+    required this.onTap,
+    required this.language,
+  });
 
   final String title;
   final VoidCallback onTap;
-
+  final String language;
   @override
   Widget build(BuildContext context) {
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -137,8 +151,10 @@ class _TaskTitleButton extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontFamily: fontFamily,
+                    height: lineHeight,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

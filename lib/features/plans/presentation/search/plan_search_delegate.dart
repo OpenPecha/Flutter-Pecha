@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_card.dart';
@@ -7,11 +8,12 @@ import 'package:go_router/go_router.dart';
 
 class PlanSearchDelegate extends SearchDelegate<PlansModel?> {
   final WidgetRef ref;
+  final String hintText;
 
-  PlanSearchDelegate({required this.ref});
+  PlanSearchDelegate({required this.ref, required this.hintText});
 
   @override
-  String get searchFieldLabel => 'Search plans...';
+  String get searchFieldLabel => hintText;
 
   @override
   TextStyle? get searchFieldStyle => const TextStyle(fontSize: 14);
@@ -98,13 +100,13 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(planSearchProvider);
-
+    final localizations = AppLocalizations.of(context)!;
     // Empty query state
     if (searchState.query.trim().isEmpty) {
       return _EmptySearchState(
         icon: Icons.search,
-        title: 'Search for plans',
-        subtitle: 'Enter keywords to find practice plans',
+        title: localizations.search_for_plans,
+        // subtitle: 'Enter keywords to find practice plans',
       );
     }
 
@@ -125,8 +127,8 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
     if (searchState.results.isEmpty && !searchState.isLoading) {
       return _EmptySearchState(
         icon: Icons.search_off,
-        title: 'No plans found',
-        subtitle: 'Try different keywords or filters',
+        title: localizations.no_plans_found,
+        // subtitle: 'Try different keywords or filters',
       );
     }
 
@@ -168,12 +170,12 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
 class _EmptySearchState extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
 
   const _EmptySearchState({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
   });
 
   @override
@@ -193,14 +195,14 @@ class _EmptySearchState extends StatelessWidget {
               ).textTheme.titleMedium?.copyWith(color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
+            if (subtitle != null)
+              Text(
+                subtitle!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
           ],
         ),
       ),
