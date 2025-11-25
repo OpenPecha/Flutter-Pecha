@@ -106,7 +106,6 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
       return _EmptySearchState(
         icon: Icons.search,
         title: localizations.search_for_plans,
-        // subtitle: 'Enter keywords to find practice plans',
       );
     }
 
@@ -128,7 +127,6 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
       return _EmptySearchState(
         icon: Icons.search_off,
         title: localizations.no_plans_found,
-        // subtitle: 'Try different keywords or filters',
       );
     }
 

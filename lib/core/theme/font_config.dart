@@ -49,6 +49,13 @@ class AppFontConfig {
       contentFontIsGoogle: false,
     ),
 
+    'BO': LanguageFontConfig(
+      systemFont: 'Noto Serif Tibetan',
+      contentFont: 'Atisha',
+      systemFontIsGoogle: true,
+      contentFontIsGoogle: false,
+    ),
+
     // English - Google Inter for UI, EB Garamond for content
     'en': LanguageFontConfig(
       systemFont: 'Inter',
@@ -57,8 +64,22 @@ class AppFontConfig {
       contentFontIsGoogle: true,
     ),
 
+    'EN': LanguageFontConfig(
+      systemFont: 'Inter',
+      contentFont: 'EB Garamond',
+      systemFontIsGoogle: true,
+      contentFontIsGoogle: true,
+    ),
+
     // Chinese - Google Inter for UI, EB Garamond for content
     'zh': LanguageFontConfig(
+      systemFont: 'Inter',
+      contentFont: 'EB Garamond',
+      systemFontIsGoogle: true,
+      contentFontIsGoogle: true,
+    ),
+
+    'ZH': LanguageFontConfig(
       systemFont: 'Inter',
       contentFont: 'EB Garamond',
       systemFontIsGoogle: true,

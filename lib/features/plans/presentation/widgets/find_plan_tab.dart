@@ -100,14 +100,9 @@ class _FindPlansTabState extends ConsumerState<FindPlansTab> {
               '/plans/info',
               extra: {'plan': plan, 'author': author},
             );
-            //  Handle the result from plan_info screen
             if (result == true && context.mounted) {
-              // change tab to my plans
+              // Change tab to my plans after successful enrollment
               widget.controller.animateTo(0);
-              // context.push(
-              //   '/plans/details',
-              //   extra: {'plan': plan, 'selectedDay': 1, 'startDate': startDate},
-              // );
             }
           },
         );

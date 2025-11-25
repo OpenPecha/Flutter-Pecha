@@ -118,7 +118,6 @@ Widget _buildPlanInfo(BuildContext context, UserPlansModel plan) {
           fontWeight: FontWeight.w500,
         ),
       ),
-      const SizedBox(height: 8),
       Text(
         plan.title,
         style: context.languageTitleStyle(planLanguage),

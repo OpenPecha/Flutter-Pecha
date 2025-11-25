@@ -4,9 +4,9 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
+import 'package:flutter_pecha/features/plans/models/plan_days_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'widgets/plan_cover_image.dart';
 import 'widgets/day_carousel.dart';
@@ -29,6 +29,7 @@ class PlanDetails extends ConsumerStatefulWidget {
 
 class _PlanDetailsState extends ConsumerState<PlanDetails> {
   late int selectedDay;
+  final Set<String> _togglingTaskIds = {}; // Track tasks being toggled
 
   @override
   void initState() {
@@ -38,158 +39,157 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final language = widget.plan.language;
+    final localizations = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: _buildAppBar(context, language, localizations),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            PlanCoverImage(imageUrl: widget.plan.imageUrl ?? ''),
+            _buildDayCarouselSection(language),
+            _buildDayContentSection(context, language),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(
+    BuildContext context,
+    String language,
+    AppLocalizations localizations,
+  ) {
+    return AppBar(
+      title: Text(widget.plan.title, style: TextStyle(fontSize: 20)),
+      elevation: 0,
+      actions: [
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) {
+            if (value == 'unenroll') {
+              _showUnenrollDialog(context);
+            }
+          },
+          itemBuilder:
+              (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: 'unenroll',
+                  child: Row(
+                    children: [
+                      Icon(Icons.exit_to_app, size: 20),
+                      SizedBox(width: 12),
+                      Text(localizations.plan_unenroll),
+                    ],
+                  ),
+                ),
+              ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDayCarouselSection(String language) {
     final planDays = ref.watch(planDaysByPlanIdFutureProvider(widget.plan.id));
+
+    return planDays.when(
+      data: (days) {
+        if (days.isEmpty) {
+          return _buildEmptyDayCarouselState(context);
+        }
+        return _buildDayCarouselWithStatus(language, days);
+      },
+      loading: () => _buildDayCarouselLoadingPlaceholder(),
+      error: (error, stackTrace) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildDayCarouselWithStatus(
+    String language,
+    List<PlanDaysModel> days,
+  ) {
     final dayCompletionStatus = ref.watch(
       userPlanDaysCompletionStatusProvider(widget.plan.id),
     );
 
+    return dayCompletionStatus.when(
+      data:
+          (completionStatus) =>
+              _buildDayCarousel(language, days, completionStatus),
+      loading: () => _buildDayCarousel(language, days, null),
+      error: (error, stackTrace) => _buildDayCarousel(language, days, null),
+    );
+  }
+
+  Widget _buildDayCarousel(
+    String language,
+    List<PlanDaysModel> days,
+    Map<int, bool>? completionStatus,
+  ) {
+    return DayCarousel(
+      language: language,
+      days: days,
+      selectedDay: selectedDay,
+      startDate: widget.startDate,
+      dayCompletionStatus: completionStatus,
+      onDaySelected: (day) {
+        setState(() {
+          selectedDay = day;
+        });
+      },
+    );
+  }
+
+  Widget _buildDayContentSection(BuildContext context, String language) {
     final userPlanDayContent = ref.watch(
       userPlanDayContentFutureProvider(
         PlanDaysParams(planId: widget.plan.id, dayNumber: selectedDay),
       ),
     );
-    final language = widget.plan.language;
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
-    final localizations = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.plan.title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontFamily: fontFamily,
-            height: lineHeight,
-            fontSize: fontSize,
-          ),
-        ),
-        elevation: 0,
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              if (value == 'unenroll') {
-                _showUnenrollDialog(context);
-              }
-            },
-            itemBuilder:
-                (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'unenroll',
-                    child: Row(
-                      children: [
-                        Icon(Icons.exit_to_app, size: 20),
-                        SizedBox(width: 12),
-                        Text(localizations.plan_unenroll),
-                      ],
-                    ),
-                  ),
-                ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDayTitle(context, language, selectedDay),
+          userPlanDayContent.when(
+            data:
+                (dayContent) => ActivityList(
+                  language: language,
+                  tasks: dayContent.tasks,
+                  today: selectedDay,
+                  totalDays: dayContent.tasks.length,
+                  planId: widget.plan.id,
+                  dayNumber: selectedDay,
+                  onActivityToggled:
+                      (taskId) => _handleTaskToggle(taskId, dayContent.tasks),
+                ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => _buildDayContentError(),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            PlanCoverImage(imageUrl: widget.plan.imageUrl ?? ''),
-            planDays.when(
-              data: (days) {
-                if (days.isEmpty) {
-                  return _buildEmptyDayCarouselState(context);
-                }
-                return dayCompletionStatus.when(
-                  data:
-                      (completionStatus) => DayCarousel(
-                        language: language,
-                        days: days,
-                        selectedDay: selectedDay,
-                        startDate: widget.startDate,
-                        dayCompletionStatus: completionStatus,
-                        onDaySelected: (day) {
-                          setState(() {
-                            selectedDay = day;
-                          });
-                        },
-                      ),
-                  loading:
-                      () => DayCarousel(
-                        language: language,
-                        days: days,
-                        selectedDay: selectedDay,
-                        startDate: widget.startDate,
-                        onDaySelected: (day) {
-                          setState(() {
-                            selectedDay = day;
-                          });
-                        },
-                      ),
-                  error:
-                      (error, stackTrace) => DayCarousel(
-                        language: language,
-                        days: days,
-                        selectedDay: selectedDay,
-                        startDate: widget.startDate,
-                        onDaySelected: (day) {
-                          setState(() {
-                            selectedDay = day;
-                          });
-                        },
-                      ),
-                );
-              },
-              loading: () => _buildDayCarouselLoadingPlaceholder(),
-              error: (error, stackTrace) => const SizedBox.shrink(),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDayTitle(language, selectedDay),
-                  const SizedBox(height: 8),
-                  userPlanDayContent.when(
-                    data:
-                        (dayContent) => ActivityList(
-                          language: language,
-                          tasks: dayContent.tasks,
-                          today: selectedDay,
-                          totalDays: dayContent.tasks.length,
-                          planId: widget.plan.id,
-                          dayNumber: selectedDay,
-                          onActivityToggled:
-                              (taskId) =>
-                                  _handleTaskToggle(taskId, dayContent.tasks),
-                        ),
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error:
-                        (error, stackTrace) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Unable to load the tasks for the day',
-                              style: TextStyle(color: Colors.red[600]),
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: () {
-                                ref.invalidate(
-                                  userPlanDayContentFutureProvider,
-                                );
-                              },
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    );
+  }
+
+  Widget _buildDayContentError() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Unable to load the tasks for the day',
+          style: TextStyle(color: Colors.red[600]),
         ),
-      ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: () {
+            ref.invalidate(userPlanDayContentFutureProvider);
+          },
+          child: const Text('Retry'),
+        ),
+      ],
     );
   }
 
@@ -202,17 +202,13 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     );
   }
 
-  Widget _buildDayTitle(String language, int day) {
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
+  Widget _buildDayTitle(BuildContext context, String language, int day) {
     return Text(
       "Day $day of ${widget.plan.totalDays}",
       style: TextStyle(
-        fontSize: fontSize,
+        fontSize: 18,
         fontWeight: FontWeight.bold,
-        fontFamily: fontFamily,
-        height: lineHeight,
+        fontFamily: "Inter",
       ),
     );
   }
@@ -264,7 +260,23 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     String taskId,
     List<UserTasksDto> tasks,
   ) async {
-    final task = tasks.firstWhere((t) => t.id == taskId);
+    // Prevent race condition: Check if task is already being toggled
+    if (_togglingTaskIds.contains(taskId)) {
+      return;
+    }
+
+    final task = tasks.firstWhere(
+      (t) => t.id == taskId,
+      orElse: () {
+        _showErrorSnackbar('Task not found');
+        return tasks.first; // Safe fallback - will be caught below
+      },
+    );
+
+    // Mark task as being toggled
+    setState(() {
+      _togglingTaskIds.add(taskId);
+    });
 
     try {
       bool success;
@@ -290,6 +302,13 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
       if (mounted) {
         _showErrorSnackbar('Error: $e');
       }
+    } finally {
+      // Always remove task from toggling set
+      if (mounted) {
+        setState(() {
+          _togglingTaskIds.remove(taskId);
+        });
+      }
     }
   }
 
@@ -297,20 +316,25 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
     final localizations = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
     final language = locale.languageCode;
+    final fontSize = language == 'bo' || language == 'BO' ? 16.0 : 14.0;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(localizations.plan_unenroll),
           content: Text(
-            language == 'bo'
+            language == 'bo' || language == 'BO'
                 ? '${widget.plan.title} ${localizations.unenroll_confirmation}\n\n ${localizations.unenroll_message}'
                 : '${localizations.unenroll_confirmation} "${widget.plan.title}"?\n\n ${localizations.unenroll_message}',
+            style: TextStyle(fontSize: fontSize),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(localizations.cancel),
+              child: Text(
+                localizations.cancel,
+                style: TextStyle(fontSize: fontSize),
+              ),
             ),
             FilledButton(
               onPressed: () {
@@ -320,7 +344,10 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: Text(localizations.plan_unenroll),
+              child: Text(
+                localizations.plan_unenroll,
+                style: TextStyle(fontSize: fontSize),
+              ),
             ),
           ],
         );

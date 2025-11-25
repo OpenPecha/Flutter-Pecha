@@ -124,13 +124,10 @@ class UserPlansRemoteDatasource {
 
   /// Fetch completion status for all days in a plan (bulk endpoint)
   /// Returns a map where key is dayNumber and value is isCompleted status
-  ///
-  /// API Endpoint: GET /users/me/plans/{planId}/days/completion-status
-  /// Expected Response: { "1": true, "2": false, "3": true, ... }
   Future<Map<int, bool>> fetchPlanDaysCompletionStatus(String planId) async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/users/me/plans/$planId/days/completion-status'),
+        Uri.parse('$baseUrl/users/me/plans/$planId/days/completion_status'),
       );
 
       if (response.statusCode == 200) {
