@@ -86,6 +86,7 @@
   "search_plans": "Search plans...",
   "search_for_plans": "Search for plans",
   "no_plans_found": "No plans found",
+  "no_days_available": "No days found",
 
   "notification_turn_on": "Please turn on Notifications",
   "notification_enable_message": "Enable notifications to receive daily practice and recitation reminders.",

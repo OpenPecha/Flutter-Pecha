@@ -610,6 +610,12 @@ abstract class AppLocalizations {
   /// **'No plans found'**
   String get no_plans_found;
 
+  /// No description provided for @no_days_available.
+  ///
+  /// In en, this message translates to:
+  /// **'No days found'**
+  String get no_days_available;
+
   /// No description provided for @notification_turn_on.
   ///
   /// In en, this message translates to:

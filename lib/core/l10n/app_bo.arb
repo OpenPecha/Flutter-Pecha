@@ -85,7 +85,8 @@
   "practice_plan": "ཉམས་ལེན་འཆར་གཞི་ཡིས་ཁྱེད་རང་ཉམས་ལེན་ལ་རྒྱུན་མཐུད་ནས་གནས་པར་རོགས་རམ་བྱེད་ཀྱི་ཡོད། ང་ཚོར་འདེམས་རྒྱུའི་འཆར་གཞི་སྣ་ཚོགས་ཡོད་པ་དང་དུས་ཡུན་མི་འདྲ་བ་ཡོད།",
   "search_plans": "ཉམས་ལེན་འཚོལ།",
   "search_for_plans": "ཉམས་ལེན་འཚོལ་ཞིབ་བྱེད།",
-  "no_plans_found": "No plans found",
+  "no_plans_found": "རྙེད་མ་བྱུང།",
+  "no_days_available": "རྙེད་མ་བྱུང།",
 
   "notification_turn_on": "Please turn on Notifications",
   "notification_enable_message": "ཉིན་རེའི་ཉམས་ལེན་དང་ཞལ་འདོན་གསལ་བརྡ་ཡོང་ཆེད་གསལ་བརྡ་སྒོ་འབྱེད་གནང་རོགས།",

@@ -299,11 +299,14 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
 
   void _invalidateProviderIfNeeded() {
     if (widget.planId != null && widget.dayNumber != null) {
+      // Invalidate day content to refresh task completion status
       ref.invalidate(
         userPlanDayContentFutureProvider(
           PlanDaysParams(planId: widget.planId!, dayNumber: widget.dayNumber!),
         ),
       );
+      // Invalidate day completion status to refresh checkmarks in carousel
+      ref.invalidate(userPlanDaysCompletionStatusProvider(widget.planId!));
     }
   }
 

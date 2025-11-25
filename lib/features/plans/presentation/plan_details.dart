@@ -28,7 +28,7 @@ class PlanDetails extends ConsumerStatefulWidget {
 }
 
 class _PlanDetailsState extends ConsumerState<PlanDetails> {
-  late int selectedDay; // Day 1 is selected by default
+  late int selectedDay;
 
   @override
   void initState() {
@@ -194,10 +194,11 @@ class _PlanDetailsState extends ConsumerState<PlanDetails> {
   }
 
   Widget _buildEmptyDayCarouselState(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Container(
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 12),
-      child: Center(child: Text('No days available')),
+      child: Center(child: Text(localizations.no_days_available)),
     );
   }
 

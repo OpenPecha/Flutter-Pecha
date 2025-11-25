@@ -268,7 +268,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get search_for_plans => 'ཉམས་ལེན་འཚོལ་ཞིབ་བྱེད།';
 
   @override
-  String get no_plans_found => 'No plans found';
+  String get no_plans_found => 'རྙེད་མ་བྱུང།';
+
+  @override
+  String get no_days_available => 'རྙེད་མ་བྱུང།';
 
   @override
   String get notification_turn_on => 'Please turn on Notifications';

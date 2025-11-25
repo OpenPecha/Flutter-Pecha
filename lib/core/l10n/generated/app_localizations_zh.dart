@@ -271,6 +271,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get no_plans_found => 'No plans found';
 
   @override
+  String get no_days_available => 'No days found';
+
+  @override
   String get notification_turn_on => 'Please turn on Notifications';
 
   @override
