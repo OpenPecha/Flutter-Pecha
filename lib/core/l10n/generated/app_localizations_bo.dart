@@ -224,7 +224,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get start_plan => 'ཉམས་ལེན་འགོ་འཛུགས།';
 
   @override
-  String get continue_plan => 'Continue Plan';
+  String get continue_plan => 'ཉམས་ལེན་མུ་མཐུད་';
 
   @override
   String get tibetan => 'བོད་ཡིག';

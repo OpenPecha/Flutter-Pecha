@@ -246,11 +246,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       StoryItem(
                         TextStory(
                           text: subtask.content,
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.none,
-                          ),
                           roundedTop: true,
                           roundedBottom: true,
                         ),
@@ -292,11 +287,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   StoryItem(
                     TextStory(
                       text: 'No content available',
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.none,
-                      ),
                       roundedTop: true,
                       roundedBottom: true,
                     ),
@@ -352,6 +342,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 subtasks,
                 controller,
                 nextCard,
+                null,
               );
               // Ensure we have at least one item
               if (items.isEmpty) {
@@ -388,6 +379,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           Map<String, dynamic>? nextCard;
           String? planId;
           int? dayNumber;
+          String? language;
           if (extra is Map<String, dynamic>) {
             final subtasksValue = extra['subtasks'];
             if (subtasksValue is! List<UserSubtasksDto>) {
@@ -399,11 +391,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             nextCard = extra['nextCard'] as Map<String, dynamic>?;
             planId = extra['planId'] as String?;
             dayNumber = extra['dayNumber'] as int?;
+            language = extra['language'] as String?;
           } else if (extra is List<UserSubtasksDto>) {
             subtasks = extra;
             nextCard = null;
             planId = null;
             dayNumber = null;
+            language = null;
           } else {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
@@ -426,6 +420,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 subtasks,
                 controller,
                 nextCard,
+                language,
               );
               // Ensure we have at least one item
               if (items.isEmpty) {
@@ -513,10 +508,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           } else {
             throw Exception('Invalid extra type for /texts/works');
           }
-          return WorksScreen(
-            collection: collection,
-            colorIndex: colorIndex,
-          );
+          return WorksScreen(collection: collection, colorIndex: colorIndex);
         },
       ),
       GoRoute(

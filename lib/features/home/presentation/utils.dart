@@ -22,11 +22,6 @@ List<Widget> createWidgetList(
         widgetList.add(
           TextStory(
             text: planItem.content!,
-            textStyle: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              decoration: TextDecoration.none,
-            ),
             roundedTop: true,
             roundedBottom: true,
           ),

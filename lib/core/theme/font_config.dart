@@ -85,6 +85,13 @@ class AppFontConfig {
       contentFontIsGoogle: true,
     ),
 
+    'tibphono': LanguageFontConfig(
+      systemFont: 'Inter',
+      contentFont: 'EB Garamond',
+      systemFontIsGoogle: true,
+      contentFontIsGoogle: true,
+    ),
+
     // Chinese - Google Inter for UI, EB Garamond for content
     'zh': LanguageFontConfig(
       systemFont: 'Inter',

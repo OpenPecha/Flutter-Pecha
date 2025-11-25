@@ -55,7 +55,7 @@ class ActivityList extends StatelessWidget {
                 child: _TaskTitleButton(
                   language: language,
                   title: task.title,
-                  onTap: () => handleActivityTap(context, task),
+                  onTap: () => handleActivityTap(context, task, language),
                 ),
               ),
             ],
@@ -65,15 +65,19 @@ class ActivityList extends StatelessWidget {
     );
   }
 
-  void handleActivityTap(BuildContext context, UserTasksDto task) {
+  void handleActivityTap(
+    BuildContext context,
+    UserTasksDto task,
+    String language,
+  ) {
     if (task.subTasks.isNotEmpty) {
-      // Navigate immediately for best perceived performance
       context.push(
         '/home/plan-stories-presenter',
         extra: {
           'subtasks': task.subTasks,
           if (planId != null) 'planId': planId,
           if (dayNumber != null) 'dayNumber': dayNumber,
+          'language': language,
         },
       );
 

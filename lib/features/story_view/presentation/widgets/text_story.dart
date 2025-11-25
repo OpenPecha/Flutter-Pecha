@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/services/background_image/background_image_service.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
 class TextStory extends StatelessWidget {
   final String text;
-  final TextStyle? textStyle;
   final EdgeInsetsGeometry? padding;
   final bool roundedTop;
   final bool roundedBottom;
   final String? backgroundImagePath;
-
+  final String? language;
   const TextStory({
     super.key,
     required this.text,
-    this.textStyle,
     this.padding,
     this.roundedTop = false,
     this.roundedBottom = false,
     this.backgroundImagePath,
+    this.language,
   });
 
   @override
@@ -29,6 +29,12 @@ class TextStory extends StatelessWidget {
     // Get screen height to calculate 80% constraint
     final screenHeight = MediaQuery.of(context).size.height;
     final maxTextHeight = screenHeight * 0.8;
+    final effectiveLanguage =
+        language ?? Localizations.localeOf(context).languageCode;
+    final fontFamily = getFontFamily(effectiveLanguage);
+    final lineHeight = getLineHeight(effectiveLanguage);
+    final fontSize =
+        effectiveLanguage == "bo" || effectiveLanguage == "BO" ? 28.0 : 24.0;
 
     return Container(
       width: double.infinity,
@@ -60,11 +66,12 @@ class TextStory extends StatelessWidget {
                 text,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 18,
-                  height: 1.5,
+                  fontSize: fontSize,
+                  height: lineHeight,
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.none,
+                  fontFamily: fontFamily,
                 ),
               ),
             ),

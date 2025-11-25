@@ -12,6 +12,7 @@ List<StoryItem> createFlutterStoryItems(
   List<UserSubtasksDto> subtasks,
   FlutterStoryController? controller,
   Map<String, dynamic>? nextCard,
+  String? language,
 ) {
   final List<StoryItem> storyItems = [];
   const durationForText = Duration(seconds: 15);
@@ -33,13 +34,9 @@ List<StoryItem> createFlutterStoryItems(
             customWidget: (controller, audioPlayer) {
               return TextStory(
                 text: subtask.content,
-                textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  decoration: TextDecoration.none,
-                ),
                 roundedTop: true,
                 roundedBottom: true,
+                language: language,
               );
             },
           ),

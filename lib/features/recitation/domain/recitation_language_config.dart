@@ -28,13 +28,14 @@ class RecitationLanguageConfig {
   /// - English users: English translation + Tibetan recitation + English transliteration
   /// - Chinese users: Chinese + English translations + English transliteration
   static RecitationContentParams getContentParams(
-    String languageCode,
+    String language,
     String textId,
   ) {
-    switch (languageCode) {
+    switch (language) {
       case tibetan:
         return RecitationContentParams(
           textId: textId,
+          language: language,
           recitations: [tibetan],
           adaptations: [tibetanAdaptation],
           translations: [english],
@@ -43,6 +44,7 @@ class RecitationLanguageConfig {
       case english:
         return RecitationContentParams(
           textId: textId,
+          language: language,
           translations: [english],
           recitations: [tibetan],
           transliterations: [tibetanTransliteration],
@@ -51,6 +53,7 @@ class RecitationLanguageConfig {
       case chinese:
         return RecitationContentParams(
           textId: textId,
+          language: language,
           translations: [chinese],
           recitations: [tibetan],
           transliterations: [tibetanTransliteration],
@@ -60,6 +63,7 @@ class RecitationLanguageConfig {
         // Default configuration for unsupported languages
         return RecitationContentParams(
           textId: textId,
+          language: language,
           recitations: [tibetan],
           translations: [english],
         );
