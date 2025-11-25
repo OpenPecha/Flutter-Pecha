@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/features/plans/exceptions/plan_exceptions.dart';
 import 'package:flutter_pecha/features/plans/models/plan_progress_model.dart';
 import 'package:flutter_pecha/features/plans/models/response/user_plan_day_detail_response.dart';
 import 'package:flutter_pecha/features/plans/models/response/user_plan_list_response_model.dart';
@@ -63,15 +65,27 @@ class UserPlansRemoteDatasource {
       if (response.statusCode == 204) {
         return true;
       } else {
-        // Throw exception with status code and response body
-        final errorMessage = 'HTTP ${response.statusCode}: ${response.body}';
-        debugPrint('Failed to enroll user to plan: $errorMessage');
-        throw Exception('Failed to enroll in plan: $errorMessage');
+        throw PlanApiException(
+          'Failed to subscribe to plan',
+          statusCode: response.statusCode,
+          responseBody: response.body,
+        );
       }
-    } catch (e) {
-      if (e is Exception) rethrow;
-      debugPrint('Failed to enroll user to plan: $e');
-      throw Exception('Failed to enroll user to plan: $e');
+    } on SocketException catch (e, stackTrace) {
+      throw PlanApiException(
+        'Network error while subscribing to plan',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    } on PlanApiException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw PlanOperationException(
+        'subscribeToPlan',
+        'Unexpected error during subscription',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
