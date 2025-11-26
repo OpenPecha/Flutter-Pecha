@@ -38,7 +38,7 @@ class _NotificationSettingsScreenState
                   AppLocalizations.of(
                     context,
                   )?.dailyPracticeNotificationTitle ??
-                  'Daily Practice Reminder',
+                  'Daily Practice Reminder.',
               body:
                   AppLocalizations.of(context)?.timeForDailyPractice ??
                   'It\'s time for your daily practice.',
@@ -84,8 +84,12 @@ class _NotificationSettingsScreenState
             .read(recitationNotificationProvider.notifier)
             .enableRecitationReminder(
               time: selectedTime,
-              title: 'Recitations Reminder',
-              body: 'Take a moment to pray',
+              title:
+                  AppLocalizations.of(context)?.recitation_reminder ??
+                  'Recitation Reminder.',
+              body:
+                  AppLocalizations.of(context)?.moment_to_pray ??
+                  'Take a moment to pray.',
             );
 
         _showSuccessMessage('Recitation reminders enabled');

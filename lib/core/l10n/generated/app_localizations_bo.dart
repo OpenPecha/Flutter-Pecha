@@ -188,25 +188,44 @@ class AppLocalizationsBo extends AppLocalizations {
   String get loading => 'ལེན་བཞིན་པ་་་';
 
   @override
-  String get choose_image => 'Choose Image';
+  String get choose_image => 'པར་འདེམས།';
 
   @override
-  String get choose_bg_image => 'Choose Your Background Image';
+  String get choose_bg_image => 'རྒྱབས་ངོས་ཀྱི་པར་རིས་འདེམས།';
 
   @override
-  String get create_image => 'Create Image';
+  String get create_image => 'པར་རིས་བཟོས།';
 
   @override
-  String get save => 'Save';
+  String get save => 'ཉར་ཚགས།';
 
   @override
-  String get done => 'བྱས་ཟིན།';
+  String get done => 'འགྲིག';
 
   @override
-  String get download_image => 'Download Image';
+  String get customise_message =>
+      'ཡིག་གཟུགས་སྒྲིག་བཀོད་བྱེད་པར་སྒྲིག་བཀོད་ཀྱི་མཚོན་རྟགས་ལ་གནོན།';
+
+  @override
+  String get download_image => 'པར་རིས་ཕབ་ལེན་བྱེད།';
 
   @override
   String get no_images_available => 'འདྲ་པར་མི་འདུག';
+
+  @override
+  String get customise_text => 'ཡི་གེ་སྒྲིག་བཀོད་བྱེད།';
+
+  @override
+  String get text_size => 'ཡིག་གཟུགས་ཆེ་ཆུང་།';
+
+  @override
+  String get text_color => 'ཡིག་གཟུགས་མཚོན་ཁྲ།';
+
+  @override
+  String get text_shadow => 'ཡི་གེའི་གྲིབ་གཟུགས།';
+
+  @override
+  String get apply => 'ཉར་ཚགས།';
 
   @override
   String get practice_nav_title => 'ཉིན་རེ་ཉམས་ལེན།';
@@ -249,6 +268,12 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
+
+  @override
+  String get recitation_reminder => 'Recitations Reminder.';
+
+  @override
+  String get moment_to_pray => 'Take a moment to pray.';
 
   @override
   String get plan_unenroll => 'ཉམས་ལེན་ནས་ཕྱིར་ཐོན།';
@@ -296,13 +321,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get reminderTime => 'Reminder Time';
 
   @override
-  String get selectTime => 'Select Time';
+  String get selectTime => 'དུས་ཚོད་འདེམ།';
 
   @override
   String get notification_daily_recitation => 'ཞལ་འདོན་དྲན་བརྡ།';
-
-  @override
-  String get manageDailyReminders => 'Manage daily reminders';
 
   @override
   String get text_noContent => 'སྡེ་ཚན་དེའི་ནང་དཔེ་ཆ་མིན་འདུག';
@@ -329,7 +351,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_search_for => 'ཞལ་འདོན་འཚོལ་ཞིབ་བྱེད།';
 
   @override
-  String get recitations_no_found => 'No recitations found';
+  String get recitations_no_found => 'རྙེད་མ་བྱུང།';
 
   @override
   String get recitations_saved => 'Recitation saved';
@@ -338,16 +360,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_unsaved => 'Recitation removed';
 
   @override
-  String get recitations_no_content => 'No recitations available';
+  String get recitations_no_content => 'རྙེད་མ་བྱུང།';
 
   @override
   String get recitations_no_saved => 'ཞལ་འདོན་ཉར་ཚག་བྱས་མིན་འདུག';
-
-  @override
-  String get recitations_save_prompt => 'Save recitations to access them here';
-
-  @override
-  String get recitations_login_required => 'Login Required';
 
   @override
   String get recitations_login_prompt =>
@@ -360,13 +376,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_unsave => 'Unsave recitation';
 
   @override
-  String get recitations_phonetic => 'Phonetic';
-
-  @override
   String get recitations_translation => 'Translation';
 
   @override
-  String get no_availabel => 'Not available';
+  String get no_available => 'རྙེད་མ་བྱུང།';
 
   @override
   String get recitations_no_data_message =>

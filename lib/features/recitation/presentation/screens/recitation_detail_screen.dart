@@ -374,7 +374,7 @@ class _RecitationDetailScreenState
             Icon(Icons.menu_book_outlined, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
-              localizations.no_availabel,
+              localizations.no_available,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(color: Colors.grey[700]),

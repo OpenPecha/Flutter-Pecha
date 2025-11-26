@@ -478,6 +478,12 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get done;
 
+  /// No description provided for @customise_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the customize icon to adjust text style'**
+  String get customise_message;
+
   /// No description provided for @download_image.
   ///
   /// In en, this message translates to:
@@ -489,6 +495,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No images available'**
   String get no_images_available;
+
+  /// No description provided for @customise_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Customise Text'**
+  String get customise_text;
+
+  /// No description provided for @text_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Size'**
+  String get text_size;
+
+  /// No description provided for @text_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Color'**
+  String get text_color;
+
+  /// No description provided for @text_shadow.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Shadow'**
+  String get text_shadow;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
 
   /// No description provided for @practice_nav_title.
   ///
@@ -573,6 +609,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It\'s time for your daily practice.'**
   String get timeForDailyPractice;
+
+  /// No description provided for @recitation_reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitations Reminder.'**
+  String get recitation_reminder;
+
+  /// No description provided for @moment_to_pray.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a moment to pray.'**
+  String get moment_to_pray;
 
   /// No description provided for @plan_unenroll.
   ///
@@ -670,12 +718,6 @@ abstract class AppLocalizations {
   /// **'Daily Recitation'**
   String get notification_daily_recitation;
 
-  /// No description provided for @manageDailyReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage daily reminders'**
-  String get manageDailyReminders;
-
   /// No description provided for @text_noContent.
   ///
   /// In en, this message translates to:
@@ -754,18 +796,6 @@ abstract class AppLocalizations {
   /// **'No saved recitations'**
   String get recitations_no_saved;
 
-  /// No description provided for @recitations_save_prompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Save recitations to access them here'**
-  String get recitations_save_prompt;
-
-  /// No description provided for @recitations_login_required.
-  ///
-  /// In en, this message translates to:
-  /// **'Login Required'**
-  String get recitations_login_required;
-
   /// No description provided for @recitations_login_prompt.
   ///
   /// In en, this message translates to:
@@ -784,23 +814,17 @@ abstract class AppLocalizations {
   /// **'Unsave recitation'**
   String get recitations_unsave;
 
-  /// No description provided for @recitations_phonetic.
-  ///
-  /// In en, this message translates to:
-  /// **'Phonetic'**
-  String get recitations_phonetic;
-
   /// No description provided for @recitations_translation.
   ///
   /// In en, this message translates to:
   /// **'Translation'**
   String get recitations_translation;
 
-  /// No description provided for @no_availabel.
+  /// No description provided for @no_available.
   ///
   /// In en, this message translates to:
   /// **'Not available'**
-  String get no_availabel;
+  String get no_available;
 
   /// No description provided for @recitations_no_data_message.
   ///

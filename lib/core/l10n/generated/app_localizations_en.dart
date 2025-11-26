@@ -203,10 +203,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done => 'Done';
 
   @override
+  String get customise_message => 'Tap the customize icon to adjust text style';
+
+  @override
   String get download_image => 'Download Image';
 
   @override
   String get no_images_available => 'No images available';
+
+  @override
+  String get customise_text => 'Customise Text';
+
+  @override
+  String get text_size => 'Text Size';
+
+  @override
+  String get text_color => 'Text Color';
+
+  @override
+  String get text_shadow => 'Text Shadow';
+
+  @override
+  String get apply => 'Apply';
 
   @override
   String get practice_nav_title => 'Practice';
@@ -249,6 +267,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
+
+  @override
+  String get recitation_reminder => 'Recitations Reminder.';
+
+  @override
+  String get moment_to_pray => 'Take a moment to pray.';
 
   @override
   String get plan_unenroll => 'Unenroll';
@@ -302,9 +326,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notification_daily_recitation => 'Daily Recitation';
 
   @override
-  String get manageDailyReminders => 'Manage daily reminders';
-
-  @override
   String get text_noContent => 'No texts available in the selected language';
 
   @override
@@ -344,12 +365,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recitations_no_saved => 'No saved recitations';
 
   @override
-  String get recitations_save_prompt => 'Save recitations to access them here';
-
-  @override
-  String get recitations_login_required => 'Login Required';
-
-  @override
   String get recitations_login_prompt =>
       'Sign in to view your saved recitations';
 
@@ -360,13 +375,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recitations_unsave => 'Unsave recitation';
 
   @override
-  String get recitations_phonetic => 'Phonetic';
-
-  @override
   String get recitations_translation => 'Translation';
 
   @override
-  String get no_availabel => 'Not available';
+  String get no_available => 'Not available';
 
   @override
   String get recitations_no_data_message =>

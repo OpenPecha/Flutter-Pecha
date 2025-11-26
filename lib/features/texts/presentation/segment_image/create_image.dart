@@ -505,7 +505,7 @@ class _CreateImageState extends State<CreateImage> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                'Tap the customize icon to adjust text style, then save when ready',
+                localizations.customise_message,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
@@ -564,6 +564,7 @@ class _CustomizationSheetState extends State<_CustomizationSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(top: 100),
       decoration: BoxDecoration(
@@ -590,7 +591,7 @@ class _CustomizationSheetState extends State<_CustomizationSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Customize Text',
+                  localizations.customise_text,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -601,7 +602,7 @@ class _CustomizationSheetState extends State<_CustomizationSheet> {
 
                 // Text size slider
                 Text(
-                  'Text Size: ${_textSize.toInt()}',
+                  '${localizations.text_size}: ${_textSize.toInt()}',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -640,7 +641,7 @@ class _CustomizationSheetState extends State<_CustomizationSheet> {
 
                 // Text color selector
                 Text(
-                  'Text Color',
+                  localizations.text_color,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -695,8 +696,7 @@ class _CustomizationSheetState extends State<_CustomizationSheet> {
 
                 // Shadow toggle
                 SwitchListTile(
-                  title: const Text('Text Shadow'),
-                  subtitle: const Text('Adds shadow for better readability'),
+                  title: Text(localizations.text_shadow),
                   value: _hasShadow,
                   onChanged: (value) {
                     setState(() {
@@ -725,8 +725,8 @@ class _CustomizationSheetState extends State<_CustomizationSheet> {
                       widget.onApply(_textSize, _textColor, _hasShadow);
                       Navigator.pop(context);
                     },
-                    child: const Text(
-                      'Apply',
+                    child: Text(
+                      localizations.apply,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,

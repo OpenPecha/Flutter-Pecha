@@ -203,10 +203,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get done => 'Done';
 
   @override
+  String get customise_message => 'Tap the customize icon to adjust text style';
+
+  @override
   String get download_image => 'Download Image';
 
   @override
   String get no_images_available => '沒有可用的圖片';
+
+  @override
+  String get customise_text => 'Customise Text';
+
+  @override
+  String get text_size => 'Text Size';
+
+  @override
+  String get text_color => 'Text Color';
+
+  @override
+  String get text_shadow => 'Text Shadow';
+
+  @override
+  String get apply => 'Apply';
 
   @override
   String get practice_nav_title => '修持計劃';
@@ -249,6 +267,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
+
+  @override
+  String get recitation_reminder => 'Recitations Reminder.';
+
+  @override
+  String get moment_to_pray => 'Take a moment to pray.';
 
   @override
   String get plan_unenroll => 'Unenroll from Plan';
@@ -302,9 +326,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notification_daily_recitation => 'Daily Recitation';
 
   @override
-  String get manageDailyReminders => 'Manage daily reminders';
-
-  @override
   String get text_noContent => 'No texts available in the selected language';
 
   @override
@@ -344,12 +365,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_no_saved => '沒有已保存的持誦';
 
   @override
-  String get recitations_save_prompt => '保存持誦以便在此訪問';
-
-  @override
-  String get recitations_login_required => '需要登錄';
-
-  @override
   String get recitations_login_prompt => '請登錄以查看您保存的持誦';
 
   @override
@@ -359,13 +374,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_unsave => '從已保存中移除';
 
   @override
-  String get recitations_phonetic => '讀音';
-
-  @override
   String get recitations_translation => '翻譯';
 
   @override
-  String get no_availabel => 'Not available';
+  String get no_available => 'Not available';
 
   @override
   String get recitations_no_data_message => '此持誦的內容目前不可用。\n請稍後再查看。';
