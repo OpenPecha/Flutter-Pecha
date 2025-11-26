@@ -397,6 +397,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_hide_adaptation => 'བསྒྱུར་བཅོས་སྦས།';
 
   @override
+  String get next_recitation => 'རྗེས་མ།';
+
+  @override
   String get settings_appearance => 'རྣམ་པ།';
 
   @override

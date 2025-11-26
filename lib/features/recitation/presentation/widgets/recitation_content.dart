@@ -6,18 +6,20 @@ import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
 class RecitationContent extends StatelessWidget {
   final RecitationContentModel content;
-
   final List<ContentType> contentOrder;
+  final ScrollController? scrollController;
 
   const RecitationContent({
     super.key,
     required this.content,
     required this.contentOrder,
+    this.scrollController,
   });
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: scrollController,
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +36,8 @@ class RecitationContent extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 32),
+          // Extra bottom padding to ensure floating button doesn't cover text
+          const SizedBox(height: 100),
         ],
       ),
     );

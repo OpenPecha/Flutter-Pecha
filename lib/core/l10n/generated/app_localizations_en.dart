@@ -397,6 +397,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recitations_hide_adaptation => 'Hide adaptation';
 
   @override
+  String get next_recitation => 'Next';
+
+  @override
   String get settings_appearance => 'Appearance';
 
   @override

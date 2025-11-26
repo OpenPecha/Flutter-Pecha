@@ -668,12 +668,39 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/recitations/detail',
         builder: (context, state) {
           final extra = state.extra;
-          if (extra == null || extra is! RecitationModel) {
+
+          // Support both single recitation and recitation with list
+          if (extra == null) {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
             );
           }
-          return RecitationDetailScreen(recitation: extra);
+
+          if (extra is RecitationModel) {
+            // Single recitation mode (from search, browse tab, etc.)
+            return RecitationDetailScreen(recitation: extra);
+          } else if (extra is Map<String, dynamic>) {
+            // Navigation with list mode (from My Recitations tab)
+            final recitation = extra['recitation'] as RecitationModel?;
+            final allRecitations = extra['allRecitations'] as List<RecitationModel>?;
+            final currentIndex = extra['currentIndex'] as int?;
+
+            if (recitation == null) {
+              return const Scaffold(
+                body: Center(child: Text('Missing required parameters')),
+              );
+            }
+
+            return RecitationDetailScreen(
+              recitation: recitation,
+              allRecitations: allRecitations,
+              currentIndex: currentIndex,
+            );
+          }
+
+          return const Scaffold(
+            body: Center(child: Text('Invalid parameters')),
+          );
         },
       ),
     ],

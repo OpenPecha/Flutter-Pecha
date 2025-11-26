@@ -395,6 +395,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_hide_adaptation => '隱藏改編';
 
   @override
+  String get next_recitation => 'Next';
+
+  @override
   String get settings_appearance => '外觀';
 
   @override

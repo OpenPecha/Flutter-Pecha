@@ -856,6 +856,12 @@ abstract class AppLocalizations {
   /// **'Hide adaptation'**
   String get recitations_hide_adaptation;
 
+  /// No description provided for @next_recitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next_recitation;
+
   /// No description provided for @settings_appearance.
   ///
   /// In en, this message translates to:
