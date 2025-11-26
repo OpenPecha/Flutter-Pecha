@@ -124,7 +124,7 @@
   "recitations_unsave": "Unsave recitation",
   "recitations_translation": "Translation",
   "no_available": "Not available",
-  "recitations_no_data_message": "The content for this recitation is currently not available.\nPlease check back later.",
+  "recitations_no_data_message": "No Recitation Found.",
   "recitations_show_translation": "Show translation",
   "recitations_hide_translation": "Hide translation",
   "recitations_show_transliteration": "Show transliteration",

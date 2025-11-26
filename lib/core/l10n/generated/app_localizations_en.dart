@@ -381,8 +381,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_available => 'Not available';
 
   @override
-  String get recitations_no_data_message =>
-      'The content for this recitation is currently not available.\nPlease check back later.';
+  String get recitations_no_data_message => 'No Recitation Found.';
 
   @override
   String get recitations_show_translation => 'Show translation';

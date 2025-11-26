@@ -28,20 +28,15 @@ class _NotificationSettingsScreenState
   }
 
   Future<void> _toggleNotifications(bool value, TimeOfDay selectedTime) async {
+    final localizations = AppLocalizations.of(context)!;
     if (value) {
       try {
         await ref
             .read(notificationProvider.notifier)
             .enableDailyReminder(
               time: selectedTime,
-              title:
-                  AppLocalizations.of(
-                    context,
-                  )?.dailyPracticeNotificationTitle ??
-                  'Daily Practice Reminder.',
-              body:
-                  AppLocalizations.of(context)?.timeForDailyPractice ??
-                  'It\'s time for your daily practice.',
+              title: localizations.dailyPracticeNotificationTitle,
+              body: localizations.timeForDailyPractice,
             );
 
         _showSuccessMessage('Daily reminders enabled');
@@ -78,18 +73,15 @@ class _NotificationSettingsScreenState
     bool value,
     TimeOfDay selectedTime,
   ) async {
+    final localizations = AppLocalizations.of(context)!;
     if (value) {
       try {
         await ref
             .read(recitationNotificationProvider.notifier)
             .enableRecitationReminder(
               time: selectedTime,
-              title:
-                  AppLocalizations.of(context)?.recitation_reminder ??
-                  'Recitation Reminder.',
-              body:
-                  AppLocalizations.of(context)?.moment_to_pray ??
-                  'Take a moment to pray.',
+              title: localizations.recitation_reminder,
+              body: localizations.moment_to_pray,
             );
 
         _showSuccessMessage('Recitation reminders enabled');

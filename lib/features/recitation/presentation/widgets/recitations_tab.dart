@@ -89,6 +89,7 @@ class RecitationsTab extends ConsumerWidget {
     bool isSaved,
     WidgetRef ref,
   ) {
+    final localizations = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -115,8 +116,8 @@ class RecitationsTab extends ConsumerWidget {
                   if (context.mounted) Navigator.pop(context);
                   if (context.mounted && result) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Recitation saved'),
+                      SnackBar(
+                        content: Text(localizations.recitations_saved),
                         backgroundColor: Colors.green,
                         duration: Duration(seconds: 2),
                       ),

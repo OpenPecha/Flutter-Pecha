@@ -829,7 +829,7 @@ abstract class AppLocalizations {
   /// No description provided for @recitations_no_data_message.
   ///
   /// In en, this message translates to:
-  /// **'The content for this recitation is currently not available.\nPlease check back later.'**
+  /// **'No Recitation Found.'**
   String get recitations_no_data_message;
 
   /// No description provided for @recitations_show_translation.
