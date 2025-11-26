@@ -9,6 +9,16 @@
 ## flutter_local_notifications
 -keep class com.dexterous.** { *; }
 
+## Auth0
+-keep class com.auth0.** { *; }
+-keep class com.auth0.android.** { *; }
+-keep class com.auth0.android.provider.** { *; }
+-keep class com.auth0.android.authentication.** { *; }
+-keep class com.auth0.android.management.** { *; }
+-keep class com.auth0.android.result.** { *; }
+-keep class com.auth0.android.request.** { *; }
+-dontwarn com.auth0.**
+
 ## Google Play Core (referenced by Flutter for deferred components)
 -dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
 -dontwarn com.google.android.play.core.splitinstall.SplitInstallException
