@@ -20,6 +20,8 @@ class ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(icon, size: 24),
             const SizedBox(height: 4),

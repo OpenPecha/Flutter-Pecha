@@ -200,6 +200,7 @@ class _RecitationDetailScreenState
                 content: content,
                 contentOrder: filteredContentOrder,
                 scrollController: _scrollController,
+                language: effectiveLanguageCode,
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),

@@ -8,12 +8,14 @@ class RecitationContent extends StatelessWidget {
   final RecitationContentModel content;
   final List<ContentType> contentOrder;
   final ScrollController? scrollController;
+  final String language;
 
   const RecitationContent({
     super.key,
     required this.content,
     required this.contentOrder,
     this.scrollController,
+    required this.language,
   });
 
   @override
@@ -44,14 +46,12 @@ class RecitationContent extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final languageCode = locale.languageCode;
-    final fontFamily = getFontFamily(languageCode);
-    final fontSize = languageCode == 'bo' ? 26.0 : 22.0;
+    final fontFamily = getFontFamily(language);
+    final fontSize = language == 'bo' ? 26.0 : 22.0;
 
     return Text(
       content.title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+      style: TextStyle(
         fontWeight: FontWeight.bold,
         fontFamily: fontFamily,
         fontSize: fontSize,
