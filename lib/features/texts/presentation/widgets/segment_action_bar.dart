@@ -126,13 +126,9 @@ class SegmentActionBar extends ConsumerWidget {
                   onTap: () {
                     final textWithLineBreaks = text.replaceAll("<br>", "\n");
                     final plainText = htmlToPlainText(textWithLineBreaks);
-                    final cutText =
-                        plainText.length > 180
-                            ? plainText.substring(0, 180)
-                            : plainText;
                     context.push(
                       '/texts/segment_image/choose_image',
-                      extra: cutText,
+                      extra: plainText,
                     );
                     onClose();
                   },

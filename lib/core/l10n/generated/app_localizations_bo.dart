@@ -206,6 +206,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get download_image => 'Download Image';
 
   @override
+  String get no_images_available => 'འདྲ་པར་མི་འདུག';
+
+  @override
   String get practice_nav_title => 'ཉིན་རེ་ཉམས་ལེན།';
 
   @override

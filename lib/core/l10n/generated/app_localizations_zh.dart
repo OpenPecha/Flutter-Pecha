@@ -206,6 +206,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get download_image => 'Download Image';
 
   @override
+  String get no_images_available => '沒有可用的圖片';
+
+  @override
   String get practice_nav_title => '修持計劃';
 
   @override

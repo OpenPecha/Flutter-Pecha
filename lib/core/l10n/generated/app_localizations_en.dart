@@ -206,6 +206,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get download_image => 'Download Image';
 
   @override
+  String get no_images_available => 'No images available';
+
+  @override
   String get practice_nav_title => 'Practice';
 
   @override

@@ -484,6 +484,12 @@ abstract class AppLocalizations {
   /// **'Download Image'**
   String get download_image;
 
+  /// No description provided for @no_images_available.
+  ///
+  /// In en, this message translates to:
+  /// **'No images available'**
+  String get no_images_available;
+
   /// No description provided for @practice_nav_title.
   ///
   /// In en, this message translates to:
