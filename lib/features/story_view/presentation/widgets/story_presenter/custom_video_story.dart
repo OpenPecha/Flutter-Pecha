@@ -20,6 +20,7 @@ class CustomVideoStory extends StatefulWidget {
 class _CustomVideoStoryState extends State<CustomVideoStory> {
   bool _isVideoReady = false;
   bool _isVideoPlaying = false;
+  bool _hasVideoEnded = false;
   yt.YoutubePlayerController? _youtubeController;
 
   @override
@@ -61,6 +62,7 @@ class _CustomVideoStoryState extends State<CustomVideoStory> {
   @override
   void dispose() {
     widget.controller.removeListener(_onStoryControllerChanged);
+    _youtubeController?.removeListener(_onYoutubePlayerStateChange);
     super.dispose();
   }
 
@@ -95,6 +97,19 @@ class _CustomVideoStoryState extends State<CustomVideoStory> {
 
   void _setYoutubeController(yt.YoutubePlayerController controller) {
     _youtubeController = controller;
+    // Listen for video end state
+    _youtubeController!.addListener(_onYoutubePlayerStateChange);
+  }
+
+  void _onYoutubePlayerStateChange() {
+    if (_youtubeController == null || !mounted) return;
+
+    final playerState = _youtubeController!.value.playerState;
+    if (playerState == yt.PlayerState.ended && !_hasVideoEnded) {
+      _hasVideoEnded = true;
+      // Video ended - move to next story or complete
+      widget.controller.next();
+    }
   }
 
   void handleTap() {
