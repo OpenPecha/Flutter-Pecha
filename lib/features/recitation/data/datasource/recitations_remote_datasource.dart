@@ -82,7 +82,9 @@ class RecitationsRemoteDatasource {
             )
             .toList();
       } else {
-        _logger.error('Failed to fetch saved recitations: ${response.statusCode}');
+        _logger.error(
+          'Failed to fetch saved recitations: ${response.statusCode}',
+        );
         throw Exception(
           'Failed to fetch saved recitations: ${response.statusCode}',
         );
@@ -125,7 +127,9 @@ class RecitationsRemoteDatasource {
         body: json.encode(requestBody),
       );
 
-      _logger.debug('Recitation Content Response Status: ${response.statusCode}');
+      _logger.debug(
+        'Recitation Content Response Status: ${response.statusCode}',
+      );
       if (response.statusCode != 200) {
         _logger.debug('Recitation Content Response Body: ${response.body}');
       }
@@ -133,7 +137,6 @@ class RecitationsRemoteDatasource {
       if (response.statusCode == 200) {
         final decoded = utf8.decode(response.bodyBytes);
         final data = json.decode(decoded) as Map<String, dynamic>;
-        _logger.debug('Recitation Content Response Data: $data');
         return RecitationContentModel.fromJson(data);
       } else {
         _logger.error(
@@ -205,7 +208,9 @@ class RecitationsRemoteDatasource {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
       } else {
-        _logger.error('Failed to update recitations order: ${response.statusCode}');
+        _logger.error(
+          'Failed to update recitations order: ${response.statusCode}',
+        );
         _logger.debug('Response body: ${response.body}');
         return false;
       }

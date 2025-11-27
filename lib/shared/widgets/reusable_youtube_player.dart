@@ -29,6 +29,7 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
   late YoutubePlayerController _controller;
   bool _hasCalledOnReady = false;
   bool? _previousIsPlaying;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -56,13 +57,16 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
   }
 
   void _onControllerUpdate() {
+    // Guard against callbacks after disposal
+    if (_isDisposed || !mounted) return;
+
     // Handle onReady callback
     if (_controller.value.isReady &&
         !_hasCalledOnReady &&
         widget.onReady != null) {
       _hasCalledOnReady = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted && !_isDisposed) {
           widget.onReady!();
         }
       });
@@ -75,7 +79,7 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
       if (isPlaying != _previousIsPlaying) {
         _previousIsPlaying = isPlaying;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
+          if (mounted && !_isDisposed) {
             widget.onStateChanged!(isPlaying);
           }
         });
@@ -85,19 +89,35 @@ class _ReusableYoutubePlayerState extends State<ReusableYoutubePlayer> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _isDisposed = true;
+    _controller.removeListener(_onControllerUpdate);
+    // Pause video before disposing to stop WebView activity
+    try {
+      _controller.pause();
+    } catch (_) {
+      // Ignore errors if controller is already in bad state
+    }
+    // Wrap dispose in try-catch to handle InAppWebView disposal race condition
+    try {
+      _controller.dispose();
+    } catch (_) {
+      // Ignore disposal errors from InAppWebView race condition
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Don't render if disposed
+    if (_isDisposed) return const SizedBox.shrink();
+
     return AspectRatio(
       aspectRatio: widget.aspectRatio,
       child: YoutubePlayer(
         controller: _controller,
         aspectRatio: widget.aspectRatio,
         showVideoProgressIndicator: false, // Hide progress indicator
-        onReady: widget.onReady,
+        // Don't pass onReady here - handled in _onControllerUpdate with mounted checks
       ),
     );
   }
