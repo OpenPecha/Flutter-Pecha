@@ -41,6 +41,7 @@
         <activity 
             android:name="com.auth0.android.provider.RedirectActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:permission="android.permission.INTERNET"
             >
             <intent-filter android:autoVerify="true">
@@ -49,7 +50,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:host="${auth0Domain}"
-                    android:scheme="https" />
+                    android:scheme="https"
+                    android:pathPrefix="/android/${applicationId}/callback" />
             </intent-filter>
 
             <intent-filter>
