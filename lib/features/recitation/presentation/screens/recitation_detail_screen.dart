@@ -42,11 +42,28 @@ class _RecitationDetailScreenState
   final ScrollController _scrollController = ScrollController();
   bool _showNextButton = false;
   bool _isNavigating = false;
+  bool _hasCheckedScroll = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant RecitationDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset state when navigating to a different recitation
+    if (oldWidget.currentIndex != widget.currentIndex ||
+        oldWidget.recitation.textId != widget.recitation.textId) {
+      _isNavigating = false;
+      _showNextButton = false;
+      _hasCheckedScroll = false;
+      // Scroll to top for new recitation
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+    }
   }
 
   @override
@@ -65,7 +82,6 @@ class _RecitationDetailScreenState
     bool shouldShow;
 
     if (maxScroll == 0) {
-      // Content doesn't need scrolling - show button if there's a next recitation
       shouldShow = _hasNextRecitation();
     } else if (maxScroll < 200) {
       shouldShow = currentScroll >= maxScroll * 0.7 && _hasNextRecitation();
@@ -122,7 +138,9 @@ class _RecitationDetailScreenState
     final isContentLoaded =
         contentAsync.hasValue && !contentAsync.value!.isEmpty;
 
-    if (isContentLoaded && !_isNavigating) {
+    // Trigger scroll check once when content loads
+    if (isContentLoaded && !_isNavigating && !_hasCheckedScroll) {
+      _hasCheckedScroll = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _onScroll();
       });
@@ -136,9 +154,7 @@ class _RecitationDetailScreenState
           onPressed: () => _handleBackNavigation(context),
         ),
         actions: [
-          // Only show toggle icons when content is loaded
           if (isContentLoaded) ...[
-            // Second segment toggle
             if (secondContentType != null)
               IconButton(
                 onPressed:
@@ -158,7 +174,6 @@ class _RecitationDetailScreenState
                   localizations,
                 ),
               ),
-            // Third segment toggle
             if (thirdContentType != null)
               IconButton(
                 onPressed:
@@ -177,7 +192,6 @@ class _RecitationDetailScreenState
                 ),
               ),
           ],
-          // Save/unsave toggle (always visible)
           IconButton(
             onPressed: () => _handleSaveToggle(context, ref, isSaved),
             icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
