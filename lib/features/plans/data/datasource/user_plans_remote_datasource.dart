@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/features/plans/exceptions/plan_exceptions.dart';
 import 'package:flutter_pecha/features/plans/models/plan_progress_model.dart';
 import 'package:flutter_pecha/features/plans/models/response/user_plan_day_detail_response.dart';
+import 'package:flutter_pecha/features/plans/models/response/user_plan_day_completion_status_response.dart';
 import 'package:flutter_pecha/features/plans/models/response/user_plan_list_response_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -147,17 +148,10 @@ class UserPlansRemoteDatasource {
       if (response.statusCode == 200) {
         final decoded = utf8.decode(response.bodyBytes);
         final jsonData = json.decode(decoded) as Map<String, dynamic>;
+        final completionResponse =
+            UserPlanDayCompletionStatusResponse.fromJson(jsonData);
 
-        // Convert string keys to int keys
-        final Map<int, bool> completionStatus = {};
-        jsonData.forEach((key, value) {
-          final dayNumber = int.tryParse(key);
-          if (dayNumber != null) {
-            completionStatus[dayNumber] = value as bool;
-          }
-        });
-
-        return completionStatus;
+        return completionResponse.toCompletionStatusMap();
       } else {
         debugPrint(
           'Failed to load plan days completion status: ${response.statusCode}',
