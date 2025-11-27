@@ -23,6 +23,10 @@ class DayCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Convert to local time first, then extract date-only to avoid
+    // timezone-related date shifts when the time component crosses midnight
+    final localStartDate = DateUtils.dateOnly(startDate.toLocal());
+
     return Container(
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -41,8 +45,7 @@ class DayCarousel extends StatelessWidget {
         itemCount: days.length,
         itemBuilder: (context, index, realIndex) {
           final day = days[index];
-          final dayDate = startDate.add(Duration(days: day.dayNumber - 1));
-          //convert to 02 Jan type format
+          final dayDate = localStartDate.add(Duration(days: day.dayNumber - 1));
           final dayDateString = DateFormat('dd MMM').format(dayDate);
           final isSelected = selectedDay == day.dayNumber;
           final isCompleted = dayCompletionStatus?[day.dayNumber] ?? false;
@@ -93,7 +96,7 @@ class DayCarousel extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight:
-                              startDate == dayDate
+                              day.dayNumber == 1
                                   ? FontWeight.bold
                                   : FontWeight.normal,
                           fontFamily: "Inter",
