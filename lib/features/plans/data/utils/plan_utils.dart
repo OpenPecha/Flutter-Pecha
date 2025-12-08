@@ -1,13 +1,16 @@
 class PlanUtils {
   static int calculateSelectedDay(DateTime startedAt, int totalDays) {
     final today = DateTime.now();
+    // Convert startedAt to local time before extracting date components
+    // (startedAt may be UTC from backend)
+    final localStartedAt = startedAt.toLocal();
 
     // Normalize dates to midnight to compare only date parts (ignore time)
     final normalizedToday = DateTime(today.year, today.month, today.day);
     final normalizedStartedAt = DateTime(
-      startedAt.year,
-      startedAt.month,
-      startedAt.day,
+      localStartedAt.year,
+      localStartedAt.month,
+      localStartedAt.day,
     );
 
     // If today equals startedAt (date-wise), return day 1

@@ -39,14 +39,14 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  Future<void> logout() async {
-    //   try {
-    //     // Try to logout on server first
-    //     await remoteDataSource.logout(allDevices: false);
-    //   } catch (e) {
-    //     // Continue with local logout even if server logout fails
-    //     logger.warning('Server logout failed: $e');
-    //   }
-  }
+  // @override
+  // Future<void> logout() async {
+  //   try {
+  //     // Try to logout on server first
+  //     await remoteDataSource.logout(allDevices: false);
+  //   } catch (e) {
+  //     // Continue with local logout even if server logout fails
+  //     logger.warning('Server logout failed: $e');
+  //   }
+  // }
 }

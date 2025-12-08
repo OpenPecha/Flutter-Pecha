@@ -21,6 +21,7 @@ class VideoStory extends StatefulWidget {
 class _VideoStoryState extends State<VideoStory> {
   bool _isVideoReady = false;
   bool _isVideoPlaying = false;
+  bool _isDisposed = false;
   StreamSubscription<PlaybackState>? _storySubscription;
   YoutubePlayerController? _youtubeController;
 
@@ -36,6 +37,7 @@ class _VideoStoryState extends State<VideoStory> {
     _storySubscription = widget.controller.playbackNotifier.listen((
       playbackState,
     ) {
+      if (_isDisposed || !mounted) return;
       if (_youtubeController != null && _isVideoReady) {
         switch (playbackState) {
           case PlaybackState.play:
@@ -57,36 +59,45 @@ class _VideoStoryState extends State<VideoStory> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _storySubscription?.cancel();
     super.dispose();
   }
 
   void _onVideoReady() {
+    if (_isDisposed || !mounted) return;
     setState(() {
       _isVideoReady = true;
     });
     // Resume story progress when video is ready and auto-play
-    widget.controller.play();
+    if (mounted && !_isDisposed) {
+      widget.controller.play();
+    }
   }
 
   void _onVideoStateChanged(bool isPlaying) {
+    if (_isDisposed || !mounted) return;
     setState(() {
       _isVideoPlaying = isPlaying;
     });
 
     // Sync story progress with video state
-    if (isPlaying) {
-      widget.controller.play();
-    } else {
-      widget.controller.pause();
+    if (mounted && !_isDisposed) {
+      if (isPlaying) {
+        widget.controller.play();
+      } else {
+        widget.controller.pause();
+      }
     }
   }
 
   void _setYoutubeController(YoutubePlayerController controller) {
+    if (_isDisposed) return;
     _youtubeController = controller;
   }
 
   void _handleCenterTap() {
+    if (_isDisposed || !mounted) return;
     if (widget.controller.playbackNotifier.value == PlaybackState.play) {
       widget.controller.pause();
     } else {

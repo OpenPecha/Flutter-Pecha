@@ -10,14 +10,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class VerseCard extends ConsumerWidget {
   final String verseText;
   final String title;
-  final UserSubtasksDto subtask;
+  final List<UserSubtasksDto> subtasks;
   final Map<String, dynamic>? nextCard;
 
   const VerseCard({
     super.key,
     required this.verseText,
     required this.title,
-    required this.subtask,
+    required this.subtasks,
     this.nextCard,
   });
 
@@ -36,14 +36,14 @@ class VerseCard extends ConsumerWidget {
       onTap: () {
         showStoryDialog(
           context: context,
-          subtasks: [subtask],
+          subtasks: subtasks,
           nextCard: nextCard,
         );
       },
       child: Stack(
         children: [
           Hero(
-            tag: backgroundImagePath,
+            tag: 'verse-image-$backgroundImagePath',
             child: Container(
               width: double.infinity,
               height: VerseCardConstants.cardHeight,

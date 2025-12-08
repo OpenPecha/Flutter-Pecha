@@ -21,7 +21,6 @@ final plansFutureProvider = FutureProvider<List<PlansModel>>((ref) {
   final locale = ref.watch(localeProvider);
   final languageCode = locale.languageCode;
   return ref.watch(plansRepositoryProvider).getPlans(language: languageCode);
-  // return Future.value(mockPlans);
 });
 
 final planByIdFutureProvider = FutureProvider.family<PlansModel, String>((

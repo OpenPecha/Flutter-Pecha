@@ -16,7 +16,7 @@ class FeaturedDayRepository {
     }
   }
 
-  /// Convert FeaturedDayResponse tasks to List<FeaturedDayTask>
+  /// Convert FeaturedDayResponse tasks to List of FeaturedDayTask
   List<FeaturedDayTask> mapToFeaturedDayTasks(FeaturedDayResponse response) {
     return response.tasks.map((task) {
       return FeaturedDayTask(

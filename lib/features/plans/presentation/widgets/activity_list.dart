@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_tasks_dto.dart';
 import 'package:flutter_pecha/features/story_view/services/story_media_preloader.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
+import 'package:flutter_pecha/shared/extensions/typography_extensions.dart';
 import 'package:go_router/go_router.dart';
 
 class ActivityList extends StatelessWidget {
@@ -55,7 +55,7 @@ class ActivityList extends StatelessWidget {
                 child: _TaskTitleButton(
                   language: language,
                   title: task.title,
-                  onTap: () => handleActivityTap(context, task),
+                  onTap: () => handleActivityTap(context, task, language),
                 ),
               ),
             ],
@@ -65,15 +65,19 @@ class ActivityList extends StatelessWidget {
     );
   }
 
-  void handleActivityTap(BuildContext context, UserTasksDto task) {
+  void handleActivityTap(
+    BuildContext context,
+    UserTasksDto task,
+    String language,
+  ) {
     if (task.subTasks.isNotEmpty) {
-      // Navigate immediately for best perceived performance
       context.push(
         '/home/plan-stories-presenter',
         extra: {
           'subtasks': task.subTasks,
           if (planId != null) 'planId': planId,
           if (dayNumber != null) 'dayNumber': dayNumber,
+          'language': language,
         },
       );
 
@@ -136,9 +140,6 @@ class _TaskTitleButton extends StatelessWidget {
   final String language;
   @override
   Widget build(BuildContext context) {
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -151,10 +152,8 @@ class _TaskTitleButton extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontFamily: fontFamily,
-                    height: lineHeight,
-                    fontSize: fontSize,
+                  style: context.languageTextStyle(
+                    language,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

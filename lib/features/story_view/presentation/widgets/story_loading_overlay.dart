@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 
 /// Loading overlay shown when first story item is not ready
 class StoryLoadingOverlay extends StatefulWidget {
@@ -10,6 +11,7 @@ class StoryLoadingOverlay extends StatefulWidget {
 
 class StoryLoadingOverlayState extends State<StoryLoadingOverlay>
     with SingleTickerProviderStateMixin {
+  final _logger = AppLogger('StoryLoadingOverlay');
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -39,7 +41,7 @@ class StoryLoadingOverlayState extends State<StoryLoadingOverlay>
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building StoryLoadingOverlay');
+    _logger.debug('Building StoryLoadingOverlay');
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Container(

@@ -10,6 +10,7 @@ import 'recitation_search_provider.dart';
 // Params class for recitation content
 class RecitationContentParams {
   final String textId;
+  final String language;
   final List<String>? recitations;
   final List<String>? translations;
   final List<String>? transliterations;
@@ -17,6 +18,7 @@ class RecitationContentParams {
 
   const RecitationContentParams({
     required this.textId,
+    required this.language,
     this.recitations,
     this.translations,
     this.transliterations,
@@ -28,10 +30,11 @@ class RecitationContentParams {
       identical(this, other) ||
       other is RecitationContentParams &&
           runtimeType == other.runtimeType &&
-          textId == other.textId;
+          textId == other.textId &&
+          language == other.language;
 
   @override
-  int get hashCode => textId.hashCode;
+  int get hashCode => textId.hashCode ^ language.hashCode;
 }
 
 // Repository provider
@@ -65,13 +68,11 @@ final recitationContentProvider =
       ref,
       params,
     ) {
-      final locale = ref.watch(localeProvider);
-      final languageCode = locale.languageCode;
       return ref
           .watch(recitationsRepositoryProvider)
           .getRecitationContent(
             params.textId,
-            languageCode,
+            params.language,
             params.recitations,
             params.translations,
             params.transliterations,
@@ -90,15 +91,17 @@ final searchRecitationsProvider =
     });
 
 // Recitation search state provider with debounce
-final recitationSearchProvider = StateNotifierProvider<
-    RecitationSearchNotifier, RecitationSearchState>((ref) {
-  final repository = ref.watch(recitationsRepositoryProvider);
-  final locale = ref.watch(localeProvider);
-  return RecitationSearchNotifier(
-    repository: repository,
-    languageCode: locale.languageCode,
-  );
-});
+final recitationSearchProvider =
+    StateNotifierProvider<RecitationSearchNotifier, RecitationSearchState>((
+      ref,
+    ) {
+      final repository = ref.watch(recitationsRepositoryProvider);
+      final locale = ref.watch(localeProvider);
+      return RecitationSearchNotifier(
+        repository: repository,
+        languageCode: locale.languageCode,
+      );
+    });
 
 // Mutation providers for recitations
 final saveRecitationProvider = FutureProvider.autoDispose.family<bool, String>((
@@ -108,19 +111,19 @@ final saveRecitationProvider = FutureProvider.autoDispose.family<bool, String>((
   return ref.watch(recitationsRepositoryProvider).saveRecitation(recitationId);
 });
 
-final unsaveRecitationProvider = FutureProvider.autoDispose.family<bool, String>((
-  ref,
-  recitationId,
-) {
-  return ref.watch(recitationsRepositoryProvider).unsaveRecitation(recitationId);
-});
+final unsaveRecitationProvider = FutureProvider.autoDispose
+    .family<bool, String>((ref, recitationId) {
+      return ref
+          .watch(recitationsRepositoryProvider)
+          .unsaveRecitation(recitationId);
+    });
 
-final updateRecitationsOrderProvider = FutureProvider.autoDispose.family<bool, List<Map<String, dynamic>>>((
-  ref,
-  recitations,
-) {
-  return ref.watch(recitationsRepositoryProvider).updateRecitationsOrder(recitations);
-});
+final updateRecitationsOrderProvider = FutureProvider.autoDispose
+    .family<bool, List<Map<String, dynamic>>>((ref, recitations) {
+      return ref
+          .watch(recitationsRepositoryProvider)
+          .updateRecitationsOrder(recitations);
+    });
 
 // Toggle providers for showing/hiding second and third content segments
 // The actual content type depends on the language's content order

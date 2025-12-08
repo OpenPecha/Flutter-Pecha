@@ -4,37 +4,31 @@ import 'package:flutter_pecha/features/recitation/domain/content_type.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_segment.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
-/// A widget that displays the full content of a recitation.
-///
-/// This widget handles:
-/// - Displaying the recitation title
-/// - Rendering all segments in order
-/// - Applying consistent layout and spacing
 class RecitationContent extends StatelessWidget {
-  /// The recitation content to display
   final RecitationContentModel content;
-
-  /// The order in which to display different content types within segments
   final List<ContentType> contentOrder;
+  final ScrollController? scrollController;
+  final String language;
 
   const RecitationContent({
     super.key,
     required this.content,
     required this.contentOrder,
+    this.scrollController,
+    required this.language,
   });
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: scrollController,
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
           _buildTitle(context),
           const SizedBox(height: 26),
 
-          // Segments
           ...List.generate(
             content.segments.length,
             (index) => RecitationSegment(
@@ -44,23 +38,20 @@ class RecitationContent extends StatelessWidget {
             ),
           ),
 
-          // Bottom spacing
-          const SizedBox(height: 32),
+          // Extra bottom padding to ensure floating button doesn't cover text
+          const SizedBox(height: 100),
         ],
       ),
     );
   }
 
-  /// Builds the title widget with proper styling.
   Widget _buildTitle(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final languageCode = locale.languageCode;
-    final fontFamily = getFontFamily(languageCode);
-    final fontSize = languageCode == 'bo' ? 26.0 : 22.0;
+    final fontFamily = getFontFamily(language);
+    final fontSize = language == 'bo' ? 26.0 : 22.0;
 
     return Text(
       content.title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+      style: TextStyle(
         fontWeight: FontWeight.bold,
         fontFamily: fontFamily,
         fontSize: fontSize,

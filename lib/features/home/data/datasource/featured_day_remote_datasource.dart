@@ -25,7 +25,6 @@ class FeaturedDayRemoteDatasource {
         final jsonData = json.decode(decoded);
         return FeaturedDayResponse.fromJson(jsonData);
       } else {
-        debugPrint('Failed to load featured day: ${response.statusCode}');
         return FeaturedDayResponse.fromJson({
           'id': '',
           'day_number': 0,
@@ -33,7 +32,6 @@ class FeaturedDayRemoteDatasource {
         });
       }
     } catch (e) {
-      debugPrint('Failed to load featured day: $e');
       throw Exception('Faild in fetching featured day: $e');
     }
   }

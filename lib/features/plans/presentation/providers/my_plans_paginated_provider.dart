@@ -61,7 +61,11 @@ class MyPlansNotifier extends StateNotifier<MyPlansState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await repository.getUserPlans(language: languageCode);
+      final response = await repository.getUserPlans(
+        language: languageCode,
+        skip: 0,
+        limit: _limit,
+      );
 
       if (mounted) {
         state = state.copyWith(
@@ -89,7 +93,11 @@ class MyPlansNotifier extends StateNotifier<MyPlansState> {
     state = state.copyWith(isLoadingMore: true, error: null);
 
     try {
-      final response = await repository.getUserPlans(language: languageCode);
+      final response = await repository.getUserPlans(
+        language: languageCode,
+        skip: state.skip,
+        limit: _limit,
+      );
 
       if (mounted) {
         state = state.copyWith(

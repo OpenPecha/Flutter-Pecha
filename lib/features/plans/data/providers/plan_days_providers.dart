@@ -37,7 +37,7 @@ class PlanDaysParams {
   int get hashCode => planId.hashCode ^ dayNumber.hashCode;
 }
 
-// // Get tasks of a day by plan id and day number
+// Get day content with tasks by plan id and day number
 final planDayContentFutureProvider =
     FutureProvider.family<PlanDaysModel, PlanDaysParams>((ref, params) {
       return ref

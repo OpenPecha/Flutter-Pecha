@@ -1,10 +1,9 @@
 // Riverpod provider and logic for authentication state.
 import 'package:auth0_flutter/auth0_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_pecha/features/onboarding/data/providers/onboarding_datasource_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logging/logging.dart';
 import '../auth_service.dart';
 
 /// Authentication state
@@ -47,7 +46,7 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService authService;
   final Ref ref;
-  final Logger _logger = Logger('AuthNotifier');
+  final _logger = AppLogger('AuthNotifier');
 
   AuthNotifier({required this.authService, required this.ref})
     : super(const AuthState(isLoggedIn: false, isLoading: true)) {
@@ -55,13 +54,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _restoreLoginState() async {
-    debugPrint('Restoring login state');
+    _logger.debug('Restoring login state');
     try {
       await authService.initialize(); // Ensure config + Auth0 initialized
 
       // First check if we have any credentials at all
       final hasCredentials = await authService.hasValidCredentials();
-      debugPrint('Checking if credentials are valid: $hasCredentials');
+      _logger.debug('Credentials valid: $hasCredentials');
 
       if (hasCredentials) {
         final credentials =
@@ -75,28 +74,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
             isGuest: false,
             errorMessage: null,
           );
-          debugPrint(
-            'Login state restored for user: ${credentials.user.sub} auth isLoggedin ${state.isLoggedIn}',
-          );
+          _logger.info('Login state restored for user: ${credentials.user.sub}');
 
           // Initialize user data
           try {
             await ref.read(userProvider.notifier).initializeUser();
-            debugPrint('User data initialized successfully');
           } catch (e) {
-            debugPrint('Could not initialize user data: $e');
+            _logger.warning('Could not initialize user data', e);
             // Non-critical, user can still use the app
           }
 
           // Early return after successful credential restoration
           return;
         } else {
-          debugPrint('Credentials check returned null or invalid user');
+          _logger.debug('Credentials check returned null or invalid user');
           // Fall through to check guest mode
         }
       }
 
-      debugPrint('No valid credentials found, checking guest mode');
+      _logger.debug('No valid credentials found, checking guest mode');
 
       // No credentials, check if user previously chose guest mode
       final isGuest = await authService.isGuestMode();
@@ -121,12 +117,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       _logger.info('No valid credentials or guest mode found, showing login');
     } on CredentialsManagerException catch (e) {
-      _logger.severe('Credentials manager error during restore: ${e.message}');
+      _logger.error('Credentials manager error during restore: ${e.message}');
 
       // Clear any stored credentials and require re-authentication
       await _handleAuthFailure();
     } catch (e) {
-      _logger.severe('Failed to restore login state: $e');
+      _logger.error('Failed to restore login state', e);
       // Clear any stored credentials and require re-authentication
       await _handleAuthFailure();
     }
@@ -177,9 +173,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           try {
             final onboardingRepo = ref.read(onboardingRepositoryProvider);
             await onboardingRepo.clearPreferences();
-            debugPrint('✅ Guest converted to authenticated user, onboarding reset');
+            _logger.info('Guest converted to authenticated user, onboarding reset');
           } catch (e) {
-            debugPrint('⚠️ Failed to clear guest onboarding: $e');
+            _logger.warning('Failed to clear guest onboarding', e);
           }
         }
 
@@ -206,7 +202,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      debugPrint('Login failed: ${e.toString()}');
+      _logger.error('Login failed', e);
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Login failed: ${e.toString()}',

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_subtasks_dto.dart';
@@ -31,6 +32,7 @@ class PlanStoryPresenter extends ConsumerStatefulWidget {
 }
 
 class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
+  final _logger = AppLogger('PlanStoryPresenter');
   late final FlutterStoryController flutterStoryController;
   late final List<StoryItem> storyItems;
   late final Map<int, String> _storyIndexToSubtaskId; // NEW: Index mapping
@@ -138,7 +140,7 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
         flutterStoryController.play();
       }
     } catch (e) {
-      debugPrint('Error preloading first item: $e');
+      _logger.error('Error preloading first item', e);
       // Even if preloading fails, show the story (graceful degradation)
       if (mounted) {
         setState(() {
@@ -158,7 +160,9 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
     final remainingItems = widget.subtasks.skip(1).take(3).toList();
     if (remainingItems.isNotEmpty) {
       Future.microtask(() {
-        unawaited(_preloader.preloadStoryItems(remainingItems, context));
+        if (mounted) {
+          unawaited(_preloader.preloadStoryItems(remainingItems, context));
+        }
       });
     }
   }
@@ -202,7 +206,7 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
     // Get actual subtask ID from mapping
     final subtaskId = _storyIndexToSubtaskId[storyIndex];
     if (subtaskId == null) {
-      debugPrint('Warning: No subtask mapping for story index $storyIndex');
+      _logger.warning('No subtask mapping for story index $storyIndex');
       return;
     }
 
@@ -262,13 +266,13 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
       if (mounted && !_isDisposing) {
         if (success) {
           _completedSubtaskIds.add(subtaskId);
-          debugPrint('✅ Subtask $subtaskId marked complete');
+          _logger.info('Subtask $subtaskId marked complete');
         } else {
-          debugPrint('⚠️ Subtask $subtaskId completion returned false');
+          _logger.warning('Subtask $subtaskId completion returned false');
         }
       }
     } catch (e) {
-      debugPrint('❌ Error completing subtask $subtaskId: $e');
+      _logger.error('Error completing subtask $subtaskId', e);
       // Note: subtaskId NOT added to _completedSubtaskIds, allowing retry
     } finally {
       // Always remove from pending (allows retry on next view)
@@ -299,11 +303,14 @@ class _PlanStoryPresenterState extends ConsumerState<PlanStoryPresenter> {
 
   void _invalidateProviderIfNeeded() {
     if (widget.planId != null && widget.dayNumber != null) {
+      // Invalidate day content to refresh task completion status
       ref.invalidate(
         userPlanDayContentFutureProvider(
           PlanDaysParams(planId: widget.planId!, dayNumber: widget.dayNumber!),
         ),
       );
+      // Invalidate day completion status to refresh checkmarks in carousel
+      ref.invalidate(userPlanDaysCompletionStatusProvider(widget.planId!));
     }
   }
 

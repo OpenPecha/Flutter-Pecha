@@ -106,7 +106,6 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
       return _EmptySearchState(
         icon: Icons.search,
         title: localizations.search_for_plans,
-        // subtitle: 'Enter keywords to find practice plans',
       );
     }
 
@@ -128,7 +127,6 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
       return _EmptySearchState(
         icon: Icons.search_off,
         title: localizations.no_plans_found,
-        // subtitle: 'Try different keywords or filters',
       );
     }
 
@@ -170,13 +168,8 @@ class _SearchResultsViewState extends ConsumerState<_SearchResultsView> {
 class _EmptySearchState extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
 
-  const _EmptySearchState({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-  });
+  const _EmptySearchState({required this.icon, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -195,14 +188,6 @@ class _EmptySearchState extends StatelessWidget {
               ).textTheme.titleMedium?.copyWith(color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
-            if (subtitle != null)
-              Text(
-                subtitle!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
           ],
         ),
       ),

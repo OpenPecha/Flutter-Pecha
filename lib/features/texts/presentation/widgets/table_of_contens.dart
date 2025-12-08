@@ -50,10 +50,14 @@ class _TableOfContentsState extends ConsumerState<TableOfContents> {
         section.sections != null && section.sections!.isNotEmpty;
 
     Widget buildTitle(bool tappable) {
-      final segmentId =
-          hasChildren
-              ? section.sections!.first.segments.first.segmentId
-              : section.segments.first.segmentId;
+      // Safely get segmentId with proper bounds checking
+      final String? segmentId = _getFirstSegmentId(section, hasChildren);
+
+      // If no valid segment ID found, don't make the title tappable
+      if (segmentId == null) {
+        tappable = false;
+      }
+
       final titleWidget = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         child: Text(
@@ -67,16 +71,19 @@ class _TableOfContentsState extends ConsumerState<TableOfContents> {
       );
       if (!tappable) return titleWidget;
       return GestureDetector(
-        onTap: () {
-          context.push(
-            '/texts/chapters',
-            extra: {
-              'textId': textId,
-              'contentId': tocId,
-              'segmentId': segmentId,
-            },
-          );
-        },
+        onTap:
+            segmentId != null
+                ? () {
+                  context.push(
+                    '/texts/chapters',
+                    extra: {
+                      'textId': textId,
+                      'contentId': tocId,
+                      'segmentId': segmentId,
+                    },
+                  );
+                }
+                : null,
         child: titleWidget,
       );
     }
@@ -130,5 +137,25 @@ class _TableOfContentsState extends ConsumerState<TableOfContents> {
         child: buildTitle(true),
       );
     }
+  }
+
+  /// Safely gets the first segment ID from a section
+  /// Returns null if no valid segment is found
+  String? _getFirstSegmentId(Section section, bool hasChildren) {
+    if (hasChildren) {
+      // Try to get from nested sections
+      final nestedSections = section.sections;
+      if (nestedSections != null && nestedSections.isNotEmpty) {
+        final firstNestedSection = nestedSections.first;
+        if (firstNestedSection.segments.isNotEmpty) {
+          return firstNestedSection.segments.first.segmentId;
+        }
+      }
+    }
+    // Fallback to direct segments
+    if (section.segments.isNotEmpty) {
+      return section.segments.first.segmentId;
+    }
+    return null;
   }
 }

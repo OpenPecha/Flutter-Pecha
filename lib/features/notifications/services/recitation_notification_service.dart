@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'notification_service.dart';
+
+final _logger = AppLogger('RecitationNotificationService');
 
 /// Service for managing recitation reminders
 /// Handles scheduling and managing daily recitation notifications
@@ -43,8 +46,7 @@ class RecitationNotificationService {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
 
-      debugPrint('📿 Scheduling recitation notification for: $scheduledDate');
-      debugPrint('🔔 Title: $title, Body: $body');
+      _logger.debug('Scheduling recitation notification for: $scheduledDate');
 
       // Save the reminder time and enable the notification in shared preferences
       final prefs = await SharedPreferences.getInstance();
@@ -81,11 +83,9 @@ class RecitationNotificationService {
         matchDateTimeComponents: DateTimeComponents.time,
       );
 
-      debugPrint(
-        '✅ Recitation notification scheduled successfully with ID: $recitationNotificationId',
-      );
+      _logger.info('Recitation notification scheduled with ID: $recitationNotificationId');
     } catch (e) {
-      debugPrint('❌ Error scheduling recitation notification: $e');
+      _logger.error('Error scheduling recitation notification', e);
       rethrow;
     }
   }

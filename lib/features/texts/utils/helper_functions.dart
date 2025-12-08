@@ -1,8 +1,10 @@
 // to get the last segment id
-import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/texts/models/section.dart';
 import 'package:flutter_pecha/features/texts/models/segment.dart';
 import 'package:flutter_pecha/features/texts/models/text/toc.dart';
+
+final _logger = AppLogger('TextHelperFunctions');
 
 /// Gets the last segment ID from a list of sections
 ///
@@ -150,7 +152,7 @@ List<Section> mergeSections(
       }
     }
   } catch (e) {
-    debugPrint('Error merging sections: $e');
+    _logger.error('Error merging sections', e);
   }
 
   return mergedSections;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/services/audio/audio_handler.dart';
 import 'package:flutter_pecha/core/services/service_providers.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/core/widgets/audio_progress_bar.dart';
 import 'package:flutter_pecha/features/home/models/prayer_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ class PrayerOfTheDayScreen extends ConsumerStatefulWidget {
 }
 
 class _PrayerOfTheDayScreenState extends ConsumerState<PrayerOfTheDayScreen> {
+  final _logger = AppLogger('PrayerOfTheDayScreen');
   AudioPlayer? _audioPlayer;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
@@ -190,7 +192,7 @@ class _PrayerOfTheDayScreenState extends ConsumerState<PrayerOfTheDayScreen> {
         }
       });
     } catch (e) {
-      debugPrint('Error initializing audio player: $e');
+      _logger.error('Error initializing audio player', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

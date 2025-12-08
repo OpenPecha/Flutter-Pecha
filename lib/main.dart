@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/l10n.dart';
 import 'package:flutter_pecha/core/services/service_providers.dart';
 import 'package:flutter_pecha/core/theme/theme_notifier.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/notifications/services/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,28 +10,24 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/config/router/go_router.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:fquery/fquery.dart';
-import 'package:logging/logging.dart';
 import 'core/theme/app_theme.dart';
 import 'core/localization/material_localizations_bo.dart';
 import 'core/localization/cupertino_localizations_bo.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-final _log = Logger('main');
+final _logger = AppLogger('Main');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Setup logging
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
-    debugPrint('${record.level.name}: ${record.time}: ${record.message}');
-  });
+  // Setup environment-aware logging
+  AppLogger.init();
 
   // Load environment variables
   try {
     await dotenv.load(fileName: ".env");
   } catch (e) {
-    _log.warning('Error loading .env file: $e');
+    _logger.warning('Error loading .env file: $e');
     // Continue app initialization even if .env fails
   }
 

@@ -203,7 +203,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done => 'Done';
 
   @override
+  String get customise_message => 'Tap the customize icon to adjust text style';
+
+  @override
   String get download_image => 'Download Image';
+
+  @override
+  String get no_images_available => 'No images available';
+
+  @override
+  String get customise_text => 'Customise Text';
+
+  @override
+  String get text_size => 'Text Size';
+
+  @override
+  String get text_color => 'Text Color';
+
+  @override
+  String get text_shadow => 'Text Shadow';
+
+  @override
+  String get apply => 'Apply';
 
   @override
   String get practice_nav_title => 'Practice';
@@ -248,6 +269,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
 
   @override
+  String get recitation_reminder => 'Recitations Reminder.';
+
+  @override
+  String get moment_to_pray => 'Take a moment to pray.';
+
+  @override
   String get plan_unenroll => 'Unenroll';
 
   @override
@@ -269,6 +296,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no_plans_found => 'No plans found';
+
+  @override
+  String get no_days_available => 'No days found';
 
   @override
   String get notification_turn_on => 'Please turn on Notifications';
@@ -294,9 +324,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notification_daily_recitation => 'Daily Recitation';
-
-  @override
-  String get manageDailyReminders => 'Manage daily reminders';
 
   @override
   String get text_noContent => 'No texts available in the selected language';
@@ -338,12 +365,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recitations_no_saved => 'No saved recitations';
 
   @override
-  String get recitations_save_prompt => 'Save recitations to access them here';
-
-  @override
-  String get recitations_login_required => 'Login Required';
-
-  @override
   String get recitations_login_prompt =>
       'Sign in to view your saved recitations';
 
@@ -354,17 +375,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recitations_unsave => 'Unsave recitation';
 
   @override
-  String get recitations_phonetic => 'Phonetic';
-
-  @override
   String get recitations_translation => 'Translation';
 
   @override
-  String get no_availabel => 'Not available';
+  String get no_available => 'Not available';
 
   @override
-  String get recitations_no_data_message =>
-      'The content for this recitation is currently not available.\nPlease check back later.';
+  String get recitations_no_data_message => 'No Recitation Found.';
 
   @override
   String get recitations_show_translation => 'Show translation';
@@ -389,6 +406,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recitations_hide_adaptation => 'Hide adaptation';
+
+  @override
+  String get next_recitation => 'Next';
 
   @override
   String get settings_appearance => 'Appearance';

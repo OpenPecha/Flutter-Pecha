@@ -1,9 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_pecha/features/onboarding/data/onboarding_local_datasource.dart';
 import 'package:flutter_pecha/features/onboarding/data/onboarding_remote_datasource.dart';
 import 'package:flutter_pecha/features/onboarding/models/onboarding_preferences.dart';
+
+final _logger = AppLogger('OnboardingRepository');
 
 /// Repository for managing onboarding preferences
 /// Aggregates local and remote datasources
@@ -45,9 +47,9 @@ class OnboardingRepository {
         await localeNotifier.setLocaleFromOnboardingPreference(
           prefs.preferredLanguage,
         );
-        debugPrint('✅ App locale set to: ${prefs.preferredLanguage}');
+        _logger.debug('App locale set to: ${prefs.preferredLanguage}');
       } catch (e) {
-        debugPrint('⚠️ Failed to set app locale: $e');
+        _logger.warning('Failed to set app locale', e);
         // Don't throw - continue with onboarding completion
       }
     }
@@ -58,12 +60,11 @@ class OnboardingRepository {
     // Update user's onboarding status via UserNotifier
     try {
       await userNotifier.updateOnboardingStatus(true);
-      debugPrint('✅ User data updated: onboardingCompleted = true');
     } catch (e) {
-      debugPrint('❌ Failed to update user onboarding status: $e');
+      _logger.warning('Failed to update user onboarding status', e);
       // Don't throw - onboarding flag is still saved separately
     }
-    debugPrint('✅ Onboarding completed and marked');
+    _logger.info('Onboarding completed');
   }
 
   /// Check if user has completed onboarding

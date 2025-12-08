@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/application/config_service.dart';
-import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -13,7 +12,7 @@ class AuthService {
   static AuthService get instance => _instance;
 
   late final Auth0 _auth0;
-  final Logger _logger = Logger('AuthService');
+  final _logger = AppLogger('AuthService');
 
   // Serialize concurrent refresh attempts
   Future<String?>? _ongoingIdTokenRefresh;
@@ -48,29 +47,29 @@ class AuthService {
       final credentials = await _auth0
           .webAuthentication(scheme: 'org.pecha.app')
           .login(
-            // useHTTPS: true,
+            useHTTPS: true,
             parameters: parameters,
             scopes: {"openid", "profile", "email", "offline_access"},
           );
 
       // Store credentials in the credentials manager
       await _auth0.credentialsManager.storeCredentials(credentials);
-      debugPrint('✅ Credentials stored successfully');
+      _logger.info('Credentials stored successfully');
 
       // VERIFY STORAGE IMMEDIATELY AFTER STORING
       final verified = await _auth0.credentialsManager.hasValidCredentials();
-      debugPrint('🔍 Verification after store: $verified');
+      _logger.debug('Verification after store: $verified');
 
       _logger.info('Login successful for connection: $connection');
       return credentials;
     } on WebAuthenticationException catch (e) {
-      _logger.severe('WebAuth error for $connection: ${e.message}');
+      _logger.warning('WebAuth error for $connection: ${e.message}');
       if (e.code == 'a0.session.user_cancelled') {
         throw AuthException('Login was cancelled by user', code: e.code);
       }
       throw AuthException('Login failed: ${e.message}', code: e.code);
     } catch (e) {
-      _logger.severe('Unexpected login error for $connection: $e');
+      _logger.error('Unexpected login error for $connection', e);
       throw AuthException('An unexpected error occurred during login');
     }
   }
@@ -93,8 +92,9 @@ class AuthService {
     try {
       await _auth0.credentialsManager.clearCredentials();
       await clearGuestMode(); // Also clear guest mode on logout
+      _logger.info('Local logout successful');
     } catch (e) {
-      _logger.severe('Logout failed: $e');
+      _logger.error('Logout failed', e);
     }
   }
 
@@ -105,8 +105,9 @@ class AuthService {
           .webAuthentication(scheme: 'org.pecha.app')
           .logout(useHTTPS: true);
       await _auth0.credentialsManager.clearCredentials();
+      _logger.info('Global logout successful');
     } catch (e) {
-      _logger.severe('Logout failed: $e');
+      _logger.error('Logout failed', e);
     }
   }
 
@@ -136,16 +137,15 @@ class AuthService {
 
   /// Force refresh ID token using refresh token (internal, no concurrency control)
   Future<String?> _refreshIdTokenInternal() async {
-    debugPrint('Refreshing ID token using refresh token');
+    _logger.debug('Refreshing ID token using refresh token');
     try {
       final storedCreds = await _auth0.credentialsManager.credentials();
 
       if (storedCreds.refreshToken == null) {
-        _logger.severe('No refresh token available');
+        _logger.warning('No refresh token available');
         throw AuthException("No refresh token available");
       }
 
-      _logger.fine('Refreshing ID token using refresh token');
       final newCreds = await _auth0.api.renewCredentials(
         refreshToken: storedCreds.refreshToken!,
       );
@@ -155,11 +155,10 @@ class AuthService {
 
       return newCreds.idToken;
     } on ApiException catch (e) {
-      _logger.severe('Auth0 API error during token refresh: ${e.message}');
-
+      _logger.error('Auth0 API error during token refresh: ${e.message}');
       throw AuthException('Token refresh failed: ${e.message}');
     } catch (e) {
-      _logger.severe('Unexpected error during token refresh: $e');
+      _logger.error('Unexpected error during token refresh', e);
       throw AuthException('Token refresh failed: $e');
     }
   }
@@ -168,12 +167,12 @@ class AuthService {
   Future<String?> refreshIdToken() async {
     // If a refresh is already in progress, wait for it
     if (_ongoingIdTokenRefresh != null) {
-      debugPrint('Waiting for ongoing ID token refresh');
+      _logger.debug('Waiting for ongoing ID token refresh');
       return await _ongoingIdTokenRefresh!;
     }
 
     // Start new refresh
-    debugPrint('Starting new ID token refresh');
+    _logger.debug('Starting new ID token refresh');
     _ongoingIdTokenRefresh = _refreshIdTokenInternal();
 
     try {
@@ -189,7 +188,7 @@ class AuthService {
     // If a refresh is already in progress, wait for it
     final ongoing = _ongoingIdTokenRefresh;
     if (ongoing != null) {
-      _logger.fine('Waiting for ongoing ID token refresh');
+      _logger.debug('Waiting for ongoing ID token refresh');
       await ongoing;
       // After waiting, get fresh credentials and return
       final creds = await _auth0.credentialsManager.credentials();
@@ -201,21 +200,20 @@ class AuthService {
 
     // Check if ID token is still valid after waiting
     if (!isIdTokenExpired(creds.idToken)) {
-      _logger.fine('ID token is still valid');
       return creds.idToken;
     }
 
     // Token is expired, need to refresh
     // Double-check if another thread started refresh while we were checking
     if (_ongoingIdTokenRefresh != null) {
-      _logger.fine('Another thread started refresh, waiting for completion');
+      _logger.debug('Another thread started refresh, waiting for completion');
       await _ongoingIdTokenRefresh!;
       final freshCreds = await _auth0.credentialsManager.credentials();
       return freshCreds.idToken;
     }
 
     // Start the refresh (we're the first thread to need it)
-    _logger.info('ID token expired, starting refresh');
+    _logger.debug('ID token expired, starting refresh');
     _ongoingIdTokenRefresh = _refreshIdTokenInternal();
 
     try {

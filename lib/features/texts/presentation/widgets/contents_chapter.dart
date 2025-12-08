@@ -78,13 +78,9 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
       final newItemsCount = getTotalSegmentsCount(
         newlyLoadedPage.content.sections,
       );
-      // debugPrint("newItemsCount: $newItemsCount");
 
       if (_currentPositionBeforeLoad != null) {
         final targetIndex = _currentPositionBeforeLoad! + newItemsCount;
-        // debugPrint(
-        //   "Adjusting scroll to: $targetIndex (was: $_currentPositionBeforeLoad, added: $newItemsCount)",
-        // );
 
         if (widget.itemScrollController.isAttached && targetIndex >= 0) {
           widget.itemScrollController.scrollTo(

@@ -17,7 +17,6 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
     final themeIndex = await _localStorageService.get<int>(
       AppStorageKeys.themeMode,
     );
-    debugPrint('themeIndex: $themeIndex');
     if (themeIndex != null) {
       state = ThemeMode.values[themeIndex];
     }
@@ -25,13 +24,11 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 
   Future<void> setTheme(ThemeMode mode) async {
     state = mode;
-    debugPrint('setting theme mode: ${mode.index}');
     await _localStorageService.set<int>(AppStorageKeys.themeMode, mode.index);
   }
 
   void toggleTheme() {
     final newMode = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    debugPrint('toggling theme mode: ${newMode.index}');
     setTheme(newMode);
   }
 }

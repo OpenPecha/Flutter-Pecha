@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/texts/models/search/multilingual_search_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/search_response.dart';
 import 'package:flutter_pecha/features/texts/models/text/commentary_text_response.dart';
@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 
 class TextRemoteDatasource {
   final http.Client client;
+  final _logger = AppLogger('TextRemoteDatasource');
 
   TextRemoteDatasource({required this.client});
 
@@ -58,7 +59,7 @@ class TextRemoteDatasource {
       final Map<String, dynamic> jsonMap = json.decode(decoded);
       return TocResponse.fromJson(jsonMap);
     } else {
-      debugPrint('Failed to load text content: ${response.body}');
+      _logger.error('Failed to load text content: ${response.body}');
       throw Exception('Failed to load text content');
     }
   }
@@ -79,7 +80,7 @@ class TextRemoteDatasource {
       final Map<String, dynamic> jsonMap = json.decode(decoded);
       return VersionResponse.fromJson(jsonMap);
     } else {
-      debugPrint('Failed to load text version: ${response.body}');
+      _logger.error('Failed to load text version: ${response.body}');
       throw Exception('Failed to load text version');
     }
   }
@@ -98,7 +99,7 @@ class TextRemoteDatasource {
       final List<dynamic> jsonMap = json.decode(decoded) as List<dynamic>;
       return CommentaryTextResponse.fromJson(jsonMap);
     } else {
-      debugPrint('Failed to load commentary text: ${response.body}');
+      _logger.error('Failed to load commentary text: ${response.body}');
       throw Exception('Failed to load commentary text');
     }
   }
@@ -197,7 +198,7 @@ class TextRemoteDatasource {
         );
         return multilingualSearchResponse;
       } catch (e) {
-        debugPrint('MultilingualSearchResponse::: Failed to search text: $e');
+        _logger.error('MultilingualSearchResponse::: Failed to search text', e);
         throw Exception('MultilingualSearchResponse::: Failed to search text');
       }
     } else {

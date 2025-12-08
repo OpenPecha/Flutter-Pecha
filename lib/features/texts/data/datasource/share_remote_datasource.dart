@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:http/http.dart' as http;
 
 class ShareRemoteDatasource {
   final http.Client client;
   final String baseUrl = dotenv.env['BASE_API_URL']!;
+  final _logger = AppLogger('ShareRemoteDatasource');
 
   ShareRemoteDatasource({required this.client});
 
@@ -52,7 +53,7 @@ class ShareRemoteDatasource {
         throw Exception('HTTP error: ${response.statusCode}');
       }
     } on FormatException catch (e) {
-      debugPrint('Invalid JSON response: $e');
+      _logger.error('Invalid JSON response', e);
       throw Exception('Invalid JSON response: $e');
     } catch (e) {
       if (e is Exception) {
