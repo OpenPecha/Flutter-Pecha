@@ -15,8 +15,15 @@ class TextsRepository {
   Future<TextDetailResponse> getTexts({
     required String termId,
     String? language,
+    int skip = 0,
+    int limit = 20,
   }) {
-    return remoteDatasource.fetchTexts(termId: termId, language: language);
+    return remoteDatasource.fetchTexts(
+      termId: termId,
+      language: language,
+      skip: skip,
+      limit: limit,
+    );
   }
 
   Future<TocResponse> fetchTextContent({

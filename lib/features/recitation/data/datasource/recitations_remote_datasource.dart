@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_content_model.dart';
@@ -22,6 +22,7 @@ class RecitationsQueryParams {
 class RecitationsRemoteDatasource {
   final http.Client client;
   final String baseUrl = dotenv.env['BASE_API_URL']!;
+  final _logger = AppLogger('RecitationsRemoteDatasource');
 
   RecitationsRemoteDatasource({required this.client});
 
@@ -53,11 +54,11 @@ class RecitationsRemoteDatasource {
             )
             .toList();
       } else {
-        debugPrint('Failed to fetch recitations: ${response.statusCode}');
+        _logger.error('Failed to fetch recitations: ${response.statusCode}');
         throw Exception('Failed to fetch recitations: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Error fetching recitations: $e');
+      _logger.error('Error fetching recitations', e);
       throw Exception('Error fetching recitations: $e');
     }
   }
@@ -81,13 +82,15 @@ class RecitationsRemoteDatasource {
             )
             .toList();
       } else {
-        debugPrint('Failed to fetch saved recitations: ${response.statusCode}');
+        _logger.error(
+          'Failed to fetch saved recitations: ${response.statusCode}',
+        );
         throw Exception(
           'Failed to fetch saved recitations: ${response.statusCode}',
         );
       }
     } catch (e) {
-      debugPrint('Error fetching saved recitations: $e');
+      _logger.error('Error fetching saved recitations', e);
       throw Exception('Error fetching saved recitations: $e');
     }
   }
@@ -113,8 +116,8 @@ class RecitationsRemoteDatasource {
         'adaptations': adaptations ?? [],
       };
 
-      debugPrint('Recitation Content Request URL: $uri');
-      debugPrint(
+      _logger.debug('Recitation Content Request URL: $uri');
+      _logger.debug(
         'Recitation Content Request Body: ${json.encode(requestBody)}',
       );
 
@@ -124,18 +127,19 @@ class RecitationsRemoteDatasource {
         body: json.encode(requestBody),
       );
 
-      debugPrint('Recitation Content Response Status: ${response.statusCode}');
+      _logger.debug(
+        'Recitation Content Response Status: ${response.statusCode}',
+      );
       if (response.statusCode != 200) {
-        debugPrint('Recitation Content Response Body: ${response.body}');
+        _logger.debug('Recitation Content Response Body: ${response.body}');
       }
 
       if (response.statusCode == 200) {
         final decoded = utf8.decode(response.bodyBytes);
         final data = json.decode(decoded) as Map<String, dynamic>;
-        debugPrint('Recitation Content Response Data: $data');
         return RecitationContentModel.fromJson(data);
       } else {
-        debugPrint(
+        _logger.error(
           'Failed to fetch recitation content: ${response.statusCode}',
         );
         throw Exception(
@@ -143,7 +147,7 @@ class RecitationsRemoteDatasource {
         );
       }
     } catch (e) {
-      debugPrint('Error fetching recitation content: $e');
+      _logger.error('Error fetching recitation content', e);
       throw Exception('Error fetching recitation content: $e');
     }
   }
@@ -164,7 +168,7 @@ class RecitationsRemoteDatasource {
         return false;
       }
     } catch (e) {
-      debugPrint('Failed to save recitation: $e');
+      _logger.error('Failed to save recitation', e);
       throw Exception('Failed to save recitation: $e');
     }
   }
@@ -183,7 +187,7 @@ class RecitationsRemoteDatasource {
         return false;
       }
     } catch (e) {
-      debugPrint('Failed to unsave recitation: $e');
+      _logger.error('Failed to unsave recitation', e);
       throw Exception('Failed to unsave recitation: $e');
     }
   }
@@ -195,7 +199,7 @@ class RecitationsRemoteDatasource {
     try {
       final uri = Uri.parse('$baseUrl/users/me/recitations/order');
       final body = json.encode({'recitations': recitations});
-      debugPrint('Updating recitations order: $recitations');
+      _logger.debug('Updating recitations order: $recitations');
       final response = await client.put(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -204,12 +208,14 @@ class RecitationsRemoteDatasource {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
       } else {
-        debugPrint('Failed to update recitations order: ${response.statusCode}');
-        debugPrint('Response body: ${response.body}');
+        _logger.error(
+          'Failed to update recitations order: ${response.statusCode}',
+        );
+        _logger.debug('Response body: ${response.body}');
         return false;
       }
     } catch (e) {
-      debugPrint('Failed to update recitations order: $e');
+      _logger.error('Failed to update recitations order', e);
       throw Exception('Failed to update recitations order: $e');
     }
   }

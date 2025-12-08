@@ -1,5 +1,6 @@
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/network/api_client_provider.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/plans/data/datasource/user_plans_remote_datasource.dart';
 import 'package:flutter_pecha/features/plans/data/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/data/repositories/user_plans_repository.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_pecha/features/plans/models/response/user_plan_day_detai
 import 'package:flutter_pecha/features/plans/models/response/user_plan_list_response_model.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/my_plans_paginated_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final _logger = AppLogger('UserPlansProvider');
 
 final userPlansRepositoryProvider = Provider<UserPlansRepository>((ref) {
   return UserPlansRepository(
@@ -91,31 +94,20 @@ final userPlanDayContentFutureProvider =
           .getUserPlanDayContent(params.planId, params.dayNumber);
     });
 
-/// Provider that fetches completion status for all days in a plan
+/// Provider that fetches completion status for all days in a plan using bulk endpoint
 /// Returns a Map where key is dayNumber and value is isCompleted status
+///
+/// This uses a single API call instead of N separate calls (N+1 problem fixed)
 final userPlanDaysCompletionStatusProvider =
     FutureProvider.autoDispose.family<Map<int, bool>, String>((ref, planId) async {
-      // First get the list of days to know how many days to fetch
-      final planDays = await ref.watch(
-        planDaysByPlanIdFutureProvider(planId).future,
-      );
-
       final repository = ref.read(userPlansRepositoryProvider);
 
-      // Fetch completion status for all days in parallel
-      final completionFutures = planDays.map((day) async {
-        try {
-          final dayContent = await repository.getUserPlanDayContent(
-            planId,
-            day.dayNumber,
-          );
-          return MapEntry(day.dayNumber, dayContent.isCompleted);
-        } catch (e) {
-          // If fetch fails, assume not completed
-          return MapEntry(day.dayNumber, false);
-        }
-      });
-
-      final results = await Future.wait(completionFutures);
-      return Map.fromEntries(results);
+      try {
+        // Single API call to get all day completion statuses
+        return await repository.getPlanDaysCompletionStatus(planId);
+      } catch (e) {
+        _logger.error('Error fetching plan days completion status', e);
+        // Return empty map on error - UI will show all days as incomplete
+        return {};
+      }
     });

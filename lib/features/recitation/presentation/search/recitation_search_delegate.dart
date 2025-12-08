@@ -77,7 +77,6 @@ class _SearchResultsView extends ConsumerWidget {
       return _EmptySearchState(
         icon: Icons.search,
         title: localizations.recitations_search_for,
-        // subtitle: 'Enter keywords to find recitations',
       );
     }
 
@@ -99,7 +98,6 @@ class _SearchResultsView extends ConsumerWidget {
       return _EmptySearchState(
         icon: Icons.search_off,
         title: localizations.recitations_no_found,
-        // subtitle: 'Try different keywords',
       );
     }
 
@@ -127,13 +125,8 @@ class _SearchResultsView extends ConsumerWidget {
 class _EmptySearchState extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
 
-  const _EmptySearchState({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-  });
+  const _EmptySearchState({required this.icon, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -153,14 +146,6 @@ class _EmptySearchState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            if (subtitle != null)
-              Text(
-                subtitle!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
           ],
         ),
       ),

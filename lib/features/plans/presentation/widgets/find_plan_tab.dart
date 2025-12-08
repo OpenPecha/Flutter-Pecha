@@ -100,14 +100,9 @@ class _FindPlansTabState extends ConsumerState<FindPlansTab> {
               '/plans/info',
               extra: {'plan': plan, 'author': author},
             );
-            //  Handle the result from plan_info screen
             if (result == true && context.mounted) {
-              // change tab to my plans
+              // Change tab to my plans after successful enrollment
               widget.controller.animateTo(0);
-              // context.push(
-              //   '/plans/details',
-              //   extra: {'plan': plan, 'selectedDay': 1, 'startDate': startDate},
-              // );
             }
           },
         );
@@ -151,48 +146,6 @@ class _EmptyState extends StatelessWidget {
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorState({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
-            const SizedBox(height: 24),
-            Text(
-              'Something went wrong',
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
             ),
           ],
         ),

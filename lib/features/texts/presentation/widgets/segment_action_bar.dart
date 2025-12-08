@@ -71,73 +71,75 @@ class SegmentActionBar extends ConsumerWidget {
           elevation: 8,
           borderRadius: BorderRadius.circular(18),
           color: Theme.of(context).cardColor,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // commentary button - opens split screen
-                ActionButton(
-                  icon: Icons.comment_outlined,
-                  label: localizations.text_commentary,
-                  onTap: () {
-                    // Toggle commentary split screen
-                    final currentSegmentId = ref.read(
-                      commentarySplitSegmentProvider,
-                    );
-                    if (currentSegmentId == segmentId) {
-                      // Close if same segment - also close action bar
-                      ref.read(commentarySplitSegmentProvider.notifier).state =
-                          null;
+          child: Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // commentary button - opens split screen
+                  ActionButton(
+                    icon: Icons.comment_outlined,
+                    label: localizations.text_commentary,
+                    onTap: () {
+                      // Toggle commentary split screen
+                      final currentSegmentId = ref.read(
+                        commentarySplitSegmentProvider,
+                      );
+                      if (currentSegmentId == segmentId) {
+                        // Close if same segment - also close action bar
+                        ref
+                            .read(commentarySplitSegmentProvider.notifier)
+                            .state = null;
+                        onClose();
+                      } else {
+                        // Open for this segment - keep segment highlighted, don't call onClose
+                        ref
+                            .read(commentarySplitSegmentProvider.notifier)
+                            .state = segmentId;
+                        // Scroll to segment after a short delay to allow layout to update
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          onOpenCommentary?.call();
+                        });
+                      }
+                    },
+                  ),
+                  ActionButton(
+                    icon: Icons.copy,
+                    label: localizations.copy,
+                    onTap: () {
+                      final textWithLineBreaks = text.replaceAll("<br>", "\n");
+                      final plainText = htmlToPlainText(textWithLineBreaks);
+                      Clipboard.setData(ClipboardData(text: plainText));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(localizations.copied)),
+                      );
                       onClose();
-                    } else {
-                      // Open for this segment - keep segment highlighted, don't call onClose
-                      ref.read(commentarySplitSegmentProvider.notifier).state =
-                          segmentId;
-                      // Scroll to segment after a short delay to allow layout to update
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        onOpenCommentary?.call();
-                      });
-                    }
-                  },
-                ),
-                ActionButton(
-                  icon: Icons.copy,
-                  label: localizations.copy,
-                  onTap: () {
-                    final textWithLineBreaks = text.replaceAll("<br>", "\n");
-                    final plainText = htmlToPlainText(textWithLineBreaks);
-                    Clipboard.setData(ClipboardData(text: plainText));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(localizations.copied)),
-                    );
-                    onClose();
-                  },
-                ),
-                _ShareButton(
-                  textId: textId,
-                  segmentId: segmentId,
-                  language: language,
-                  onClose: onClose,
-                ),
-                ActionButton(
-                  icon: Icons.image_outlined,
-                  label: localizations.image,
-                  onTap: () {
-                    final textWithLineBreaks = text.replaceAll("<br>", "\n");
-                    final plainText = htmlToPlainText(textWithLineBreaks);
-                    final cutText =
-                        plainText.length > 180
-                            ? plainText.substring(0, 180)
-                            : plainText;
-                    context.push(
-                      '/texts/segment_image/choose_image',
-                      extra: cutText,
-                    );
-                    onClose();
-                  },
-                ),
-              ],
+                    },
+                  ),
+                  _ShareButton(
+                    textId: textId,
+                    segmentId: segmentId,
+                    language: language,
+                    onClose: onClose,
+                  ),
+                  ActionButton(
+                    icon: Icons.image_outlined,
+                    label: localizations.image,
+                    onTap: () {
+                      final textWithLineBreaks = text.replaceAll("<br>", "\n");
+                      final plainText = htmlToPlainText(textWithLineBreaks);
+                      context.push(
+                        '/texts/segment_image/choose_image',
+                        extra: plainText,
+                      );
+                      onClose();
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -213,6 +215,8 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
               width: 24,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
+import 'package:flutter_pecha/shared/extensions/typography_extensions.dart';
 
 class UserPlanCard extends StatelessWidget {
   final UserPlansModel plan;
@@ -26,7 +26,7 @@ class UserPlanCard extends StatelessWidget {
         children: [
           _buildPlanImage(plan),
           const SizedBox(width: 24),
-          Expanded(child: _buildPlanInfo(plan)),
+          Expanded(child: _buildPlanInfo(context, plan)),
         ],
       ),
     );
@@ -103,33 +103,24 @@ Widget _buildPlanImage(UserPlansModel plan) {
   );
 }
 
-Widget _buildPlanInfo(UserPlansModel plan) {
+Widget _buildPlanInfo(BuildContext context, UserPlansModel plan) {
   final planLanguage = plan.language;
-  final fontFamily = getFontFamily(planLanguage);
-  final lineHeight = getLineHeight(planLanguage);
-  final fontSize = planLanguage == 'bo' ? 22.0 : 18.0;
-
+  final fontSize = planLanguage == 'bo' ? 18.0 : 16.0;
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const SizedBox(height: 4),
       Text(
         '${plan.totalDays} Days',
-        style: TextStyle(
-          fontSize: 12.0,
+        style: context.languageTextStyle(
+          planLanguage,
+          fontSize: fontSize,
           fontWeight: FontWeight.w500,
-          fontFamily: fontFamily,
-          height: lineHeight,
         ),
       ),
       Text(
         plan.title,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          fontFamily: fontFamily,
-          height: lineHeight,
-        ),
+        style: context.languageTitleStyle(planLanguage),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

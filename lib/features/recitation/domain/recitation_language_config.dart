@@ -15,6 +15,7 @@ class RecitationLanguageConfig {
   static const String chinese = 'zh';
   static const String sanskrit = 'sa';
   static const String tibetanAdaptation = 'tib';
+  static const String tibetanTransliteration = 'tibphono';
 
   /// Supported languages list
   static const List<String> supportedLanguages = [tibetan, english, chinese];
@@ -27,13 +28,14 @@ class RecitationLanguageConfig {
   /// - English users: English translation + Tibetan recitation + English transliteration
   /// - Chinese users: Chinese + English translations + English transliteration
   static RecitationContentParams getContentParams(
-    String languageCode,
+    String language,
     String textId,
   ) {
-    switch (languageCode) {
+    switch (language) {
       case tibetan:
         return RecitationContentParams(
           textId: textId,
+          language: language,
           recitations: [tibetan],
           adaptations: [tibetanAdaptation],
           translations: [english],
@@ -42,23 +44,26 @@ class RecitationLanguageConfig {
       case english:
         return RecitationContentParams(
           textId: textId,
+          language: language,
           translations: [english],
           recitations: [tibetan],
-          transliterations: [tibetan],
+          transliterations: [tibetanTransliteration],
         );
 
       case chinese:
         return RecitationContentParams(
           textId: textId,
+          language: language,
           translations: [chinese],
           recitations: [tibetan],
-          transliterations: [tibetan],
+          transliterations: [tibetanTransliteration],
         );
 
       default:
         // Default configuration for unsupported languages
         return RecitationContentParams(
           textId: textId,
+          language: language,
           recitations: [tibetan],
           translations: [english],
         );

@@ -12,9 +12,10 @@ List<Widget> createWidgetList(
   List<dynamic> planItems,
   StoryController storyController,
 ) {
-  List<Widget> widgetList = [];
+  final List<Widget> widgetList = [];
   for (final planItem in planItems) {
-    if (planItems.isEmpty) {
+    // Skip if planItem has no subtasks to prevent index out of bounds
+    if (planItem.subtasks == null || planItem.subtasks.isEmpty) {
       continue;
     }
     switch (planItem.subtasks[0].contentType) {
@@ -22,11 +23,6 @@ List<Widget> createWidgetList(
         widgetList.add(
           TextStory(
             text: planItem.content!,
-            textStyle: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              decoration: TextDecoration.none,
-            ),
             roundedTop: true,
             roundedBottom: true,
           ),

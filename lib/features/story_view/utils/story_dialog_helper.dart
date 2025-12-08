@@ -19,7 +19,7 @@ void showStoryDialog({
       return StoryPresenter(
         author: author,
         storyItemsBuilder: (controller) {
-          return createFlutterStoryItems(subtasks, controller, nextCard);
+          return createFlutterStoryItems(subtasks, controller, nextCard, null);
         },
       );
     },

@@ -26,8 +26,9 @@ class VersionSelectionScreen extends ConsumerWidget {
               }
               return 0;
             })
-            .reduce((a, b) => a + b) ??
+            .fold(0, (a, b) => a + b) ??
         0;
+
     final filteredVersions =
         textVersionResponse.value?.versions
             ?.where((version) => version.language == currentLanguage)

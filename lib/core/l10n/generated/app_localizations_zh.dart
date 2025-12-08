@@ -139,7 +139,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get text_detail_rootText => 'Root Text';
 
   @override
-  String get text_detail_commentaryText => 'Commentary';
+  String get text_detail_commentaryText => '釋論';
 
   @override
   String get text_toc_continueReading => 'Continue Reading';
@@ -203,7 +203,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get done => 'Done';
 
   @override
+  String get customise_message => 'Tap the customize icon to adjust text style';
+
+  @override
   String get download_image => 'Download Image';
+
+  @override
+  String get no_images_available => '沒有可用的圖片';
+
+  @override
+  String get customise_text => 'Customise Text';
+
+  @override
+  String get text_size => 'Text Size';
+
+  @override
+  String get text_color => 'Text Color';
+
+  @override
+  String get text_shadow => 'Text Shadow';
+
+  @override
+  String get apply => 'Apply';
 
   @override
   String get practice_nav_title => '修持計劃';
@@ -215,7 +236,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get find_plans => '尋找計劃';
 
   @override
-  String get browse_plans => 'Browse Plans';
+  String get browse_plans => '尋找計劃';
 
   @override
   String get plan_info => 'Plan Info';
@@ -248,6 +269,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get timeForDailyPractice => 'It\'s time for your daily practice.';
 
   @override
+  String get recitation_reminder => 'Recitations Reminder.';
+
+  @override
+  String get moment_to_pray => 'Take a moment to pray.';
+
+  @override
   String get plan_unenroll => 'Unenroll from Plan';
 
   @override
@@ -269,6 +296,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get no_plans_found => 'No plans found';
+
+  @override
+  String get no_days_available => 'No days found';
 
   @override
   String get notification_turn_on => 'Please turn on Notifications';
@@ -296,9 +326,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notification_daily_recitation => 'Daily Recitation';
 
   @override
-  String get manageDailyReminders => 'Manage daily reminders';
-
-  @override
   String get text_noContent => 'No texts available in the selected language';
 
   @override
@@ -314,7 +341,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_my_recitations => '我的清單';
 
   @override
-  String get browse_recitations => 'Browse Recitations';
+  String get browse_recitations => '唱頌';
 
   @override
   String get recitations_search => '搜索';
@@ -338,12 +365,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_no_saved => '沒有已保存的持誦';
 
   @override
-  String get recitations_save_prompt => '保存持誦以便在此訪問';
-
-  @override
-  String get recitations_login_required => '需要登錄';
-
-  @override
   String get recitations_login_prompt => '請登錄以查看您保存的持誦';
 
   @override
@@ -353,13 +374,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_unsave => '從已保存中移除';
 
   @override
-  String get recitations_phonetic => '讀音';
-
-  @override
   String get recitations_translation => '翻譯';
 
   @override
-  String get no_availabel => 'Not available';
+  String get no_available => 'Not available';
 
   @override
   String get recitations_no_data_message => '此持誦的內容目前不可用。\n請稍後再查看。';
@@ -389,6 +407,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_hide_adaptation => '隱藏改編';
 
   @override
+  String get next_recitation => 'Next';
+
+  @override
   String get settings_appearance => '外觀';
 
   @override
@@ -401,7 +422,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_account => '帳號';
 
   @override
-  String get select_language => 'Select Language';
+  String get select_language => '語言設定';
 
   @override
   String get logout_confirmation => '您確定要登出嗎？';
@@ -410,16 +431,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cancel => '取消';
 
   @override
-  String get copy => 'Copy';
+  String get copy => '複製';
 
   @override
   String get copied => 'Copied';
 
   @override
-  String get share => 'Share';
+  String get share => '分享';
 
   @override
-  String get image => 'Image';
+  String get image => '圖片';
 
   @override
   String get author => 'Author';

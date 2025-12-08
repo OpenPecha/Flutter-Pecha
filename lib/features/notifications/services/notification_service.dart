@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
+
+final _logger = AppLogger('NotificationService');
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -128,7 +131,7 @@ class NotificationService {
       await androidImplementation.createNotificationChannel(recitationChannel);
       await androidImplementation.createNotificationChannel(testChannel);
 
-      debugPrint('✅ Android notification channels created successfully');
+      _logger.info('Android notification channels created');
     }
   }
 
@@ -234,8 +237,7 @@ class NotificationService {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
 
-      debugPrint('📅 Scheduling notification for: $scheduledDate');
-      debugPrint('🔔 Title: $title, Body: $body');
+      _logger.debug('Scheduling notification for: $scheduledDate');
 
       // save the reminder time and enable the notification in shared preferences
       final prefs = await SharedPreferences.getInstance();
@@ -272,11 +274,9 @@ class NotificationService {
         matchDateTimeComponents: DateTimeComponents.time,
       );
 
-      debugPrint(
-        '✅ Notification scheduled successfully with ID: $dailyNotificationId',
-      );
+      _logger.info('Notification scheduled with ID: $dailyNotificationId');
     } catch (e) {
-      debugPrint('❌ Error scheduling notification: $e');
+      _logger.error('Error scheduling notification', e);
       rethrow;
     }
   }

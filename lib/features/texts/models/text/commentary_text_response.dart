@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/texts/models/text/commentary_text.dart';
+
+final _logger = AppLogger('CommentaryTextResponse');
 
 class CommentaryTextResponse {
   final List<CommentaryText> commentaries;
@@ -15,7 +17,7 @@ class CommentaryTextResponse {
                 .toList(),
       );
     } catch (e) {
-      debugPrint('Failed to load commentary text: $e');
+      _logger.error('Failed to load commentary text', e);
       throw Exception('Failed to load commentary text');
     }
   }

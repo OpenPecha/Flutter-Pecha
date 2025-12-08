@@ -10,14 +10,14 @@ import 'package:flutter_pecha/features/plans/models/plans_model.dart';
 import 'package:flutter_pecha/features/plans/models/response/user_plan_list_response_model.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/presentation/author_detail_screen.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
+import 'package:flutter_pecha/shared/extensions/typography_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class PlanInfo extends ConsumerStatefulWidget {
-  const PlanInfo({super.key, required this.plan, required this.author});
+  const PlanInfo({super.key, required this.plan, this.author});
   final PlansModel plan;
-  final AuthorDtoModel author;
+  final AuthorDtoModel? author;
   @override
   ConsumerState<PlanInfo> createState() => _PlanInfoState();
 }
@@ -39,24 +39,13 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
         subscribedPlans.valueOrNull?.userPlans.map((e) => e.id).toList() ?? [];
 
     final language = widget.plan.language.toLowerCase();
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         scrolledUnderElevation: 0,
-        title: Text(
-          localizations.plan_info,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontFamily: fontFamily,
-            height: lineHeight,
-            fontSize: fontSize,
-          ),
-        ),
+        title: Text(localizations.plan_info, style: TextStyle(fontSize: 20)),
         centerTitle: false,
       ),
       body: SingleChildScrollView(
@@ -79,11 +68,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
             SizedBox(height: 16),
             Text(
               widget.plan.description,
-              style: TextStyle(
-                fontSize: fontSize,
-                fontFamily: fontFamily,
-                height: lineHeight,
-              ),
+              style: context.languageBodyStyle(language),
             ),
             SizedBox(height: 24),
           ],
@@ -103,9 +88,6 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
   }
 
   Widget _buildPlanTitleDays(BuildContext context, String language) {
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -117,21 +99,14 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
                 widget.plan.title,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: fontFamily,
-                  height: lineHeight,
-                ),
+                style: context.languageTitleStyle(language),
               ),
               SizedBox(height: 4),
               Text(
                 '${widget.plan.totalDays} Days',
-                style: TextStyle(
-                  fontSize: fontSize,
+                style: context.languageTextStyle(
+                  language,
                   fontWeight: FontWeight.w500,
-                  fontFamily: fontFamily,
-                  height: lineHeight,
                 ),
               ),
             ],
@@ -145,6 +120,16 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
 
   Widget _buildAuthorAvatar(BuildContext context) {
     final author = widget.author;
+
+    // Handle null author case
+    if (author == null) {
+      return CircleAvatar(
+        radius: 20,
+        backgroundColor: Colors.grey[300],
+        child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+      );
+    }
+
     final authorImage = author.authorImageThumbnail;
     final authorId = author.id;
 
@@ -183,10 +168,6 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
     final buttonText = _getButtonText(isGuest, isSubscribed);
     final userPlan = _findUserPlan(subscribedPlans);
 
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
-
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
@@ -200,15 +181,7 @@ class _PlanInfoState extends ConsumerState<PlanInfo> {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        child: Text(
-          buttonText,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            fontFamily: fontFamily,
-            height: lineHeight,
-          ),
-        ),
+        child: Text(buttonText, style: context.languageTitleStyle(language)),
       ),
     );
   }

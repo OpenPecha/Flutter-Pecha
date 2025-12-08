@@ -20,39 +20,96 @@ class UserPlansRepository {
     );
   }
 
+  /// Subscribe user to a plan
+  /// Throws [Exception] if enrollment fails
   Future<bool> subscribeToPlan(String planId) async {
-    return await userPlansRemoteDatasource.subscribeToPlan(planId);
+    try {
+      return await userPlansRemoteDatasource.subscribeToPlan(planId);
+    } catch (e) {
+      throw Exception('Repository: Failed to subscribe to plan - $e');
+    }
   }
 
+  /// Get user plan progress details
+  /// Throws [Exception] if fetching fails
   Future<List<PlanProgressModel>> getUserPlanProgressDetails(
     String planId,
   ) async {
-    return await userPlansRemoteDatasource.getUserPlanProgressDetails(planId);
+    try {
+      return await userPlansRemoteDatasource.getUserPlanProgressDetails(planId);
+    } catch (e) {
+      throw Exception('Repository: Failed to get plan progress details - $e');
+    }
   }
 
+  /// Get user plan day content
+  /// Throws [Exception] if fetching fails
   Future<UserPlanDayDetailResponse> getUserPlanDayContent(
     String planId,
     int dayNumber,
   ) async {
-    return await userPlansRemoteDatasource.fetchUserPlanDayContent(
-      planId,
-      dayNumber,
-    );
+    try {
+      return await userPlansRemoteDatasource.fetchUserPlanDayContent(
+        planId,
+        dayNumber,
+      );
+    } catch (e) {
+      throw Exception('Repository: Failed to get plan day content - $e');
+    }
   }
 
+  /// Get completion status for all days in a plan using bulk endpoint
+  /// This replaces the N+1 query pattern with a single API call
+  /// Throws [Exception] if fetching fails
+  Future<Map<int, bool>> getPlanDaysCompletionStatus(String planId) async {
+    try {
+      return await userPlansRemoteDatasource.fetchPlanDaysCompletionStatus(
+        planId,
+      );
+    } catch (e) {
+      throw Exception(
+        'Repository: Failed to get plan days completion status - $e',
+      );
+    }
+  }
+
+  /// Mark a subtask as complete
+  /// Throws [Exception] if operation fails
   Future<bool> completeSubTask(String subTaskId) async {
-    return await userPlansRemoteDatasource.completeSubTask(subTaskId);
+    try {
+      return await userPlansRemoteDatasource.completeSubTask(subTaskId);
+    } catch (e) {
+      throw Exception('Repository: Failed to complete subtask - $e');
+    }
   }
 
+  /// Mark a task as complete
+  /// Throws [Exception] if operation fails
   Future<bool> completeTask(String taskId) async {
-    return await userPlansRemoteDatasource.completeTask(taskId);
+    try {
+      return await userPlansRemoteDatasource.completeTask(taskId);
+    } catch (e) {
+      throw Exception('Repository: Failed to complete task - $e');
+    }
   }
 
+  /// Delete/uncomplete a task
+  /// Throws [Exception] if operation fails
   Future<bool> deleteTask(String taskId) async {
-    return await userPlansRemoteDatasource.deleteTask(taskId);
+    try {
+      return await userPlansRemoteDatasource.deleteTask(taskId);
+    } catch (e) {
+      throw Exception('Repository: Failed to delete task - $e');
+    }
   }
 
+  /// Unenroll user from a plan
+  /// Throws [Exception] if operation fails
   Future<bool> unenrollFromPlan(String planId) async {
-    return await userPlansRemoteDatasource.unenrollFromPlan(planId);
+    try {
+      return await userPlansRemoteDatasource.unenrollFromPlan(planId);
+    } catch (e) {
+      throw Exception('Repository: Failed to unenroll from plan - $e');
+    }
   }
 }

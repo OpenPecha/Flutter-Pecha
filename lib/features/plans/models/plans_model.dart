@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/plans/models/author/author_dto_model.dart';
+
+final _logger = AppLogger('PlansModel');
 
 enum DifficultyLevel { beginner, intermediate, advanced }
 
@@ -92,7 +94,7 @@ class PlansModel {
                 : null,
       );
     } catch (e) {
-      debugPrint('Error in PlansModel.fromJson: $e');
+      _logger.error('Error in PlansModel.fromJson', e);
       throw Exception('Failed to load plans: $e');
     }
   }

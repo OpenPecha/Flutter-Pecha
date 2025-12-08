@@ -67,7 +67,7 @@ class FeaturedContentFactory {
         VerseCard(
           verseText: planItem.subtasks[0].content,
           title: planItem.title,
-          subtask: _createSubtaskDto(planItem.subtasks[0]),
+          subtasks: _createSubtaskDtoList(planItem.subtasks),
           nextCard:
               nextPlanItem != null
                   ? _buildNextCardData(
@@ -105,7 +105,7 @@ class FeaturedContentFactory {
           onTap:
               () => showStoryDialog(
                 context: context,
-                subtasks: [_createSubtaskDto(planItem.subtasks[0])],
+                subtasks: _createSubtaskDtoList(planItem.subtasks),
                 nextCard:
                     nextPlanItem != null
                         ? _buildNextCardData(
@@ -135,7 +135,7 @@ class FeaturedContentFactory {
           onTap:
               () => showStoryDialog(
                 context: context,
-                subtasks: [_createSubtaskDto(planItem.subtasks[0])],
+                subtasks: _createSubtaskDtoList(planItem.subtasks),
               ),
         ),
         const SizedBox(height: HomeScreenConstants.cardSpacing),
@@ -159,7 +159,7 @@ class FeaturedContentFactory {
       'title': planItem.title,
       'subtitle': subtitle,
       'iconWidget': getVideoThumbnail(planItem.subtasks[0].content),
-      'subtasks': [_createSubtaskDto(planItem.subtasks[0])],
+      'subtasks': _createSubtaskDtoList(planItem.subtasks),
     };
 
     if (nextNextCard != null) {
@@ -178,5 +178,12 @@ class FeaturedContentFactory {
       displayOrder: subtask.displayOrder,
       isCompleted: false,
     );
+  }
+
+  /// Helper method to convert all subtasks to DTOs
+  static List<UserSubtasksDto> _createSubtaskDtoList(
+    List<FeaturedDaySubtask> subtasks,
+  ) {
+    return subtasks.map(_createSubtaskDto).toList();
   }
 }

@@ -12,10 +12,14 @@ class SocialMediaSection extends StatelessWidget {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        _showErrorSnackBar(context, 'Cannot open this link');
+        if (context.mounted) {
+          _showErrorSnackBar(context, 'Cannot open this link');
+        }
       }
     } catch (e) {
-      _showErrorSnackBar(context, 'Invalid URL format');
+      if (context.mounted) {
+        _showErrorSnackBar(context, 'Invalid URL format');
+      }
     }
   }
 
@@ -24,10 +28,14 @@ class SocialMediaSection extends StatelessWidget {
       if (await canLaunchUrl(Uri.parse(email))) {
         await launchUrl(Uri.parse('mailto:$email'));
       } else {
-        _showErrorSnackBar(context, 'Cannot open this email');
+        if (context.mounted) {
+          _showErrorSnackBar(context, 'Cannot open this email');
+        }
       }
     } catch (e) {
-      _showErrorSnackBar(context, 'Invalid email format');
+      if (context.mounted) {
+        _showErrorSnackBar(context, 'Invalid email format');
+      }
     }
   }
 

@@ -27,7 +27,6 @@ class AuthRemoteDatasourceImpl extends AuthRemoteDataSource {
 
   @override
   Future<UserModel> getCurrentUser() async {
-    debugPrint('Getting current user from API...');
     try {
       final response = await _apiClient.get(Uri.parse('$baseUrl/users/info'));
 

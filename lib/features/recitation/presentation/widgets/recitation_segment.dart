@@ -9,7 +9,6 @@ import 'package:flutter_pecha/features/recitation/presentation/widgets/recitatio
 /// (recitation, translation, transliteration, adaptation) based on
 /// the specified display order.
 class RecitationSegment extends StatelessWidget {
-  /// The segment data to display
   final RecitationSegmentModel segment;
 
   final List<ContentType> contentOrder;
@@ -28,47 +27,46 @@ class RecitationSegment extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Add height for segments after the first one
-        if (!isFirstSegment) ...[const SizedBox(height: 26)],
-
-        // Render content in the specified order
-        ...contentOrder.expand((contentType) {
-          return _buildContentForType(contentType);
-        }),
+        if (!isFirstSegment) const SizedBox(height: 26),
+        ..._buildAllContent(),
       ],
     );
   }
 
-  /// Builds the widgets for a specific content type.
-  ///
-  /// Returns an empty list if the content type is not available
-  /// in this segment.
-  List<Widget> _buildContentForType(ContentType contentType) {
-    final contentMap = _getContentMap(contentType);
-    if (contentMap == null || contentMap.isEmpty) {
-      return [];
-    }
+  /// Builds all content widgets with proper global index tracking across content types.
+  List<Widget> _buildAllContent() {
+    final widgets = <Widget>[];
+    var globalIndex = 0;
 
-    // Build widgets for each text entry with spacing
-    return contentMap.entries.expand((entry) sync* {
-      // Add spacing between different language entries
-      // (but not before the first one)
-      if (entry.key != contentMap.keys.first) {
-        yield const SizedBox(height: 8);
+    for (final contentType in contentOrder) {
+      final contentMap = _getContentMap(contentType);
+      if (contentMap == null || contentMap.isEmpty) {
+        continue;
       }
 
-      // entry.key is the language code (e.g., 'bo', 'en', 'zh')
-      // entry.value contains the text content
-      yield RecitationTextSection(
-        text: entry.value.content,
-        languageCode: entry.key,
-      );
-    }).toList();
+      // Process each text entry in this content type
+      for (final entry in contentMap.entries) {
+        // Add spacing between entries (but not before the first one)
+        if (globalIndex > 0) {
+          widgets.add(const SizedBox(height: 8));
+        }
+
+        widgets.add(
+          RecitationTextSection(
+            text: entry.value.content,
+            languageCode: entry.key,
+            textIndex: globalIndex,
+          ),
+        );
+
+        globalIndex++;
+      }
+    }
+
+    return widgets;
   }
 
   /// Gets the content map for a specific content type.
-  ///
-  /// Returns null if the content type is not available in this segment.
   Map<String, RecitationTextModel>? _getContentMap(ContentType contentType) {
     return switch (contentType) {
       ContentType.recitation => segment.recitation,

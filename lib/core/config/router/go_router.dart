@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter_pecha/core/utils/local_storage_service.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/presentation/login_page.dart';
 import 'package:flutter_pecha/features/auth/presentation/profile_page.dart';
 import 'package:flutter_pecha/features/app/presentation/skeleton_screen.dart';
@@ -48,9 +48,10 @@ import 'package:flutter_story_presenter/flutter_story_presenter.dart' as fsp;
 import 'route_config.dart';
 import 'package:flutter_pecha/features/onboarding/data/providers/onboarding_datasource_providers.dart';
 
+final _logger = AppLogger('GoRouter');
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
-  final localStorageService = ref.watch(localStorageServiceProvider);
   final onboardingRepo = ref.watch(onboardingRepositoryProvider);
 
   return GoRouter(
@@ -237,7 +238,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               const durationForVideo = Duration(minutes: 5);
               const durationForImage = Duration(seconds: 15);
               for (final subtask in subtasks) {
-                if (subtask.content.isEmpty || subtask.content.isEmpty) {
+                if (subtask.content.isEmpty || subtask.contentType.isEmpty) {
                   continue;
                 }
                 switch (subtask.contentType) {
@@ -246,11 +247,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       StoryItem(
                         TextStory(
                           text: subtask.content,
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.none,
-                          ),
                           roundedTop: true,
                           roundedBottom: true,
                         ),
@@ -292,11 +288,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   StoryItem(
                     TextStory(
                       text: 'No content available',
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.none,
-                      ),
                       roundedTop: true,
                       roundedBottom: true,
                     ),
@@ -352,6 +343,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 subtasks,
                 controller,
                 nextCard,
+                null,
               );
               // Ensure we have at least one item
               if (items.isEmpty) {
@@ -388,6 +380,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           Map<String, dynamic>? nextCard;
           String? planId;
           int? dayNumber;
+          String? language;
           if (extra is Map<String, dynamic>) {
             final subtasksValue = extra['subtasks'];
             if (subtasksValue is! List<UserSubtasksDto>) {
@@ -399,11 +392,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             nextCard = extra['nextCard'] as Map<String, dynamic>?;
             planId = extra['planId'] as String?;
             dayNumber = extra['dayNumber'] as int?;
+            language = extra['language'] as String?;
           } else if (extra is List<UserSubtasksDto>) {
             subtasks = extra;
             nextCard = null;
             planId = null;
             dayNumber = null;
+            language = null;
           } else {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
@@ -426,6 +421,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 subtasks,
                 controller,
                 nextCard,
+                language,
               );
               // Ensure we have at least one item
               if (items.isEmpty) {
@@ -513,10 +509,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           } else {
             throw Exception('Invalid extra type for /texts/works');
           }
-          return WorksScreen(
-            collection: collection,
-            colorIndex: colorIndex,
-          );
+          return WorksScreen(collection: collection, colorIndex: colorIndex);
         },
       ),
       GoRoute(
@@ -678,12 +671,39 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/recitations/detail',
         builder: (context, state) {
           final extra = state.extra;
-          if (extra == null || extra is! RecitationModel) {
+
+          // Support both single recitation and recitation with list
+          if (extra == null) {
             return const Scaffold(
               body: Center(child: Text('Missing required parameters')),
             );
           }
-          return RecitationDetailScreen(recitation: extra);
+
+          if (extra is RecitationModel) {
+            // Single recitation mode (from search, browse tab, etc.)
+            return RecitationDetailScreen(recitation: extra);
+          } else if (extra is Map<String, dynamic>) {
+            // Navigation with list mode (from My Recitations tab)
+            final recitation = extra['recitation'] as RecitationModel?;
+            final allRecitations = extra['allRecitations'] as List<RecitationModel>?;
+            final currentIndex = extra['currentIndex'] as int?;
+
+            if (recitation == null) {
+              return const Scaffold(
+                body: Center(child: Text('Missing required parameters')),
+              );
+            }
+
+            return RecitationDetailScreen(
+              recitation: recitation,
+              allRecitations: allRecitations,
+              currentIndex: currentIndex,
+            );
+          }
+
+          return const Scaffold(
+            body: Center(child: Text('Invalid parameters')),
+          );
         },
       ),
     ],
@@ -695,38 +715,38 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // 1. While auth is loading, redirect to login
       if (isLoading) {
-        debugPrint('🔄 Auth is loading, redirecting to login');
+        _logger.debug('Auth is loading, redirecting to login');
         return RouteConfig.login;
       }
 
       // 2. Check onboarding for authenticated non-guest users
       if (isLoggedIn && !isGuest) {
-        debugPrint('✅ Authenticated non-guest user, checking onboarding');
+        _logger.debug('Authenticated non-guest user, checking onboarding');
 
         // Check onboarding completion from local storage
         // This is the single source of truth per requirements
         final hasCompletedOnboarding =
             await onboardingRepo.hasCompletedOnboarding();
-        debugPrint('📋 Onboarding status: $hasCompletedOnboarding');
+        _logger.debug('Onboarding status: $hasCompletedOnboarding');
 
         // Redirect to onboarding if not completed (unless already there or on login)
         if (!hasCompletedOnboarding &&
             currentPath != RouteConfig.onboarding &&
             currentPath != RouteConfig.login) {
-          debugPrint('🎯 Redirecting to onboarding');
+          _logger.debug('Redirecting to onboarding');
           return RouteConfig.onboarding;
         }
 
         // If completed and on onboarding page, redirect to home
         if (hasCompletedOnboarding && currentPath == RouteConfig.onboarding) {
-          debugPrint('✅ Onboarding already completed, redirecting to home');
+          _logger.debug('Onboarding already completed, redirecting to home');
           return RouteConfig.home;
         }
       }
 
       // 3. Guest users skip onboarding - allow them to navigate freely
       if (isGuest && currentPath == RouteConfig.onboarding) {
-        debugPrint('👤 Guest user, skipping onboarding');
+        _logger.debug('Guest user, skipping onboarding');
         return RouteConfig.home;
       }
 
@@ -737,17 +757,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final hasCompletedOnboarding =
               await onboardingRepo.hasCompletedOnboarding();
           if (!hasCompletedOnboarding) {
-            debugPrint('🎯 New authenticated user, redirecting to onboarding');
+            _logger.debug('New authenticated user, redirecting to onboarding');
             return RouteConfig.onboarding;
           }
         }
-        debugPrint('✅ Authenticated user, redirecting to home');
+        _logger.debug('Authenticated user, redirecting to home');
         return RouteConfig.home;
       }
 
       // 5. Unauthenticated user trying to access protected route
       if (!isLoggedIn && RouteConfig.isProtectedRoute(currentPath)) {
-        debugPrint('🔒 Protected route, redirecting to login');
+        _logger.debug('Protected route, redirecting to login');
         return RouteConfig.login;
       }
 

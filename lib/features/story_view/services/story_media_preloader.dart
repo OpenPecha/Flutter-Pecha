@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/plans/models/user/user_subtasks_dto.dart';
 
 /// Service to preload story media (images, videos) for better UX
@@ -7,6 +8,8 @@ class StoryMediaPreloader {
   static final StoryMediaPreloader _instance = StoryMediaPreloader._internal();
   factory StoryMediaPreloader() => _instance;
   StoryMediaPreloader._internal();
+
+  final _logger = AppLogger('StoryMediaPreloader');
 
   final Set<String> _preloadingImageUrls = {};
   final Set<String> _precachedImageUrls = {};
@@ -39,9 +42,9 @@ class StoryMediaPreloader {
     if (remainingItems.isNotEmpty) {
       Future.microtask(() {
         for (final subtask in remainingItems) {
-          // if (context.mounted) {
-          _preloadSubtask(subtask, context).ignore();
-          // }
+          if (context.mounted) {
+            _preloadSubtask(subtask, context).ignore();
+          }
         }
       });
     }
@@ -90,7 +93,7 @@ class StoryMediaPreloader {
       await precacheImage(imageProvider, context);
       _precachedImageUrls.add(imageUrl);
     } catch (e) {
-      debugPrint('Failed to preload image $imageUrl: $e');
+      _logger.error('Failed to preload image $imageUrl', e);
     } finally {
       _preloadingImageUrls.remove(imageUrl);
     }
@@ -129,7 +132,7 @@ class StoryMediaPreloader {
         _preparedVideoUrls.add(videoUrl);
       }
     } catch (e) {
-      debugPrint('Failed to prepare video metadata $videoUrl: $e');
+      _logger.error('Failed to prepare video metadata $videoUrl', e);
     } finally {
       _preloadingVideoUrls.remove(videoUrl);
     }

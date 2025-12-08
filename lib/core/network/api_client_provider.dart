@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/auth_service.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 
 class ApiClient extends http.BaseClient {
   final AuthService _authService;
@@ -33,13 +32,13 @@ class ApiClient extends http.BaseClient {
     '/api/v1/users/me/recitations',
     // Add more as needed
   ];
-  final Logger _logger = Logger('ApiClient');
+  final _logger = AppLogger('ApiClient');
 
   ApiClient(this._authService);
 
   @override
   void close() {
-    _logger.fine('Closing ApiClient HTTP client');
+    _logger.debug('Closing ApiClient HTTP client');
     _inner.close();
     super.close();
   }
@@ -51,16 +50,9 @@ class ApiClient extends http.BaseClient {
     // Add authentication header for protected routes
     if (_isProtectedRoute(request.url.path)) {
       final token = await _authService.getValidIdToken();
-      // debugPrint('Token half: ${token?.substring(0, token.length ~/ 2)}');
-      // debugPrint(
-      //   'Token half length: ${token?.substring(token.length ~/ 2, token.length)}',
-      // );
       if (token != null) {
         request.headers['Authorization'] = 'Bearer $token';
-        debugPrint(
-          'Added auth token for ${request.method} ${request.url.path}',
-        );
-        _logger.fine(
+        _logger.debug(
           'Added auth token for ${request.method} ${request.url.path}',
         );
       } else {
@@ -90,11 +82,11 @@ class ApiClient extends http.BaseClient {
           newRequest.headers['Authorization'] = 'Bearer $newToken';
           _logger.info('Retrying request with refreshed token');
           final retryResponse = await _inner.send(newRequest);
-          _logger.fine('${retryResponse.statusCode} ${request.url}');
+          _logger.debug('${retryResponse.statusCode} ${request.url}');
           return retryResponse;
         }
       } catch (e) {
-        debugPrint('Error in ApiClient: $e');
+        _logger.error('Error in ApiClient', e);
         _logger.warning('Token refresh returned null, returning original 401');
       }
     }

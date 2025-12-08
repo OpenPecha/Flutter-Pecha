@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_pecha/features/plans/models/plan_days_model.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:intl/intl.dart';
 
 class DayCarousel extends StatelessWidget {
@@ -24,9 +23,10 @@ class DayCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontFamily = getFontFamily(language);
-    final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 20.0 : 16.0;
+    // Convert to local time first, then extract date-only to avoid
+    // timezone-related date shifts when the time component crosses midnight
+    final localStartDate = DateUtils.dateOnly(startDate.toLocal());
+
     return Container(
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -45,8 +45,7 @@ class DayCarousel extends StatelessWidget {
         itemCount: days.length,
         itemBuilder: (context, index, realIndex) {
           final day = days[index];
-          final dayDate = startDate.add(Duration(days: day.dayNumber - 1));
-          //convert to 02 Jan type format
+          final dayDate = localStartDate.add(Duration(days: day.dayNumber - 1));
           final dayDateString = DateFormat('dd MMM').format(dayDate);
           final isSelected = selectedDay == day.dayNumber;
           final isCompleted = dayCompletionStatus?[day.dayNumber] ?? false;
@@ -86,23 +85,21 @@ class DayCarousel extends StatelessWidget {
                       Text(
                         '${day.dayNumber}',
                         style: TextStyle(
-                          fontFamily: fontFamily,
-                          height: lineHeight,
-                          fontSize: fontSize,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          fontFamily: "Inter",
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         dayDateString,
                         style: TextStyle(
-                          fontSize: 10,
-                          fontFamily: fontFamily,
-                          height: lineHeight,
+                          fontSize: 12,
                           fontWeight:
-                              startDate == dayDate
+                              day.dayNumber == 1
                                   ? FontWeight.bold
                                   : FontWeight.normal,
+                          fontFamily: "Inter",
                         ),
                       ),
                     ],

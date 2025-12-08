@@ -19,7 +19,6 @@ export 'data/providers/onboarding_datasource_providers.dart';
 // Presentation Layer - Screens
 export 'presentation/onboarding_screen_1.dart';
 export 'presentation/onboarding_screen_3.dart';
-export 'presentation/onboarding_screen_4.dart';
 export 'presentation/onboarding_screen_5.dart';
 export 'presentation/onboarding_wrapper.dart';
 
@@ -27,5 +26,4 @@ export 'presentation/onboarding_wrapper.dart';
 export 'presentation/widgets/onboarding_question_title.dart';
 export 'presentation/widgets/onboarding_continue_button.dart';
 export 'presentation/widgets/onboarding_radio_option.dart';
-export 'presentation/widgets/onboarding_checkbox_option.dart';
 export 'presentation/widgets/onboarding_back_button.dart';

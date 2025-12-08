@@ -171,7 +171,6 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
           paginationDirection: infiniteQuery.data!.pages[0].paginationDirection,
         );
       } catch (e) {
-        debugPrint("Error creating merged content: $e");
         return null;
       }
     }, [infiniteQuery.data?.pages]);

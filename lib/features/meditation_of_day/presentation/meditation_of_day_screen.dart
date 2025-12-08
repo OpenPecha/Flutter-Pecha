@@ -60,7 +60,6 @@ class _MeditationOfTheDayScreenState extends State<MeditationOfTheDayScreen> {
         await _audioPlayer.play();
       }
     } catch (e) {
-      debugPrint('Error initializing audio player: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

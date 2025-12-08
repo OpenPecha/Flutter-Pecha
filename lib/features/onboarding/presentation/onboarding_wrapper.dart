@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/onboarding/application/onboarding_provider.dart';
 import 'package:flutter_pecha/features/onboarding/presentation/onboarding_screen_1.dart';
 import 'package:flutter_pecha/features/onboarding/presentation/onboarding_screen_3.dart';
-import 'package:flutter_pecha/features/onboarding/presentation/onboarding_screen_4.dart';
 import 'package:flutter_pecha/features/onboarding/presentation/onboarding_screen_5.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_pecha/core/config/router/route_config.dart';
@@ -19,7 +18,6 @@ class OnboardingWrapper extends ConsumerStatefulWidget {
 
 class _OnboardingWrapperState extends ConsumerState<OnboardingWrapper> {
   final PageController _pageController = PageController();
-  final int _totalPages = 4;
 
   @override
   void dispose() {
@@ -85,7 +83,6 @@ class _OnboardingWrapperState extends ConsumerState<OnboardingWrapper> {
             children: [
               OnboardingScreen1(onNext: _nextPage),
               OnboardingScreen3(onNext: _nextPage, onBack: _previousPage),
-              OnboardingScreen4(onNext: _nextPage, onBack: _previousPage),
               OnboardingScreen5(onComplete: _completeOnboarding),
             ],
           ),

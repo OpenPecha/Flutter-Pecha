@@ -101,12 +101,24 @@ class _MyRecitationsTabState extends ConsumerState<MyRecitationsTab> {
     RecitationModel recitation,
     int index,
   ) {
+    // Get the display recitations for navigation context
+    final displayRecitations = _optimisticRecitations ??
+        ref.watch(savedRecitationsFutureProvider).valueOrNull ??
+        [];
+
     return Container(
       key: ValueKey(recitation.textId),
       margin: const EdgeInsets.only(bottom: _itemBottomMargin),
       child: RecitationCard(
         recitation: recitation,
-        onTap: () => context.push('/recitations/detail', extra: recitation),
+        onTap: () => context.push(
+          '/recitations/detail',
+          extra: {
+            'recitation': recitation,
+            'allRecitations': displayRecitations,
+            'currentIndex': index,
+          },
+        ),
         dragIndex: index, // Use list index for drag handle, not displayOrder
       ),
     );

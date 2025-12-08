@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/onboarding/models/onboarding_preferences.dart';
 import 'package:http/http.dart' as http;
+
+final _logger = AppLogger('OnboardingRemoteDatasource');
 
 /// Remote datasource for saving onboarding preferences to backend
 class OnboardingRemoteDatasource {
@@ -12,7 +14,6 @@ class OnboardingRemoteDatasource {
 
   /// Save onboarding preferences to backend
   ///
-  /// TODO: Backend implementation required
   /// Endpoint: POST /api/v1/users/me/onboarding-preferences
   /// Body: JSON with  preferredLanguage, selectedPaths
   /// Returns: Success boolean
@@ -20,7 +21,7 @@ class OnboardingRemoteDatasource {
     try {
       final baseUrl = dotenv.env['BASE_API_URL'];
       if (baseUrl == null) {
-        debugPrint('BASE_API_URL not configured');
+        _logger.warning('BASE_API_URL not configured');
         return false;
       }
 
@@ -34,16 +35,14 @@ class OnboardingRemoteDatasource {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        debugPrint('Onboarding preferences saved to backend successfully');
+        _logger.info('Onboarding preferences saved to backend');
         return true;
       } else {
-        debugPrint(
-          'Failed to save onboarding preferences: ${response.statusCode}',
-        );
+        _logger.warning('Failed to save onboarding preferences: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      debugPrint('Error saving onboarding preferences to backend: $e');
+      _logger.error('Error saving onboarding preferences to backend', e);
       return false;
     }
   }

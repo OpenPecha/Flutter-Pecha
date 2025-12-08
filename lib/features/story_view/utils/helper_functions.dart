@@ -12,6 +12,7 @@ List<StoryItem> createFlutterStoryItems(
   List<UserSubtasksDto> subtasks,
   FlutterStoryController? controller,
   Map<String, dynamic>? nextCard,
+  String? language,
 ) {
   final List<StoryItem> storyItems = [];
   const durationForText = Duration(seconds: 15);
@@ -23,7 +24,14 @@ List<StoryItem> createFlutterStoryItems(
     if (subtask.content.isEmpty) {
       continue;
     }
-
+    final duration =
+        subtask.duration != null
+            ? Duration(
+              hours: int.parse(subtask.duration!.split(':')[0]),
+              minutes: int.parse(subtask.duration!.split(':')[1]),
+              seconds: int.parse(subtask.duration!.split(':')[2]),
+            )
+            : durationForVideo;
     switch (subtask.contentType) {
       case "TEXT":
         storyItems.add(
@@ -33,13 +41,9 @@ List<StoryItem> createFlutterStoryItems(
             customWidget: (controller, audioPlayer) {
               return TextStory(
                 text: subtask.content,
-                textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  decoration: TextDecoration.none,
-                ),
                 roundedTop: true,
                 roundedBottom: true,
+                language: language,
               );
             },
           ),
@@ -47,10 +51,11 @@ List<StoryItem> createFlutterStoryItems(
         break;
       case "VIDEO":
         // Use custom widget for YouTube videos
+        // subtask.duration format is 'HH:MM:SS'
         storyItems.add(
           StoryItem(
             storyItemType: StoryItemType.custom,
-            duration: durationForVideo,
+            duration: duration,
             customWidget: (controller, audioPlayer) {
               return CustomVideoStory(
                 videoUrl: subtask.content,

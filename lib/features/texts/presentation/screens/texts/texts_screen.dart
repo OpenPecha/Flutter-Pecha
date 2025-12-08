@@ -165,7 +165,9 @@ class TextsScreen extends ConsumerWidget {
                               'Unable to load table of contents.\nPlease try again later.',
                         ),
                     data: (contentResponse) {
-                      if (contentResponse.contents[0].sections.length > 1) {
+                      // Safely check bounds before accessing contents[0]
+                      if (contentResponse.contents.isNotEmpty &&
+                          contentResponse.contents[0].sections.length > 1) {
                         return TableOfContents(toc: contentResponse);
                       } else {
                         return Center(child: Text(localizations.no_content));

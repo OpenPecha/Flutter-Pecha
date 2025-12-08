@@ -163,10 +163,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get commentary_total => 'Total';
 
   @override
-  String get show_more => 'Show more';
+  String get show_more => 'མང་བ་བསྟོན།';
 
   @override
-  String get show_less => 'Show less';
+  String get show_less => 'ཉུང་བ་བསྟོན།';
 
   @override
   String get read_more => 'མང་ཙམ་ཀློགས།';
@@ -188,22 +188,44 @@ class AppLocalizationsBo extends AppLocalizations {
   String get loading => 'ལེན་བཞིན་པ་་་';
 
   @override
-  String get choose_image => 'Choose Image';
+  String get choose_image => 'པར་འདེམས།';
 
   @override
-  String get choose_bg_image => 'Choose Your Background Image';
+  String get choose_bg_image => 'རྒྱབས་ངོས་ཀྱི་པར་རིས་འདེམས།';
 
   @override
-  String get create_image => 'Create Image';
+  String get create_image => 'པར་རིས་བཟོས།';
 
   @override
-  String get save => 'Save';
+  String get save => 'ཉར་ཚགས།';
 
   @override
-  String get done => 'བྱས་ཟིན།';
+  String get done => 'འགྲིག';
 
   @override
-  String get download_image => 'Download Image';
+  String get customise_message =>
+      'ཡིག་གཟུགས་སྒྲིག་བཀོད་བྱེད་པར་སྒྲིག་བཀོད་ཀྱི་མཚོན་རྟགས་ལ་གནོན།';
+
+  @override
+  String get download_image => 'པར་རིས་ཕབ་ལེན་བྱེད།';
+
+  @override
+  String get no_images_available => 'འདྲ་པར་མི་འདུག';
+
+  @override
+  String get customise_text => 'ཡི་གེ་སྒྲིག་བཀོད་བྱེད།';
+
+  @override
+  String get text_size => 'ཡིག་གཟུགས་ཆེ་ཆུང་།';
+
+  @override
+  String get text_color => 'ཡིག་གཟུགས་མཚོན་ཁྲ།';
+
+  @override
+  String get text_shadow => 'ཡི་གེའི་གྲིབ་གཟུགས།';
+
+  @override
+  String get apply => 'ཉར་ཚགས།';
 
   @override
   String get practice_nav_title => 'ཉིན་རེ་ཉམས་ལེན།';
@@ -224,7 +246,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get start_plan => 'ཉམས་ལེན་འགོ་འཛུགས།';
 
   @override
-  String get continue_plan => 'Continue Plan';
+  String get continue_plan => 'ཉམས་ལེན་མུ་མཐུད་';
 
   @override
   String get tibetan => 'བོད་ཡིག';
@@ -242,10 +264,16 @@ class AppLocalizationsBo extends AppLocalizations {
   String get language => 'སྐད་ཡིག';
 
   @override
-  String get dailyPracticeNotificationTitle => 'Daily Practice Reminder';
+  String get dailyPracticeNotificationTitle => 'ཉིན་རེའི་ཉམས་ལེན་དྲན་སྐུལ།';
 
   @override
-  String get timeForDailyPractice => 'It\'s time for your daily practice.';
+  String get timeForDailyPractice => 'ཉིན་རེའི་ཉམས་ལེན་བྱེད་རེན་སོང་།';
+
+  @override
+  String get recitation_reminder => 'ཉིན་རེའི་ཞལ་འདོན་དྲན་སྐུལ།';
+
+  @override
+  String get moment_to_pray => 'ཉིན་རེའི་ཞལ་འདོན་བྱེད་རེན་སོང་།';
 
   @override
   String get plan_unenroll => 'ཉམས་ལེན་ནས་ཕྱིར་ཐོན།';
@@ -268,7 +296,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get search_for_plans => 'ཉམས་ལེན་འཚོལ་ཞིབ་བྱེད།';
 
   @override
-  String get no_plans_found => 'No plans found';
+  String get no_plans_found => 'རྙེད་མ་བྱུང།';
+
+  @override
+  String get no_days_available => 'རྙེད་མ་བྱུང།';
 
   @override
   String get notification_turn_on => 'Please turn on Notifications';
@@ -290,19 +321,16 @@ class AppLocalizationsBo extends AppLocalizations {
   String get reminderTime => 'Reminder Time';
 
   @override
-  String get selectTime => 'Select Time';
+  String get selectTime => 'དུས་ཚོད་འདེམ།';
 
   @override
   String get notification_daily_recitation => 'ཞལ་འདོན་དྲན་བརྡ།';
 
   @override
-  String get manageDailyReminders => 'Manage daily reminders';
-
-  @override
   String get text_noContent => 'སྡེ་ཚན་དེའི་ནང་དཔེ་ཆ་མིན་འདུག';
 
   @override
-  String get text_switchToTibetan => 'Switch to Tibetan';
+  String get text_switchToTibetan => ' བོད་སྐད་ཐོག་བལྟ།';
 
   @override
   String get common_sign_in => 'ནང་འཛུལ།';
@@ -323,48 +351,38 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_search_for => 'ཞལ་འདོན་འཚོལ་ཞིབ་བྱེད།';
 
   @override
-  String get recitations_no_found => 'No recitations found';
+  String get recitations_no_found => 'རྙེད་མ་བྱུང།';
 
   @override
-  String get recitations_saved => 'Recitation saved';
+  String get recitations_saved => 'ཞལ་འདོན་ཉར་ཚགས་བྱས་ཚར།';
 
   @override
-  String get recitations_unsaved => 'Recitation removed';
+  String get recitations_unsaved => 'རང་ཉིད་ཀྱི་ཞལ་འདོན་ནས་ཕྱིར་ཐན་བྱས་ཚར།';
 
   @override
-  String get recitations_no_content => 'No recitations available';
+  String get recitations_no_content => 'རྙེད་མ་བྱུང།';
 
   @override
   String get recitations_no_saved => 'ཞལ་འདོན་ཉར་ཚག་བྱས་མིན་འདུག';
 
   @override
-  String get recitations_save_prompt => 'Save recitations to access them here';
-
-  @override
-  String get recitations_login_required => 'Login Required';
-
-  @override
   String get recitations_login_prompt =>
-      'Sign in to view your saved recitations';
+      'རང་ཉིད་ཀྱི་ཞལ་འདོན་བལྟ་ཆེད་ནང་འཛུལ་གྱིས།';
 
   @override
-  String get recitations_save => 'Save Recitation';
+  String get recitations_save => 'རང་ཉིད་ཀྱི་ཞལ་འདོན་ནང་ཉར་ཚགས་བྱེད།';
 
   @override
-  String get recitations_unsave => 'Unsave recitation';
-
-  @override
-  String get recitations_phonetic => 'Phonetic';
+  String get recitations_unsave => 'རང་ཉིད་ཀྱི་ཞལ་འདོན་ནས་ཕྱིར་ཐན་བྱེད།';
 
   @override
   String get recitations_translation => 'Translation';
 
   @override
-  String get no_availabel => 'Not available';
+  String get no_available => 'རྙེད་མ་བྱུང།';
 
   @override
-  String get recitations_no_data_message =>
-      'The content for this recitation is currently not available.\nPlease check back later.';
+  String get recitations_no_data_message => 'ཞལ་འདོན་རྙེད་མ་བྱུང་།';
 
   @override
   String get recitations_show_translation => 'ཡིག་སྒྱུར་མཐོང་།';
@@ -391,6 +409,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get recitations_hide_adaptation => 'བསྒྱུར་བཅོས་སྦས།';
 
   @override
+  String get next_recitation => 'རྗེས་མ།';
+
+  @override
   String get settings_appearance => 'རྣམ་པ།';
 
   @override
@@ -406,7 +427,8 @@ class AppLocalizationsBo extends AppLocalizations {
   String get select_language => 'སྐད་ཡིག་འདེམས།';
 
   @override
-  String get logout_confirmation => 'Are you sure you want to log out?';
+  String get logout_confirmation =>
+      'ཁྱེད་རང་ཕྱིར་འཐོན་བྱ་རྒྱུ་བཏན་འཁེལ་ཡིན་ནམ།';
 
   @override
   String get cancel => 'རྩིས་མེད།';

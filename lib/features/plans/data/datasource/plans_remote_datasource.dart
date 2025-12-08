@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/plans/models/plans_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -42,6 +42,7 @@ class PlansQueryParams {
 class PlansRemoteDatasource {
   final http.Client client;
   final String baseUrl = dotenv.env['BASE_API_URL']!;
+  final _logger = AppLogger('PlansRemoteDatasource');
 
   PlansRemoteDatasource({required this.client});
 
@@ -65,11 +66,11 @@ class PlansRemoteDatasource {
         final List<dynamic> jsonData = responseData['plans'] as List<dynamic>;
         return jsonData.map((json) => PlansModel.fromJson(json)).toList();
       } else {
-        debugPrint('Failed to load plans: ${response.statusCode}');
+        _logger.error('Failed to load plans: ${response.statusCode}');
         throw Exception('Failed to load plans: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Error in fetchPlans: $e');
+      _logger.error('Error in fetchPlans', e);
       throw Exception('Failed to load plans: $e');
     }
   }

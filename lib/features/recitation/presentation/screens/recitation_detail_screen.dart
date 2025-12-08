@@ -10,6 +10,7 @@ import 'package:flutter_pecha/features/recitation/presentation/providers/recitat
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_content.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_error_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Screen that displays the detailed content of a recitation.
 ///
@@ -18,18 +19,91 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// - Allows authenticated users to save/unsave recitations
 /// - Displays content in a language-appropriate order
 /// - Handles loading and error states
-class RecitationDetailScreen extends ConsumerWidget {
+/// - Supports navigation to next recitation when provided with a list
+class RecitationDetailScreen extends ConsumerStatefulWidget {
   final RecitationModel recitation;
+  final List<RecitationModel>? allRecitations;
+  final int? currentIndex;
 
-  const RecitationDetailScreen({super.key, required this.recitation});
+  const RecitationDetailScreen({
+    super.key,
+    required this.recitation,
+    this.allRecitations,
+    this.currentIndex,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecitationDetailScreen> createState() =>
+      _RecitationDetailScreenState();
+}
+
+class _RecitationDetailScreenState
+    extends ConsumerState<RecitationDetailScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showNextButton = false;
+  bool _isNavigating = false;
+  bool _hasCheckedScroll = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant RecitationDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset state when navigating to a different recitation
+    if (oldWidget.currentIndex != widget.currentIndex ||
+        oldWidget.recitation.textId != widget.recitation.textId) {
+      _isNavigating = false;
+      _showNextButton = false;
+      _hasCheckedScroll = false;
+      // Scroll to top for new recitation
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isNavigating) return;
+
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+
+    bool shouldShow;
+
+    if (maxScroll == 0) {
+      shouldShow = _hasNextRecitation();
+    } else if (maxScroll < 200) {
+      shouldShow = currentScroll >= maxScroll * 0.7 && _hasNextRecitation();
+    } else {
+      shouldShow = currentScroll >= maxScroll - 100 && _hasNextRecitation();
+    }
+
+    if (shouldShow != _showNextButton) {
+      setState(() {
+        _showNextButton = shouldShow;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userLanguageCode = ref.watch(
       localeProvider.select((locale) => locale.languageCode),
     );
 
-    final effectiveLanguageCode = recitation.language ?? userLanguageCode;
+    final effectiveLanguageCode =
+        widget.recitation.language ?? userLanguageCode;
 
     final isGuest = ref.watch(authProvider.select((state) => state.isGuest));
     final isSaved = _checkIfSaved(ref, isGuest);
@@ -39,7 +113,7 @@ class RecitationDetailScreen extends ConsumerWidget {
 
     final recitationParams = RecitationLanguageConfig.getContentParams(
       effectiveLanguageCode,
-      recitation.textId,
+      widget.recitation.textId,
     );
     final contentOrder = RecitationLanguageConfig.getContentOrder(
       effectiveLanguageCode,
@@ -64,13 +138,23 @@ class RecitationDetailScreen extends ConsumerWidget {
     final isContentLoaded =
         contentAsync.hasValue && !contentAsync.value!.isEmpty;
 
+    // Trigger scroll check once when content loads
+    if (isContentLoaded && !_isNavigating && !_hasCheckedScroll) {
+      _hasCheckedScroll = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _onScroll();
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _handleBackNavigation(context),
+        ),
         actions: [
-          // Only show toggle icons when content is loaded
           if (isContentLoaded) ...[
-            // Second segment toggle
             if (secondContentType != null)
               IconButton(
                 onPressed:
@@ -90,7 +174,6 @@ class RecitationDetailScreen extends ConsumerWidget {
                   localizations,
                 ),
               ),
-            // Third segment toggle
             if (thirdContentType != null)
               IconButton(
                 onPressed:
@@ -109,7 +192,6 @@ class RecitationDetailScreen extends ConsumerWidget {
                 ),
               ),
           ],
-          // Save/unsave toggle (always visible)
           IconButton(
             onPressed: () => _handleSaveToggle(context, ref, isSaved),
             icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
@@ -120,21 +202,100 @@ class RecitationDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: contentAsync.when(
-        data: (content) {
-          if (content.isEmpty) {
-            return _buildEmptyContentState(context, content.title);
-          }
+      body: Stack(
+        children: [
+          contentAsync.when(
+            data: (content) {
+              if (content.isEmpty) {
+                return _buildEmptyContentState(context, content.title);
+              }
 
-          return RecitationContent(
-            content: content,
-            contentOrder: filteredContentOrder,
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => RecitationErrorState(error: error),
+              return RecitationContent(
+                content: content,
+                contentOrder: filteredContentOrder,
+                scrollController: _scrollController,
+                language: effectiveLanguageCode,
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => RecitationErrorState(error: error),
+          ),
+        ],
+      ),
+      floatingActionButton:
+          _showNextButton
+              ? _buildFloatingNextButton(context, localizations)
+              : null,
+    );
+  }
+
+  /// Checks if there's a next recitation available.
+  bool _hasNextRecitation() {
+    if (widget.allRecitations == null || widget.currentIndex == null) {
+      return false;
+    }
+    return widget.currentIndex! < widget.allRecitations!.length - 1;
+  }
+
+  /// Builds the floating next recitation button.
+  Widget _buildFloatingNextButton(
+    BuildContext context,
+    AppLocalizations localizations,
+  ) {
+    final localizations = AppLocalizations.of(context)!;
+    return AnimatedOpacity(
+      opacity: _showNextButton ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 200),
+      child: FloatingActionButton.extended(
+        onPressed: () => _navigateToNextRecitation(context),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSecondary,
+        elevation: 4,
+        icon: const Icon(Icons.arrow_forward, size: 18),
+        label: Text(
+          localizations.next_recitation,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
       ),
     );
+  }
+
+  /// Navigates to the next recitation.
+  void _navigateToNextRecitation(BuildContext context) {
+    if (!_hasNextRecitation() || _isNavigating) return;
+
+    // Hide button immediately during navigation
+    setState(() {
+      _isNavigating = true;
+      _showNextButton = false;
+    });
+
+    final nextIndex = widget.currentIndex! + 1;
+    final nextRecitation = widget.allRecitations![nextIndex];
+
+    // Replace current route with next recitation
+    context.go(
+      '/recitations/detail',
+      extra: {
+        'recitation': nextRecitation,
+        'allRecitations': widget.allRecitations,
+        'currentIndex': nextIndex,
+      },
+    );
+  }
+
+  /// Handles back navigation.
+  /// If navigated from My Recitations with a list, goes back to recitations screen.
+  /// Otherwise, uses default back behavior.
+  void _handleBackNavigation(BuildContext context) {
+    // If we have a list context, we came from My Recitations tab
+    // Go back to home/recitations screen
+    if (widget.allRecitations != null && widget.currentIndex != null) {
+      context.go('/home');
+    } else {
+      // Default back behavior for other entry points (search, browse)
+      context.pop();
+    }
   }
 
   /// Returns the appropriate icon for a content type.
@@ -187,11 +348,8 @@ class RecitationDetailScreen extends ConsumerWidget {
         .entries
         .where((entry) {
           final index = entry.key;
-          // Always show the first segment (primary content)
           if (index == 0) return true;
-          // Toggle for second segment
           if (index == 1 && !showSecondSegment) return false;
-          // Toggle for third segment
           if (index == 2 && !showThirdSegment) return false;
           return true;
         })
@@ -209,14 +367,14 @@ class RecitationDetailScreen extends ConsumerWidget {
     final savedRecitationIds =
         savedRecitationsAsync.valueOrNull?.map((e) => e.textId).toSet() ?? {};
 
-    return savedRecitationIds.contains(recitation.textId);
+    return savedRecitationIds.contains(widget.recitation.textId);
   }
 
   /// Handles the save/unsave toggle action.
   void _handleSaveToggle(BuildContext context, WidgetRef ref, bool isSaved) {
     final controller = RecitationSaveController(ref: ref, context: context);
 
-    controller.toggleSave(textId: recitation.textId, isSaved: isSaved);
+    controller.toggleSave(textId: widget.recitation.textId, isSaved: isSaved);
   }
 
   /// Builds a user-friendly empty state when recitation content is not available.
@@ -231,7 +389,7 @@ class RecitationDetailScreen extends ConsumerWidget {
             Icon(Icons.menu_book_outlined, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
-              localizations.no_availabel,
+              localizations.no_available,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(color: Colors.grey[700]),

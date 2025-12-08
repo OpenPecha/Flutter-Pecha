@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_pecha/features/texts/models/collections/collections_response.dart';
 import 'package:flutter_pecha/features/texts/models/search/search.dart';
 import 'package:flutter_pecha/features/texts/models/search/source_result_item.dart';

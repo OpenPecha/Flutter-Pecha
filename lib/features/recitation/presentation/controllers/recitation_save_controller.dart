@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// - Error handling and user feedback
 /// - Provider invalidation after operations
 class RecitationSaveController {
+  final _logger = AppLogger('RecitationSaveController');
   final WidgetRef ref;
   final BuildContext context;
 
@@ -48,8 +50,11 @@ class RecitationSaveController {
       ref.invalidate(savedRecitationsFutureProvider);
     } catch (e, stackTrace) {
       // Log error for debugging
-      debugPrint('Error ${isSaved ? 'unsaving' : 'saving'} recitation: $e');
-      debugPrint('Stack trace: $stackTrace');
+      _logger.error(
+        'Error ${isSaved ? 'unsaving' : 'saving'} recitation',
+        e,
+        stackTrace,
+      );
 
       // Show user-friendly error message
       _showErrorSnackBar(isSaved);
