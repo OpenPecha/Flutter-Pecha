@@ -114,15 +114,14 @@ class NotificationService {
           );
 
       // Test notification channel
-      const AndroidNotificationChannel testChannel =
-          AndroidNotificationChannel(
-            'test_notification',
-            'Test Notifications',
-            description: 'For testing notifications',
-            importance: Importance.high,
-            playSound: true,
-            enableVibration: true,
-          );
+      const AndroidNotificationChannel testChannel = AndroidNotificationChannel(
+        'test_notification',
+        'Test Notifications',
+        description: 'For testing notifications',
+        importance: Importance.high,
+        playSound: true,
+        enableVibration: true,
+      );
 
       // Create all channels
       await androidImplementation.createNotificationChannel(
@@ -205,10 +204,10 @@ class NotificationService {
     if (_router != null && _container != null) {
       // Check notification ID to determine which tab to open
       if (response.id == recitationNotificationId) {
-        // Recitation notification - go to recitation tab (index 2)
-        _container!.read(bottomNavIndexProvider.notifier).state = 2;
+        // Recitation notification - go to recitation tab (index 1, was 2 before home hidden)
+        _container!.read(bottomNavIndexProvider.notifier).state = 1;
       } else {
-        // Daily practice or default - go to home tab (index 0)
+        // Daily practice or default - go to texts tab (index 0, home is hidden)
         _container!.read(bottomNavIndexProvider.notifier).state = 0;
       }
       _router!.go('/home');
