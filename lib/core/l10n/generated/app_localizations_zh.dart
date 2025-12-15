@@ -443,6 +443,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get image => '圖片';
 
   @override
+  String get feedback => 'Feedback';
+
+  @override
+  String get feedback_wishlist => 'Feedback and Wishlist';
+
+  @override
   String get author => 'Author';
 
   @override

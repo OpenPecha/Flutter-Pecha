@@ -301,7 +301,6 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
 
     return Container(
       key: Key(segment.segmentId),
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -326,7 +325,7 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
             }
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color:
                   isSelected
@@ -343,7 +342,7 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: SizedBox(
-                    width: 30,
+                    width: 20,
                     child: Text(
                       segmentNumber,
                       textAlign: TextAlign.left,
@@ -355,7 +354,6 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
                 // Segment content
                 Expanded(
                   child: SegmentHtmlWidget(

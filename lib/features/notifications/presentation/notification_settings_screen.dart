@@ -218,46 +218,46 @@ class _NotificationSettingsScreenState
               SizedBox(height: 16),
             ],
             if (hasPermission) ...[
-              Card(
-                color: Theme.of(context).cardColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SwitchListTile(
-                        activeTrackColor: Theme.of(context).colorScheme.primary,
-                        inactiveTrackColor: Colors.grey,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 0,
-                        ),
-                        title: Text(
-                          localizations.notification_daily_practice,
-                          style: TextStyle(fontSize: titleFontSize),
-                        ),
-                        value: isEnabled,
-                        onChanged: (v) => _toggleNotifications(v, selectedTime),
-                      ),
-                      if (isEnabled) ...[
-                        ListTile(
-                          title: Text(
-                            localizations.notification_select_time,
-                            style: TextStyle(fontSize: subtitleFontSize),
-                          ),
-                          subtitle: Text(
-                            selectedTime.format(context),
-                            style: TextStyle(fontSize: bodyFontSize),
-                          ),
-                          trailing: const Icon(Icons.access_time),
-                          onTap: () => _selectTime(context, selectedTime),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+              // Card(
+              //   color: Theme.of(context).cardColor,
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(8.0),
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         SwitchListTile(
+              //           activeTrackColor: Theme.of(context).colorScheme.primary,
+              //           inactiveTrackColor: Colors.grey,
+              //           contentPadding: const EdgeInsets.symmetric(
+              //             horizontal: 16,
+              //             vertical: 0,
+              //           ),
+              //           title: Text(
+              //             localizations.notification_daily_practice,
+              //             style: TextStyle(fontSize: titleFontSize),
+              //           ),
+              //           value: isEnabled,
+              //           onChanged: (v) => _toggleNotifications(v, selectedTime),
+              //         ),
+              //         if (isEnabled) ...[
+              //           ListTile(
+              //             title: Text(
+              //               localizations.notification_select_time,
+              //               style: TextStyle(fontSize: subtitleFontSize),
+              //             ),
+              //             subtitle: Text(
+              //               selectedTime.format(context),
+              //               style: TextStyle(fontSize: bodyFontSize),
+              //             ),
+              //             trailing: const Icon(Icons.access_time),
+              //             onTap: () => _selectTime(context, selectedTime),
+              //           ),
+              //         ],
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
               Card(
                 color: Theme.of(context).cardColor,
                 child: Padding(

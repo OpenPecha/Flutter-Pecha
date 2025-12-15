@@ -6,7 +6,7 @@ class FontSizeNotifier extends StateNotifier<double> {
   final LocalStorageService _localStorageService;
   FontSizeNotifier({required LocalStorageService localStorageService})
     : _localStorageService = localStorageService,
-      super(22.0) {
+      super(18.0) {
     _loadFontSize();
   }
 
@@ -14,7 +14,7 @@ class FontSizeNotifier extends StateNotifier<double> {
     final fontSize = await _localStorageService.get<double>(
       AppStorageKeys.fontSize,
     );
-    state = fontSize ?? 22.0;
+    state = fontSize ?? 18.0;
   }
 
   Future<void> setFontSize(double size) async {

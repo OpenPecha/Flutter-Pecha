@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/features/texts/models/collections/collections.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CollectionsSection extends ConsumerWidget {
-  final String title;
-  final String subtitle;
+  final Collections collection;
   final Color dividerColor;
-  final String slug;
 
   const CollectionsSection({
     super.key,
-    required this.title,
-    required this.subtitle,
+    required this.collection,
     required this.dividerColor,
-    required this.slug,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
-    final fontFamily = getFontFamily(locale.languageCode);
-    final lineHeight = getLineHeight(locale.languageCode);
-    final fontSize = locale.languageCode == 'bo' ? 26.0 : 22.0;
+    final fontFamily = getFontFamily(collection.language);
+    final lineHeight = getLineHeight(collection.language);
+    final fontSize = 22.0;
     return Card(
       color: Colors.transparent,
       elevation: 0,
@@ -34,7 +29,7 @@ class CollectionsSection extends ConsumerWidget {
           Divider(color: dividerColor, thickness: 3, height: 4),
           const SizedBox(height: 8),
           Text(
-            title,
+            collection.title,
             style: TextStyle(
               fontFamily: fontFamily,
               height: lineHeight,
@@ -42,9 +37,9 @@ class CollectionsSection extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 2),
-          if (subtitle.isNotEmpty)
+          if (collection.description.isNotEmpty)
             Text(
-              subtitle,
+              collection.description,
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 16.0,

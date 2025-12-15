@@ -7,7 +7,7 @@ class FontSizeSelector extends ConsumerWidget {
   final String language;
 
   // Base font size (100% = 16px)
-  double get baseFontSize => language == 'bo' ? 26.0 : 22.0;
+  double get baseFontSize => language == 'bo' ? 22.0 : 22.0;
 
   // Industry standard font size percentages
   static const List<double> fontSizePercentages = [100, 150, 200, 250];

@@ -136,18 +136,13 @@ class _CollectionsListView extends StatelessWidget {
               onTap: () {
                 context.push(
                   TextRoutes.works,
-                  extra: {
-                    'collection': collection,
-                    'colorIndex': colorIndex,
-                  },
+                  extra: {'collection': collection, 'colorIndex': colorIndex},
                 );
               },
               child: CollectionsSection(
-                title: collection.title,
-                subtitle: collection.description,
+                collection: collection,
                 dividerColor:
                     TextScreenConstants.collectionCyclingColors[colorIndex],
-                slug: collection.slug,
               ),
             );
           },

@@ -446,6 +446,12 @@ class AppLocalizationsBo extends AppLocalizations {
   String get image => 'འདྲ་པར།';
 
   @override
+  String get feedback => 'དགོངས་འཆར།';
+
+  @override
+  String get feedback_wishlist => 'དགོངས་འཆར་དང་རེ་འདུན།';
+
+  @override
   String get author => 'རྩོམ་སྒྲིག་པ།';
 
   @override

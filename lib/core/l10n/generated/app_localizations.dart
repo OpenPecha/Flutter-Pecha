@@ -952,6 +952,18 @@ abstract class AppLocalizations {
   /// **'Image'**
   String get image;
 
+  /// No description provided for @feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedback;
+
+  /// No description provided for @feedback_wishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback and Wishlist'**
+  String get feedback_wishlist;
+
   /// No description provided for @author.
   ///
   /// In en, this message translates to:

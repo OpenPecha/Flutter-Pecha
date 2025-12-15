@@ -88,7 +88,7 @@ class TextsScreen extends ConsumerWidget {
 
   Widget _buildTextHeader(BuildContext context, Texts text) {
     final language = text.language ?? '';
-    final fontSize = 24.0;
+    final fontSize = 22.0;
     return Row(
       children: [
         Expanded(
