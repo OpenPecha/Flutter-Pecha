@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_story_presenter/flutter_story_presenter.dart';
 
 class CustomWidgetStory extends StatefulWidget {
@@ -35,6 +36,8 @@ class _CustomWidgetStoryState extends State<CustomWidgetStory> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final fontFamily = getFontFamily(locale.languageCode);
     // Create the card visual
     return Container(
       width: double.infinity,
@@ -53,7 +56,7 @@ class _CustomWidgetStoryState extends State<CustomWidgetStory> {
             child: Container(
               // Add explicit size constraints
               width: double.infinity,
-              constraints: const BoxConstraints(minHeight: 150),
+              constraints: const BoxConstraints(minHeight: 100),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 border: Border.all(
@@ -68,23 +71,17 @@ class _CustomWidgetStoryState extends State<CustomWidgetStory> {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          widget.heading,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Instrument Serif',
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
                           widget.title,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontFamily: fontFamily,
                             fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.none,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -96,9 +93,12 @@ class _CustomWidgetStoryState extends State<CustomWidgetStory> {
                             const SizedBox(width: 4),
                             Text(
                               widget.subtitle,
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: fontFamily,
                                 fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -111,7 +111,7 @@ class _CustomWidgetStoryState extends State<CustomWidgetStory> {
                     borderRadius: BorderRadius.circular(16),
                     child: SizedBox(
                       width: 122,
-                      height: 122,
+                      height: 100,
                       child: widget.iconWidget,
                     ),
                   ),
