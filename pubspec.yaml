@@ -74,6 +74,11 @@ dependencies:
   equatable: ^2.0.7
   cached_network_image: ^3.4.1
   google_fonts: ^6.2.1
+  # Local caching
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  # Network connectivity
+  connectivity_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:
