@@ -11,6 +11,7 @@ class ChatState {
   final String currentStreamingContent;
   final List<SearchResult> currentSearchResults;
   final String? error;
+  final String? currentThreadId;
 
   ChatState({
     this.messages = const [],
@@ -18,6 +19,7 @@ class ChatState {
     this.currentStreamingContent = '',
     this.currentSearchResults = const [],
     this.error,
+    this.currentThreadId,
   });
 
   ChatState copyWith({
@@ -26,6 +28,7 @@ class ChatState {
     String? currentStreamingContent,
     List<SearchResult>? currentSearchResults,
     String? error,
+    String? currentThreadId,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -33,6 +36,7 @@ class ChatState {
       currentStreamingContent: currentStreamingContent ?? this.currentStreamingContent,
       currentSearchResults: currentSearchResults ?? this.currentSearchResults,
       error: error,
+      currentThreadId: currentThreadId ?? this.currentThreadId,
     );
   }
 }
@@ -125,6 +129,53 @@ class ChatController extends StateNotifier<ChatState> {
         error: e.toString(),
       );
     }
+  }
+
+  /// Load a thread by ID
+  Future<void> loadThread(String threadId) async {
+    _logger.info('Loading thread: $threadId');
+    
+    try {
+      // Cancel any ongoing stream
+      await _streamSubscription?.cancel();
+      
+      // Set loading state
+      state = state.copyWith(
+        isStreaming: false,
+        currentStreamingContent: '',
+        error: null,
+      );
+
+      // Fetch thread details
+      final thread = await _repository.getThreadById(threadId);
+      
+      // Convert thread messages to chat messages
+      final chatMessages = thread.toChatMessages();
+      
+      // Update state with loaded messages
+      state = state.copyWith(
+        messages: chatMessages,
+        currentThreadId: threadId,
+      );
+      
+      _logger.info('Loaded thread with ${chatMessages.length} messages');
+    } catch (e, stackTrace) {
+      _logger.error('Error loading thread', e, stackTrace);
+      state = state.copyWith(
+        error: 'Failed to load conversation: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Start a new thread (clear current conversation)
+  void startNewThread() {
+    _logger.info('Starting new thread');
+    
+    // Cancel any ongoing stream
+    _streamSubscription?.cancel();
+    
+    // Clear all state
+    state = ChatState();
   }
 
   /// Clears the error message

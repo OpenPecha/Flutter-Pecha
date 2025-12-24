@@ -1,6 +1,8 @@
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/ai/data/datasource/ai_chat_remote_datasource.dart';
+import 'package:flutter_pecha/features/ai/data/datasource/thread_datasource_dummy.dart';
 import 'package:flutter_pecha/features/ai/models/chat_message.dart';
+import 'package:flutter_pecha/features/ai/models/chat_thread.dart';
 
 /// Event types emitted by the chat stream
 abstract class ChatStreamEvent {}
@@ -24,9 +26,10 @@ class ErrorEvent extends ChatStreamEvent {
 
 class AiChatRepository {
   final AiChatRemoteDatasource _datasource;
+  final ThreadDatasourceDummy _threadDatasource;
   final _logger = AppLogger('AiChatRepository');
 
-  AiChatRepository(this._datasource);
+  AiChatRepository(this._datasource, this._threadDatasource);
 
   /// Sends a message and returns a stream of chat events
   Stream<ChatStreamEvent> sendMessage(String message) async* {
@@ -65,6 +68,31 @@ class AiChatRepository {
     } catch (e, stackTrace) {
       _logger.error('Error in chat stream', e, stackTrace);
       yield ErrorEvent(e.toString());
+    }
+  }
+
+  /// Get list of threads
+  Future<ThreadListResponse> getThreads({
+    int skip = 0,
+    int limit = 20,
+  }) async {
+    try {
+      _logger.info('Fetching threads (skip: $skip, limit: $limit)');
+      return await _threadDatasource.getThreads(skip: skip, limit: limit);
+    } catch (e, stackTrace) {
+      _logger.error('Error fetching threads', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Get specific thread by ID
+  Future<ChatThreadDetail> getThreadById(String threadId) async {
+    try {
+      _logger.info('Fetching thread: $threadId');
+      return await _threadDatasource.getThreadById(threadId);
+    } catch (e, stackTrace) {
+      _logger.error('Error fetching thread $threadId', e, stackTrace);
+      rethrow;
     }
   }
 }

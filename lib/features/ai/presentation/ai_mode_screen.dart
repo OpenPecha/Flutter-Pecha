@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/ai/presentation/controllers/chat_controller.dart';
+import 'package:flutter_pecha/features/ai/presentation/controllers/thread_list_controller.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/chat_header.dart';
+import 'package:flutter_pecha/features/ai/presentation/widgets/chat_history_drawer.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/message_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +17,7 @@ class AiModeScreen extends ConsumerStatefulWidget {
 class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<String> _suggestions = [
     'What is self ?',
     'How one can attain enlightenment ?',
@@ -45,6 +48,8 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   }
 
   void _onSuggestionTap(String suggestion) {
+    // Don't focus the text field when tapping suggestions
+    _focusNode.unfocus();
     _sendMessage(suggestion);
   }
 
@@ -61,8 +66,17 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   }
 
   void _onNewChat() {
-    // Reset the chat by creating a new controller instance
-    ref.invalidate(chatControllerProvider);
+    // Unfocus to prevent keyboard from appearing
+    _focusNode.unfocus();
+    // Start new thread
+    ref.read(chatControllerProvider.notifier).startNewThread();
+    // Refresh thread list to show the new thread (when API is integrated)
+    ref.read(threadListControllerProvider.notifier).refreshThreads();
+  }
+
+  void _onMenuPressed() {
+    // Open the drawer
+    _scaffoldKey.currentState?.openDrawer();
   }
 
   @override
@@ -92,25 +106,32 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
     }
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      drawer: const ChatHistoryDrawer(),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
           child: Column(
             children: [
-              // Show header only when in chat mode
-              if (hasMessages) ChatHeader(onNewChat: _onNewChat),
+              // Show full header when in chat mode, minimal header in empty state
+              if (hasMessages)
+                ChatHeader(onNewChat: _onNewChat, onMenuPressed: _onMenuPressed)
+              else
+                _buildMinimalHeader(isDarkMode),
 
               // Main content area
               Expanded(
-                child: hasMessages
-                    ? MessageList(
-                        messages: chatState.messages,
-                        isStreaming: chatState.isStreaming,
-                        currentStreamingContent: chatState.currentStreamingContent,
-                      )
-                    : _buildEmptyState(isDarkMode),
+                child:
+                    hasMessages
+                        ? MessageList(
+                          messages: chatState.messages,
+                          isStreaming: chatState.isStreaming,
+                          currentStreamingContent:
+                              chatState.currentStreamingContent,
+                        )
+                        : _buildEmptyState(isDarkMode),
               ),
 
               // Bottom input section
@@ -118,6 +139,49 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Build the minimal header for the empty state. Starting State for the app.
+  Widget _buildMinimalHeader(bool isDarkMode) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(
+          bottom: BorderSide(
+            color: isDarkMode ? AppColors.grey800 : AppColors.grey100,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: _onMenuPressed,
+            icon: Icon(
+              Icons.menu_sharp,
+              color:
+                  isDarkMode
+                      ? AppColors.surfaceWhite
+                      : AppColors.cardBorderDark,
+            ),
+            tooltip: 'Chat History',
+          ),
+          Text(
+            'Buddhist AI Assistant',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color:
+                  isDarkMode ? AppColors.surfaceWhite : AppColors.textPrimary,
+            ),
+          ),
+          // Invisible spacer to balance the layout
+          const SizedBox(width: 48),
+        ],
       ),
     );
   }
@@ -146,53 +210,43 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                 crossAxisAlignment: WrapCrossAlignment.start,
                 spacing: 8,
                 runSpacing: 8,
-                children: _suggestions.map((s) {
-                  return InkWell(
-                    onTap: () => _onSuggestionTap(s),
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? AppColors.surfaceVariantDark
-                            : AppColors.grey100,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: isDarkMode
-                              ? AppColors.grey500
-                              : AppColors.grey100,
-                          width: 1,
+                children:
+                    _suggestions.map((s) {
+                      return InkWell(
+                        onTap: () => _onSuggestionTap(s),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline,
+                                size: 15,
+                                color:
+                                    isDarkMode
+                                        ? AppColors.surfaceWhite
+                                        : AppColors.grey800,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                s,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  // fontWeight: FontWeight.w500,
+                                  color:
+                                      isDarkMode
+                                          ? AppColors.surfaceWhite
+                                          : AppColors.grey800,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.lightbulb_outline,
-                            size: 20,
-                            color: isDarkMode
-                                ? AppColors.surfaceWhite
-                                : AppColors.grey800,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            s,
-                            style: TextStyle(
-                              fontSize: 13,
-                              // fontWeight: FontWeight.w500,
-                              color: isDarkMode
-                                  ? AppColors.surfaceWhite
-                                  : AppColors.grey800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
           ],
@@ -203,17 +257,12 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
 
   Widget _buildInputSection(bool isDarkMode) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? AppColors.surfaceVariantDark
-                  : Colors.white,
+              color: isDarkMode ? AppColors.surfaceVariantDark : Colors.white,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
@@ -224,15 +273,17 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                     controller: _controller,
                     focusNode: _focusNode,
                     autofocus: false,
+                    enableInteractiveSelection: true,
                     maxLines: null,
                     minLines: 1,
                     textInputAction: TextInputAction.newline,
                     decoration: InputDecoration(
-                      hintText: 'Ask a question....',
+                      hintText: 'Ask a question ...',
                       hintStyle: TextStyle(
-                        color: isDarkMode
-                            ? AppColors.textSubtleDark
-                            : AppColors.grey500,
+                        color:
+                            isDarkMode
+                                ? AppColors.textSubtleDark
+                                : AppColors.grey500,
                         fontSize: 15,
                       ),
                       border: InputBorder.none,
@@ -242,9 +293,10 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                       ),
                     ),
                     style: TextStyle(
-                      color: isDarkMode
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimary,
+                      color:
+                          isDarkMode
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -254,13 +306,14 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                     onPressed: _hasText ? _onSendMessage : null,
                     icon: Icon(
                       Icons.send_rounded,
-                      color: _hasText
-                          ? (isDarkMode
-                              ? Colors.white
-                              : AppColors.backgroundDark)
-                          : (isDarkMode
-                              ? AppColors.grey500
-                              : AppColors.grey800),
+                      color:
+                          _hasText
+                              ? (isDarkMode
+                                  ? Colors.white
+                                  : AppColors.backgroundDark)
+                              : (isDarkMode
+                                  ? AppColors.grey500
+                                  : AppColors.grey800),
                       size: 22,
                     ),
                   ),

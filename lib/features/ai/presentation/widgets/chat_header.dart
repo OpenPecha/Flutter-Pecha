@@ -3,10 +3,12 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 class ChatHeader extends StatelessWidget {
   final VoidCallback? onNewChat;
+  final VoidCallback? onMenuPressed;
 
   const ChatHeader({
     super.key,
     this.onNewChat,
+    this.onMenuPressed,
   });
 
   @override
@@ -25,21 +27,22 @@ class ChatHeader extends StatelessWidget {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(
-            Icons.auto_awesome,
-            size: 24,
-            color: isDarkMode ? AppColors.surfaceWhite : AppColors.backgroundDark,
+          IconButton(
+            onPressed: onMenuPressed,
+            icon: Icon(
+              Icons.menu_sharp,
+              color: isDarkMode ? AppColors.surfaceWhite : AppColors.cardBorderDark,
+            ),
+            tooltip: 'Chat History',
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Buddhist AI Assistant',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? AppColors.surfaceWhite : AppColors.textPrimary,
-              ),
+          Text(
+            'Buddhist AI Assistant',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? AppColors.surfaceWhite : AppColors.textPrimary,
             ),
           ),
           if (onNewChat != null)
@@ -47,7 +50,7 @@ class ChatHeader extends StatelessWidget {
               onPressed: onNewChat,
               icon: Icon(
                 Icons.add,
-                color: isDarkMode ? AppColors.surfaceWhite : AppColors.grey800,
+                color: isDarkMode ? AppColors.surfaceWhite : AppColors.cardBorderDark,
               ),
               tooltip: 'New Chat',
             ),
@@ -56,4 +59,3 @@ class ChatHeader extends StatelessWidget {
     );
   }
 }
-
