@@ -450,4 +450,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get plans_created => 'ཉམས་ལེན་ཁག';
+
+  @override
+  String get nav_ai_mode => 'རིག་ནུས་';
 }

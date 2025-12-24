@@ -963,6 +963,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plan created'**
   String get plans_created;
+
+  /// No description provided for @nav_ai_mode.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get nav_ai_mode;
 }
 
 class _AppLocalizationsDelegate

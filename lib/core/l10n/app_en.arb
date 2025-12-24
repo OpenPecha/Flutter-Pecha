@@ -148,5 +148,8 @@
   "image": "Image",
 
   "author": "Author",
-  "plans_created": "Plan created"
+  "plans_created": "Plan created",
+
+  "nav_settings": "Settings",
+  "nav_ai_mode": "AI"
 }

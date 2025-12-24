@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/home/presentation/home_screen.dart';
 import 'package:flutter_pecha/features/more/presentation/more_screen.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
+import 'package:flutter_pecha/features/ai/presentation/ai_mode_screen.dart';
 
 /// Riverpod provider for bottom navigation index
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
@@ -20,6 +21,7 @@ class SkeletonScreen extends ConsumerWidget {
     HomeScreen(), // Home tab
     CollectionsScreen(), // Texts tab
     RecitationsScreen(), // Recitations tab
+    AiModeScreen(), // AI Mode tab
     PlansScreen(), // Practice Plans tab
     MoreScreen(), // Settings/More tab
   ];

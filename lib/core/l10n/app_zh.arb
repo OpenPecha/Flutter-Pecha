@@ -148,5 +148,8 @@
   "image": "圖片",
 
   "author": "Author",
-  "plans_created": "Plan created"
+  "plans_created": "Plan created",
+
+  "nav_settings": "設定",
+  "nav_ai_mode": "AI"
 }
