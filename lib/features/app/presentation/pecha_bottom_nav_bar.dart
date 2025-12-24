@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -89,15 +88,24 @@ class PechaBottomNavBar extends ConsumerWidget {
     required String label,
     required bool isSelected,
   }) {
-    final locale = ref.watch(localeProvider);
-    final fontSize = locale.languageCode == 'bo' ? 14.0 : 12.0;
+    final fontSize = 12.0;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // Active color uses primary color, inactive uses grey (dark mode friendly)
+    final activeColor =
+        theme.colorScheme.brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black;
+    final inactiveColor =
+        isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600;
+
     return Expanded(
       child: InkWell(
         onTap: () {
           final currentIndex = ref.read(bottomNavIndexProvider);
           if (index != currentIndex) {
             ref.read(bottomNavIndexProvider.notifier).state = index;
-            // Navigate to home when tapping any tab (router will handle the rest)
             context.go('/home');
           }
         },
@@ -110,7 +118,8 @@ class PechaBottomNavBar extends ConsumerWidget {
             children: [
               Icon(
                 isSelected ? selectedIcon : icon,
-                size: isSelected ? 26 : 24,
+                color: isSelected ? activeColor : inactiveColor,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               const SizedBox(height: 2),
               MediaQuery(
@@ -121,7 +130,9 @@ class PechaBottomNavBar extends ConsumerWidget {
                   label,
                   style: TextStyle(
                     fontSize: fontSize,
-                    fontWeight: isSelected ? FontWeight.w400 : FontWeight.w300,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? activeColor : inactiveColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
