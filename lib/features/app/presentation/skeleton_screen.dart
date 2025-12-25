@@ -2,6 +2,7 @@
 // Tabs: Texts, Recitations, Plans, Settings (Home is hidden but kept in codebase).
 
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/services/upgrade/app_upgrade_wrapper.dart';
 import 'package:flutter_pecha/features/plans/presentation/screens/plans_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/screens/collections/collections_screen.dart';
 import 'package:flutter_pecha/features/recitation/presentation/screens/recitations_screen.dart';
@@ -27,9 +28,11 @@ class SkeletonScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(bottomNavIndexProvider);
-    return Scaffold(
-      body: _pages[selectedIndex],
-      bottomNavigationBar: PechaBottomNavBar(),
+    return AppUpgradeWrapper(
+      child: Scaffold(
+        body: _pages[selectedIndex],
+        bottomNavigationBar: PechaBottomNavBar(),
+      ),
     );
   }
 }
