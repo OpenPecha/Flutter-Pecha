@@ -105,18 +105,19 @@ class TextsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTextType(Texts text, AppLocalizations localizations) {
-    return Text(
-      text.type.toLowerCase() == "root_text"
-          ? localizations.text_detail_rootText.toUpperCase()
-          : localizations.text_detail_commentaryText.toUpperCase(),
-      style: TextStyle(
-        fontSize: TextScreenConstants.bodyFontSize,
-        fontWeight: FontWeight.w500,
-        color: Colors.grey[TextScreenConstants.greyShade600],
-      ),
-    );
-  }
+  // not displaying the text table of contents type in the app bar
+  // Widget _buildTextType(Texts text, AppLocalizations localizations) {
+  //   return Text(
+  //     text.type.toLowerCase() == "root_text"
+  //         ? localizations.text_detail_rootText.toUpperCase()
+  //         : localizations.text_detail_commentaryText.toUpperCase(),
+  //     style: TextStyle(
+  //       fontSize: TextScreenConstants.bodyFontSize,
+  //       fontWeight: FontWeight.w500,
+  //       color: Colors.grey[TextScreenConstants.greyShade600],
+  //     ),
+  //   );
+  // }
 
   Widget _buildTabs(
     AppLocalizations localizations,

@@ -145,9 +145,9 @@ class _ContentsChapterState extends ConsumerState<ContentsChapter> {
       widget.infiniteQuery.fetchPreviousPage();
 
       // How many new list items were prepended?
-      final newItemsCount = getTotalSegmentsCount(widget.newPageSections);
+      // final newItemsCount = getTotalSegmentsCount(widget.newPageSections);
 
-      final targetIndex = anchorIndex + newItemsCount;
+      // final targetIndex = anchorIndex + newItemsCount;
       // if (widget.itemScrollController.isAttached && targetIndex >= 0) {
       //   widget.itemScrollController.scrollTo(
       //     index: targetIndex,
