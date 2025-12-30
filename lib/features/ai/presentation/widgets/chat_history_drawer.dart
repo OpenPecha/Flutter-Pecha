@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/ai/presentation/controllers/chat_controller.dart';
 import 'package:flutter_pecha/features/ai/presentation/controllers/thread_list_controller.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/thread_list_item.dart';
+import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatHistoryDrawer extends ConsumerStatefulWidget {
@@ -15,10 +16,15 @@ class ChatHistoryDrawer extends ConsumerStatefulWidget {
 class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    
+    // Setup scroll listener for pagination
+    _scrollController.addListener(_onScroll);
+    
     // Load threads when drawer is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(threadListControllerProvider.notifier).loadThreads();
@@ -29,7 +35,16 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    // Load more when user scrolls to 80% of the list
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent * 0.8) {
+      ref.read(threadListControllerProvider.notifier).loadMoreThreads();
+    }
   }
 
   void _performSearch(String query) {
@@ -48,6 +63,7 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final threadListState = ref.watch(threadListControllerProvider);
     final currentThreadId = ref.watch(chatControllerProvider).currentThreadId;
+    final userState = ref.watch(userProvider);
 
     return Drawer(
       backgroundColor: isDarkMode ? AppColors.backgroundDark : AppColors.primarySurface,
@@ -149,12 +165,51 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
             ),
             const Divider(height: 1),
             const SizedBox(height: 5),
-              // Thread List
+              // Thread List or Guest Message
               Expanded(
-                child: _buildThreadList(isDarkMode, threadListState, currentThreadId),
+                child: userState.isAuthenticated
+                    ? _buildThreadList(isDarkMode, threadListState, currentThreadId)
+                    : _buildGuestMessage(isDarkMode),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuestMessage(bool isDarkMode) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.lock_outline,
+              size: 64,
+              color: isDarkMode ? AppColors.grey800 : AppColors.grey300,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Please log in to view chat history',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: isDarkMode ? AppColors.grey400 : AppColors.grey800,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Sign in to save and access your conversations across devices',
+              style: TextStyle(
+                fontSize: 12,
+                color: isDarkMode ? AppColors.grey500 : AppColors.grey600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -250,8 +305,26 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
     }
 
     return ListView.builder(
-      itemCount: state.threads.length,
+      controller: _scrollController,
+      itemCount: state.threads.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        // Show loading indicator at the bottom
+        if (index == state.threads.length) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          );
+        }
+
         final thread = state.threads[index];
         final isActive = thread.id == currentThreadId;
 
@@ -263,6 +336,8 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
             FocusScope.of(context).unfocus();
             // Load the selected thread
             await ref.read(chatControllerProvider.notifier).loadThread(thread.id);
+            // Refresh threads to update order
+            ref.read(threadListControllerProvider.notifier).refreshThreads();
             // Close drawer
             if (context.mounted) {
               Navigator.of(context).pop();

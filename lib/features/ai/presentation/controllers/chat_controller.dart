@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/ai/data/providers/ai_chat_provider.dart';
 import 'package:flutter_pecha/features/ai/data/repositories/ai_chat_repository.dart';
 import 'package:flutter_pecha/features/ai/models/chat_message.dart';
+import 'package:flutter_pecha/features/ai/presentation/controllers/thread_list_controller.dart';
 import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -132,6 +133,8 @@ class ChatController extends StateNotifier<ChatState> {
             state = state.copyWith(
               currentThreadId: event.threadId,
             );
+            // Refresh threads list when we get a new thread_id (new conversation)
+            _ref.read(threadListControllerProvider.notifier).refreshThreads();
           } else if (event is DoneEvent) {
             // Finalize the AI message with search results
             final aiMessage = ChatMessage(

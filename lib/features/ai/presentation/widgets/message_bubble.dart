@@ -194,61 +194,57 @@ class MessageBubble extends StatelessWidget {
         children: [
           // Message Content
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color:
-                    message.isUser
-                        ? (isDarkMode
-                            ? AppColors.primaryDark
-                            : AppColors.backgroundDark)
-                        : (isDarkMode
-                            ? AppColors.surfaceVariantDark
-                            : AppColors.grey100),
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(18),
-                  topRight: const Radius.circular(18),
-                  bottomLeft: Radius.circular(message.isUser ? 18 : 4),
-                  bottomRight: Radius.circular(message.isUser ? 4 : 18),
-                ),
-              ),
-              child:
-                  message.isUser
-                      ? Text(
+            child:
+                message.isUser
+                    ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color:
+                            isDarkMode
+                                ? AppColors.primaryDark
+                                : AppColors.backgroundDark,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(18),
+                          topRight: Radius.circular(18),
+                          bottomLeft: Radius.circular(18),
+                          bottomRight: Radius.circular(4),
+                        ),
+                      ),
+                      child: Text(
                         message.content,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           height: 1.4,
                           color: Colors.white,
                         ),
-                      )
-                      : RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontSize: 15,
+                      ),
+                    )
+                    : RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          color:
+                              isDarkMode
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimary,
+                        ),
+                        children: _parseContentWithCitations(
+                          context,
+                          message.content,
+                          message.searchResults,
+                          isDarkMode,
+                          TextStyle(
+                            fontSize: 14,
                             height: 1.4,
                             color:
                                 isDarkMode
                                     ? AppColors.textPrimaryDark
                                     : AppColors.textPrimary,
                           ),
-                          children: _parseContentWithCitations(
-                            context,
-                            message.content,
-                            message.searchResults,
-                            isDarkMode,
-                            TextStyle(
-                              fontSize: 15,
-                              height: 1.4,
-                              color:
-                                  isDarkMode
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                            ),
-                          ),
                         ),
                       ),
-            ),
+                    ),
           ),
         ],
       ),

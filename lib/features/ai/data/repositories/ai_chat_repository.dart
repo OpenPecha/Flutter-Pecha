@@ -1,6 +1,6 @@
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/ai/data/datasource/ai_chat_remote_datasource.dart';
-import 'package:flutter_pecha/features/ai/data/datasource/thread_datasource_dummy.dart';
+import 'package:flutter_pecha/features/ai/data/datasource/thread_remote_datasource.dart';
 import 'package:flutter_pecha/features/ai/models/chat_message.dart';
 import 'package:flutter_pecha/features/ai/models/chat_thread.dart';
 
@@ -31,7 +31,7 @@ class ErrorEvent extends ChatStreamEvent {
 
 class AiChatRepository {
   final AiChatRemoteDatasource _datasource;
-  final ThreadDatasourceDummy _threadDatasource;
+  final ThreadRemoteDatasource _threadDatasource;
   final _logger = AppLogger('AiChatRepository');
 
   AiChatRepository(this._datasource, this._threadDatasource);
@@ -96,12 +96,17 @@ class AiChatRepository {
 
   /// Get list of threads
   Future<ThreadListResponse> getThreads({
+    required String email,
     int skip = 0,
-    int limit = 20,
+    int limit = 10,
   }) async {
     try {
-      _logger.info('Fetching threads (skip: $skip, limit: $limit)');
-      return await _threadDatasource.getThreads(skip: skip, limit: limit);
+      _logger.info('Fetching threads (email: $email, skip: $skip, limit: $limit)');
+      return await _threadDatasource.getThreads(
+        email: email,
+        skip: skip,
+        limit: limit,
+      );
     } catch (e, stackTrace) {
       _logger.error('Error fetching threads', e, stackTrace);
       rethrow;

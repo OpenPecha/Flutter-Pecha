@@ -40,42 +40,22 @@ class _TypingIndicatorState extends State<TypingIndicator>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sparkle icon (not in circle)
-          Icon(
-            Icons.auto_awesome,
-            size: 16,
-            color: isDarkMode ? AppColors.grey500 : AppColors.grey600,
-          ),
-          const SizedBox(width: 8),
-
           // Content: Either streaming text or animated dots
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDarkMode ? AppColors.surfaceVariantDark : AppColors.grey100,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                  bottomLeft: Radius.circular(4),
-                  bottomRight: Radius.circular(18),
-                ),
-              ),
-              child: widget.currentContent.isEmpty
-                  ? _buildAnimatedDots(isDarkMode)
-                  : Text(
-                      widget.currentContent,
-                      style: TextStyle(
-                        fontSize: 15,
-                        height: 1.4,
-                        color: isDarkMode
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimary,
-                      ),
+            child: widget.currentContent.isEmpty
+                ? _buildAnimatedDots(isDarkMode)
+                : Text(
+                    widget.currentContent,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.4,
+                      color: isDarkMode
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimary,
                     ),
-            ),
+                  ),
           ),
         ],
       ),
