@@ -172,6 +172,18 @@ abstract class AppLocalizations {
   /// **'Approximatey 500 million people worldwide practice Buddhism, making it the world\'s fourth largest religion'**
   String get onboarding_quote;
 
+  /// No description provided for @onboarding_find_peace.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your Peace'**
+  String get onboarding_find_peace;
+
+  /// No description provided for @onboarding_continue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboarding_continue;
+
   /// No description provided for @onboarding_first_question.
   ///
   /// In en, this message translates to:
@@ -219,12 +231,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Good Evening'**
   String get home_good_evening;
-
-  /// No description provided for @home_dailyRefresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily Refresh'**
-  String get home_dailyRefresh;
 
   /// No description provided for @home_meditationTitle.
   ///
@@ -375,12 +381,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Versions'**
   String get text_toc_versions;
-
-  /// No description provided for @text_toc_revisionHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Revision History'**
-  String get text_toc_revisionHistory;
 
   /// No description provided for @text_commentary.
   ///
@@ -706,12 +706,6 @@ abstract class AppLocalizations {
   /// **'Reminder Time'**
   String get reminderTime;
 
-  /// No description provided for @selectTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Time'**
-  String get selectTime;
-
   /// No description provided for @notification_daily_recitation.
   ///
   /// In en, this message translates to:
@@ -729,12 +723,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to Tibetan'**
   String get text_switchToTibetan;
-
-  /// No description provided for @common_sign_in.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
-  String get common_sign_in;
 
   /// No description provided for @recitations_title.
   ///

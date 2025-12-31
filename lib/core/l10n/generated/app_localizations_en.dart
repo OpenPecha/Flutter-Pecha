@@ -47,6 +47,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Approximatey 500 million people worldwide practice Buddhism, making it the world\'s fourth largest religion';
 
   @override
+  String get onboarding_find_peace => 'Find your Peace';
+
+  @override
+  String get onboarding_continue => 'Continue';
+
+  @override
   String get onboarding_first_question =>
       'In which language would you like to access core texts?';
 
@@ -71,9 +77,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_good_evening => 'Good Evening';
-
-  @override
-  String get home_dailyRefresh => 'Daily Refresh';
 
   @override
   String get home_meditationTitle => 'Meditation';
@@ -149,9 +152,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get text_toc_versions => 'Versions';
-
-  @override
-  String get text_toc_revisionHistory => 'Revision History';
 
   @override
   String get text_commentary => 'Commentary';
@@ -320,9 +320,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reminderTime => 'Reminder Time';
 
   @override
-  String get selectTime => 'Select Time';
-
-  @override
   String get notification_daily_recitation => 'Daily Recitation';
 
   @override
@@ -330,9 +327,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get text_switchToTibetan => 'Switch to Tibetan';
-
-  @override
-  String get common_sign_in => 'Sign in';
 
   @override
   String get recitations_title => 'Recitations';

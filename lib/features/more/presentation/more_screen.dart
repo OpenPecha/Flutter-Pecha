@@ -200,7 +200,7 @@ class MoreScreen extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   title: Text(
-                    localizations.common_sign_in,
+                    localizations.sign_in,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w500,

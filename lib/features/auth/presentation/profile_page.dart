@@ -171,7 +171,7 @@ class ProfilePage extends ConsumerWidget {
                   context.go(RouteConfig.login);
                 },
                 icon: const Icon(Icons.login),
-                label: Text(localizations.common_sign_in),
+                label: Text(localizations.sign_in),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(

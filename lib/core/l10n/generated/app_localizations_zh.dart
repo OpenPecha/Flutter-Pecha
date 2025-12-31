@@ -30,21 +30,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get switchToDark => '切换到深色模式';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => '登錄';
 
   @override
-  String get logout => 'Logout';
+  String get logout => '登出';
 
   @override
-  String get onboarding_welcome => 'Welcome to WeBuddhist';
+  String get onboarding_welcome => '歡迎來到 WeBuddhist';
 
   @override
-  String get onboarding_description =>
-      'Where we learn, live, and share Buddhist wisdom every day';
+  String get onboarding_description => '在這裡每天學習、生活與分享佛教智慧';
 
   @override
   String get onboarding_quote =>
       'Approximatey 500 million people worldwide practice Buddhism, making it the world\'s fourth largest religion';
+
+  @override
+  String get onboarding_find_peace => '尋找你本有的平靜';
+
+  @override
+  String get onboarding_continue => '下一步';
 
   @override
   String get onboarding_first_question =>
@@ -58,7 +63,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_choose_option => 'Choose upto 3 options';
 
   @override
-  String get onboarding_all_set => 'You are All Setup';
+  String get onboarding_all_set => '你已設定完成';
 
   @override
   String get home_today => '今天';
@@ -71,9 +76,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get home_good_evening => '晚上好';
-
-  @override
-  String get home_dailyRefresh => 'Daily Refresh';
 
   @override
   String get home_meditationTitle => '禪修時刻';
@@ -112,7 +114,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_profile => 'Profile';
 
   @override
-  String get no_feature_content => 'No featured content available';
+  String get no_feature_content => '尚無內容';
 
   @override
   String get nav_home => '首頁';
@@ -136,7 +138,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get text_search => '搜尋';
 
   @override
-  String get text_detail_rootText => 'Root Text';
+  String get text_detail_rootText => '原文本';
 
   @override
   String get text_detail_commentaryText => '釋論';
@@ -145,86 +147,82 @@ class AppLocalizationsZh extends AppLocalizations {
   String get text_toc_continueReading => 'Continue Reading';
 
   @override
-  String get text_toc_content => 'Contents';
+  String get text_toc_content => '內容';
 
   @override
-  String get text_toc_versions => 'Versions';
+  String get text_toc_versions => '版本';
 
   @override
-  String get text_toc_revisionHistory => 'Revision History';
+  String get text_commentary => '注釋';
 
   @override
-  String get text_commentary => 'Commentary';
+  String get text_close_commentary => '關閉注釋';
 
   @override
-  String get text_close_commentary => 'Close commentary';
+  String get commentary_total => '總計';
 
   @override
-  String get commentary_total => 'Total';
+  String get show_more => '顯示更多';
 
   @override
-  String get show_more => 'Show more';
+  String get show_less => '顯示較少';
 
   @override
-  String get show_less => 'Show less';
+  String get read_more => '閱讀更多';
 
   @override
-  String get read_more => 'Read more';
+  String get no_content => '尚無相關內容';
 
   @override
-  String get no_content => 'No content found';
+  String get no_version => '尚無相關版本';
 
   @override
-  String get no_version => 'No versions found';
+  String get no_commentary => '尚無相關注釋';
 
   @override
-  String get no_commentary => 'No commentary found';
+  String get no_commentary_message => '此偈誦尚無相關注釋';
 
   @override
-  String get no_commentary_message =>
-      'There are no commentaries available for this segment.';
+  String get loading => '加載中...';
 
   @override
-  String get loading => 'Loading...';
+  String get choose_image => '選擇圖像';
 
   @override
-  String get choose_image => 'Choose Image';
+  String get choose_bg_image => '選擇背景';
 
   @override
-  String get choose_bg_image => 'Choose Your Background Image';
+  String get create_image => '創建圖像';
 
   @override
-  String get create_image => 'Create Image';
+  String get save => '儲存';
 
   @override
-  String get save => 'Save';
+  String get done => '完成';
 
   @override
-  String get done => 'Done';
+  String get customise_message => '點擊自訂以調整字型大小';
 
   @override
-  String get customise_message => 'Tap the customize icon to adjust text style';
-
-  @override
-  String get download_image => 'Download Image';
+  String get download_image => '下載圖像';
 
   @override
   String get no_images_available => '沒有可用的圖片';
 
   @override
-  String get customise_text => 'Customise Text';
+  String get customise_text => '自訂文字';
 
   @override
-  String get text_size => 'Text Size';
+  String get text_size => '文字大小';
 
   @override
-  String get text_color => 'Text Color';
+  String get text_color => '文字顏色';
 
   @override
-  String get text_shadow => 'Text Shadow';
+  String get text_shadow => '文字陰影';
 
   @override
-  String get apply => 'Apply';
+  String get apply => '執行';
 
   @override
   String get practice_nav_title => '修持計劃';
@@ -239,13 +237,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browse_plans => '尋找計劃';
 
   @override
-  String get plan_info => 'Plan Info';
+  String get plan_info => '計畫內容';
 
   @override
   String get start_plan => '開始計畫';
 
   @override
-  String get continue_plan => 'Continue Plan';
+  String get continue_plan => '繼續計劃';
 
   @override
   String get tibetan => 'Tibetan';
@@ -260,79 +258,70 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chinese => 'Chinese';
 
   @override
-  String get language => 'Language';
+  String get language => '語言';
 
   @override
-  String get dailyPracticeNotificationTitle => 'Daily Practice Reminder';
+  String get dailyPracticeNotificationTitle => '每日修持提醒';
 
   @override
-  String get timeForDailyPractice => 'It\'s time for your daily practice.';
+  String get timeForDailyPractice => '到了每天修持的時間了';
 
   @override
-  String get recitation_reminder => 'Recitations Reminder.';
+  String get recitation_reminder => '持誦提醒';
 
   @override
-  String get moment_to_pray => 'Take a moment to pray.';
+  String get moment_to_pray => '這一刻讓我們一起祈願';
 
   @override
-  String get plan_unenroll => 'Unenroll from Plan';
+  String get plan_unenroll => '退出計劃';
 
   @override
-  String get unenroll_confirmation => 'Are you sure you want to unenroll from';
+  String get unenroll_confirmation => '確定要退出嗎';
 
   @override
-  String get unenroll_message =>
-      'Your progress will be permanently lost and cannot be recovered.';
+  String get unenroll_message => '您的進度將永久丟失，且無法恢復';
 
   @override
-  String get practice_plan =>
-      'Practice plans help you stay consistent with your practice. We have a variety of plans to choose from and for different durations.';
+  String get practice_plan => '修持計劃幫助您在修持中保持穩定。我們有許多計劃可供選擇，也有時間長短不同的計劃。';
 
   @override
-  String get search_plans => 'Search plans...';
+  String get search_plans => '搜尋計畫...';
 
   @override
-  String get search_for_plans => 'Search for plans';
+  String get search_for_plans => '搜尋計劃';
 
   @override
-  String get no_plans_found => 'No plans found';
+  String get no_plans_found => '無相關計劃';
 
   @override
-  String get no_days_available => 'No days found';
+  String get no_days_available => '無此天數';
 
   @override
-  String get notification_turn_on => 'Please turn on Notifications';
+  String get notification_turn_on => '請開啟通知';
 
   @override
-  String get notification_enable_message =>
-      'Enable notifications to receive daily practice and recitation reminders.';
+  String get notification_enable_message => '開啟通知以收取每日修持、持誦提醒';
 
   @override
-  String get enable_notification => 'Enable Notifications';
+  String get enable_notification => '開啟通知';
 
   @override
-  String get notification_daily_practice => 'Daily Practice';
+  String get notification_daily_practice => '每日修持';
 
   @override
-  String get notification_select_time => 'Select Time';
+  String get notification_select_time => '設定時間';
 
   @override
-  String get reminderTime => 'Reminder Time';
+  String get reminderTime => '提醒時間';
 
   @override
-  String get selectTime => 'Select Time';
+  String get notification_daily_recitation => '每日持誦';
 
   @override
-  String get notification_daily_recitation => 'Daily Recitation';
+  String get text_noContent => '所選語言下無可用文本';
 
   @override
-  String get text_noContent => 'No texts available in the selected language';
-
-  @override
-  String get text_switchToTibetan => 'Switch to Tibetan';
-
-  @override
-  String get common_sign_in => 'Sign in';
+  String get text_switchToTibetan => '切換成藏文';
 
   @override
   String get recitations_title => '唱頌';
@@ -347,10 +336,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_search => '搜索';
 
   @override
-  String get recitations_search_for => 'Search for recitations';
+  String get recitations_search_for => '尋找持誦內容';
 
   @override
-  String get recitations_no_found => 'No recitations found';
+  String get recitations_no_found => '尚無相關持誦內容';
 
   @override
   String get recitations_saved => '已保存持誦';
@@ -377,7 +366,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_translation => '翻譯';
 
   @override
-  String get no_available => 'Not available';
+  String get no_available => '無法';
 
   @override
   String get recitations_no_data_message => '此持誦的內容目前不可用。\n請稍後再查看。';
@@ -407,7 +396,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recitations_hide_adaptation => '隱藏改編';
 
   @override
-  String get next_recitation => 'Next';
+  String get next_recitation => '下一步';
 
   @override
   String get settings_appearance => '外觀';
@@ -434,7 +423,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get copy => '複製';
 
   @override
-  String get copied => 'Copied';
+  String get copied => '已複製';
 
   @override
   String get share => '分享';
@@ -443,14 +432,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get image => '圖片';
 
   @override
-  String get feedback => 'Feedback';
+  String get feedback => '回饋';
 
   @override
-  String get feedback_wishlist => 'Feedback and Wishlist';
+  String get feedback_wishlist => '回饋及願望清單';
 
   @override
-  String get author => 'Author';
+  String get author => '作者';
 
   @override
-  String get plans_created => 'Plan created';
+  String get plans_created => '參與設計的計劃';
 }
