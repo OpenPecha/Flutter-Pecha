@@ -102,7 +102,10 @@ class SourceBottomSheet extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             height: 1.6,
-                            color: isDarkMode ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                            color:
+                                isDarkMode
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
                           ),
                         ),
                       ],

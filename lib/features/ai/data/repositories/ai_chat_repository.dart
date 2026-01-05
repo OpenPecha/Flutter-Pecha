@@ -123,5 +123,17 @@ class AiChatRepository {
       rethrow;
     }
   }
+
+  /// Delete a thread by ID
+  Future<void> deleteThread(String threadId) async {
+    try {
+      _logger.info('Deleting thread: $threadId');
+      await _threadDatasource.deleteThread(threadId);
+      _logger.info('Thread deleted successfully: $threadId');
+    } catch (e, stackTrace) {
+      _logger.error('Error deleting thread $threadId', e, stackTrace);
+      rethrow;
+    }
+  }
 }
 

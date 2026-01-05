@@ -15,6 +15,7 @@ class ChatState {
   final List<SearchResult> currentSearchResults;
   final String? error;
   final String? currentThreadId;
+  final bool isLoadingThread;
 
   ChatState({
     this.messages = const [],
@@ -23,6 +24,7 @@ class ChatState {
     this.currentSearchResults = const [],
     this.error,
     this.currentThreadId,
+    this.isLoadingThread = false,
   });
 
   ChatState copyWith({
@@ -32,6 +34,7 @@ class ChatState {
     List<SearchResult>? currentSearchResults,
     String? error,
     String? currentThreadId,
+    bool? isLoadingThread,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -40,6 +43,7 @@ class ChatState {
       currentSearchResults: currentSearchResults ?? this.currentSearchResults,
       error: error,
       currentThreadId: currentThreadId ?? this.currentThreadId,
+      isLoadingThread: isLoadingThread ?? this.isLoadingThread,
     );
   }
 }
@@ -194,6 +198,7 @@ class ChatController extends StateNotifier<ChatState> {
         isStreaming: false,
         currentStreamingContent: '',
         error: null,
+        isLoadingThread: true,
       );
 
       // Fetch thread details
@@ -206,6 +211,7 @@ class ChatController extends StateNotifier<ChatState> {
       state = state.copyWith(
         messages: chatMessages,
         currentThreadId: threadId,
+        isLoadingThread: false,
       );
       
       _logger.info('Loaded thread with ${chatMessages.length} messages');
@@ -213,6 +219,7 @@ class ChatController extends StateNotifier<ChatState> {
       _logger.error('Error loading thread', e, stackTrace);
       state = state.copyWith(
         error: 'Failed to load conversation: ${e.toString()}',
+        isLoadingThread: false,
       );
     }
   }

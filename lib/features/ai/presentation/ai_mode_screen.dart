@@ -121,14 +121,16 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
               // Main content area
               Expanded(
                 child:
-                    hasMessages
-                        ? MessageList(
-                          messages: chatState.messages,
-                          isStreaming: chatState.isStreaming,
-                          currentStreamingContent:
-                              chatState.currentStreamingContent,
-                        )
-                        : _buildEmptyState(isDarkMode),
+                    chatState.isLoadingThread
+                        ? _buildLoadingState(isDarkMode)
+                        : hasMessages
+                            ? MessageList(
+                              messages: chatState.messages,
+                              isStreaming: chatState.isStreaming,
+                              currentStreamingContent:
+                                  chatState.currentStreamingContent,
+                            )
+                            : _buildEmptyState(isDarkMode),
               ),
 
               // Bottom input section
@@ -178,6 +180,27 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
           ),
           // Invisible spacer to balance the layout
           const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(bool isDarkMode) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Loading conversation...',
+            style: TextStyle(
+              fontSize: 14,
+              color: isDarkMode ? AppColors.grey400 : AppColors.grey600,
+            ),
+          ),
         ],
       ),
     );

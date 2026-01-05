@@ -168,6 +168,32 @@ class ThreadListController extends StateNotifier<ThreadListState> {
     }
   }
 
+  /// Delete a thread by ID
+  Future<void> deleteThread(String threadId) async {
+    final email = _getUserEmail();
+    if (email == null) {
+      _logger.debug('User not authenticated, skipping thread deletion');
+      throw Exception('Authentication required');
+    }
+
+    try {
+      _logger.info('Deleting thread: $threadId');
+      await _repository.deleteThread(threadId);
+      
+      // Remove the thread from the local list
+      final updatedThreads = state.threads.where((t) => t.id != threadId).toList();
+      state = state.copyWith(
+        threads: updatedThreads,
+        total: state.total - 1,
+      );
+      
+      _logger.info('Thread deleted successfully: $threadId');
+    } catch (e, stackTrace) {
+      _logger.error('Error deleting thread', e, stackTrace);
+      rethrow;
+    }
+  }
+
   /// Clear error message
   void clearError() {
     state = state.copyWith(error: null);
