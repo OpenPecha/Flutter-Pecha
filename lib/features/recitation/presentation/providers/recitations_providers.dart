@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/network/api_client_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,10 +32,21 @@ class RecitationContentParams {
       other is RecitationContentParams &&
           runtimeType == other.runtimeType &&
           textId == other.textId &&
-          language == other.language;
+          language == other.language &&
+          listEquals(recitations, other.recitations) &&
+          listEquals(translations, other.translations) &&
+          listEquals(transliterations, other.transliterations) &&
+          listEquals(adaptations, other.adaptations);
 
   @override
-  int get hashCode => textId.hashCode ^ language.hashCode;
+  int get hashCode => Object.hash(
+    textId,
+    language,
+    recitations != null ? Object.hashAll(recitations!) : null,
+    translations != null ? Object.hashAll(translations!) : null,
+    transliterations != null ? Object.hashAll(transliterations!) : null,
+    adaptations != null ? Object.hashAll(adaptations!) : null,
+  );
 }
 
 // Repository provider
@@ -127,5 +139,5 @@ final updateRecitationsOrderProvider = FutureProvider.autoDispose
 
 // Toggle providers for showing/hiding second and third content segments
 // The actual content type depends on the language's content order
-final showSecondSegmentProvider = StateProvider<bool>((ref) => true);
-final showThirdSegmentProvider = StateProvider<bool>((ref) => true);
+final showSecondSegmentProvider = StateProvider<bool>((ref) => false);
+final showThirdSegmentProvider = StateProvider<bool>((ref) => false);

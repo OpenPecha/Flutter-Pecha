@@ -111,10 +111,7 @@ class _RecitationDetailScreenState
     final showSecondSegment = ref.watch(showSecondSegmentProvider);
     final showThirdSegment = ref.watch(showThirdSegmentProvider);
 
-    final recitationParams = RecitationLanguageConfig.getContentParams(
-      effectiveLanguageCode,
-      widget.recitation.textId,
-    );
+    // Get content order for display
     final contentOrder = RecitationLanguageConfig.getContentOrder(
       effectiveLanguageCode,
     );
@@ -128,6 +125,14 @@ class _RecitationDetailScreenState
       contentOrder,
       showSecondSegment: showSecondSegment,
       showThirdSegment: showThirdSegment,
+    );
+
+    // Build params based on toggle states - single request with all needed content
+    final recitationParams = RecitationLanguageConfig.getContentParamsWithToggles(
+      effectiveLanguageCode,
+      widget.recitation.textId,
+      includeSecondary: showSecondSegment,
+      includeTertiary: showThirdSegment,
     );
 
     // Watch recitation content

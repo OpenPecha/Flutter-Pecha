@@ -70,6 +70,62 @@ class RecitationLanguageConfig {
     }
   }
 
+  /// Returns params based on what content segments are enabled.
+  /// Builds a single request with all needed content types.
+  ///
+  /// - [includeSecondary]: Whether to include the second content type
+  /// - [includeTertiary]: Whether to include the third content type
+  ///
+  /// Primary content is always included.
+  static RecitationContentParams getContentParamsWithToggles(
+    String language,
+    String textId, {
+    bool includeSecondary = false,
+    bool includeTertiary = false,
+  }) {
+    switch (language) {
+      case tibetan:
+        // Tibetan order: recitation (primary) + adaptation (secondary) + translation (tertiary)
+        return RecitationContentParams(
+          textId: textId,
+          language: language,
+          recitations: [tibetan],
+          adaptations: includeSecondary ? [tibetanAdaptation] : null,
+          translations: includeTertiary ? [english] : null,
+        );
+
+      case english:
+        // English order: translation (primary) + recitation (secondary) + transliteration (tertiary)
+        return RecitationContentParams(
+          textId: textId,
+          language: language,
+          translations: [english],
+          recitations: includeSecondary ? [tibetan] : null,
+          transliterations: includeTertiary ? [tibetanTransliteration] : null,
+        );
+
+      case chinese:
+        // Chinese order: translation (primary) + recitation (secondary) + transliteration (tertiary)
+        return RecitationContentParams(
+          textId: textId,
+          language: language,
+          translations: [chinese],
+          recitations: includeSecondary ? [tibetan] : null,
+          transliterations: includeTertiary ? [tibetanTransliteration] : null,
+        );
+
+      default:
+        // Default order: recitation (primary) + translation (secondary) + transliteration (tertiary)
+        return RecitationContentParams(
+          textId: textId,
+          language: language,
+          recitations: [tibetan],
+          translations: includeSecondary ? [english] : null,
+          transliterations: includeTertiary ? [tibetanTransliteration] : null,
+        );
+    }
+  }
+
   /// Content order configurations for each language (cached for performance)
   static const List<ContentType> _tibetanOrder = [
     ContentType.recitation,
