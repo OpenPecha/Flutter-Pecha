@@ -4,7 +4,6 @@ import 'package:flutter_pecha/features/ai/presentation/controllers/chat_controll
 import 'package:flutter_pecha/features/ai/presentation/controllers/thread_list_controller.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/delete_thread_dialog.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/thread_list_item.dart';
-import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatHistoryDrawer extends ConsumerStatefulWidget {
@@ -137,7 +136,6 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final threadListState = ref.watch(threadListControllerProvider);
     final currentThreadId = ref.watch(chatControllerProvider).currentThreadId;
-    final userState = ref.watch(userProvider);
 
     return Drawer(
       backgroundColor:
@@ -262,56 +260,16 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
               ),
               const Divider(height: 1),
               const SizedBox(height: 5),
-              // Thread List or Guest Message
+              // Thread List
               Expanded(
-                child:
-                    userState.isAuthenticated
-                        ? _buildThreadList(
-                          isDarkMode,
-                          threadListState,
-                          currentThreadId,
-                        )
-                        : _buildGuestMessage(isDarkMode),
+                child: _buildThreadList(
+                  isDarkMode,
+                  threadListState,
+                  currentThreadId,
+                ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGuestMessage(bool isDarkMode) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.lock_outline,
-              size: 64,
-              color: isDarkMode ? AppColors.grey800 : AppColors.grey300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Please log in to view chat history',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? AppColors.grey400 : AppColors.grey800,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sign in to save and access your conversations across devices',
-              style: TextStyle(
-                fontSize: 12,
-                color: isDarkMode ? AppColors.grey500 : AppColors.grey600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );

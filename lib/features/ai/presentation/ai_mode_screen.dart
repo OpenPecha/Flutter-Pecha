@@ -6,6 +6,8 @@ import 'package:flutter_pecha/features/ai/presentation/widgets/chat_header.dart'
 import 'package:flutter_pecha/features/ai/presentation/widgets/chat_history_drawer.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/message_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 
 class AiModeScreen extends ConsumerStatefulWidget {
   const AiModeScreen({super.key});
@@ -79,10 +81,18 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final authState = ref.watch(authProvider);
+
+    if (authState.isGuest) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: _buildSignInPrompt(isDarkMode),
+      );
+    }
+
     final chatState = ref.watch(chatControllerProvider);
     final hasMessages = chatState.messages.isNotEmpty || chatState.isStreaming;
 
-    // Show error if any
     if (chatState.error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -124,13 +134,13 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                     chatState.isLoadingThread
                         ? _buildLoadingState(isDarkMode)
                         : hasMessages
-                            ? MessageList(
-                              messages: chatState.messages,
-                              isStreaming: chatState.isStreaming,
-                              currentStreamingContent:
-                                  chatState.currentStreamingContent,
-                            )
-                            : _buildEmptyState(isDarkMode),
+                        ? MessageList(
+                          messages: chatState.messages,
+                          isStreaming: chatState.isStreaming,
+                          currentStreamingContent:
+                              chatState.currentStreamingContent,
+                        )
+                        : _buildEmptyState(isDarkMode),
               ),
 
               // Bottom input section
@@ -190,9 +200,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: AppColors.primary,
-          ),
+          CircularProgressIndicator(color: AppColors.primary),
           const SizedBox(height: 16),
           Text(
             'Loading conversation...',
@@ -202,6 +210,63 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSignInPrompt(bool isDarkMode) {
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lock_outline,
+                size: 80,
+                color: theme.colorScheme.primary.withValues(alpha: 0.7),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Sign in to use AI Mode',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color:
+                      isDarkMode
+                          ? AppColors.surfaceWhite
+                          : AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Please sign in to access the Buddhist AI Assistant and start meaningful conversations',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? AppColors.grey400 : AppColors.grey600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.login),
+                label: const Text('Sign In'),
+                onPressed: () {
+                  LoginDrawer.show(context, ref);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
