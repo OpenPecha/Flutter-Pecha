@@ -230,7 +230,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Sign in to use AI Mode',
+                'Sign In',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
