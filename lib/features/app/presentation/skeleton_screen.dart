@@ -1,12 +1,13 @@
 // This file is the overall app shell with a bottom navigation bar for main sections.
-// Tabs: Home, Texts, Recitations, Plans, Settings.
+// Tabs: Texts, Recitations, Plans, Settings (Home is hidden but kept in codebase).
 
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/services/upgrade/app_upgrade_wrapper.dart';
 import 'package:flutter_pecha/features/plans/presentation/screens/plans_screen.dart';
 import 'package:flutter_pecha/features/texts/presentation/screens/collections/collections_screen.dart';
 import 'package:flutter_pecha/features/recitation/presentation/screens/recitations_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_pecha/features/home/presentation/home_screen.dart';
+// import 'package:flutter_pecha/features/home/presentation/home_screen.dart';
 import 'package:flutter_pecha/features/more/presentation/more_screen.dart';
 import 'package:flutter_pecha/features/app/presentation/pecha_bottom_nav_bar.dart';
 import 'package:flutter_pecha/features/ai/presentation/ai_mode_screen.dart';
@@ -18,7 +19,7 @@ class SkeletonScreen extends ConsumerWidget {
   const SkeletonScreen({super.key});
 
   static final List<Widget> _pages = <Widget>[
-    HomeScreen(), // Home tab
+    // HomeScreen(), // Home tab
     CollectionsScreen(), // Texts tab
     RecitationsScreen(), // Recitations tab
     AiModeScreen(), // AI Mode tab
@@ -29,9 +30,11 @@ class SkeletonScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(bottomNavIndexProvider);
-    return Scaffold(
-      body: _pages[selectedIndex],
-      bottomNavigationBar: PechaBottomNavBar(),
+    return AppUpgradeWrapper(
+      child: Scaffold(
+        body: _pages[selectedIndex],
+        bottomNavigationBar: PechaBottomNavBar(),
+      ),
     );
   }
 }

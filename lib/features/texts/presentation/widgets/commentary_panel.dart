@@ -170,27 +170,6 @@ class _CommentaryPanelContent extends StatelessWidget {
   }
 }
 
-/// Header showing total commentary count
-class _CommentaryHeader extends StatelessWidget {
-  const _CommentaryHeader({required this.totalCount});
-
-  final int totalCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: _CommentaryPanelConstants.cardSpacing,
-      ),
-      child: Text(
-        '${localizations.commentary_total} ($totalCount)',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-}
-
 /// Card widget for individual commentary
 class _CommentaryCard extends StatelessWidget {
   const _CommentaryCard({

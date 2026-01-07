@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,10 +21,9 @@ class TextListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
-    final fontFamily = getFontFamily(locale.languageCode);
-    final lineHeight = getLineHeight(locale.languageCode);
-    final fontSize = locale.languageCode == 'bo' ? 26.0 : 22.0;
+    final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
+    final fontSize = 22.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

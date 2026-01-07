@@ -126,7 +126,7 @@ class PaginatedTextsNotifier extends StateNotifier<PaginatedTextsState> {
   }
 }
 
-final paginatedTextsProvider = StateNotifierProvider.family<
+final paginatedTextsProvider = StateNotifierProvider.autoDispose.family<
     PaginatedTextsNotifier, PaginatedTextsState, String>(
   (ref, collectionId) => PaginatedTextsNotifier(ref, collectionId),
 );

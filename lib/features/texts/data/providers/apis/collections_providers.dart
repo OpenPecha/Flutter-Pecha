@@ -12,7 +12,7 @@ final collectionsRepositoryProvider = Provider(
   ),
 );
 
-final collectionsListFutureProvider = FutureProvider((ref) {
+final collectionsListFutureProvider = FutureProvider.autoDispose((ref) {
   final locale = ref.watch(localeProvider);
   final languageCode = locale.languageCode;
   return ref
@@ -20,7 +20,7 @@ final collectionsListFutureProvider = FutureProvider((ref) {
       .getCollections(language: languageCode);
 });
 
-final collectionsCategoryFutureProvider = FutureProvider.family((
+final collectionsCategoryFutureProvider = FutureProvider.autoDispose.family((
   ref,
   String parentId,
 ) {

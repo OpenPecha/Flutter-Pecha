@@ -12,13 +12,13 @@ class ChapterHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = textDetail.language == 'bo' ? 26.0 : 22.0;
+    final fontSize = 22.0;
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: TextScreenConstants.screenHorizontalPadding + 4,
-        vertical: TextScreenConstants.extraLargeVerticalSpacing,
+        vertical: 8,
       ),
       child: Text(
         textDetail.title,

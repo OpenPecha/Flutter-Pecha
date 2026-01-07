@@ -114,8 +114,12 @@ class _CustomVideoStoryState extends State<CustomVideoStory> {
   }
 
   void handleTap() {
-    if (_youtubeController == null || !_isVideoReady || _isDisposed || !mounted)
+    if (_youtubeController == null ||
+        !_isVideoReady ||
+        _isDisposed ||
+        !mounted) {
       return;
+    }
 
     if (_isVideoPlaying) {
       _youtubeController!.pause();

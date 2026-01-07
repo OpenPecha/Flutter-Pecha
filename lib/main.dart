@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/cache/cache_service.dart';
+import 'package:flutter_pecha/core/network/connectivity_service.dart';
 import 'package:flutter_pecha/core/l10n/l10n.dart';
 import 'package:flutter_pecha/core/services/service_providers.dart';
 import 'package:flutter_pecha/core/theme/theme_notifier.dart';
@@ -29,6 +31,24 @@ void main() async {
   } catch (e) {
     _logger.warning('Error loading .env file: $e');
     // Continue app initialization even if .env fails
+  }
+
+  // Initialize cache service for offline-first data
+  try {
+    await CacheService.instance.initialize();
+    _logger.info('Cache service initialized');
+  } catch (e) {
+    _logger.warning('Error initializing cache service: $e');
+    // Continue app initialization even if cache fails
+  }
+
+  // Initialize connectivity service for offline detection
+  try {
+    await ConnectivityService.instance.initialize();
+    _logger.info('Connectivity service initialized');
+  } catch (e) {
+    _logger.warning('Error initializing connectivity service: $e');
+    // Continue app initialization even if connectivity check fails
   }
 
   // Create provider container for notification service access

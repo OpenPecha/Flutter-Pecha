@@ -9,6 +9,7 @@ import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.da
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../notifications/presentation/notification_settings_screen.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -141,21 +142,47 @@ class MoreScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Notification Settings
-          _buildSectionHeader(context, localizations.settings_notifications),
+          if (authState.isLoggedIn && !authState.isGuest) ...[
+            // Notification Settings
+            _buildSectionHeader(context, localizations.settings_notifications),
+            _buildSectionCard(
+              context,
+              children: [
+                ListTile(
+                  leading: Icon(
+                    Icons.notifications,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(
+                    localizations.notification_settings,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  onTap:
+                      () => context.push(NotificationSettingsScreen.routeName),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+          // Feedback Section
+          _buildSectionHeader(context, localizations.feedback),
           _buildSectionCard(
             context,
             children: [
               ListTile(
                 leading: Icon(
-                  Icons.notifications,
+                  Icons.feedback,
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 title: Text(
-                  localizations.notification_settings,
+                  localizations.feedback_wishlist,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                onTap: () => context.push(NotificationSettingsScreen.routeName),
+                onTap: () async {
+                  final url =
+                      "https://app-webuddhist.ideas.userback.io/p/5omSMHB8A9VMUrD6vLrE";
+                  await launchUrl(Uri.parse(url));
+                },
               ),
             ],
           ),
@@ -173,7 +200,7 @@ class MoreScreen extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   title: Text(
-                    localizations.common_sign_in,
+                    localizations.sign_in,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w500,

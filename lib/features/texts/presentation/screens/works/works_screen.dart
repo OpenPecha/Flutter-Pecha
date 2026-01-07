@@ -59,7 +59,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen> {
     final locale = ref.watch(localeProvider);
     final fontFamily = getFontFamily(locale.languageCode);
     final lineHeight = getLineHeight(locale.languageCode);
-    final fontSize = locale.languageCode == 'bo' ? 26.0 : 22.0;
+    final fontSize = locale.languageCode == 'bo' ? 24.0 : 22.0;
 
     // Get the border color from the color index
     final borderColor =

@@ -25,4 +25,15 @@ class CommentaryTextResponse {
   Map<String, dynamic> toJson() {
     return {'commentaries': commentaries.map((e) => e.toJson()).toList()};
   }
+
+  /// Factory to reconstruct from cached JSON (Map format from toJson)
+  factory CommentaryTextResponse.fromCacheJson(Map<String, dynamic> json) {
+    final list = json['commentaries'] as List<dynamic>;
+    return CommentaryTextResponse(
+      commentaries:
+          list
+              .map((e) => CommentaryText.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
 }

@@ -46,7 +46,7 @@ class UserPlanDayCompletionStatusResponse {
     };
   }
 
-  /// Converts the response to a Map<int, bool> for easy lookup
+  /// Converts the response to a Map for easy lookup
   Map<int, bool> toCompletionStatusMap() {
     return {for (final day in days) day.dayNumber: day.isCompleted};
   }

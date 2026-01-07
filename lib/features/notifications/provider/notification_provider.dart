@@ -111,13 +111,6 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
       await enableDailyReminder(time: time);
     }
   }
-
-  Future<void> showTestNotification() async {
-    await _notificationService.showTestNotification(
-      title: 'Test Notification',
-      body: 'This is a test notification from Pecha App!',
-    );
-  }
 }
 
 final notificationProvider =

@@ -685,7 +685,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           } else if (extra is Map<String, dynamic>) {
             // Navigation with list mode (from My Recitations tab)
             final recitation = extra['recitation'] as RecitationModel?;
-            final allRecitations = extra['allRecitations'] as List<RecitationModel>?;
+            final allRecitations =
+                extra['allRecitations'] as List<RecitationModel>?;
             final currentIndex = extra['currentIndex'] as int?;
 
             if (recitation == null) {
@@ -721,13 +722,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // 2. Check onboarding for authenticated non-guest users
       if (isLoggedIn && !isGuest) {
-        _logger.debug('Authenticated non-guest user, checking onboarding');
-
-        // Check onboarding completion from local storage
-        // This is the single source of truth per requirements
         final hasCompletedOnboarding =
             await onboardingRepo.hasCompletedOnboarding();
-        _logger.debug('Onboarding status: $hasCompletedOnboarding');
 
         // Redirect to onboarding if not completed (unless already there or on login)
         if (!hasCompletedOnboarding &&

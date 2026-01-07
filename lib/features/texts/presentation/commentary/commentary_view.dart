@@ -17,12 +17,6 @@ class _CommentaryViewConstants {
   static const double dividerMargin = 8.0;
   static const double contentSpacing = 8.0;
 
-  // Card styling
-  static const double cardBorderRadius = 18.0;
-  static const double shadowBlurRadius = 8.0;
-  static const double shadowOffset = 2.0;
-  static const double shadowAlpha = 0.03;
-
   // Text preview
   static const int previewMaxLength = 150;
 

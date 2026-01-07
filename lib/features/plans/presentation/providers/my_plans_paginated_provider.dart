@@ -67,9 +67,13 @@ class MyPlansNotifier extends StateNotifier<MyPlansState> {
         limit: _limit,
       );
 
+      // Sort plans by startedAt in descending order (latest first)
+      final sortedPlans = List<UserPlansModel>.from(response.userPlans)
+        ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+
       if (mounted) {
         state = state.copyWith(
-          plans: response.userPlans,
+          plans: sortedPlans,
           isLoading: false,
           hasMore: response.userPlans.length >= _limit,
           skip: response.userPlans.length,
@@ -99,9 +103,13 @@ class MyPlansNotifier extends StateNotifier<MyPlansState> {
         limit: _limit,
       );
 
+      // Combine and sort all plans by startedAt in descending order (latest first)
+      final allPlans = [...state.plans, ...response.userPlans]
+        ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+
       if (mounted) {
         state = state.copyWith(
-          plans: [...state.plans, ...response.userPlans],
+          plans: allPlans,
           isLoadingMore: false,
           hasMore:
               state.plans.length + response.userPlans.length < response.total,

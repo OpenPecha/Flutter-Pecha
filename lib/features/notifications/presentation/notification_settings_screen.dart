@@ -17,56 +17,56 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
 
 class _NotificationSettingsScreenState
     extends ConsumerState<NotificationSettingsScreen> {
-  Future<void> _selectTime(BuildContext context, TimeOfDay selectedTime) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-    if (pickedTime != null && selectedTime != pickedTime) {
-      _updateReminderTime(pickedTime);
-    }
-  }
+  // Future<void> _selectTime(BuildContext context, TimeOfDay selectedTime) async {
+  //   final TimeOfDay? pickedTime = await showTimePicker(
+  //     context: context,
+  //     initialTime: selectedTime,
+  //   );
+  //   if (pickedTime != null && selectedTime != pickedTime) {
+  //     _updateReminderTime(pickedTime);
+  //   }
+  // }
 
-  Future<void> _toggleNotifications(bool value, TimeOfDay selectedTime) async {
-    final localizations = AppLocalizations.of(context)!;
-    if (value) {
-      try {
-        await ref
-            .read(notificationProvider.notifier)
-            .enableDailyReminder(
-              time: selectedTime,
-              title: localizations.dailyPracticeNotificationTitle,
-              body: localizations.timeForDailyPractice,
-            );
+  // Future<void> _toggleNotifications(bool value, TimeOfDay selectedTime) async {
+  //   final localizations = AppLocalizations.of(context)!;
+  //   if (value) {
+  //     try {
+  //       await ref
+  //           .read(notificationProvider.notifier)
+  //           .enableDailyReminder(
+  //             time: selectedTime,
+  //             title: localizations.dailyPracticeNotificationTitle,
+  //             body: localizations.timeForDailyPractice,
+  //           );
 
-        _showSuccessMessage('Daily reminders enabled');
-      } catch (e) {
-        _showErrorMessage(
-          'Failed to enable notifications. Please try again later.',
-        );
-      }
-    } else {
-      try {
-        await ref.read(notificationProvider.notifier).disableDailyReminder();
-        _showSuccessMessage('Daily reminders disabled');
-      } catch (e) {
-        _showErrorMessage(
-          'Failed to disable notifications. Please try again later.',
-        );
-      }
-    }
-  }
+  //       _showSuccessMessage('Daily reminders enabled');
+  //     } catch (e) {
+  //       _showErrorMessage(
+  //         'Failed to enable notifications. Please try again later.',
+  //       );
+  //     }
+  //   } else {
+  //     try {
+  //       await ref.read(notificationProvider.notifier).disableDailyReminder();
+  //       _showSuccessMessage('Daily reminders disabled');
+  //     } catch (e) {
+  //       _showErrorMessage(
+  //         'Failed to disable notifications. Please try again later.',
+  //       );
+  //     }
+  //   }
+  // }
 
-  Future<void> _updateReminderTime(TimeOfDay time) async {
-    try {
-      await ref.read(notificationProvider.notifier).updateReminderTime(time);
-      _showSuccessMessage('Reminder time updated');
-    } catch (e) {
-      _showErrorMessage(
-        'Failed to update reminder time. Please try again later.',
-      );
-    }
-  }
+  // Future<void> _updateReminderTime(TimeOfDay time) async {
+  //   try {
+  //     await ref.read(notificationProvider.notifier).updateReminderTime(time);
+  //     _showSuccessMessage('Reminder time updated');
+  //   } catch (e) {
+  //     _showErrorMessage(
+  //       'Failed to update reminder time. Please try again later.',
+  //     );
+  //   }
+  // }
 
   // Recitation notification methods
   Future<void> _toggleRecitationNotifications(
@@ -148,10 +148,10 @@ class _NotificationSettingsScreenState
     final state = ref.watch(notificationProvider);
     final recitationState = ref.watch(recitationNotificationProvider);
 
-    // Use provider state directly
-    final isEnabled = state.isEnabled;
-    final selectedTime =
-        state.reminderTime ?? const TimeOfDay(hour: 9, minute: 0);
+    // Daily practice state
+    // final isEnabled = state.isEnabled;
+    // final selectedTime =
+    //     state.reminderTime ?? const TimeOfDay(hour: 9, minute: 0);
     final hasPermission = state.hasPermission;
 
     // Recitation state
@@ -218,46 +218,46 @@ class _NotificationSettingsScreenState
               SizedBox(height: 16),
             ],
             if (hasPermission) ...[
-              Card(
-                color: Theme.of(context).cardColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SwitchListTile(
-                        activeTrackColor: Theme.of(context).colorScheme.primary,
-                        inactiveTrackColor: Colors.grey,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 0,
-                        ),
-                        title: Text(
-                          localizations.notification_daily_practice,
-                          style: TextStyle(fontSize: titleFontSize),
-                        ),
-                        value: isEnabled,
-                        onChanged: (v) => _toggleNotifications(v, selectedTime),
-                      ),
-                      if (isEnabled) ...[
-                        ListTile(
-                          title: Text(
-                            localizations.notification_select_time,
-                            style: TextStyle(fontSize: subtitleFontSize),
-                          ),
-                          subtitle: Text(
-                            selectedTime.format(context),
-                            style: TextStyle(fontSize: bodyFontSize),
-                          ),
-                          trailing: const Icon(Icons.access_time),
-                          onTap: () => _selectTime(context, selectedTime),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+              // Card(
+              //   color: Theme.of(context).cardColor,
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(8.0),
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         SwitchListTile(
+              //           activeTrackColor: Theme.of(context).colorScheme.primary,
+              //           inactiveTrackColor: Colors.grey,
+              //           contentPadding: const EdgeInsets.symmetric(
+              //             horizontal: 16,
+              //             vertical: 0,
+              //           ),
+              //           title: Text(
+              //             localizations.notification_daily_practice,
+              //             style: TextStyle(fontSize: titleFontSize),
+              //           ),
+              //           value: isEnabled,
+              //           onChanged: (v) => _toggleNotifications(v, selectedTime),
+              //         ),
+              //         if (isEnabled) ...[
+              //           ListTile(
+              //             title: Text(
+              //               localizations.notification_select_time,
+              //               style: TextStyle(fontSize: subtitleFontSize),
+              //             ),
+              //             subtitle: Text(
+              //               selectedTime.format(context),
+              //               style: TextStyle(fontSize: bodyFontSize),
+              //             ),
+              //             trailing: const Icon(Icons.access_time),
+              //             onTap: () => _selectTime(context, selectedTime),
+              //           ),
+              //         ],
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
               Card(
                 color: Theme.of(context).cardColor,
                 child: Padding(

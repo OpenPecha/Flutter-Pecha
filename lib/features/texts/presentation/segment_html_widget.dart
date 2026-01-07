@@ -61,7 +61,8 @@ class _SegmentHtmlWidgetState extends ConsumerState<SegmentHtmlWidget> {
             final element = context.element;
             if ((element?.classes.contains('footnote-marker')) ?? false) {
               final currentIndex = footnoteCounter++;
-              return GestureDetector(
+
+              return InkWell(
                 onTap: () {
                   setState(() {
                     if (visibleFootnotes.contains(currentIndex)) {
@@ -71,20 +72,32 @@ class _SegmentHtmlWidgetState extends ConsumerState<SegmentHtmlWidget> {
                     }
                   });
                 },
+                // Increase the tap target size for better UX
+                borderRadius: BorderRadius.circular(4),
                 child: Transform.translate(
-                  offset: const Offset(0, -12),
+                  offset: const Offset(0, -6),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 4, right: 4),
-                    child: DefaultTextStyle.merge(
-                      style: TextStyle(
-                        color: Color(0xFF007bff),
-                        fontWeight: FontWeight.w700,
-                        fontSize: widget.fontSize,
+                    // Increased padding for larger tap target
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
                       ),
-                      child:
-                          (context.element?.text ?? '').isNotEmpty
-                              ? Text(context.element?.text ?? '')
-                              : const Text('*'),
+                      child: DefaultTextStyle.merge(
+                        style: TextStyle(
+                          color: const Color(0xFF007bff),
+                          fontWeight: FontWeight.w700,
+                          fontSize: widget.fontSize * 0.85,
+                        ),
+                        child:
+                            (context.element?.text ?? '').isNotEmpty
+                                ? Text(context.element?.text ?? '')
+                                : const Text('*'),
+                      ),
                     ),
                   ),
                 ),

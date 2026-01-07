@@ -149,6 +149,7 @@ class _CreateImageState extends State<CreateImage> {
       tempFile = File(imagePath);
       await tempFile.writeAsBytes(_capturedImageBytes!);
 
+      if (!mounted) return;
       final sharePositionOrigin = getSharePositionOrigin(
         context: context,
         globalKey: _shareButtonKey,

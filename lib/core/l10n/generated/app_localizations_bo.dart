@@ -30,7 +30,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get switchToDark => 'ནག་པོའི་ཚད་གཞི་ལ་སྒྲིག་པ།';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'ནང་འཛུལ།';
 
   @override
   String get logout => 'ཕྱིར་ཐོན།';
@@ -45,6 +45,12 @@ class AppLocalizationsBo extends AppLocalizations {
   @override
   String get onboarding_quote =>
       'Approximatey 500 million people worldwide practice Buddhism, making it the world\'s fourth largest religion';
+
+  @override
+  String get onboarding_find_peace => 'Find your Peace';
+
+  @override
+  String get onboarding_continue => 'Continue';
 
   @override
   String get onboarding_first_question =>
@@ -73,22 +79,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get home_good_evening => 'དགོང་དྲོ་བདེ་ལེགས།';
 
   @override
-  String get home_dailyRefresh => 'Daily Refresh';
-
-  @override
   String get home_meditationTitle => 'དངོས་གཞི་སྒོམ།';
 
   @override
-  String get home_meditationSubtitle => 'Awaken peace within.';
-
-  @override
   String get home_prayerTitle => 'Prayer of the Day';
-
-  @override
-  String get home_prayerSubtitle => 'Begin your day with a sacred intention.';
-
-  @override
-  String get home_btnText => 'Start now';
 
   @override
   String get home_scripture => 'Guided Scripture';
@@ -149,9 +143,6 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get text_toc_versions => 'འགྱུར་མ་དང་དཔེ་རྒྱུན།';
-
-  @override
-  String get text_toc_revisionHistory => 'བཟོ་བཅོས་ཀྱི་ལོ་རྒྱུས།';
 
   @override
   String get text_commentary => 'འགྲེལ་བ།';
@@ -321,9 +312,6 @@ class AppLocalizationsBo extends AppLocalizations {
   String get reminderTime => 'Reminder Time';
 
   @override
-  String get selectTime => 'དུས་ཚོད་འདེམ།';
-
-  @override
   String get notification_daily_recitation => 'ཞལ་འདོན་དྲན་བརྡ།';
 
   @override
@@ -331,9 +319,6 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get text_switchToTibetan => ' བོད་སྐད་ཐོག་བལྟ།';
-
-  @override
-  String get common_sign_in => 'ནང་འཛུལ།';
 
   @override
   String get recitations_title => 'ཞལ་འདོན།';
@@ -444,6 +429,12 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get image => 'འདྲ་པར།';
+
+  @override
+  String get feedback => 'དགོངས་འཆར།';
+
+  @override
+  String get feedback_wishlist => 'དགོངས་འཆར་དང་རེ་འདུན།';
 
   @override
   String get author => 'རྩོམ་སྒྲིག་པ།';

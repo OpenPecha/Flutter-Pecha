@@ -172,6 +172,18 @@ abstract class AppLocalizations {
   /// **'Approximatey 500 million people worldwide practice Buddhism, making it the world\'s fourth largest religion'**
   String get onboarding_quote;
 
+  /// No description provided for @onboarding_find_peace.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your Peace'**
+  String get onboarding_find_peace;
+
+  /// No description provided for @onboarding_continue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboarding_continue;
+
   /// No description provided for @onboarding_first_question.
   ///
   /// In en, this message translates to:
@@ -220,41 +232,17 @@ abstract class AppLocalizations {
   /// **'Good Evening'**
   String get home_good_evening;
 
-  /// No description provided for @home_dailyRefresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily Refresh'**
-  String get home_dailyRefresh;
-
   /// No description provided for @home_meditationTitle.
   ///
   /// In en, this message translates to:
   /// **'Meditation'**
   String get home_meditationTitle;
 
-  /// No description provided for @home_meditationSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Awaken peace within.'**
-  String get home_meditationSubtitle;
-
   /// No description provided for @home_prayerTitle.
   ///
   /// In en, this message translates to:
   /// **'Prayer of the Day'**
   String get home_prayerTitle;
-
-  /// No description provided for @home_prayerSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Begin your day with a sacred intention.'**
-  String get home_prayerSubtitle;
-
-  /// No description provided for @home_btnText.
-  ///
-  /// In en, this message translates to:
-  /// **'Start now'**
-  String get home_btnText;
 
   /// No description provided for @home_scripture.
   ///
@@ -349,13 +337,13 @@ abstract class AppLocalizations {
   /// No description provided for @text_detail_rootText.
   ///
   /// In en, this message translates to:
-  /// **'Root Text'**
+  /// **'Root'**
   String get text_detail_rootText;
 
   /// No description provided for @text_detail_commentaryText.
   ///
   /// In en, this message translates to:
-  /// **'Commentary Text'**
+  /// **'Commentary'**
   String get text_detail_commentaryText;
 
   /// No description provided for @text_toc_continueReading.
@@ -375,12 +363,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Versions'**
   String get text_toc_versions;
-
-  /// No description provided for @text_toc_revisionHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Revision History'**
-  String get text_toc_revisionHistory;
 
   /// No description provided for @text_commentary.
   ///
@@ -706,12 +688,6 @@ abstract class AppLocalizations {
   /// **'Reminder Time'**
   String get reminderTime;
 
-  /// No description provided for @selectTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Time'**
-  String get selectTime;
-
   /// No description provided for @notification_daily_recitation.
   ///
   /// In en, this message translates to:
@@ -729,12 +705,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to Tibetan'**
   String get text_switchToTibetan;
-
-  /// No description provided for @common_sign_in.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
-  String get common_sign_in;
 
   /// No description provided for @recitations_title.
   ///
@@ -951,6 +921,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image'**
   String get image;
+
+  /// No description provided for @feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedback;
+
+  /// No description provided for @feedback_wishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback and Wishlist'**
+  String get feedback_wishlist;
 
   /// No description provided for @author.
   ///

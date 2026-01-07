@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/texts/constants/text_screen_constants.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
-/// List item widget for displaying text versions
 class VersionListItem extends StatelessWidget {
   final String title;
   final String sourceLink;
@@ -25,7 +24,7 @@ class VersionListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final fontFamily = getFontFamily(language);
     final lineHeight = getLineHeight(language);
-    final fontSize = language == 'bo' ? 22.0 : 18.0;
+    final fontSize = language == 'bo' ? 20.0 : 18.0;
 
     return GestureDetector(
       onTap: onTap,
