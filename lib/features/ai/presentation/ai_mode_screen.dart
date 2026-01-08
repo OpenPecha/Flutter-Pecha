@@ -20,7 +20,6 @@ class AiModeScreen extends ConsumerStatefulWidget {
 class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<String> _suggestions = [
     'What is self ?',
     'How one can attain enlightenment ?',
@@ -73,8 +72,28 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   }
 
   void _onMenuPressed() {
-    // Open the drawer
-    _scaffoldKey.currentState?.openDrawer();
+    // Show fullscreen overlay drawer that covers bottom nav
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Chat History',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const ChatHistoryDrawer();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(-1, 0),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
+          child: child,
+        );
+      },
+    );
   }
 
   @override
@@ -112,12 +131,17 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
     }
 
     return Scaffold(
-      key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      drawer: const ChatHistoryDrawer(),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => FocusScope.of(context).unfocus(),
+        onHorizontalDragEnd: (details) {
+          // Open drawer when swiping from left to right
+          if (details.primaryVelocity != null &&
+              details.primaryVelocity! > 300) {
+            _onMenuPressed();
+          }
+        },
         child: SafeArea(
           child: Column(
             children: [
@@ -342,7 +366,9 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   Widget _buildInputSection(bool isDarkMode) {
     final textLength = _controller.text.length;
     final isOverLimit = MessageValidator.exceedsLimit(_controller.text);
-    final isApproachingLimit = MessageValidator.isApproachingLimit(_controller.text);
+    final isApproachingLimit = MessageValidator.isApproachingLimit(
+      _controller.text,
+    );
     final canSend = _hasText && !isOverLimit;
 
     return Padding(
@@ -431,11 +457,14 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                   '$textLength/${MessageValidator.maxLength}',
                   style: TextStyle(
                     fontSize: 11,
-                    color: isOverLimit
-                        ? Colors.red
-                        : isApproachingLimit
+                    color:
+                        isOverLimit
+                            ? Colors.red
+                            : isApproachingLimit
                             ? Colors.orange
-                            : (isDarkMode ? AppColors.grey500 : AppColors.grey600),
+                            : (isDarkMode
+                                ? AppColors.grey500
+                                : AppColors.grey600),
                   ),
                 ),
               ),

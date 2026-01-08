@@ -161,6 +161,16 @@ class ThreadListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    // Highlight colors for active/selected thread
+    final activeBackgroundColor =
+        isDarkMode
+            ? AppColors.primary.withValues(alpha: 0.25)
+            : AppColors.primaryContainer;
+    final activeBorderColor =
+        isDarkMode
+            ? AppColors.primary.withValues(alpha: 0.5)
+            : AppColors.primaryLight.withValues(alpha: 0.4);
+
     return GestureDetector(
       onLongPress: () {
         if (onDelete != null) {
@@ -171,23 +181,37 @@ class ThreadListItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
+          margin:
+              isActive
+                  ? const EdgeInsets.symmetric(horizontal: 8, vertical: 2)
+                  : EdgeInsets.zero,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color:
+            color: isActive ? activeBackgroundColor : Colors.transparent,
+            borderRadius: isActive ? BorderRadius.circular(10) : null,
+            border:
                 isActive
-                    ? (isDarkMode
-                        ? AppColors.backgroundDark
-                        : AppColors.grey100)
-                    : Colors.transparent,
+                    ? Border.all(color: activeBorderColor, width: 1)
+                    : null,
           ),
           child: Row(
             children: [
-              const SizedBox(width: 12),
+              // Active indicator dot
+              if (isActive)
+                Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
               Expanded(
                 child: Text(
                   thread.title,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     color:
                         isDarkMode
                             ? AppColors.surfaceWhite

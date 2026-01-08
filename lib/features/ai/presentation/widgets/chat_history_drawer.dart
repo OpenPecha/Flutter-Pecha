@@ -136,139 +136,155 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final threadListState = ref.watch(threadListControllerProvider);
     final currentThreadId = ref.watch(chatControllerProvider).currentThreadId;
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Drawer width: 85% of screen, max 320
+    final drawerWidth = (screenWidth * 0.85).clamp(280.0, 320.0);
 
-    return Drawer(
-      backgroundColor:
-          isDarkMode ? AppColors.backgroundDark : AppColors.primarySurface,
-      child: GestureDetector(
-        onTap: () {
-          // Dismiss keyboard when tapping outside the text field
-          _searchFocusNode.unfocus();
-        },
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Search Field
-                    TextField(
-                      controller: _searchController,
-                      focusNode: _searchFocusNode,
-                      textInputAction: TextInputAction.search,
-                      decoration: InputDecoration(
-                        hintText: 'Search for chats',
-                        hintStyle: TextStyle(
-                          fontSize: 12,
-                          color:
-                              isDarkMode
-                                  ? AppColors.grey500
-                                  : AppColors.textPrimaryLight,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color:
-                              isDarkMode
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimary,
-                          size: 28,
-                        ),
-                        filled: true,
-                        fillColor:
-                            isDarkMode
-                                ? AppColors.surfaceDark
-                                : AppColors.textPrimaryDark,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                            color: AppColors.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color:
-                            isDarkMode
-                                ? AppColors.surfaceWhite
-                                : AppColors.textPrimary,
-                      ),
-                      onChanged: (value) {
-                        // TODO: Implement real-time search filtering
-                      },
-                      onSubmitted: _performSearch,
-                    ),
-                    const SizedBox(height: 16),
-                    // Chats Header with New Chat Button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Material(
+        color: isDarkMode ? AppColors.backgroundDark : AppColors.primarySurface,
+        child: GestureDetector(
+          onTap: () {
+            // Dismiss keyboard when tapping outside the text field
+            _searchFocusNode.unfocus();
+          },
+          onHorizontalDragEnd: (details) {
+            // Close drawer when swiping from right to left
+            if (details.primaryVelocity != null &&
+                details.primaryVelocity! < -300) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: Container(
+            width: drawerWidth,
+            height: double.infinity,
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Chats',
+                        // Search Field
+                        TextField(
+                          controller: _searchController,
+                          focusNode: _searchFocusNode,
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            hintText: 'Search for chats',
+                            hintStyle: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  isDarkMode
+                                      ? AppColors.grey500
+                                      : AppColors.textPrimaryLight,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color:
+                                  isDarkMode
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimary,
+                              size: 28,
+                            ),
+                            filled: true,
+                            fillColor:
+                                isDarkMode
+                                    ? AppColors.surfaceDark
+                                    : AppColors.textPrimaryDark,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
                           style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
                             color:
                                 isDarkMode
                                     ? AppColors.surfaceWhite
                                     : AppColors.textPrimary,
                           ),
-                        ),
-                        // New Chat Icon
-                        GestureDetector(
-                          onTap: () {
-                            // Unfocus any focused widget before performing actions
-                            FocusScope.of(context).unfocus();
-                            ref
-                                .read(chatControllerProvider.notifier)
-                                .startNewThread();
-                            ref
-                                .read(threadListControllerProvider.notifier)
-                                .refreshThreads();
-                            Navigator.of(context).pop(); // Close drawer
+                          onChanged: (value) {
+                            // TODO: Implement real-time search filtering
                           },
-                          child: Icon(
-                            Icons.add,
-                            size: 24,
-                            color:
-                                isDarkMode
-                                    ? AppColors.surfaceWhite
-                                    : AppColors.textPrimary,
-                          ),
+                          onSubmitted: _performSearch,
                         ),
+                        const SizedBox(height: 16),
+                        // Chats Header with New Chat Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Chats',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                                color:
+                                    isDarkMode
+                                        ? AppColors.surfaceWhite
+                                        : AppColors.textPrimary,
+                              ),
+                            ),
+                            // New Chat Icon
+                            GestureDetector(
+                              onTap: () {
+                                // Unfocus any focused widget before performing actions
+                                FocusScope.of(context).unfocus();
+                                ref
+                                    .read(chatControllerProvider.notifier)
+                                    .startNewThread();
+                                ref
+                                    .read(threadListControllerProvider.notifier)
+                                    .refreshThreads();
+                                Navigator.of(context).pop(); // Close drawer
+                              },
+                              child: Icon(
+                                Icons.add,
+                                size: 24,
+                                color:
+                                    isDarkMode
+                                        ? AppColors.surfaceWhite
+                                        : AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // const SizedBox(height: 5),
                       ],
                     ),
-                    // const SizedBox(height: 5),
-                  ],
-                ),
+                  ),
+                  const Divider(height: 1),
+                  const SizedBox(height: 5),
+                  // Thread List
+                  Expanded(
+                    child: _buildThreadList(
+                      isDarkMode,
+                      threadListState,
+                      currentThreadId,
+                    ),
+                  ),
+                ],
               ),
-              const Divider(height: 1),
-              const SizedBox(height: 5),
-              // Thread List
-              Expanded(
-                child: _buildThreadList(
-                  isDarkMode,
-                  threadListState,
-                  currentThreadId,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -298,7 +314,7 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Failed to load conversations',
+                'Unable to load conversations',
                 style: TextStyle(
                   fontSize: 16,
                   color:
@@ -350,7 +366,7 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
               Text(
                 'Start a new chat to begin',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   color: isDarkMode ? AppColors.grey500 : AppColors.grey600,
                 ),
               ),
