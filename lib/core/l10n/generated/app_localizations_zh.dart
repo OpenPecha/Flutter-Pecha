@@ -123,6 +123,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_settings => '設定';
 
   @override
+  String get nav_ai_mode => '人工智能';
+
+  @override
   String get text_browseTheLibrary => '瀏覽文庫';
 
   @override

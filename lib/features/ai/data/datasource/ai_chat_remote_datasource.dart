@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/ai/config/ai_config.dart';
 import 'package:http/http.dart' as http;
 
 class AiChatRemoteDatasource {
@@ -48,7 +49,17 @@ class AiChatRemoteDatasource {
       request.headers['Accept'] = 'application/json';
       request.body = jsonEncode(requestBody);
 
-      final streamedResponse = await _client.send(request);
+      // Add connection timeout
+      final streamedResponse = await _client.send(request).timeout(
+        AiConfig.connectionTimeout,
+        onTimeout: () {
+          _logger.error('Connection timeout after ${AiConfig.connectionTimeout.inSeconds}s');
+          throw TimeoutException(
+            'Connection timed out. Please check your internet connection.',
+            AiConfig.connectionTimeout,
+          );
+        },
+      );
 
       if (streamedResponse.statusCode != 200) {
         _logger.error('API error: ${streamedResponse.statusCode}');
@@ -60,8 +71,21 @@ class AiChatRemoteDatasource {
       // Buffer for incomplete lines across chunks
       String buffer = '';
 
-      // Parse the SSE stream with proper buffering
-      await for (final chunk in streamedResponse.stream.transform(utf8.decoder)) {
+      // Parse the SSE stream with token timeout
+      // Using stream timeout to detect stalled connections
+      await for (final chunk in streamedResponse.stream
+          .transform(utf8.decoder)
+          .timeout(
+            AiConfig.tokenTimeout,
+            onTimeout: (sink) {
+              _logger.error('Stream timeout - no data received for ${AiConfig.tokenTimeout.inSeconds}s');
+              sink.addError(TimeoutException(
+                'Response timed out. The AI server may be busy.',
+                AiConfig.tokenTimeout,
+              ));
+              sink.close();
+            },
+          )) {
         // Add new chunk to buffer
         buffer += chunk;
         

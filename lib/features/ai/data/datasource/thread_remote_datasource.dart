@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/ai/config/ai_config.dart';
 import 'package:flutter_pecha/features/ai/models/chat_thread.dart';
+import 'package:flutter_pecha/features/ai/services/retry_service.dart';
 import 'package:http/http.dart' as http;
 
 /// Remote data source for thread operations
@@ -35,21 +37,34 @@ class ThreadRemoteDatasource {
     _logger.info('Fetching threads: ${url.toString()}');
 
     try {
-      final response = await _client.get(url);
+      // Use retry service for resilience
+      return await RetryService.execute(
+        () async {
+          final response = await _client.get(url).timeout(
+            AiConfig.requestTimeout,
+            onTimeout: () {
+              throw Exception('Request timed out. Please try again.');
+            },
+          );
 
-      if (response.statusCode == 200) {
-        final decoded = utf8.decode(response.bodyBytes);
-        final jsonData = json.decode(decoded) as Map<String, dynamic>;
-        
-        _logger.info('Successfully fetched threads');
-        return ThreadListResponse.fromJson(jsonData);
-      } else if (response.statusCode == 401 || response.statusCode == 403) {
-        _logger.error('Authentication error: ${response.statusCode}');
-        throw Exception('Authentication required. Please log in.');
-      } else {
-        _logger.error('Failed to fetch threads: ${response.statusCode}');
-        throw Exception('Failed to load chat history: ${response.statusCode}');
-      }
+          if (response.statusCode == 200) {
+            final decoded = utf8.decode(response.bodyBytes);
+            final jsonData = json.decode(decoded) as Map<String, dynamic>;
+
+            _logger.info('Successfully fetched threads');
+            return ThreadListResponse.fromJson(jsonData);
+          } else if (response.statusCode == 401 || response.statusCode == 403) {
+            _logger.error('Authentication error: ${response.statusCode}');
+            throw Exception('Authentication required. Please log in.');
+          } else {
+            _logger.error('Failed to fetch threads: ${response.statusCode}');
+            throw Exception('Failed to load chat history: ${response.statusCode}');
+          }
+        },
+        onRetry: (attempt, delay, error) {
+          _logger.warning('Retrying getThreads (attempt $attempt) after ${delay.inSeconds}s');
+        },
+      );
     } catch (e) {
       if (e is Exception) rethrow;
       _logger.error('Network error fetching threads', e);
@@ -70,24 +85,37 @@ class ThreadRemoteDatasource {
     _logger.info('Fetching thread details: ${url.toString()}');
 
     try {
-      final response = await _client.get(url);
+      // Use retry service for resilience
+      return await RetryService.execute(
+        () async {
+          final response = await _client.get(url).timeout(
+            AiConfig.requestTimeout,
+            onTimeout: () {
+              throw Exception('Request timed out. Please try again.');
+            },
+          );
 
-      if (response.statusCode == 200) {
-        final decoded = utf8.decode(response.bodyBytes);
-        final jsonData = json.decode(decoded) as Map<String, dynamic>;
-        
-        _logger.info('Successfully fetched thread: $threadId');
-        return ChatThreadDetail.fromJson(jsonData);
-      } else if (response.statusCode == 404) {
-        _logger.error('Thread not found: $threadId');
-        throw Exception('Conversation not found');
-      } else if (response.statusCode == 401 || response.statusCode == 403) {
-        _logger.error('Authentication error: ${response.statusCode}');
-        throw Exception('Authentication required. Please log in.');
-      } else {
-        _logger.error('Failed to fetch thread: ${response.statusCode}');
-        throw Exception('Failed to load conversation: ${response.statusCode}');
-      }
+          if (response.statusCode == 200) {
+            final decoded = utf8.decode(response.bodyBytes);
+            final jsonData = json.decode(decoded) as Map<String, dynamic>;
+
+            _logger.info('Successfully fetched thread: $threadId');
+            return ChatThreadDetail.fromJson(jsonData);
+          } else if (response.statusCode == 404) {
+            _logger.error('Thread not found: $threadId');
+            throw Exception('Conversation not found');
+          } else if (response.statusCode == 401 || response.statusCode == 403) {
+            _logger.error('Authentication error: ${response.statusCode}');
+            throw Exception('Authentication required. Please log in.');
+          } else {
+            _logger.error('Failed to fetch thread: ${response.statusCode}');
+            throw Exception('Failed to load conversation: ${response.statusCode}');
+          }
+        },
+        onRetry: (attempt, delay, error) {
+          _logger.warning('Retrying getThreadById (attempt $attempt) after ${delay.inSeconds}s');
+        },
+      );
     } catch (e) {
       if (e is Exception) rethrow;
       _logger.error('Network error fetching thread', e);
@@ -108,37 +136,50 @@ class ThreadRemoteDatasource {
     _logger.info('Deleting thread: ${url.toString()}');
 
     try {
-      final response = await _client.delete(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'thread_id': threadId}),
-      );
+      // Use retry service for resilience
+      await RetryService.execute(
+        () async {
+          final response = await _client.delete(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'thread_id': threadId}),
+          ).timeout(
+            AiConfig.requestTimeout,
+            onTimeout: () {
+              throw Exception('Request timed out. Please try again.');
+            },
+          );
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        // Parse response body for 200 status code
-        if (response.statusCode == 200) {
-          try {
-            final decoded = utf8.decode(response.bodyBytes);
-            final jsonData = json.decode(decoded) as Map<String, dynamic>;
-            final message = jsonData['message'] ?? 'Thread deleted successfully';
-            _logger.info('Delete thread response: $message (thread_id: $threadId)');
-          } catch (e) {
-            _logger.info('Successfully deleted thread: $threadId');
+          if (response.statusCode == 200 || response.statusCode == 204) {
+            // Parse response body for 200 status code
+            if (response.statusCode == 200) {
+              try {
+                final decoded = utf8.decode(response.bodyBytes);
+                final jsonData = json.decode(decoded) as Map<String, dynamic>;
+                final message = jsonData['message'] ?? 'Thread deleted successfully';
+                _logger.info('Delete thread response: $message (thread_id: $threadId)');
+              } catch (e) {
+                _logger.info('Successfully deleted thread: $threadId');
+              }
+            } else {
+              _logger.info('Successfully deleted thread: $threadId');
+            }
+            return;
+          } else if (response.statusCode == 404) {
+            _logger.error('Thread not found: $threadId');
+            throw Exception('Conversation not found');
+          } else if (response.statusCode == 401 || response.statusCode == 403) {
+            _logger.error('Authentication error: ${response.statusCode}');
+            throw Exception('Authentication required. Please log in.');
+          } else {
+            _logger.error('Failed to delete thread: ${response.statusCode}');
+            throw Exception('Failed to delete conversation: ${response.statusCode}');
           }
-        } else {
-          _logger.info('Successfully deleted thread: $threadId');
-        }
-        return;
-      } else if (response.statusCode == 404) {
-        _logger.error('Thread not found: $threadId');
-        throw Exception('Conversation not found');
-      } else if (response.statusCode == 401 || response.statusCode == 403) {
-        _logger.error('Authentication error: ${response.statusCode}');
-        throw Exception('Authentication required. Please log in.');
-      } else {
-        _logger.error('Failed to delete thread: ${response.statusCode}');
-        throw Exception('Failed to delete conversation: ${response.statusCode}');
-      }
+        },
+        onRetry: (attempt, delay, error) {
+          _logger.warning('Retrying deleteThread (attempt $attempt) after ${delay.inSeconds}s');
+        },
+      );
     } catch (e) {
       if (e is Exception) rethrow;
       _logger.error('Network error deleting thread', e);

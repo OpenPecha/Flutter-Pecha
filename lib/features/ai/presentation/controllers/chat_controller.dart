@@ -5,6 +5,8 @@ import 'package:flutter_pecha/features/ai/data/providers/ai_chat_provider.dart';
 import 'package:flutter_pecha/features/ai/data/repositories/ai_chat_repository.dart';
 import 'package:flutter_pecha/features/ai/models/chat_message.dart';
 import 'package:flutter_pecha/features/ai/presentation/controllers/thread_list_controller.dart';
+import 'package:flutter_pecha/features/ai/services/rate_limiter.dart';
+import 'package:flutter_pecha/features/ai/validators/message_validator.dart';
 import 'package:flutter_pecha/features/auth/application/user_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,11 +52,12 @@ class ChatState {
 
 class ChatController extends StateNotifier<ChatState> {
   final AiChatRepository _repository;
+  final RateLimiter _rateLimiter;
   final Ref _ref;
   final _logger = AppLogger('ChatController');
   StreamSubscription? _streamSubscription;
 
-  ChatController(this._repository, this._ref) : super(ChatState());
+  ChatController(this._repository, this._rateLimiter, this._ref) : super(ChatState());
 
   /// Get user email or generate a random guest email
   String _getUserEmail() {
@@ -82,13 +85,32 @@ class ChatController extends StateNotifier<ChatState> {
 
   /// Sends a message to the AI and handles the streaming response
   Future<void> sendMessage(String content) async {
-    if (content.trim().isEmpty) return;
+    // Validate the message
+    final validationResult = MessageValidator.validate(content);
+    if (!validationResult.isValid) {
+      state = state.copyWith(error: validationResult.errorMessage);
+      return;
+    }
+
+    // Check rate limit
+    if (!_rateLimiter.canMakeRequest()) {
+      final rateLimitMessage = _rateLimiter.getRateLimitMessage();
+      _logger.warning('Rate limit exceeded: $rateLimitMessage');
+      state = state.copyWith(error: rateLimitMessage);
+      return;
+    }
+
+    // Use the sanitized content
+    final sanitizedContent = validationResult.sanitizedContent!;
+
+    // Record the request for rate limiting
+    _rateLimiter.recordRequest();
 
     // Cancel any ongoing stream
     await _streamSubscription?.cancel();
 
     // Add user message to the list
-    final userMessage = ChatMessage(content: content, isUser: true);
+    final userMessage = ChatMessage(content: sanitizedContent, isUser: true);
     state = state.copyWith(
       messages: [...state.messages, userMessage],
       error: null,
@@ -113,7 +135,7 @@ class ChatController extends StateNotifier<ChatState> {
 
     try {
       final stream = _repository.sendMessage(
-        message: content,
+        message: sanitizedContent,
         email: email,
         threadId: state.currentThreadId,
       );
@@ -249,6 +271,7 @@ class ChatController extends StateNotifier<ChatState> {
 
 final chatControllerProvider = StateNotifierProvider<ChatController, ChatState>((ref) {
   final repository = ref.watch(aiChatRepositoryProvider);
-  return ChatController(repository, ref);
+  final rateLimiter = ref.watch(rateLimiterProvider);
+  return ChatController(repository, rateLimiter, ref);
 });
 

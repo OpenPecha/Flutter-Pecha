@@ -32,11 +32,14 @@
   "home_bringing": "融入生活",
   "home_profile": "Profile",
   "no_feature_content": "尚無內容",
+
   "nav_home": "首頁",
   "nav_texts": "文本",
   "nav_recitations": "唱誦",
   "nav_practice": "修持計劃",
   "nav_settings": "設定",
+  "nav_ai_mode": "人工智能",
+
   "text_browseTheLibrary": "瀏覽文庫",
   "text_search": "搜尋",
   "text_detail_rootText": "原文本",

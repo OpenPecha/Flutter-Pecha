@@ -32,11 +32,14 @@
   "home_bringing": "བློ་སྦྱོང་གོམས་འདྲིས།",
   "home_profile": "ངོ་སྤྲོད་སྙིང་བསྡུས།",
   "no_feature_content": "རྒྱུ་ཆ་མིན་འདུག",
+
   "nav_home": "འདུན་ངོས།",
   "nav_texts": "ཡིག་མཛོད།",
   "nav_recitations": "ཞལ་འདོན།",
   "nav_practice": "ཉམས་ལེན།",
   "nav_settings": "སྒྲིག་འགོད།",
+  "nav_ai_mode": "རིག་ནུས་",
+
   "text_browseTheLibrary": "དཀར་ཆག",
   "text_search": "འཚོལ་ས།",
   "text_detail_rootText": "རྩ་བ།",
@@ -145,8 +148,5 @@
   "feedback_wishlist": "དགོངས་འཆར་དང་རེ་འདུན།",
 
   "author": "རྩོམ་སྒྲིག་པ།",
-  "plans_created": "ཉམས་ལེན་ཁག",
-
-  "nav_settings": "སྒྲིག་འགོད།",
-  "nav_ai_mode": "རིག་ནུས་"
+  "plans_created": "ཉམས་ལེན་ཁག"
 }

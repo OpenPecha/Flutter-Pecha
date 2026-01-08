@@ -32,11 +32,14 @@
   "home_bringing": "Bringing it to life",
   "home_profile": "Profile",
   "no_feature_content": "No featured content available",
+
   "nav_home": "Home",
   "nav_texts": "Texts",
   "nav_recitations": "Recitations",
   "nav_practice": "Practice",
   "nav_settings": "Settings",
+  "nav_ai_mode": "AI",
+
   "text_browseTheLibrary": "Browse The Library",
   "text_search": "Search",
   "text_detail_rootText": "Root",
@@ -145,8 +148,5 @@
   "feedback_wishlist": "Feedback and Wishlist",
 
   "author": "Author",
-  "plans_created": "Plan created",
-
-  "nav_settings": "Settings",
-  "nav_ai_mode": "AI"
+  "plans_created": "Plan created"
 }

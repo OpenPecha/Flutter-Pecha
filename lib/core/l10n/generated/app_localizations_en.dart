@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_settings => 'Settings';
 
   @override
+  String get nav_ai_mode => 'AI';
+
+  @override
   String get text_browseTheLibrary => 'Browse The Library';
 
   @override
@@ -439,7 +442,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plans_created => 'Plan created';
-
-  @override
-  String get nav_ai_mode => 'AI';
 }

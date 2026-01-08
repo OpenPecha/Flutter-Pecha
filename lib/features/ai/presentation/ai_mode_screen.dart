@@ -5,6 +5,7 @@ import 'package:flutter_pecha/features/ai/presentation/controllers/thread_list_c
 import 'package:flutter_pecha/features/ai/presentation/widgets/chat_header.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/chat_history_drawer.dart';
 import 'package:flutter_pecha/features/ai/presentation/widgets/message_list.dart';
+import 'package:flutter_pecha/features/ai/validators/message_validator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/auth/application/auth_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
@@ -33,12 +34,10 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   }
 
   void _onTextChanged() {
-    final hasText = _controller.text.trim().isNotEmpty;
-    if (hasText != _hasText) {
-      setState(() {
-        _hasText = hasText;
-      });
-    }
+    // Always rebuild to update character counter
+    setState(() {
+      _hasText = _controller.text.trim().isNotEmpty;
+    });
   }
 
   @override
@@ -341,6 +340,11 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
   }
 
   Widget _buildInputSection(bool isDarkMode) {
+    final textLength = _controller.text.length;
+    final isOverLimit = MessageValidator.exceedsLimit(_controller.text);
+    final isApproachingLimit = MessageValidator.isApproachingLimit(_controller.text);
+    final canSend = _hasText && !isOverLimit;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Column(
@@ -399,11 +403,11 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 4, bottom: 4),
                   child: IconButton(
-                    onPressed: _hasText ? _onSendMessage : null,
+                    onPressed: canSend ? _onSendMessage : null,
                     icon: Icon(
                       Icons.send_rounded,
                       color:
-                          _hasText
+                          canSend
                               ? (isDarkMode
                                   ? AppColors.primaryContainer
                                   : AppColors.backgroundDark)
@@ -417,7 +421,27 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 5),
+          // Character counter - only show when user has typed something
+          if (_hasText)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, right: 12),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '$textLength/${MessageValidator.maxLength}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isOverLimit
+                        ? Colors.red
+                        : isApproachingLimit
+                            ? Colors.orange
+                            : (isDarkMode ? AppColors.grey500 : AppColors.grey600),
+                  ),
+                ),
+              ),
+            )
+          else
+            const SizedBox(height: 5),
         ],
       ),
     );
