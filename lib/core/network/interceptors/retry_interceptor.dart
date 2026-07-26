@@ -50,7 +50,7 @@ class RetryInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     // Handle 401 - try to refresh token
-    if (err.response?.statusCode == 401) {
+    if (_isAuthFailure(err)) {
       // Check if user has valid credentials (refresh token available via CredentialsManager)
       final hasValidCreds = await _authService.hasValidCredentials();
       if (hasValidCreds) {
@@ -110,6 +110,21 @@ class RetryInterceptor extends Interceptor {
         }
         return;
       }
+
+      // No recoverable credentials: nothing stored, storage unreadable, or
+      // the access token expired with no refresh token to renew it. Refresh
+      // is impossible, so without ending the session here the user stays
+      // "signed in" and every protected call 401s forever with no re-login
+      // prompt. Guests are skipped — they legitimately have no credentials
+      // and must not be bounced out of guest mode.
+      final isGuest = await _authService.isGuestMode();
+      if (!isGuest) {
+        _logger.warning(
+          '401 with no recoverable credentials — session is unrecoverable, '
+          'forcing re-authentication',
+        );
+        onAuthExpired?.call();
+      }
     }
 
     // Retry network errors with exponential backoff
@@ -142,6 +157,21 @@ class RetryInterceptor extends Interceptor {
     }
 
     handler.next(err);
+  }
+
+  /// Whether [err] means the request failed *authentication* (fixable by a
+  /// token refresh), per RFC 6750 that is a 401. One backend quirk widens it:
+  /// FastAPI's HTTPBearer answers a request with a *missing* Authorization
+  /// header with 403, not 401 — which happens when the proactive token fetch
+  /// failed and [AuthInterceptor] sent the request bare. Such a 403 cannot be
+  /// a real permissions error (no identity was presented), so treat it as an
+  /// auth failure too. A 403 on a request that DID carry a bearer stays a
+  /// genuine authorization error — refreshing would loop pointlessly.
+  bool _isAuthFailure(DioException err) {
+    final status = err.response?.statusCode;
+    if (status == 401) return true;
+    return status == 403 &&
+        !err.requestOptions.headers.containsKey('Authorization');
   }
 
   /// A [FormData] body's underlying file streams are consumed on the first
