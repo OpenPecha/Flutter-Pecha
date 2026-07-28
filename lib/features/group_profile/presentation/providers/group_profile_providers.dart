@@ -127,6 +127,10 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
     _ref.invalidate(groupProfileProvider(_key.groupId));
   }
 
+  void _refreshGroupMembers() {
+    _ref.read(groupMembersProvider(_key.groupId).notifier).loadInitial();
+  }
+
   void _invalidateConnectProviders() {
     _ref.invalidate(myGroupsProvider);
     _ref.invalidate(discoverGroupsProvider);
@@ -247,6 +251,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
       countDelta: incrementCount ? previousDelta + 1 : previousDelta,
     );
     _invalidateGroupProfile();
+    _refreshGroupMembers();
     _invalidateConnectProviders();
     if (connectGroup != null) {
       _addPendingJoinedGroup(connectGroup);
@@ -278,6 +283,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
           countDelta: previousDelta - 1,
         );
         _invalidateGroupProfile();
+        _refreshGroupMembers();
         _invalidateConnectProviders();
         if (connectGroup != null) {
           _removePendingJoinedGroup(connectGroup.id);
