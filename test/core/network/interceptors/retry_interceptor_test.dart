@@ -1,3 +1,4 @@
+import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/network/interceptors/retry_interceptor.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
@@ -40,9 +41,11 @@ void main() {
     );
   });
 
-  group('401 with no recoverable credentials', () {
-    test('ends the session for a signed-in user', () async {
-      when(authService.hasValidCredentials()).thenAnswer((_) async => false);
+  group('401 with positive evidence the session is gone', () {
+    test('missing credentials end the session for a signed-in user', () async {
+      when(authService.forceRefreshAccessToken()).thenThrow(
+        const CredentialsManagerException('NO_CREDENTIALS', 'none', {}),
+      );
       when(authService.isGuestMode()).thenAnswer((_) async => false);
 
       final err = unauthorized();
@@ -54,9 +57,85 @@ void main() {
       verifyNever(handler.resolve(any));
     });
 
+    test('a missing refresh token ends the session', () async {
+      when(authService.forceRefreshAccessToken()).thenThrow(
+        const CredentialsManagerException('NO_REFRESH_TOKEN', 'none', {}),
+      );
+      when(authService.isGuestMode()).thenAnswer((_) async => false);
+
+      final err = unauthorized();
+      interceptor.onError(err, handler);
+      await untilCalled(handler.next(any));
+
+      expect(authExpiredCalls, 1);
+      verify(handler.next(err)).called(1);
+    });
+
+    test('an opaque (pre-audience) token ends the session', () async {
+      when(authService.forceRefreshAccessToken()).thenThrow(
+        AuthException(
+          'Opaque access token; re-authentication required',
+          code: AuthService.opaqueAccessTokenCode,
+        ),
+      );
+      when(authService.isGuestMode()).thenAnswer((_) async => false);
+
+      final err = unauthorized();
+      interceptor.onError(err, handler);
+      await untilCalled(handler.next(any));
+
+      expect(authExpiredCalls, 1);
+      verify(handler.next(err)).called(1);
+      verifyNever(handler.resolve(any));
+    });
+
+    test('a rejected renewal (RENEW_FAILED while online) ends the session',
+        () async {
+      when(authService.forceRefreshAccessToken()).thenThrow(
+        const CredentialsManagerException('RENEW_FAILED', 'rejected', {}),
+      );
+      when(authService.isGuestMode()).thenAnswer((_) async => false);
+
+      final err = unauthorized();
+      interceptor.onError(err, handler);
+      await untilCalled(handler.next(any));
+
+      expect(authExpiredCalls, 1);
+      verify(handler.next(err)).called(1);
+    });
+
     test('does not end the session for a guest', () async {
-      when(authService.hasValidCredentials()).thenAnswer((_) async => false);
+      when(authService.forceRefreshAccessToken()).thenThrow(
+        const CredentialsManagerException('NO_CREDENTIALS', 'none', {}),
+      );
       when(authService.isGuestMode()).thenAnswer((_) async => true);
+
+      final err = unauthorized();
+      interceptor.onError(err, handler);
+      await untilCalled(handler.next(any));
+
+      expect(authExpiredCalls, 0);
+      verify(handler.next(err)).called(1);
+    });
+  });
+
+  group('401 with an indeterminate credential failure', () {
+    test('an untyped exception keeps the session (no logout)', () async {
+      when(authService.forceRefreshAccessToken())
+          .thenThrow(Exception('keystore read failed'));
+
+      final err = unauthorized();
+      interceptor.onError(err, handler);
+      await untilCalled(handler.next(any));
+
+      expect(authExpiredCalls, 0);
+      verify(handler.next(err)).called(1);
+      verifyNever(authService.isGuestMode());
+    });
+
+    test('a transient AuthException keeps the session', () async {
+      when(authService.forceRefreshAccessToken())
+          .thenThrow(AuthException('offline'));
 
       final err = unauthorized();
       interceptor.onError(err, handler);
@@ -72,7 +151,9 @@ void main() {
       'treats a 403 on a request sent WITHOUT a bearer as an auth failure '
       '(FastAPI missing-header quirk)',
       () async {
-        when(authService.hasValidCredentials()).thenAnswer((_) async => false);
+        when(authService.forceRefreshAccessToken()).thenThrow(
+          const CredentialsManagerException('NO_CREDENTIALS', 'none', {}),
+        );
         when(authService.isGuestMode()).thenAnswer((_) async => false);
 
         final err = authError(statusCode: 403);
@@ -94,42 +175,8 @@ void main() {
 
         expect(authExpiredCalls, 0);
         verify(handler.next(err)).called(1);
-        verifyNever(authService.hasValidCredentials());
         verifyNever(authService.forceRefreshAccessToken());
       },
     );
-  });
-
-  group('401 with credentials but a permanently failed refresh', () {
-    test('ends the session and fails the queued request', () async {
-      when(authService.hasValidCredentials()).thenAnswer((_) async => true);
-      when(authService.forceRefreshAccessToken()).thenThrow(
-        AuthException(
-          'Opaque access token; re-authentication required',
-          code: AuthService.opaqueAccessTokenCode,
-        ),
-      );
-
-      final err = unauthorized();
-      interceptor.onError(err, handler);
-      await untilCalled(handler.next(any));
-
-      expect(authExpiredCalls, 1);
-      verify(handler.next(err)).called(1);
-      verifyNever(handler.resolve(any));
-    });
-
-    test('keeps the session on a transient refresh failure', () async {
-      when(authService.hasValidCredentials()).thenAnswer((_) async => true);
-      when(authService.forceRefreshAccessToken())
-          .thenThrow(AuthException('offline'));
-
-      final err = unauthorized();
-      interceptor.onError(err, handler);
-      await untilCalled(handler.next(any));
-
-      expect(authExpiredCalls, 0);
-      verify(handler.next(err)).called(1);
-    });
   });
 }

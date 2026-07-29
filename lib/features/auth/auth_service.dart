@@ -379,7 +379,13 @@ class AuthService {
   static bool isTokenRenewalFailed(Object error) =>
       error is CredentialsManagerException && error.isTokenRenewFailed;
 
-  /// Check if credentials exist and are valid
+  /// Check if credentials exist and are valid.
+  ///
+  /// A `false` result is INDETERMINATE, not proof the session is gone: any
+  /// exception from the credentials manager (transient keystore/plugin IO)
+  /// is also collapsed to `false`. Never use `false` here as grounds for
+  /// logging the user out — terminal decisions need the typed errors from an
+  /// actual credentials/renewal attempt (see [isSessionPermanentlyLost]).
   Future<bool> hasValidCredentials() async {
     try {
       return await _auth0.credentialsManager.hasValidCredentials();
