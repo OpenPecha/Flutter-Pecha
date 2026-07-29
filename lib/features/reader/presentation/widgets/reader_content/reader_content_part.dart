@@ -536,7 +536,10 @@ class _ReaderContentPartState extends ConsumerState<ReaderContentPart> {
               itemScrollController: _itemScrollController,
               itemPositionsListener: _itemPositionsListener,
               itemCount: listItemCount,
-              padding: EdgeInsets.only(bottom: widget.bottomPadding),
+              padding: EdgeInsets.only(
+                top: ReaderConstants.contentTopPadding,
+                bottom: widget.bottomPadding,
+              ),
               itemBuilder: (context, index) {
                 if (isCollapsed) {
                   // Trailing item is the "Read Full Text" footer.

@@ -50,6 +50,7 @@ class ReaderConstants {
   // Segment item
   static const double segmentHorizontalPadding = 12.0;
   static const double segmentVerticalPadding = 6.0;
+  static const double contentTopPadding = 12.0;
   static const double segmentNumberWidth = 28.0;
   static const double segmentBorderRadius = 16.0;
 
