@@ -1733,6 +1733,9 @@ class AppLocalizationsMn extends AppLocalizations {
       'Хувь нэмрээ хянахын тулд энэ хуримтлалд нэгдэнэ үү.';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'Одоогоор уншлага байхгүй.';
+
+  @override
   String get group_accumulator_recite_now => 'Одоо уншина уу';
 
   @override

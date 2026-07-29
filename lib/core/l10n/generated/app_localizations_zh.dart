@@ -1634,6 +1634,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_accumulator_contributions_empty => '加入此累積以追蹤您的貢獻。';
 
   @override
+  String get group_accumulator_leaderboard_empty => '尚無誦讀記錄。';
+
+  @override
   String get group_accumulator_recite_now => '立即誦念';
 
   @override

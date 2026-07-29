@@ -547,13 +547,25 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       );
     }
 
-    final sortedMembers = sortAccumulatorMembers(membersState.members, _sort);
+    final sortedMembers =
+        sortAccumulatorMembers(membersState.members, _sort).where((member) {
+          final count =
+              _sort == GroupAccumulatorMemberSort.today
+                  ? member.todayCount
+                  : member.totalCount;
+          return count > 0;
+        }).toList();
+
+    final showEmptyMessage =
+        sortedMembers.isEmpty && !membersState.isLoadingMore;
 
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       itemCount:
-          1 + sortedMembers.length + (membersState.isLoadingMore ? 1 : 0),
+          1 +
+          (showEmptyMessage ? 1 : sortedMembers.length) +
+          (membersState.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == 0) {
           return Padding(
@@ -582,7 +594,18 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           );
         }
 
-        final memberIndex = index - 1;
+        if (showEmptyMessage && index == 1) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(
+              context.l10n.group_accumulator_leaderboard_empty,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: secondaryColor),
+            ),
+          );
+        }
+
+        final memberIndex = index - 1 - (showEmptyMessage ? 1 : 0);
         if (memberIndex < sortedMembers.length) {
           final member = sortedMembers[memberIndex];
           final count =

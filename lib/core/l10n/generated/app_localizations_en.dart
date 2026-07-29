@@ -1716,6 +1716,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Join this accumulation to track your contributions.';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'No recitations yet.';
+
+  @override
   String get group_accumulator_recite_now => 'Recite now';
 
   @override

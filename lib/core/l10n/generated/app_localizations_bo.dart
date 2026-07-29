@@ -1738,6 +1738,9 @@ class AppLocalizationsBo extends AppLocalizations {
       'ཁྱེད་ཀྱི་སྐྱེལ་མ་ལ་རྗེས་འདེད་བྱེད་ཆེད་བསགས་གྲངས་འདིར་ཞུགས་རོགས།';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'ད་ལྟ་བརྗོད་ཚད་མེད།';
+
+  @override
   String get group_accumulator_recite_now => 'ད་ལྟ་བཟླས་བརྗོད་གནང་།';
 
   @override

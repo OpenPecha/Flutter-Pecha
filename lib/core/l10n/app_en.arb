@@ -829,6 +829,7 @@
   "group_accumulator_recited": "Recited",
   "group_accumulator_total": "Total",
   "group_accumulator_contributions_empty": "Join this accumulation to track your contributions.",
+  "group_accumulator_leaderboard_empty": "No recitations yet.",
   "group_accumulator_recite_now": "Recite now",
   "@group_and_more_links": {
     "placeholders": {
