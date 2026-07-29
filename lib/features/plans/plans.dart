@@ -50,7 +50,6 @@ export 'data/datasource/plans_local_datasource.dart';
 export 'data/datasource/plans_remote_datasource.dart';
 export 'data/datasource/user_plans_remote_datasource.dart';
 export 'data/datasource/plan_days_remote_datasource.dart';
-export 'data/datasource/tasks_remote_datasource.dart';
 export 'data/datasource/author_remote_datasource.dart';
 
 // Data - Providers (moved to presentation)
@@ -59,7 +58,6 @@ export 'data/datasource/author_remote_datasource.dart';
 export 'data/repositories/plans_repository_impl.dart';
 export 'data/repositories/user_plans_repository.dart';
 export 'data/repositories/plan_days_repository.dart';
-export 'data/repositories/tasks_repository.dart';
 export 'data/repositories/author_repository.dart';
 
 // Data - Utils
@@ -73,7 +71,6 @@ export 'presentation/providers/find_plans_paginated_provider.dart';
 export 'presentation/providers/plans_providers.dart';
 export 'presentation/providers/user_plans_provider.dart';
 export 'presentation/providers/plan_days_providers.dart';
-export 'presentation/providers/tasks_providers.dart';
 export 'presentation/providers/author_providers.dart';
 
 // Presentation - Screens

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_pecha/core/config/protected_routes.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/auth_service.dart';
 
@@ -49,67 +50,78 @@ class RetryInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    // Handle 401 - try to refresh token
-    if (err.response?.statusCode == 401) {
-      // Check if user has valid credentials (refresh token available via CredentialsManager)
-      final hasValidCreds = await _authService.hasValidCredentials();
-      if (hasValidCreds) {
-        // Queue every 401'd request — including the one that triggers the
-        // refresh. Each request lives in exactly one place (the queue) and is
-        // removed before its handler is called, so a handler can never be
-        // completed twice.
-        _refreshQueue.add(_RetryRequest(err, handler));
+    // Handle 401 (and bearer-less 403) - try to refresh the token. The refresh
+    // is attempted unconditionally rather than pre-gated on
+    // `hasValidCredentials()`: that check returns false both when credentials
+    // are truly missing AND when the credentials manager merely failed to read
+    // them (transient IO), so it cannot be evidence of an unrecoverable
+    // session. The refresh attempt itself yields typed errors that can.
+    if (_isAuthFailure(err)) {
+      // Queue every failed request — including the one that triggers the
+      // refresh. Each request lives in exactly one place (the queue) and is
+      // removed before its handler is called, so a handler can never be
+      // completed twice.
+      _refreshQueue.add(_RetryRequest(err, handler));
 
-        // A refresh is already running; this request will be drained when it
-        // completes.
-        if (_isRefreshing) {
-          _logger.debug('Adding request to refresh queue');
-          return;
-        }
-
-        // Start token refresh.
-        _isRefreshing = true;
-
-        String? newAccessToken;
-        var permanentlyLost = false;
-        try {
-          _logger.info('Attempting to refresh token');
-          newAccessToken = await _authService.forceRefreshAccessToken();
-        } catch (e) {
-          // Force re-authentication when the session is permanently gone (no
-          // credentials / no refresh token / opaque token) OR the renewal was
-          // rejected. We only reach here *after* the server answered our
-          // request with a 401, so we are provably online: a `RENEW_FAILED`
-          // here is a rejected refresh token, not an offline blip, and must end
-          // the session instead of looping 401s forever. (The app-open restore
-          // path stays tolerant of transient renewal failures.)
-          permanentlyLost = AuthService.isSessionPermanentlyLost(e) ||
-              AuthService.isTokenRenewalFailed(e);
-          if (permanentlyLost) {
-            _logger.warning('Token refresh failed permanently - re-authentication required');
-          } else {
-            _logger.warning('Token refresh failed transiently - keeping session: $e');
-          }
-        }
-
-        try {
-          if (newAccessToken != null) {
-            _logger.info(
-              'Token refreshed successfully, replaying '
-              '${_refreshQueue.length} queued request(s)',
-            );
-            await _replayQueue(newAccessToken);
-          } else {
-            if (permanentlyLost) onAuthExpired?.call();
-            _failQueue();
-          }
-        } finally {
-          // No `await` between the drain loop seeing an empty queue and this
-          // line, so no request can be stranded.
-          _isRefreshing = false;
-        }
+      // A refresh is already running; this request will be drained when it
+      // completes.
+      if (_isRefreshing) {
+        _logger.debug('Adding request to refresh queue');
         return;
       }
+
+      // Start token refresh.
+      _isRefreshing = true;
+
+      String? newAccessToken;
+      var permanentlyLost = false;
+      try {
+        _logger.info('Attempting to refresh token');
+        newAccessToken = await _authService.forceRefreshAccessToken();
+      } catch (e) {
+        // End the session only on *positive evidence* that it is gone: a
+        // typed no-credentials / no-refresh-token / opaque-token error, OR a
+        // rejected renewal. We only reach here *after* the server answered
+        // our request, so we are provably online: a `RENEW_FAILED` here is a
+        // rejected refresh token, not an offline blip, and must end the
+        // session instead of looping 401s forever. Anything else (keystore
+        // IO, plugin hiccup) is indeterminate — keep the session and let a
+        // later request retry the refresh. (The app-open restore path stays
+        // tolerant of transient renewal failures.)
+        permanentlyLost = AuthService.isSessionPermanentlyLost(e) ||
+            AuthService.isTokenRenewalFailed(e);
+        if (permanentlyLost) {
+          _logger.warning('Token refresh failed permanently - re-authentication required');
+        } else {
+          _logger.warning('Token refresh failed transiently - keeping session: $e');
+        }
+      }
+
+      try {
+        if (newAccessToken != null) {
+          _logger.info(
+            'Token refreshed successfully, replaying '
+            '${_refreshQueue.length} queued request(s)',
+          );
+          await _replayQueue(newAccessToken);
+        } else {
+          // Guests are skipped — they legitimately have no credentials (the
+          // refresh above throws NO_CREDENTIALS for them) and must not be
+          // bounced out of guest mode.
+          if (permanentlyLost && !await _authService.isGuestMode()) {
+            _logger.warning(
+              'Session is unrecoverable — forcing re-authentication',
+            );
+            onAuthExpired?.call();
+          }
+          _failQueue();
+        }
+      } finally {
+        // No `await` between the drain loop seeing an empty queue and this
+        // line, so no request can be stranded.
+        _isRefreshing = false;
+      }
+      return;
     }
 
     // Retry network errors with exponential backoff
@@ -142,6 +154,27 @@ class RetryInterceptor extends Interceptor {
     }
 
     handler.next(err);
+  }
+
+  /// Whether [err] means the request failed *authentication* (fixable by a
+  /// token refresh), per RFC 6750 that is a 401. One backend quirk widens it:
+  /// FastAPI's HTTPBearer answers a request with a *missing* Authorization
+  /// header with 403, not 401 — which happens when the proactive token fetch
+  /// failed and [AuthInterceptor] sent the request bare. Such a 403 cannot be
+  /// a real permissions error (no identity was presented), so treat it as an
+  /// auth failure too — but only on routes where [AuthInterceptor] would have
+  /// attached a bearer (protected/optional): on public endpoints a missing
+  /// header is normal and a 403 is a genuine server-side denial that a
+  /// refresh cannot fix. A 403 on a request that DID carry a bearer likewise
+  /// stays a genuine authorization error — refreshing would loop pointlessly.
+  bool _isAuthFailure(DioException err) {
+    final status = err.response?.statusCode;
+    if (status == 401) return true;
+    if (status != 403) return false;
+    if (err.requestOptions.headers.containsKey('Authorization')) return false;
+    final path = err.requestOptions.path;
+    return ProtectedRoutes.isProtected(path) ||
+        ProtectedRoutes.isOptional(path);
   }
 
   /// A [FormData] body's underlying file streams are consumed on the first

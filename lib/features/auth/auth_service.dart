@@ -101,7 +101,13 @@ class AuthService {
 
   Future<Credentials?> getCredentials() async {
     try {
-      return await _auth0.credentialsManager.credentials(minTtl: 300);
+      // Same renewal threshold as the request path (_validCredentials) so the
+      // launch/restore path and the API path never disagree on when to renew —
+      // and a low threshold keeps a safe margin below any configured Auth0
+      // access-token lifetime (the SDK throws when minTtl exceeds it).
+      return await _auth0.credentialsManager.credentials(
+        minTtl: _kMinTokenTtlSeconds,
+      );
     } on CredentialsManagerException catch (e) {
       // Surface the SDK code at the boundary for diagnostics, then rethrow so
       // the repository maps it: no-credentials / no-refresh-token / opaque →
@@ -373,7 +379,13 @@ class AuthService {
   static bool isTokenRenewalFailed(Object error) =>
       error is CredentialsManagerException && error.isTokenRenewFailed;
 
-  /// Check if credentials exist and are valid
+  /// Check if credentials exist and are valid.
+  ///
+  /// A `false` result is INDETERMINATE, not proof the session is gone: any
+  /// exception from the credentials manager (transient keystore/plugin IO)
+  /// is also collapsed to `false`. Never use `false` here as grounds for
+  /// logging the user out — terminal decisions need the typed errors from an
+  /// actual credentials/renewal attempt (see [isSessionPermanentlyLost]).
   Future<bool> hasValidCredentials() async {
     try {
       return await _auth0.credentialsManager.hasValidCredentials();

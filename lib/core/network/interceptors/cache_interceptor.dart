@@ -195,21 +195,29 @@ class CacheInterceptor extends Interceptor {
     handler.next(err);
   }
 
-  /// Generate a unique cache key for the request
+  /// Generate a unique cache key for the request.
+  ///
+  /// Keys are scoped by whether the request carried a bearer: optional-auth
+  /// endpoints (e.g. /series, /plans/{id}/days) return user-enriched fields
+  /// like `progress`/`is_enrolled` when authenticated, so an anonymous
+  /// response must never be served to a signed-in user (or vice versa).
+  /// [AuthInterceptor] runs before this interceptor, so the header is final.
   String _generateCacheKey(RequestOptions options) {
+    final scope =
+        options.headers.containsKey('Authorization') ? 'auth' : 'anon';
     final path = options.path;
     final params = Map<String, dynamic>.from(options.queryParameters);
     final timezone = options.headers[IanaTimezone.headerName]?.toString();
     if (timezone != null && timezone.isNotEmpty) {
       params[IanaTimezone.headerName] = timezone;
     }
-    if (params.isEmpty) return path;
+    if (params.isEmpty) return '$scope|$path';
 
     final sortedParams = params.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
     final queryString =
         sortedParams.map((e) => '${e.key}=${e.value}').join('&');
-    return '$path?$queryString';
+    return '$scope|$path?$queryString';
   }
 
   /// Clear all cached entries
@@ -218,21 +226,27 @@ class CacheInterceptor extends Interceptor {
     _logger.info('Cache cleared');
   }
 
-  /// Drop cached GET responses for authenticated user endpoints.
+  /// Drop every cached response fetched with a bearer. Called on auth
+  /// transitions (login/logout/account switch) so the next account never
+  /// inherits the prior user's auth-enriched responses within the TTL.
+  /// Anonymous (public) entries are safe to keep.
   void clearUserScoped() {
-    _cache.removeWhere((key, _) => isUserSpecificPath(_pathFromCacheKey(key)));
-    _logger.info('User-scoped HTTP cache cleared');
+    _cache.removeWhere((key, _) => key.startsWith('auth|'));
+    _logger.info('Auth-scoped HTTP cache cleared');
   }
 
-  /// Remove a specific cache entry
+  /// Remove cached entries for [path] (both auth scopes)
   void invalidate(String path) {
-    _cache.removeWhere((key, _) => key.startsWith(path));
+    _cache.removeWhere((key, _) => _keyWithoutScope(key).startsWith(path));
     _logger.info('Cache invalidated for: $path');
   }
 
   bool _shouldCache(String path) => !isUserSpecificPath(path);
 
-  String _pathFromCacheKey(String cacheKey) => cacheKey.split('?').first;
+  String _keyWithoutScope(String cacheKey) {
+    final sep = cacheKey.indexOf('|');
+    return sep == -1 ? cacheKey : cacheKey.substring(sep + 1);
+  }
 }
 
 /// Shared [CacheInterceptor] instance wired into the main Dio client.

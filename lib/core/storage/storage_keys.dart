@@ -38,8 +38,11 @@ class StorageKeys {
   // ========== USER PREFERENCES ==========
   /// Theme mode preference (light/dark/system)
   static const String themeMode = 'theme_mode';
-  /// App language/locale preference
+  /// App UI language/locale preference (bounded to bundled ARB translations)
   static const String preferredLanguage = 'locale';
+  /// Content language code sent to backend APIs. May be a language the app has
+  /// no UI translation for; the UI then falls back to English.
+  static const String contentLanguage = 'content_language';
   /// Font size preference
   static const String fontSize = 'font_size';
   /// First launch flag

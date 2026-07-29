@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
-import 'package:flutter_pecha/core/constants/app_config.dart';
 import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/localization/app_language.dart';
+import 'package:flutter_pecha/core/localization/languages_providers.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/theme/theme_notifier.dart';
 import 'package:flutter_pecha/shared/widgets/app_toggle_switch.dart';
@@ -18,37 +19,22 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
-  final _supportedLocales = const [
-    Locale(AppConfig.englishLanguageCode),
-    Locale(AppConfig.chineseLanguageCode),
-    Locale(AppConfig.tibetanLanguageCode),
-    Locale(AppConfig.hindiLanguageCode),
-    Locale(AppConfig.mongolianLanguageCode),
-    Locale(AppConfig.nepaliLanguageCode),
-  ];
 
-  String _getLanguageName(Locale locale) {
-    switch (locale.languageCode) {
-      case AppConfig.englishLanguageCode:
-        return 'English';
-      case AppConfig.chineseLanguageCode:
-        return '中文';
-      case AppConfig.tibetanLanguageCode:
-        return 'བོད་ཡིག';
-      case AppConfig.hindiLanguageCode:
-        return 'हिन्दी';
-      case AppConfig.mongolianLanguageCode:
-        return 'Монгол';
-      case AppConfig.nepaliLanguageCode:
-        return 'नेपाली';
-      default:
-        return locale.languageCode;
+  /// Native-script label for a content-language [code]. Prefers the loaded
+  /// backend list, then the bundled fallback, then the raw code.
+  String _nativeNameForCode(String code, List<AppLanguage> languages) {
+    for (final lang in languages) {
+      if (lang.code == code) return lang.nativeName;
     }
+    for (final lang in AppLanguage.bundledFallback) {
+      if (lang.code == code) return lang.nativeName;
+    }
+    return code;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
+    final contentLanguageCode = ref.watch(contentLanguageProvider);
     final localizations = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -89,7 +75,7 @@ class MoreScreen extends ConsumerWidget {
                 title: localizations.settings_edit_profile,
                 onTap: () => context.push(AppRoutes.profile),
               ),
-            _buildLanguageRow(context, ref, locale),
+            _buildLanguageRow(context, ref, contentLanguageCode),
             _buildNotificationRow(context, localizations),
             _buildThemeToggleRow(context, ref, isDarkMode, localizations),
             const SizedBox(height: 24),
@@ -193,10 +179,20 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLanguageRow(BuildContext context, WidgetRef ref, Locale locale) {
-    final currentLanguageName = _getLanguageName(locale);
+  Widget _buildLanguageRow(
+    BuildContext context,
+    WidgetRef ref,
+    String contentLanguageCode,
+  ) {
+    // Show the loaded backend list's label when available; the bundled
+    // fallback covers offline/first-launch.
+    final languages = ref.watch(resolvedContentLanguagesProvider);
+    final currentLanguageName = _nativeNameForCode(
+      contentLanguageCode,
+      languages,
+    );
     return InkWell(
-      onTap: () => _showLanguageBottomSheet(context, ref, locale),
+      onTap: () => _showLanguageBottomSheet(context, ref, contentLanguageCode),
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -298,7 +294,7 @@ class MoreScreen extends ConsumerWidget {
   void _showLanguageBottomSheet(
     BuildContext context,
     WidgetRef ref,
-    Locale? currentLocale,
+    String currentContentCode,
   ) {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
@@ -311,7 +307,6 @@ class MoreScreen extends ConsumerWidget {
       useRootNavigator: true,
       builder: (sheetContext) {
         final theme = Theme.of(sheetContext);
-        final selected = currentLocale ?? Localizations.localeOf(sheetContext);
         return SafeArea(
           top: false,
           child: ConstrainedBox(
@@ -343,29 +338,40 @@ class MoreScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                ListView.separated(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                // Consumer so the picker rebuilds when the backend list resolves.
+                Flexible(
+                  child: Consumer(
+                    builder: (context, sheetRef, _) {
+                      final languages = sheetRef.watch(
+                        resolvedContentLanguagesProvider,
+                      );
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        itemCount: languages.length,
+                        separatorBuilder:
+                            (_, __) => Divider(
+                              height: 1,
+                              color: theme.dividerColor.withValues(alpha: 0.4),
+                            ),
+                        itemBuilder: (_, index) {
+                          final language = languages[index];
+                          final isSelected =
+                              language.code == currentContentCode;
+                          return _buildLanguageOption(
+                            sheetContext,
+                            sheetRef,
+                            language,
+                            isSelected,
+                            theme,
+                          );
+                        },
+                      );
+                    },
                   ),
-                  itemCount: _supportedLocales.length,
-                  separatorBuilder:
-                      (_, __) => Divider(
-                        height: 1,
-                        color: theme.dividerColor.withValues(alpha: 0.4),
-                      ),
-                  itemBuilder: (_, index) {
-                    final localeItem = _supportedLocales[index];
-                    final isSelected = selected == localeItem;
-                    return _buildLanguageOption(
-                      sheetContext,
-                      ref,
-                      localeItem,
-                      isSelected,
-                      theme,
-                    );
-                  },
                 ),
                 const SizedBox(height: 8),
               ],
@@ -379,7 +385,7 @@ class MoreScreen extends ConsumerWidget {
   Widget _buildLanguageOption(
     BuildContext context,
     WidgetRef ref,
-    Locale localeItem,
+    AppLanguage language,
     bool isSelected,
     ThemeData theme,
   ) {
@@ -387,9 +393,9 @@ class MoreScreen extends ConsumerWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          ref.read(localeProvider.notifier).setLocale(localeItem);
-          Navigator.pop(context);
+        onTap: () async {
+          await selectAppLanguage(ref, language.code);
+          if (context.mounted) context.pop();
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -398,7 +404,7 @@ class MoreScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  _getLanguageName(localeItem),
+                  language.nativeName,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color:
                         isSelected

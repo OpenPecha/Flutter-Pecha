@@ -4,19 +4,15 @@ import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/features/plans/data/datasource/plan_days_remote_datasource.dart';
 import 'package:flutter_pecha/features/plans/data/datasource/plans_local_datasource.dart';
 import 'package:flutter_pecha/features/plans/data/datasource/plans_remote_datasource.dart';
-import 'package:flutter_pecha/features/plans/data/datasource/tasks_remote_datasource.dart';
 import 'package:flutter_pecha/features/plans/data/datasource/user_plans_remote_datasource.dart';
 import 'package:flutter_pecha/features/plans/data/repositories/plan_days_repository.dart';
 import 'package:flutter_pecha/features/plans/data/repositories/plans_repository_impl.dart';
-import 'package:flutter_pecha/features/plans/data/repositories/tasks_repository.dart';
 import 'package:flutter_pecha/features/plans/data/repositories/user_plans_repository.dart';
 import 'package:flutter_pecha/features/plans/domain/repositories/plan_days_repository.dart';
 import 'package:flutter_pecha/features/plans/domain/repositories/plans_repository.dart';
-import 'package:flutter_pecha/features/plans/domain/repositories/tasks_repository.dart';
 import 'package:flutter_pecha/features/plans/domain/repositories/user_plans_repository.dart';
 import 'package:flutter_pecha/features/plans/domain/usecases/plan_days_usecases.dart';
 import 'package:flutter_pecha/features/plans/domain/usecases/plans_usecases.dart';
-import 'package:flutter_pecha/features/plans/domain/usecases/tasks_usecases.dart';
 import 'package:flutter_pecha/features/plans/domain/usecases/user_plans_usecases.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,10 +34,6 @@ final userPlansRemoteDatasourceProvider =
 final planDaysRemoteDatasourceProvider =
     Provider<PlanDaysRemoteDatasource>((ref) {
   return PlanDaysRemoteDatasource(dio: ref.watch(dioProvider));
-});
-
-final tasksRemoteDatasourceProvider = Provider<TasksRemoteDatasource>((ref) {
-  return TasksRemoteDatasource(dio: ref.watch(dioProvider));
 });
 
 // ========== Repository Providers ==========
@@ -69,15 +61,6 @@ final planDaysDomainRepositoryProvider =
   return PlanDaysRepository(
     planDaysRemoteDatasource: ref.watch(planDaysRemoteDatasourceProvider),
     local: ref.watch(plansLocalDatasourceProvider),
-  );
-});
-
-/// Provider for TasksRepository implementation (domain interface).
-final tasksDomainRepositoryProvider =
-    Provider<TasksRepositoryInterface>((ref) {
-  final dio = ref.watch(dioProvider);
-  return TasksRepository(
-    tasksRemoteDatasource: TasksRemoteDatasource(dio: dio),
   );
 });
 
@@ -199,17 +182,4 @@ final getPlanDaysUseCaseProvider = Provider<GetPlanDaysUseCase>((ref) {
 /// Provider for GetDayContentUseCase.
 final getDayContentUseCaseProvider = Provider<GetDayContentUseCase>((ref) {
   return GetDayContentUseCase(ref.watch(planDaysDomainRepositoryProvider));
-});
-
-// ========== Tasks Use Case Providers ==========
-
-/// Provider for GetTasksByPlanItemIdUseCase.
-final getTasksByPlanItemIdUseCaseProvider =
-    Provider<GetTasksByPlanItemIdUseCase>((ref) {
-  return GetTasksByPlanItemIdUseCase(ref.watch(tasksDomainRepositoryProvider));
-});
-
-/// Provider for GetTaskByIdUseCase.
-final getTaskByIdUseCaseProvider = Provider<GetTaskByIdUseCase>((ref) {
-  return GetTaskByIdUseCase(ref.watch(tasksDomainRepositoryProvider));
 });
