@@ -186,9 +186,7 @@ class MoreScreen extends ConsumerWidget {
   ) {
     // Show the loaded backend list's label when available; the bundled
     // fallback covers offline/first-launch.
-    final languages =
-        ref.watch(availableContentLanguagesProvider).valueOrNull ??
-        AppLanguage.bundledFallback;
+    final languages = ref.watch(resolvedContentLanguagesProvider);
     final currentLanguageName = _nativeNameForCode(
       contentLanguageCode,
       languages,
@@ -344,10 +342,9 @@ class MoreScreen extends ConsumerWidget {
                 Flexible(
                   child: Consumer(
                     builder: (context, sheetRef, _) {
-                      final languages = sheetRef
-                          .watch(availableContentLanguagesProvider)
-                          .valueOrNull ??
-                          AppLanguage.bundledFallback;
+                      final languages = sheetRef.watch(
+                        resolvedContentLanguagesProvider,
+                      );
                       return ListView.separated(
                         shrinkWrap: true,
                         padding: const EdgeInsets.symmetric(
@@ -396,9 +393,9 @@ class MoreScreen extends ConsumerWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          selectAppLanguage(ref, language.code);
-          Navigator.pop(context);
+        onTap: () async {
+          await selectAppLanguage(ref, language.code);
+          if (context.mounted) context.pop();
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

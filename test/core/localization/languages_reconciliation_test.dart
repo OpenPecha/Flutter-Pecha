@@ -123,12 +123,10 @@ void main() {
     final shown = await container.read(availableContentLanguagesProvider.future);
 
     // Load the persisted selection the way app startup would (the offline path
-    // never touches these notifiers), then let their async init settle.
+    // never touches these notifiers). ensureInitialized awaits the shared
+    // in-flight storage read on both notifiers.
     await container.read(contentLanguageProvider.notifier).ensureInitialized();
     await container.read(localeProvider.notifier).ensureInitialized();
-    for (var i = 0; i < 5; i++) {
-      await Future<void>.delayed(Duration.zero);
-    }
 
     // Kill switch must NOT fire on the offline fallback path.
     expect(container.read(contentLanguageProvider), 'bo');

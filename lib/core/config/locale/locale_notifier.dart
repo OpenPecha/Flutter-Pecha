@@ -17,12 +17,14 @@ class LocaleNotifier extends StateNotifier<Locale> {
   bool _isInitialized = false;
   // An explicit selection always wins over an in-flight startup read.
   bool _userSelected = false;
+  // Concurrent ensureInitialized() callers share this so they await the same
+  // storage read instead of returning early once init has merely started.
+  Future<void>? _initFuture;
 
   LocaleNotifier({required LocalStorageService localStorageService})
     : _localStorageService = localStorageService,
       super(const Locale(AppConfig.defaultLanguage)) {
-    // Initialize locale asynchronously, but mark initialization as started
-    _initializeLocale();
+    _initFuture = _initializeLocale();
   }
 
   /// Initialize locale from storage
@@ -45,11 +47,10 @@ class LocaleNotifier extends StateNotifier<Locale> {
     }
   }
 
-  /// Ensure locale is loaded before accessing state
-  /// This can be called by consumers if they need to ensure initialization
-  Future<void> ensureInitialized() async {
-    await _initializeLocale();
-  }
+  /// Ensure locale is loaded before accessing state.
+  /// Concurrent callers await the same in-flight initialization Future.
+  Future<void> ensureInitialized() async =>
+      _initFuture ??= _initializeLocale();
 
   Future<void> setLocale(Locale locale) async {
     final isSupported = L10n.all.any(

@@ -44,3 +44,11 @@ final availableContentLanguagesProvider = FutureProvider<List<AppLanguage>>((
     return AppLanguage.bundledFallback;
   }
 });
+
+/// Synchronous view of [availableContentLanguagesProvider] for UI that needs a
+/// list immediately. Uses the fetched value when ready; otherwise
+/// [AppLanguage.bundledFallback] (loading / no value yet).
+final resolvedContentLanguagesProvider = Provider<List<AppLanguage>>((ref) {
+  return ref.watch(availableContentLanguagesProvider).valueOrNull ??
+      AppLanguage.bundledFallback;
+});
