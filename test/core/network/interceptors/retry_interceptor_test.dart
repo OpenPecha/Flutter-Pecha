@@ -16,9 +16,13 @@ void main() {
   late int authExpiredCalls;
   late RetryInterceptor interceptor;
 
-  DioException authError({int statusCode = 401, String? bearer}) {
+  DioException authError({
+    int statusCode = 401,
+    String? bearer,
+    String path = '/users/me/plans',
+  }) {
     final options = RequestOptions(
-      path: '/users/me/plans',
+      path: path,
       headers: {if (bearer != null) 'Authorization': 'Bearer $bearer'},
     );
     return DioException(
@@ -162,6 +166,20 @@ void main() {
 
         expect(authExpiredCalls, 1);
         verify(handler.next(err)).called(1);
+      },
+    );
+
+    test(
+      'leaves a 403 on a PUBLIC endpoint (no bearer expected) as a genuine '
+      'denial — no refresh, no logout',
+      () async {
+        final err = authError(statusCode: 403, path: '/languages');
+        interceptor.onError(err, handler);
+        await untilCalled(handler.next(any));
+
+        expect(authExpiredCalls, 0);
+        verify(handler.next(err)).called(1);
+        verifyNever(authService.forceRefreshAccessToken());
       },
     );
 

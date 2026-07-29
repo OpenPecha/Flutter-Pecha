@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_pecha/core/config/protected_routes.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/auth/auth_service.dart';
 
@@ -161,13 +162,19 @@ class RetryInterceptor extends Interceptor {
   /// header with 403, not 401 — which happens when the proactive token fetch
   /// failed and [AuthInterceptor] sent the request bare. Such a 403 cannot be
   /// a real permissions error (no identity was presented), so treat it as an
-  /// auth failure too. A 403 on a request that DID carry a bearer stays a
-  /// genuine authorization error — refreshing would loop pointlessly.
+  /// auth failure too — but only on routes where [AuthInterceptor] would have
+  /// attached a bearer (protected/optional): on public endpoints a missing
+  /// header is normal and a 403 is a genuine server-side denial that a
+  /// refresh cannot fix. A 403 on a request that DID carry a bearer likewise
+  /// stays a genuine authorization error — refreshing would loop pointlessly.
   bool _isAuthFailure(DioException err) {
     final status = err.response?.statusCode;
     if (status == 401) return true;
-    return status == 403 &&
-        !err.requestOptions.headers.containsKey('Authorization');
+    if (status != 403) return false;
+    if (err.requestOptions.headers.containsKey('Authorization')) return false;
+    final path = err.requestOptions.path;
+    return ProtectedRoutes.isProtected(path) ||
+        ProtectedRoutes.isOptional(path);
   }
 
   /// A [FormData] body's underlying file streams are consumed on the first
