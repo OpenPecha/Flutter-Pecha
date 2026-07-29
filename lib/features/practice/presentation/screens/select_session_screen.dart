@@ -5,6 +5,7 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/core/utils/network_image_utils.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/core/widgets/skeletons/skeletons.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
@@ -766,19 +767,40 @@ class _CircularImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
+    final url = imageUrl?.trim();
+    
+    if (url != null && url.isNotEmpty && _isValidNetworkUrl(url)) {
+      final dpr = MediaQuery.of(context).devicePixelRatio;
+      final cachePx = (size * dpr).round();
+      
       return ClipOval(
         child: CachedNetworkImage(
-          imageUrl: imageUrl!,
+          imageUrl: url,
+          cacheKey: stableNetworkImageCacheKey(url),
           width: size,
           height: size,
           fit: BoxFit.cover,
+          memCacheWidth: cachePx,
+          memCacheHeight: cachePx,
+          maxWidthDiskCache: cachePx,
+          maxHeightDiskCache: cachePx,
+          fadeInDuration: const Duration(milliseconds: 200),
           placeholder: (_, __) => _placeholder(),
-          errorWidget: (_, __, ___) => _placeholder(),
+          errorWidget: (context, url, error) {
+            _logger.warning('Failed to load mala image: $url, error: $error');
+            return _placeholder();
+          },
         ),
       );
     }
     return _placeholder();
+  }
+
+  bool _isValidNetworkUrl(String url) {
+    final uri = Uri.tryParse(url);
+    return uri != null &&
+        uri.hasScheme &&
+        (uri.scheme == 'http' || uri.scheme == 'https');
   }
 
   Widget _placeholder() => Container(
