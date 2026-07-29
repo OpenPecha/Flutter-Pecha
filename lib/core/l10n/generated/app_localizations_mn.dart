@@ -1967,6 +1967,17 @@ class AppLocalizationsMn extends AppLocalizations {
   }
 
   @override
+  String get timer_notification_in_progress => 'Meditation in progress';
+
+  @override
+  String timer_notification_paused(String time) {
+    return 'Paused · $time left';
+  }
+
+  @override
+  String get timer_notification_complete => 'Your session is complete';
+
+  @override
   String get ai_use_search_instead => 'Оронд нь хайлт ашиглах';
 
   @override

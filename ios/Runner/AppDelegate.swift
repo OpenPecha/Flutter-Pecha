@@ -7,6 +7,9 @@ import airbridge_flutter_sdk
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  /// Retained for the app's lifetime — it owns the running Live Activity.
+  private let timerLiveActivityBridge = TimerLiveActivityBridge()
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -21,7 +24,11 @@ import airbridge_flutter_sdk
     }
 
     GeneratedPluginRegistrant.register(with: self)
-    
+
+    if let controller = window?.rootViewController as? FlutterViewController {
+      timerLiveActivityBridge.register(with: controller.binaryMessenger)
+    }
+
     let airbridgeAppName = Bundle.main.object(forInfoDictionaryKey: "AIRBRIDGE_APP_NAME") as? String ?? ""
     let airbridgeSdkToken = Bundle.main.object(forInfoDictionaryKey: "AIRBRIDGE_SDK_TOKEN") as? String ?? ""
     AirbridgeFlutter.initializeSDK(name: airbridgeAppName, token: airbridgeSdkToken)

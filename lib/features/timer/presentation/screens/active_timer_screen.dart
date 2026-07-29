@@ -5,6 +5,8 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/timer/data/services/timer_live_activity.dart';
+import 'package:flutter_pecha/features/timer/data/services/timer_session_notifier.dart';
 import 'package:flutter_pecha/features/timer/domain/entities/preset_timer.dart';
 import 'package:flutter_pecha/features/timer/domain/usecases/stop_user_timer_usecase.dart';
 import 'package:flutter_pecha/features/timer/presentation/providers/timers_providers.dart';
@@ -24,7 +26,8 @@ class ActiveTimerScreen extends ConsumerStatefulWidget {
   ConsumerState<ActiveTimerScreen> createState() => _ActiveTimerScreenState();
 }
 
-class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
+class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen>
+    with WidgetsBindingObserver {
   static const _countdownStart = 5;
   static const _ringSize = 280.0;
   static const _controlsSpacing = 48.0;
@@ -39,12 +42,43 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
   int _remainingMs = 0;
   bool _isPaused = false;
 
+  /// Absolute wall-clock instant the running session ends — the single source
+  /// of truth for how much time is left. The periodic timer below only decides
+  /// *when* to repaint; it never decides how much time has passed, so a session
+  /// stays correct across a suspended isolate (screen locked, app backgrounded).
+  ///
+  /// Null whenever there is no end time to count towards: before the session
+  /// starts, while paused (where [_remainingMs] holds the frozen value), and
+  /// once finished.
+  DateTime? _endsAt;
+
+  /// Same idea for the 5-second pre-roll.
+  DateTime? _countdownEndsAt;
+
+  /// Elapsed time of the last reported stop, so pausing and then finishing does
+  /// not post the same session twice.
+  int? _lastReportedMs;
+
   Timer? _timer;
   late final TimerSoundPlayer _soundPlayer;
+  late final TimerSessionNotifier _notifier;
+  late final TimerLiveActivity _liveActivity;
 
   int get _totalMs => widget.presetTimer.durationMs;
 
-  int get _elapsedMs => _totalMs - _remainingMs;
+  int get _elapsedMs => _totalMs - _remainingFromClock();
+
+  /// Remaining time recomputed from the wall clock. Falls back to the stored
+  /// value when there is no end time (paused or finished), which is exactly the
+  /// value that was frozen there.
+  int _remainingFromClock() {
+    final endsAt = _endsAt;
+    if (endsAt == null) return _remainingMs;
+    return endsAt
+        .difference(DateTime.now())
+        .inMilliseconds
+        .clamp(0, _totalMs);
+  }
 
   double get _elapsedProgress {
     if (_totalMs <= 0) return 1;
@@ -66,17 +100,68 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
     _remainingMs = _totalMs;
     _soundPlayer = TimerSoundPlayer();
     _soundPlayer.init();
+    _notifier = TimerSessionNotifier();
+    _liveActivity = TimerLiveActivity();
+    WidgetsBinding.instance.addObserver(this);
     _startCountdown();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _soundPlayer.dispose();
+    _clearBackgroundSurfaces();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _onResumed();
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+        _onBackgrounded();
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  /// About to be suspended: hand the bell over to a scheduled notification, so
+  /// it rings on time even though this isolate is about to stop executing.
+  void _onBackgrounded() {
+    if (_phase != _TimerPhase.running || _isPaused) return;
+    final endsAt = _endsAt;
+    if (endsAt == null) return;
+    _scheduleCompletionBell(endsAt);
+  }
+
+  /// Back in the foreground: take the bell back and resync to the wall clock,
+  /// which is where the time that passed while suspended gets accounted for.
+  void _onResumed() {
+    unawaited(_notifier.cancelCompletion());
+
+    if (_phase != _TimerPhase.running || _isPaused) return;
+    final endsAt = _endsAt;
+    if (endsAt == null) return;
+
+    if (!endsAt.isAfter(DateTime.now())) {
+      // Ran out while we were suspended. The scheduled notification has already
+      // rung, so completing silently here avoids a second bell.
+      _completeSession(playBell: false);
+      return;
+    }
+
+    setState(() => _remainingMs = _remainingFromClock());
+  }
+
   void _startCountdown() {
+    _countdownEndsAt = DateTime.now().add(
+      const Duration(seconds: _countdownStart),
+    );
     _timer?.cancel();
     _timer = Timer.periodic(
       const Duration(seconds: 1),
@@ -87,20 +172,31 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
   void _onCountdownTick() {
     if (!mounted) return;
 
-    if (_countdownValue <= 1) {
+    final endsAt = _countdownEndsAt;
+    if (endsAt == null) return;
+
+    final remainingMs = endsAt.difference(DateTime.now()).inMilliseconds;
+    if (remainingMs <= 0) {
       _timer?.cancel();
       _startMainTimer();
       return;
     }
 
-    setState(() => _countdownValue--);
+    final value = (remainingMs / 1000).ceil();
+    if (value != _countdownValue) {
+      setState(() => _countdownValue = value);
+    }
   }
 
   void _startMainTimer() {
     _soundPlayer.play();
 
+    final endsAt = DateTime.now().add(Duration(milliseconds: _totalMs));
+
     setState(() {
       _phase = _TimerPhase.running;
+      _countdownEndsAt = null;
+      _endsAt = endsAt;
       _remainingMs = _totalMs;
       _isPaused = false;
     });
@@ -110,32 +206,82 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
       const Duration(seconds: 1),
       (_) => _onMainTimerTick(),
     );
+
+    unawaited(
+      _liveActivity.start(
+        sessionName: _sessionTitle,
+        endsAt: endsAt,
+        totalSeconds: (_totalMs / 1000).round(),
+      ),
+    );
+    _showRunningNotification(endsAt);
   }
 
   void _onMainTimerTick() {
     if (!mounted || _isPaused || _phase != _TimerPhase.running) return;
+    if (_endsAt == null) return;
+
+    final remainingMs = _remainingFromClock();
+    if (remainingMs <= 0) {
+      _completeSession(playBell: true);
+      return;
+    }
+
+    setState(() => _remainingMs = remainingMs);
+  }
+
+  /// Ends the session at zero.
+  ///
+  /// [playBell] is false when the timer ran out while the app was suspended:
+  /// the scheduled notification already rang, so ringing again on resume would
+  /// double the bell.
+  void _completeSession({required bool playBell}) {
+    _timer?.cancel();
+    _timer = null;
 
     setState(() {
-      _remainingMs -= 1000;
-      if (_remainingMs <= 0) {
-        _remainingMs = 0;
-        _phase = _TimerPhase.finished;
-        _timer?.cancel();
-        _soundPlayer.play();
-        _reportTimerStop();
-      }
+      _remainingMs = 0;
+      _endsAt = null;
+      _isPaused = false;
+      _phase = _TimerPhase.finished;
     });
+
+    if (playBell) _soundPlayer.play();
+    _clearBackgroundSurfaces();
+    _reportTimerStop();
   }
 
   void _togglePause() {
     if (_phase != _TimerPhase.running) return;
 
     final enteringPause = !_isPaused;
-    setState(() => _isPaused = !_isPaused);
+
+    setState(() {
+      if (enteringPause) {
+        // Freeze at the exact instant of the tap, not at the last repaint.
+        _remainingMs = _remainingFromClock();
+        _endsAt = null;
+      } else {
+        _endsAt = DateTime.now().add(Duration(milliseconds: _remainingMs));
+      }
+      _isPaused = enteringPause;
+    });
 
     if (enteringPause) {
+      unawaited(_notifier.cancelCompletion());
+      _showPausedNotification();
       _reportTimerStop();
+    } else {
+      _showRunningNotification(_endsAt!);
     }
+
+    unawaited(
+      _liveActivity.update(
+        endsAt: _endsAt,
+        isPaused: enteringPause,
+        remainingSeconds: (_remainingMs / 1000).ceil(),
+      ),
+    );
   }
 
   void _finish() {
@@ -143,20 +289,29 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
     if (_phase == _TimerPhase.running) {
       _reportTimerStop();
     }
+    _clearBackgroundSurfaces();
     context.pop();
   }
 
   void _discardSession() {
     _timer?.cancel();
+    _clearBackgroundSurfaces();
     context.pop();
   }
 
   void _reportTimerStop() {
+    final elapsedMs = _elapsedMs;
+
+    // Pausing already reports the session; a Finish immediately after would
+    // post the same elapsed time again and double-count it.
+    if (_lastReportedMs == elapsedMs) return;
+    _lastReportedMs = elapsedMs;
+
     final useCase = ref.read(stopUserTimerUseCaseProvider);
     useCase(
       StopUserTimerParams(
         timerId: widget.presetTimer.id,
-        durationMs: _elapsedMs,
+        durationMs: elapsedMs,
       ),
     ).then((result) {
       result.fold(
@@ -164,6 +319,49 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
         (_) {},
       );
     });
+  }
+
+  // ── Lock-screen surfaces ───────────────────────────────────────────────────
+
+  String get _sessionTitle => widget.presetTimer.name;
+
+  void _showRunningNotification(DateTime endsAt) {
+    if (!mounted) return;
+    unawaited(
+      _notifier.showRunning(
+        endsAt: endsAt,
+        title: _sessionTitle,
+        body: context.l10n.timer_notification_in_progress,
+      ),
+    );
+  }
+
+  void _showPausedNotification() {
+    if (!mounted) return;
+    unawaited(
+      _notifier.showPaused(
+        title: _sessionTitle,
+        body: context.l10n.timer_notification_paused(
+          _formatDuration(_remainingMs, separator: ':'),
+        ),
+      ),
+    );
+  }
+
+  void _scheduleCompletionBell(DateTime endsAt) {
+    if (!mounted) return;
+    unawaited(
+      _notifier.scheduleCompletion(
+        endsAt: endsAt,
+        title: _sessionTitle,
+        body: context.l10n.timer_notification_complete,
+      ),
+    );
+  }
+
+  void _clearBackgroundSurfaces() {
+    unawaited(_notifier.cancelAll());
+    unawaited(_liveActivity.end());
   }
 
   @override
@@ -323,12 +521,12 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen> {
     );
   }
 
-  String _formatDuration(int ms) {
+  String _formatDuration(int ms, {String separator = ' : '}) {
     final totalSeconds = (ms / 1000).ceil();
     final minutes = totalSeconds ~/ 60;
     final seconds = totalSeconds % 60;
     final minutesText = minutes.toString().padLeft(2, '0');
     final secondsText = seconds.toString().padLeft(2, '0');
-    return '$minutesText : $secondsText';
+    return '$minutesText$separator$secondsText';
   }
 }
