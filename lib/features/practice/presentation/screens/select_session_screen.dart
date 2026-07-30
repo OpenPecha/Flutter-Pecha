@@ -771,7 +771,7 @@ class _CircularImage extends StatelessWidget {
     
     if (url != null && url.isNotEmpty && _isValidNetworkUrl(url)) {
       final dpr = MediaQuery.of(context).devicePixelRatio;
-      final cachePx = (size * dpr).round();
+      final cachePx = _toCachePx(size, dpr);
       
       return ClipOval(
         child: CachedNetworkImage(
@@ -787,7 +787,8 @@ class _CircularImage extends StatelessWidget {
           fadeInDuration: const Duration(milliseconds: 200),
           placeholder: (_, __) => _placeholder(),
           errorWidget: (context, url, error) {
-            _logger.warning('Failed to load mala image: $url, error: $error');
+            final sanitizedUrl = stableNetworkImageCacheKey(url);
+            _logger.warning('Failed to load mala image: $sanitizedUrl, error: $error');
             return _placeholder();
           },
         ),
@@ -800,7 +801,17 @@ class _CircularImage extends StatelessWidget {
     final uri = Uri.tryParse(url);
     return uri != null &&
         uri.hasScheme &&
-        (uri.scheme == 'http' || uri.scheme == 'https');
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.hasAuthority &&
+        uri.host.isNotEmpty;
+  }
+
+  /// Converts a logical dimension to physical pixels for cache sizing. Returns
+  /// null when the dimension is non-finite (e.g. `double.infinity`) or
+  /// non-positive — in those cases the framework should decode at natural size.
+  int? _toCachePx(double logical, double dpr) {
+    if (!logical.isFinite || logical <= 0) return null;
+    return (logical * dpr).round();
   }
 
   Widget _placeholder() => Container(
