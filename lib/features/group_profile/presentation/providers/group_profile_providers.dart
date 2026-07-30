@@ -128,7 +128,15 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
   }
 
   void _refreshGroupMembers() {
-    _ref.read(groupMembersProvider(_key.groupId).notifier).loadInitial();
+    final groupId = _key.groupId;
+    if (!_ref.exists(groupMembersProvider(groupId))) return;
+
+    if (_ref.read(groupMembersTabActiveProvider(groupId))) {
+      _ref.read(groupMembersProvider(groupId).notifier).loadInitial();
+    } else {
+      _ref.read(groupMembersNeedsRefreshProvider(groupId).notifier).state =
+          true;
+    }
   }
 
   void _invalidateConnectProviders() {
@@ -451,10 +459,12 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
   final GroupProfileRepositoryInterface _repository;
   final String _groupId;
   static const int _limit = 20;
+  int _requestGeneration = 0;
 
   Future<void> loadInitial() async {
-    if (state.isLoading) return;
+    if (state.isLoading || state.isLoadingMore) return;
 
+    final generation = ++_requestGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _repository.getGroupMembers(
@@ -463,7 +473,7 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
       limit: _limit,
     );
 
-    if (!mounted) return;
+    if (!mounted || generation != _requestGeneration) return;
 
     result.fold(
       (failure) {
@@ -485,6 +495,7 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
 
+    final generation = _requestGeneration;
     state = state.copyWith(isLoadingMore: true, clearError: true);
 
     final result = await _repository.getGroupMembers(
@@ -493,7 +504,7 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
       limit: _limit,
     );
 
-    if (!mounted) return;
+    if (!mounted || generation != _requestGeneration) return;
 
     result.fold(
       (failure) {
@@ -520,6 +531,14 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
     }
   }
 }
+
+/// True while the group profile members tab is the selected tab.
+final groupMembersTabActiveProvider = StateProvider.autoDispose
+    .family<bool, String>((ref, groupId) => false);
+
+/// Set when join/unjoin happens while the members tab is not selected.
+final groupMembersNeedsRefreshProvider = StateProvider.autoDispose
+    .family<bool, String>((ref, groupId) => false);
 
 final groupMembersProvider = StateNotifierProvider.autoDispose
     .family<GroupMembersNotifier, GroupMembersState, String>((ref, groupId) {
