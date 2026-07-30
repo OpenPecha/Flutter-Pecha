@@ -580,11 +580,19 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           return count > 0;
         }).toList();
 
+    final hasAnyPositive = membersState.members.any((member) {
+      final count =
+          _sort == GroupAccumulatorMemberSort.today
+              ? member.todayCount
+              : member.totalCount;
+      return count > 0;
+    });
+
     final showEmptyMessage =
-        sortedMembers.isEmpty &&
-        !membersState.hasMore &&
+        !hasAnyPositive &&
+        !membersState.isLoading &&
         !membersState.isLoadingMore &&
-        !membersState.isLoading;
+        membersState.error == null;
 
     return ListView.builder(
       controller: _scrollController,

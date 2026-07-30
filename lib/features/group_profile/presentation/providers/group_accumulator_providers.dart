@@ -275,7 +275,22 @@ Future<bool> joinGroupAccumulator({
   ref.invalidate(groupAccumulatorsProvider(groupId));
   ref.invalidate(groupAccumulatorDetailProvider(accumulatorId));
 
-  ref.invalidate(groupAccumulatorMembersProvider);
+  ref.invalidate(
+    groupAccumulatorMembersProvider(
+      GroupAccumulatorMembersKey(
+        accumulatorId: accumulatorId,
+        sortBy: GroupAccumulatorMemberSort.total,
+      ),
+    ),
+  );
+  ref.invalidate(
+    groupAccumulatorMembersProvider(
+      GroupAccumulatorMembersKey(
+        accumulatorId: accumulatorId,
+        sortBy: GroupAccumulatorMemberSort.today,
+      ),
+    ),
+  );
 
   final refreshFuture = Future.wait([
     ref.read(groupAccumulatorDetailProvider(accumulatorId).future),
