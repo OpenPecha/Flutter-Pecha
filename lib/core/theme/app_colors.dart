@@ -26,6 +26,10 @@ class AppColors {
   static const Color cardDark = Color(0xFF222222); // Card background dark
   static const Color cardBorderDark = Color(0xFF353535); // Card border dark
 
+  /// Chips and pills rendered on top of [surfaceVariantDark] inputs, which
+  /// need a fill one step lighter than the surface behind them.
+  static const Color chipBackgroundDark = Color(0xFF353535);
+
   // ============ Gold/Accent Colors ============
   /// Warm gold tones for cards and highlights
   static const Color goldLight = Color(0xFFFBF9F4); // MG 50
