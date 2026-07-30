@@ -46,17 +46,22 @@ final groupAccumulatorDetailProvider = FutureProvider.autoDispose
 @immutable
 class GroupAccumulatorMembersKey {
   final String accumulatorId;
+  final GroupAccumulatorMemberSort sortBy;
 
-  const GroupAccumulatorMembersKey({required this.accumulatorId});
+  const GroupAccumulatorMembersKey({
+    required this.accumulatorId,
+    this.sortBy = GroupAccumulatorMemberSort.total,
+  });
 
   @override
   bool operator ==(Object other) {
     return other is GroupAccumulatorMembersKey &&
-        other.accumulatorId == accumulatorId;
+        other.accumulatorId == accumulatorId &&
+        other.sortBy == sortBy;
   }
 
   @override
-  int get hashCode => accumulatorId.hashCode;
+  int get hashCode => Object.hash(accumulatorId, sortBy);
 }
 
 List<GroupAccumulatorMember> sortAccumulatorMembers(
@@ -114,11 +119,13 @@ class GroupAccumulatorMembersNotifier
   GroupAccumulatorMembersNotifier({
     required GroupAccumulatorRepositoryInterface repository,
     required this.accumulatorId,
+    required this.sortBy,
   }) : _repository = repository,
        super(const GroupAccumulatorMembersState());
 
   final GroupAccumulatorRepositoryInterface _repository;
   final String accumulatorId;
+  final GroupAccumulatorMemberSort sortBy;
   static const _pageSize = 20;
   bool _hasLoaded = false;
 
@@ -134,7 +141,7 @@ class GroupAccumulatorMembersNotifier
       accumulatorId,
       skip: 0,
       limit: _pageSize,
-      sortBy: GroupAccumulatorMemberSort.total,
+      sortBy: sortBy,
     );
 
     result.fold(
@@ -155,7 +162,7 @@ class GroupAccumulatorMembersNotifier
       accumulatorId,
       skip: state.members.length,
       limit: _pageSize,
-      sortBy: GroupAccumulatorMemberSort.total,
+      sortBy: sortBy,
     );
 
     result.fold(
@@ -183,6 +190,7 @@ final groupAccumulatorMembersProvider = StateNotifierProvider.autoDispose
       return GroupAccumulatorMembersNotifier(
         repository: ref.watch(groupAccumulatorRepositoryProvider),
         accumulatorId: key.accumulatorId,
+        sortBy: key.sortBy,
       );
     });
 
@@ -267,16 +275,11 @@ Future<bool> joinGroupAccumulator({
   ref.invalidate(groupAccumulatorsProvider(groupId));
   ref.invalidate(groupAccumulatorDetailProvider(accumulatorId));
 
+  ref.invalidate(groupAccumulatorMembersProvider);
+
   final refreshFuture = Future.wait([
     ref.read(groupAccumulatorDetailProvider(accumulatorId).future),
     ref.read(groupAccumulatorsProvider(groupId).future),
-    ref
-        .read(
-          groupAccumulatorMembersProvider(
-            GroupAccumulatorMembersKey(accumulatorId: accumulatorId),
-          ).notifier,
-        )
-        .loadInitial(force: true),
   ]);
 
   if (awaitRefresh) {

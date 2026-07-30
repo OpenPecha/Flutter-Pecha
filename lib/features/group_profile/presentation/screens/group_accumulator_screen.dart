@@ -479,8 +479,10 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   bool _hasRequestedInitialLoad = false;
   GroupAccumulatorMemberSort _sort = GroupAccumulatorMemberSort.total;
 
-  GroupAccumulatorMembersKey get _membersKey =>
-      GroupAccumulatorMembersKey(accumulatorId: widget.accumulatorId);
+  GroupAccumulatorMembersKey get _membersKey => GroupAccumulatorMembersKey(
+    accumulatorId: widget.accumulatorId,
+    sortBy: _sort,
+  );
 
   @override
   void initState() {
@@ -517,6 +519,17 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     }
   }
 
+  void _onSortChanged(GroupAccumulatorMemberSort sort) {
+    if (_sort == sort) return;
+    setState(() => _sort = sort);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(groupAccumulatorMembersProvider(_membersKey).notifier)
+          .loadInitial();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final membersState = ref.watch(
@@ -547,6 +560,17 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       );
     }
 
+    if (!membersState.isLoading &&
+        membersState.members.isEmpty &&
+        membersState.error == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(groupAccumulatorMembersProvider(_membersKey).notifier)
+            .loadInitial();
+      });
+    }
+
     final sortedMembers =
         sortAccumulatorMembers(membersState.members, _sort).where((member) {
           final count =
@@ -557,7 +581,10 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
         }).toList();
 
     final showEmptyMessage =
-        sortedMembers.isEmpty && !membersState.isLoadingMore;
+        sortedMembers.isEmpty &&
+        !membersState.hasMore &&
+        !membersState.isLoadingMore &&
+        !membersState.isLoading;
 
     return ListView.builder(
       controller: _scrollController,
@@ -587,7 +614,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                 _SortToggle(
                   sort: _sort,
                   isDark: widget.isDark,
-                  onChanged: (sort) => setState(() => _sort = sort),
+                  onChanged: _onSortChanged,
                 ),
               ],
             ),
