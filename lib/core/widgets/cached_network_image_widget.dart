@@ -23,20 +23,25 @@ int? _toCachePx(double? logical, double dpr) {
 /// rotating signatures) resolve to the same cache entry across sessions.
 String _stableCacheKey(String url) => stableNetworkImageCacheKey(url);
 
-/// Cover-style fits decode along one axis so the image can be cropped without
-/// squishing. [BoxFit.contain] and similar fits need both bounds so decodes
-/// stay within the viewport in width and height.
-bool _shouldDropOneCacheDimension(BoxFit fit) {
+/// Returns a single-axis cache size for fits that decode along one dimension.
+/// Returns null when both cache dimensions should be retained.
+(int? memCacheWidth, int? memCacheHeight)? _singleAxisCacheDimensions({
+  required BoxFit fit,
+  required int autoWidth,
+  required int autoHeight,
+}) {
   switch (fit) {
-    case BoxFit.cover:
     case BoxFit.fitWidth:
+      return (autoWidth, null);
     case BoxFit.fitHeight:
-      return true;
+      return (null, autoHeight);
+    case BoxFit.cover:
+      return autoWidth >= autoHeight ? (autoWidth, null) : (null, autoHeight);
     case BoxFit.contain:
     case BoxFit.fill:
     case BoxFit.none:
     case BoxFit.scaleDown:
-      return false;
+      return null;
   }
 }
 
@@ -55,10 +60,13 @@ bool _shouldDropOneCacheDimension(BoxFit fit) {
   final autoWidth = _toCachePx(width, devicePixelRatio);
   final autoHeight = _toCachePx(height, devicePixelRatio);
 
-  if (autoWidth != null &&
-      autoHeight != null &&
-      _shouldDropOneCacheDimension(fit)) {
-    return autoWidth >= autoHeight ? (autoWidth, null) : (null, autoHeight);
+  if (autoWidth != null && autoHeight != null) {
+    final singleAxis = _singleAxisCacheDimensions(
+      fit: fit,
+      autoWidth: autoWidth,
+      autoHeight: autoHeight,
+    );
+    if (singleAxis != null) return singleAxis;
   }
 
   return (autoWidth, autoHeight);
