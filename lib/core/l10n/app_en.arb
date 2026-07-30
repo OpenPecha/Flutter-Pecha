@@ -932,6 +932,16 @@
       }
     }
   },
+  "timer_notification_in_progress": "Meditation in progress",
+  "timer_notification_paused": "Paused · {time} left",
+  "@timer_notification_paused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timer_notification_complete": "Your session is complete",
   "ai_use_search_instead": "Use Search Instead",
   "ai_mode_label": "AI",
   "plan_day_of": "Day {day} of {total}",

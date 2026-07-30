@@ -94,6 +94,97 @@ class NotificationChannels {
     ),
   );
 
+  // ── Meditation Timer Session ────────────────────────────────────────────────
+  static const String timerSessionId = 'timer_session';
+  static const String timerSessionName = 'Meditation Timer';
+  static const String timerSessionDescription =
+      'Shows the remaining time while a meditation timer is running';
+
+  static const String timerCompleteId = 'timer_complete';
+  static const String timerCompleteName = 'Meditation Timer Finished';
+  static const String timerCompleteDescription =
+      'Rings the bell when a meditation timer finishes';
+
+  /// Silent, low-importance channel for the ongoing "session in progress"
+  /// notification. Low importance keeps it out of the heads-up lane — it is a
+  /// status readout, not an alert — while still showing on the lock screen.
+  static const AndroidNotificationChannel timerSessionChannel =
+      AndroidNotificationChannel(
+        timerSessionId,
+        timerSessionName,
+        description: timerSessionDescription,
+        importance: Importance.low,
+        playSound: false,
+        enableVibration: false,
+      );
+
+  /// The completion bell. Shares the routine reminder sound so the app has one
+  /// notification voice; Android 8+ binds sound to the channel, so it must be
+  /// declared here rather than per-notification.
+  static const AndroidNotificationChannel timerCompleteChannel =
+      AndroidNotificationChannel(
+        timerCompleteId,
+        timerCompleteName,
+        description: timerCompleteDescription,
+        importance: Importance.high,
+        playSound: true,
+        sound: routineAndroidSound,
+        enableVibration: true,
+      );
+
+  /// Ongoing "meditation in progress" notification.
+  ///
+  /// While running, Android renders the countdown itself: `usesChronometer` +
+  /// `chronometerCountDown` with `when` set to the session's end time makes
+  /// SystemUI tick the remaining time down every second with no updates from
+  /// Dart — and it keeps ticking even if the app process is killed. When paused
+  /// there is no end time to count towards, so the chronometer is dropped and
+  /// the frozen remaining time is rendered into the body text instead.
+  static NotificationDetails timerSessionDetails({
+    required int whenMs,
+    required bool paused,
+  }) => NotificationDetails(
+    android: AndroidNotificationDetails(
+      timerSessionId,
+      timerSessionName,
+      channelDescription: timerSessionDescription,
+      importance: Importance.low,
+      priority: Priority.low,
+      icon: 'ic_notification',
+      ongoing: !paused,
+      autoCancel: false,
+      onlyAlertOnce: true,
+      playSound: false,
+      enableVibration: false,
+      showWhen: !paused,
+      when: paused ? null : whenMs,
+      usesChronometer: !paused,
+      chronometerCountDown: !paused,
+    ),
+  );
+
+  /// Completion bell, scheduled for the session's end time so it rings on time
+  /// even while the app is suspended.
+  static const NotificationDetails timerCompleteDetails = NotificationDetails(
+    android: AndroidNotificationDetails(
+      timerCompleteId,
+      timerCompleteName,
+      channelDescription: timerCompleteDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: 'ic_notification',
+      playSound: true,
+      sound: routineAndroidSound,
+      enableVibration: true,
+    ),
+    iOS: DarwinNotificationDetails(
+      sound: routineIosSoundFile,
+      presentAlert: true,
+      presentBadge: false,
+      presentSound: true,
+    ),
+  );
+
   /// Action ID used for the Android action button on special-plan day-N
   /// notifications. The tap handler treats this the same as a body tap.
   static const String specialPlanActionId = 'special_plan_action';

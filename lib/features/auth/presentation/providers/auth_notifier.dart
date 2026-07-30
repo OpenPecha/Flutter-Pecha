@@ -685,15 +685,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final repo = ref.read(onboardingRepositoryProvider);
       final result = await repo.isOnboardingCompleted();
-      return result.fold(
-        (failure) {
-          _logger.warning(
-            'Could not prefetch onboarding status: ${failure.message}',
-          );
-          return null;
-        },
-        (hasCompleted) => hasCompleted,
-      );
+      return result.fold((failure) {
+        _logger.warning(
+          'Could not prefetch onboarding status: ${failure.message}',
+        );
+        return null;
+      }, (hasCompleted) => hasCompleted);
     } catch (e) {
       _logger.warning('Could not prefetch onboarding status: $e');
       return null;
