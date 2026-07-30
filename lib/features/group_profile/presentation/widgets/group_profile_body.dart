@@ -145,6 +145,13 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       });
     });
 
+    if (_isCommunityGroup(widget.profile)) {
+      // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
+      // refresh logic can set and consume them reliably.
+      ref.watch(groupMembersTabActiveProvider(widget.profile.id));
+      ref.watch(groupMembersNeedsRefreshProvider(widget.profile.id));
+    }
+
     final enrollingId = _enrollingSeriesId;
     if (enrollingId != null) {
       // Keep the autoDispose enrollment provider alive while the request is
