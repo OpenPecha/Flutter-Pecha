@@ -802,6 +802,7 @@
   "group_accumulator_recited": "Уншсан",
   "group_accumulator_total": "Нийт",
   "group_accumulator_contributions_empty": "Хувь нэмрээ хянахын тулд энэ хуримтлалд нэгдэнэ үү.",
+  "group_accumulator_leaderboard_empty": "Одоогоор уншлага байхгүй.",
   "group_accumulator_recite_now": "Одоо уншина уу",
 
   "share_this_quote": "Энэ ишлэлийг хуваалцах",

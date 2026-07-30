@@ -736,6 +736,7 @@
   "group_accumulator_recited": "已誦讀",
   "group_accumulator_total": "總數",
   "group_accumulator_contributions_empty": "加入此累積以追蹤您的貢獻。",
+  "group_accumulator_leaderboard_empty": "尚無誦讀記錄。",
   "group_accumulator_recite_now": "立即誦念",
 
   "share_this_quote": "分享这句话",

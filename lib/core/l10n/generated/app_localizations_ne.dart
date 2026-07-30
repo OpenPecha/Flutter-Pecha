@@ -1737,6 +1737,9 @@ class AppLocalizationsNe extends AppLocalizations {
       'आफ्नो योगदान ट्र्याक गर्न यो संचयमा सामेल हुनुहोस्।';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'अहिलेसम्म कुनै जप छैन।';
+
+  @override
   String get group_accumulator_recite_now => 'अहिले जप गर्नुहोस्';
 
   @override

@@ -1729,6 +1729,9 @@ class AppLocalizationsHi extends AppLocalizations {
       'अपने योगदान को ट्रैक करने के लिए इस संचय में शामिल हों।';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'अभी तक कोई जाप नहीं।';
+
+  @override
   String get group_accumulator_recite_now => 'अभी जाप करें';
 
   @override

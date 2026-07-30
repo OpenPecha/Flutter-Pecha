@@ -802,6 +802,7 @@
   "group_accumulator_recited": "जाप",
   "group_accumulator_total": "कुल",
   "group_accumulator_contributions_empty": "अपने योगदान को ट्रैक करने के लिए इस संचय में शामिल हों।",
+  "group_accumulator_leaderboard_empty": "अभी तक कोई जाप नहीं।",
   "group_accumulator_recite_now": "अभी जाप करें",
 
   "share_this_quote": "यह उद्धरण शेयर करें",
