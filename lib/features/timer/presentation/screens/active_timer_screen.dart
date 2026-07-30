@@ -121,9 +121,11 @@ class _ActiveTimerScreenState extends ConsumerState<ActiveTimerScreen>
     switch (state) {
       case AppLifecycleState.resumed:
         _onResumed();
+        break;
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
         _onBackgrounded();
+        break;
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
         break;
