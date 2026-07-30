@@ -45,6 +45,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   String? _enrollingSeriesId;
   String? _joiningAccumulatorId;
   final Set<String> _localGroupEnrolledSeriesIds = {};
+  ProviderSubscription<bool>? _membersTabActiveSub;
+  ProviderSubscription<bool>? _membersNeedsRefreshSub;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
 
@@ -72,6 +74,19 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         vsync: this,
       );
       _tabController!.addListener(_onTabChanged);
+
+      final groupId = widget.profile.id;
+      // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
+      // refresh logic can set and consume them reliably, without rebuilding
+      // this widget when the flags change.
+      _membersTabActiveSub = ref.listenManual(
+        groupMembersTabActiveProvider(groupId),
+        (_, _) {},
+      );
+      _membersNeedsRefreshSub = ref.listenManual(
+        groupMembersNeedsRefreshProvider(groupId),
+        (_, _) {},
+      );
     }
   }
 
@@ -95,6 +110,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
   @override
   void dispose() {
+    _membersTabActiveSub?.close();
+    _membersNeedsRefreshSub?.close();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     super.dispose();
@@ -144,13 +161,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         });
       });
     });
-
-    if (_isCommunityGroup(widget.profile)) {
-      // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
-      // refresh logic can set and consume them reliably.
-      ref.watch(groupMembersTabActiveProvider(widget.profile.id));
-      ref.watch(groupMembersNeedsRefreshProvider(widget.profile.id));
-    }
 
     final enrollingId = _enrollingSeriesId;
     if (enrollingId != null) {
