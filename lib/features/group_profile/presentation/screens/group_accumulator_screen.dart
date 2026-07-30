@@ -501,7 +501,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   void _loadInitialIfNeeded({bool force = false}) {
     if (_hasRequestedInitialLoad && !force) return;
     _hasRequestedInitialLoad = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.microtask(() {
       if (!mounted) return;
       ref
           .read(groupAccumulatorMembersProvider(_membersKey).notifier)
@@ -522,7 +522,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   void _onSortChanged(GroupAccumulatorMemberSort sort) {
     if (_sort == sort) return;
     setState(() => _sort = sort);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.microtask(() {
       if (!mounted) return;
       ref
           .read(groupAccumulatorMembersProvider(_membersKey).notifier)
@@ -541,7 +541,17 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       intlFormatLocaleOf(context),
     );
 
-    if (membersState.isLoading && membersState.members.isEmpty) {
+    if ((membersState.isLoading || !membersState.hasLoadedOnce) &&
+        membersState.members.isEmpty &&
+        membersState.error == null) {
+      if (!membersState.isLoading) {
+        Future.microtask(() {
+          if (!mounted) return;
+          ref
+              .read(groupAccumulatorMembersProvider(_membersKey).notifier)
+              .loadInitial();
+        });
+      }
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -558,17 +568,6 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                       .retry(),
         ),
       );
-    }
-
-    if (!membersState.isLoading &&
-        membersState.members.isEmpty &&
-        membersState.error == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref
-            .read(groupAccumulatorMembersProvider(_membersKey).notifier)
-            .loadInitial();
-      });
     }
 
     final sortedMembers =
@@ -589,6 +588,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     });
 
     final showEmptyMessage =
+        membersState.hasLoadedOnce &&
         !hasAnyPositive &&
         !membersState.isLoading &&
         !membersState.isLoadingMore &&

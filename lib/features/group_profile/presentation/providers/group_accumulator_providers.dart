@@ -84,6 +84,7 @@ class GroupAccumulatorMembersState {
   final int total;
   final bool isLoading;
   final bool isLoadingMore;
+  final bool hasLoadedOnce;
   final Failure? error;
 
   const GroupAccumulatorMembersState({
@@ -91,6 +92,7 @@ class GroupAccumulatorMembersState {
     this.total = 0,
     this.isLoading = false,
     this.isLoadingMore = false,
+    this.hasLoadedOnce = false,
     this.error,
   });
 
@@ -101,6 +103,7 @@ class GroupAccumulatorMembersState {
     int? total,
     bool? isLoading,
     bool? isLoadingMore,
+    bool? hasLoadedOnce,
     Failure? error,
     bool clearError = false,
   }) {
@@ -109,6 +112,7 @@ class GroupAccumulatorMembersState {
       total: total ?? this.total,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasLoadedOnce: hasLoadedOnce ?? this.hasLoadedOnce,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -145,9 +149,14 @@ class GroupAccumulatorMembersNotifier
     );
 
     result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure),
+      (failure) => state = state.copyWith(
+        isLoading: false,
+        hasLoadedOnce: true,
+        error: failure,
+      ),
       (page) => state = state.copyWith(
         isLoading: false,
+        hasLoadedOnce: true,
         members: page.members,
         total: page.total,
       ),
