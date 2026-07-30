@@ -106,7 +106,7 @@ class _TraditionChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(left: 12, right: 4, top: 4, bottom: 4),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+        color: isDark ? AppColors.chipBackgroundDark : AppColors.grey100,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
