@@ -15,14 +15,12 @@ void main() {
   late MockLocalStorageService mockLocalStorageService;
   late LocaleNotifier localeNotifier;
 
-  /// Waits for the async [_initializeLocale] started in [LocaleNotifier]'s ctor.
+  /// Waits for the async init started in [LocaleNotifier]'s ctor.
   Future<LocaleNotifier> createLocaleNotifier() async {
     final notifier = LocaleNotifier(
       localStorageService: mockLocalStorageService,
     );
-    for (var i = 0; i < 5; i++) {
-      await Future<void>.delayed(Duration.zero);
-    }
+    await notifier.ensureInitialized();
     return notifier;
   }
 

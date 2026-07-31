@@ -1729,6 +1729,9 @@ class AppLocalizationsHi extends AppLocalizations {
       'अपने योगदान को ट्रैक करने के लिए इस संचय में शामिल हों।';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'अभी तक कोई जाप नहीं।';
+
+  @override
   String get group_accumulator_recite_now => 'अभी जाप करें';
 
   @override
@@ -1960,6 +1963,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String timer_minute_session(int minutes) {
     return '$minutes मिनट का सत्र';
   }
+
+  @override
+  String get timer_notification_in_progress => 'Meditation in progress';
+
+  @override
+  String timer_notification_paused(String time) {
+    return 'Paused · $time left';
+  }
+
+  @override
+  String get timer_notification_complete => 'Your session is complete';
 
   @override
   String get ai_use_search_instead => 'इसके बजाय खोज का उपयोग करें';

@@ -55,11 +55,12 @@ class _OnboardingScreenLanguageState
   }
 
   Future<void> _handleContinue() async {
-    final selectedLocale = Locale(_selectedLanguageCode);
     await ref
         .read(onboardingProvider.notifier)
         .setPreferredLanguage(_selectedLanguageCode);
-    await ref.read(localeProvider.notifier).setLocale(selectedLocale);
+    // Applies the choice to both the UI locale and the backend content
+    // language so they stay in sync from the first screen.
+    await selectAppLanguage(ref, _selectedLanguageCode);
     if (!mounted) return;
     widget.onNext();
   }

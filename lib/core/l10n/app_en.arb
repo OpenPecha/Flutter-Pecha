@@ -829,6 +829,7 @@
   "group_accumulator_recited": "Recited",
   "group_accumulator_total": "Total",
   "group_accumulator_contributions_empty": "Join this accumulation to track your contributions.",
+  "group_accumulator_leaderboard_empty": "No recitations yet.",
   "group_accumulator_recite_now": "Recite now",
   "@group_and_more_links": {
     "placeholders": {
@@ -932,6 +933,16 @@
       }
     }
   },
+  "timer_notification_in_progress": "Meditation in progress",
+  "timer_notification_paused": "Paused · {time} left",
+  "@timer_notification_paused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timer_notification_complete": "Your session is complete",
   "ai_use_search_instead": "Use Search Instead",
   "ai_mode_label": "AI",
   "plan_day_of": "Day {day} of {total}",

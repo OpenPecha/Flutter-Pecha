@@ -23,6 +23,55 @@ int? _toCachePx(double? logical, double dpr) {
 /// rotating signatures) resolve to the same cache entry across sessions.
 String _stableCacheKey(String url) => stableNetworkImageCacheKey(url);
 
+/// Returns a single-axis cache size for fits that decode along one dimension.
+/// Returns null when both cache dimensions should be retained.
+(int? memCacheWidth, int? memCacheHeight)? _singleAxisCacheDimensions({
+  required BoxFit fit,
+  required int autoWidth,
+  required int autoHeight,
+}) {
+  switch (fit) {
+    case BoxFit.fitWidth:
+      return (autoWidth, null);
+    case BoxFit.fitHeight:
+      return (null, autoHeight);
+    case BoxFit.cover:
+      return autoWidth >= autoHeight ? (autoWidth, null) : (null, autoHeight);
+    case BoxFit.contain:
+    case BoxFit.fill:
+    case BoxFit.none:
+    case BoxFit.scaleDown:
+      return null;
+  }
+}
+
+(int? memCacheWidth, int? memCacheHeight) _resolveMemCacheDimensions({
+  required double devicePixelRatio,
+  required BoxFit fit,
+  double? width,
+  double? height,
+  int? memCacheWidth,
+  int? memCacheHeight,
+}) {
+  if (memCacheWidth != null || memCacheHeight != null) {
+    return (memCacheWidth, memCacheHeight);
+  }
+
+  final autoWidth = _toCachePx(width, devicePixelRatio);
+  final autoHeight = _toCachePx(height, devicePixelRatio);
+
+  if (autoWidth != null && autoHeight != null) {
+    final singleAxis = _singleAxisCacheDimensions(
+      fit: fit,
+      autoWidth: autoWidth,
+      autoHeight: autoHeight,
+    );
+    if (singleAxis != null) return singleAxis;
+  }
+
+  return (autoWidth, autoHeight);
+}
+
 class CachedNetworkImageWidget extends StatefulWidget {
   /// Remote http(s) URL, or a bundled asset path starting with `assets/`.
   final String? imageUrl;
@@ -109,8 +158,14 @@ class _CachedNetworkImageWidgetState extends State<CachedNetworkImageWidget> {
       }
     } else if (url != null && _isNetworkUrl(url)) {
       final dpr = MediaQuery.of(context).devicePixelRatio;
-      final memW = widget.memCacheWidth ?? _toCachePx(widget.width, dpr);
-      final memH = widget.memCacheHeight ?? _toCachePx(widget.height, dpr);
+      final (memW, memH) = _resolveMemCacheDimensions(
+        devicePixelRatio: dpr,
+        fit: widget.fit,
+        width: widget.width,
+        height: widget.height,
+        memCacheWidth: widget.memCacheWidth,
+        memCacheHeight: widget.memCacheHeight,
+      );
 
       imageWidget = CachedNetworkImage(
         imageUrl: url,
@@ -126,14 +181,17 @@ class _CachedNetworkImageWidgetState extends State<CachedNetworkImageWidget> {
             widget.fadeInDuration ?? const Duration(milliseconds: 200),
         placeholderFadeInDuration:
             widget.placeholderFadeInDuration ?? Duration.zero,
-        placeholder: widget.placeholder != null
-            ? (context, url) => widget.placeholder!
-            : (context, url) => _buildLoadingPlaceholder(),
-        errorWidget: widget.errorWidget != null
-            ? (context, url, error) => widget.errorWidget!
-            : (context, url, error) => widget.fallbackAsset != null
-                ? _buildAssetImage(widget.fallbackAsset!, context)
-                : _buildErrorWidget(context),
+        placeholder:
+            widget.placeholder != null
+                ? (context, url) => widget.placeholder!
+                : (context, url) => _buildLoadingPlaceholder(),
+        errorWidget:
+            widget.errorWidget != null
+                ? (context, url, error) => widget.errorWidget!
+                : (context, url, error) =>
+                    widget.fallbackAsset != null
+                        ? _buildAssetImage(widget.fallbackAsset!, context)
+                        : _buildErrorWidget(context),
       );
 
       if (widget.onImageLoaded != null) {
@@ -145,9 +203,10 @@ class _CachedNetworkImageWidgetState extends State<CachedNetworkImageWidget> {
         );
       }
     } else if (url != null) {
-      imageWidget = widget.fallbackAsset != null
-          ? _buildAssetImage(widget.fallbackAsset!, context)
-          : _buildErrorWidget(context);
+      imageWidget =
+          widget.fallbackAsset != null
+              ? _buildAssetImage(widget.fallbackAsset!, context)
+              : _buildErrorWidget(context);
     } else if (widget.fallbackAsset != null) {
       imageWidget = _buildAssetImage(widget.fallbackAsset!, context);
       if (widget.onImageLoaded != null) {
@@ -197,8 +256,9 @@ class _CachedNetworkImageWidgetState extends State<CachedNetworkImageWidget> {
       width: widget.width,
       height: widget.height,
       fit: widget.fit,
-      errorBuilder: (context, error, stackTrace) =>
-          widget.errorWidget ?? _buildErrorWidget(context),
+      errorBuilder:
+          (context, error, stackTrace) =>
+              widget.errorWidget ?? _buildErrorWidget(context),
     );
   }
 
@@ -243,22 +303,23 @@ class _ImageLoadedNotifierState extends State<_ImageLoadedNotifier> {
   }
 
   void _setupImageListener() {
-    final ImageProvider imageProvider = widget.useAssetImage
-        ? AssetImage(widget.imageUrl)
-        : CachedNetworkImageProvider(
-            widget.imageUrl,
-            cacheKey: _stableCacheKey(widget.imageUrl),
-          );
+    final ImageProvider imageProvider =
+        widget.useAssetImage
+            ? AssetImage(widget.imageUrl)
+            : CachedNetworkImageProvider(
+              widget.imageUrl,
+              cacheKey: _stableCacheKey(widget.imageUrl),
+            );
     _imageStream = imageProvider.resolve(const ImageConfiguration());
-    _imageStreamListener = ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {
-        if (!_hasCalledCallback && mounted) {
-          _hasCalledCallback = true;
-          widget.onImageLoaded();
-        }
-      },
-      onError: (exception, stackTrace) {},
-    );
+    _imageStreamListener = ImageStreamListener((
+      ImageInfo image,
+      bool synchronousCall,
+    ) {
+      if (!_hasCalledCallback && mounted) {
+        _hasCalledCallback = true;
+        widget.onImageLoaded();
+      }
+    }, onError: (exception, stackTrace) {});
     _imageStream?.addListener(_imageStreamListener!);
   }
 

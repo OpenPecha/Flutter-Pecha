@@ -1634,6 +1634,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_accumulator_contributions_empty => '加入此累積以追蹤您的貢獻。';
 
   @override
+  String get group_accumulator_leaderboard_empty => '尚無誦讀記錄。';
+
+  @override
   String get group_accumulator_recite_now => '立即誦念';
 
   @override
@@ -1844,6 +1847,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String timer_minute_session(int minutes) {
     return '$minutes 分鐘練習';
   }
+
+  @override
+  String get timer_notification_in_progress => 'Meditation in progress';
+
+  @override
+  String timer_notification_paused(String time) {
+    return 'Paused · $time left';
+  }
+
+  @override
+  String get timer_notification_complete => 'Your session is complete';
 
   @override
   String get ai_use_search_instead => '改用搜尋';
