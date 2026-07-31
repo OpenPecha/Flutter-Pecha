@@ -14,6 +14,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_profi
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_events_tab.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_members_tab.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
@@ -255,7 +256,11 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         controller: _tabController!,
         children: [
           _buildEmptyTab('No news yet', isDark, lineHeight),
-          _buildEmptyTab('No events yet', isDark, lineHeight),
+          GroupProfileEventsTab(
+            groupId: profile.id,
+            isDark: isDark,
+            lineHeight: lineHeight,
+          ),
           _buildPracticesTab(profile, isDark, lineHeight),
           GroupProfileMembersTab(
             groupId: profile.id,

@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_events_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_members_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 
@@ -29,4 +30,6 @@ abstract class GroupProfileRepositoryInterface {
     required int skip,
     required int limit,
   });
+
+  Future<Either<Failure, GroupEventsPage>> getGroupEvents(String groupId);
 }

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/group_profile/data/models/group_event_model.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_member_model.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_profile_model.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -116,6 +117,32 @@ class GroupProfileRemoteDatasource {
     } on DioException catch (e) {
       _logger.error('Dio error in fetchGroupMembers', e);
       throw _dioToException(e, 'Failed to load group members');
+    }
+  }
+
+  Future<GroupEventsPageModel> fetchGroupEvents(String groupId) async {
+    try {
+      final response = await dio.get(
+        '/events',
+        queryParameters: {'group_id': groupId},
+      );
+
+      if (response.statusCode == 200) {
+        return GroupEventsPageModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      } else {
+        _logger.error(
+          'Failed to load group events $groupId: ${response.statusCode}',
+        );
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load group events',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchGroupEvents', e);
+      throw _dioToException(e, 'Failed to load group events');
     }
   }
 
