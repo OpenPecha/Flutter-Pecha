@@ -5,10 +5,12 @@ name: 🍎 Build & Distribute iOS
 # TestFlight via the App Store Connect API key.
 #
 # Signing model: distribution certificate imported from a base64 secret, the
-# flavor's provisioning profile installed from a base64 secret, and the Xcode
-# project switched to manual signing for the build. The "Generate Entitlements"
-# build phase in the Runner target reads AUTH0_DOMAIN + AIRBRIDGE_APP_NAME from
-# the environment, so both are exported before the build.
+# flavor's provisioning profiles installed from base64 secrets, and the Xcode
+# project switched to manual signing for the build. Two profiles are needed per
+# flavor — one for Runner (<bundle-id>) and one for the TimerWidget extension
+# (<bundle-id>.TimerWidget). The "Generate Entitlements" build phase in the
+# Runner target reads AUTH0_DOMAIN + AIRBRIDGE_APP_NAME from the environment, so
+# both are exported before the build.
 
 on:
   workflow_call:
@@ -96,41 +98,59 @@ jobs:
           p12-file-base64: ${{ secrets.IOS_DIST_CERT_BASE64 }}
           p12-password:    ${{ secrets.IOS_DIST_CERT_PASSWORD }}
 
-      - name: 📄 Install provisioning profile
+      - name: 📄 Install provisioning profiles (app + TimerWidget)
         id: profile
         env:
           PROFILE_DEV:     ${{ secrets.IOS_PROVISION_PROFILE_DEV_BASE64 }}
           PROFILE_STAGING: ${{ secrets.IOS_PROVISION_PROFILE_STAGING_BASE64 }}
           PROFILE_PROD:    ${{ secrets.IOS_PROVISION_PROFILE_PROD_BASE64 }}
+          WIDGET_DEV:      ${{ secrets.IOS_PROVISION_PROFILE_DEV_WIDGET_BASE64 }}
+          WIDGET_STAGING:  ${{ secrets.IOS_PROVISION_PROFILE_STAGING_WIDGET_BASE64 }}
+          WIDGET_PROD:     ${{ secrets.IOS_PROVISION_PROFILE_PROD_WIDGET_BASE64 }}
         run: |
+          set -euo pipefail
           case "${{ inputs.flavor }}" in
-            dev)     B64="$PROFILE_DEV" ;;
-            staging) B64="$PROFILE_STAGING" ;;
-            prod)    B64="$PROFILE_PROD" ;;
+            dev)     APP_B64="$PROFILE_DEV";     WIDGET_B64="$WIDGET_DEV" ;;
+            staging) APP_B64="$PROFILE_STAGING"; WIDGET_B64="$WIDGET_STAGING" ;;
+            prod)    APP_B64="$PROFILE_PROD";    WIDGET_B64="$WIDGET_PROD" ;;
             *) echo "::error::Unknown flavor"; exit 1 ;;
           esac
-          if [ -z "$B64" ]; then
-            echo "::error::No provisioning profile secret for flavor ${{ inputs.flavor }}"; exit 1
-          fi
           PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILES_DIR"
-          echo "$B64" | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
-          PLIST=$(security cms -D -i "$RUNNER_TEMP/profile.mobileprovision")
-          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin <<< "$PLIST")
-          NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin <<< "$PLIST")
-          cp "$RUNNER_TEMP/profile.mobileprovision" "$PROFILES_DIR/$UUID.mobileprovision"
-          echo "profile_name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "Installed profile '$NAME' ($UUID)"
+
+          install_profile() {
+            local b64="$1" key="$2" plist uuid name
+            if [ -z "$b64" ]; then
+              echo "::error::No '$key' provisioning profile secret for flavor ${{ inputs.flavor }}"; exit 1
+            fi
+            echo "$b64" | base64 --decode > "$RUNNER_TEMP/$key.mobileprovision"
+            plist=$(security cms -D -i "$RUNNER_TEMP/$key.mobileprovision")
+            uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin <<< "$plist")
+            name=$(/usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin <<< "$plist")
+            cp "$RUNNER_TEMP/$key.mobileprovision" "$PROFILES_DIR/$uuid.mobileprovision"
+            echo "${key}_profile_name=$name" >> "$GITHUB_OUTPUT"
+            echo "Installed $key profile '$name' ($uuid)"
+          }
+
+          install_profile "$APP_B64"    app
+          install_profile "$WIDGET_B64" widget
 
       - name: ✍️ Switch project to manual signing
         run: |
-          fastlane run update_code_signing_settings \
-            use_automatic_signing:false \
-            path:"ios/Runner.xcodeproj" \
-            team_id:"${{ secrets.IOS_TEAM_ID }}" \
-            code_sign_identity:"Apple Distribution" \
-            profile_name:"${{ steps.profile.outputs.profile_name }}" \
-            targets:"Runner"
+          set -euo pipefail
+          # Runner and the TimerWidget extension are separate signable targets with
+          # distinct bundle IDs, so each needs its own profile. Leaving the widget on
+          # automatic signing makes the archive fail with "No Accounts" on the runner.
+          for spec in "Runner:${{ steps.profile.outputs.app_profile_name }}" \
+                      "TimerWidget:${{ steps.profile.outputs.widget_profile_name }}"; do
+            fastlane run update_code_signing_settings \
+              use_automatic_signing:false \
+              path:"ios/Runner.xcodeproj" \
+              team_id:"${{ secrets.IOS_TEAM_ID }}" \
+              code_sign_identity:"Apple Distribution" \
+              profile_name:"${spec#*:}" \
+              targets:"${spec%%:*}"
+          done
 
       - name: 🧾 Generate ExportOptions.plist
         run: |
@@ -146,7 +166,9 @@ jobs:
             <key>provisioningProfiles</key>
             <dict>
               <key>${{ inputs.ios_bundle_id }}</key>
-              <string>${{ steps.profile.outputs.profile_name }}</string>
+              <string>${{ steps.profile.outputs.app_profile_name }}</string>
+              <key>${{ inputs.ios_bundle_id }}.TimerWidget</key>
+              <string>${{ steps.profile.outputs.widget_profile_name }}</string>
             </dict>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
