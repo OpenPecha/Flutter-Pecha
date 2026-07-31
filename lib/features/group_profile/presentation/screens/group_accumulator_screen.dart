@@ -7,6 +7,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_hero_card.dart';
+import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
@@ -444,7 +445,16 @@ class _AccumulatorHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void navigateToMala() {
+    void navigateToRecite() {
+      final textId = detail.textId;
+      if (textId != null && textId.isNotEmpty) {
+        context.push(
+          '/reader/$textId',
+          extra: const NavigationContext(source: NavigationSource.normal),
+        );
+        return;
+      }
+
       final presetId = detail.presetAccumulatorId;
       if (presetId.isEmpty) return;
       context.push(
@@ -459,7 +469,7 @@ class _AccumulatorHeroCard extends StatelessWidget {
       isDark: isDark,
       isJoining: isJoining,
       onJoinTap: onJoinTap,
-      onActionTap: hasJoined ? navigateToMala : null,
+      onActionTap: hasJoined ? navigateToRecite : null,
     );
   }
 }
