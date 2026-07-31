@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
-import 'package:flutter_pecha/features/home/domain/entities/routine_info.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
 class MyPracticesStatsCard extends StatelessWidget {
   const MyPracticesStatsCard({
     super.key,
-    required this.routineInfo,
+    required this.planCount,
+    required this.chantCount,
     this.onTap,
   });
 
-  final RoutineInfo routineInfo;
+  final int planCount;
+  final int chantCount;
   final VoidCallback? onTap;
 
   static const _borderRadius = 20.0;
@@ -68,14 +69,14 @@ class MyPracticesStatsCard extends StatelessWidget {
                     Expanded(
                       child: _StatItem(
                         icon: AppAssets.homeList,
-                        count: routineInfo.seriesCount,
+                        count: planCount,
                         labelBuilder: l10n.home_plans_count,
                       ),
                     ),
                     Expanded(
                       child: _StatItem(
                         icon: AppAssets.bookOpenText,
-                        count: routineInfo.recitationCount,
+                        count: chantCount,
                         labelBuilder: l10n.home_recitation_count,
                       ),
                     ),

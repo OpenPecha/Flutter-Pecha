@@ -24,6 +24,8 @@ import 'package:flutter_pecha/features/home/presentation/widgets/verse_of_day_sk
 import 'package:flutter_pecha/features/notifications/application/notification_sync_engine.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/user_plans_provider.dart';
+import 'package:flutter_pecha/features/practice/data/models/routine_model.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/routine_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
@@ -260,6 +262,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildMyPracticesSection() {
     final routineInfoAsync = ref.watch(routineInfoFutureProvider);
+    final routineData = ref.watch(routineProvider);
+    final hasLocalRoutine = routineData.blocks.isNotEmpty;
 
     return routineInfoAsync.when(
       data: (infoEither) {
@@ -268,7 +272,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             return const SizedBox.shrink();
           }
           return MyPracticesStatsCard(
-            routineInfo: info,
+            planCount: hasLocalRoutine
+                ? routineData.uniqueItemCount(RoutineItemType.series)
+                : info.seriesCount,
+            chantCount: hasLocalRoutine
+                ? routineData.uniqueItemCount(RoutineItemType.recitation)
+                : info.recitationCount,
             onTap: () => context.pushNamed('my-practices'),
           );
         });

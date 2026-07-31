@@ -285,6 +285,15 @@ class RoutineData {
   /// Whether the maximum block limit has been reached.
   bool get isAtMaxBlocks => blocks.length >= maxBlocks;
 
+  /// Distinct sources of [type] across all blocks. The same plan added to
+  /// several time blocks is one plan, not one per block.
+  int uniqueItemCount(RoutineItemType type) => blocks
+      .expand((b) => b.items)
+      .where((i) => i.type == type)
+      .map((i) => i.id)
+      .toSet()
+      .length;
+
   /// Returns a new RoutineData with blocks sorted by time ascending.
   RoutineData get sortedByTime {
     final sorted = List<RoutineBlock>.from(blocks)
