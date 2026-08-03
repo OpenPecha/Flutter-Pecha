@@ -7,6 +7,7 @@ class MyPracticesStatsCardSkeleton extends StatelessWidget {
   const MyPracticesStatsCardSkeleton({super.key});
 
   static const _borderRadius = 20.0;
+  static final _cardColor = Color.lerp(AppColors.cardDark, AppColors.blue, 0.18)!;
 
   @override
   Widget build(BuildContext context) {
@@ -15,23 +16,23 @@ class MyPracticesStatsCardSkeleton extends StatelessWidget {
       child: Skeletonizer(
         enabled: true,
         child: Material(
-          color: AppColors.blue,
+          color: _cardColor,
           borderRadius: BorderRadius.circular(_borderRadius),
           clipBehavior: Clip.antiAlias,
           child: const Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Expanded(child: Bone(width: 140, height: 22)),
-                    Bone.circle(size: 32),
+                    Bone.circle(size: 28),
                   ],
                 ),
                 SizedBox(height: 4),
                 Bone(width: 160, height: 18),
-                SizedBox(height: 16),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(child: _StatSkeleton(icon: AppAssets.homeList)),
