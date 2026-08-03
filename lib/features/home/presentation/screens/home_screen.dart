@@ -243,10 +243,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final user = ref.watch(userProvider).user;
+    final firstName = user?.firstName ?? user?.username;
+    final hasName = firstName?.isNotEmpty ?? false;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const HomeTabAppBar(),
+      appBar: HomeTabAppBar(
+        toolbarHeight: HomeTabAppBar.toolbarHeightFor(
+          context: context,
+          hasName: hasName,
+        ),
+        firstName: firstName,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
