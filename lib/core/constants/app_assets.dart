@@ -24,7 +24,7 @@ class AppAssets {
   static const String malaSound = 'assets/audios/mala.wav';
 
   // ========== LOGOS ==========
-  static const String weBuddhistLogo = 'assets/images/app_logo.png';
+  static const String weBuddhistLogo = 'assets/images/webuddhist_logo.png';
   static const String googleIcon = 'assets/images/google-icon.png';
 
   // ========== AUTH ICONS ==========
