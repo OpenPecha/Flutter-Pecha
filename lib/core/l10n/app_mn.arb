@@ -804,6 +804,8 @@
   "group_accumulator_contributions_empty": "Хувь нэмрээ хянахын тулд энэ хуримтлалд нэгдэнэ үү.",
   "group_accumulator_leaderboard_empty": "Одоогоор уншлага байхгүй.",
   "group_accumulator_recite_now": "Одоо уншина уу",
+  "group_accumulator_chant_again": "Дахин унших",
+  "group_accumulator_finish_session": "Хичээл дуусгах",
 
   "share_this_quote": "Энэ ишлэлийг хуваалцах",
   "shared_from": "Хуваалцсан:",

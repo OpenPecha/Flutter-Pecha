@@ -1743,6 +1743,12 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_accumulator_recite_now => 'अहिले जप गर्नुहोस्';
 
   @override
+  String get group_accumulator_chant_again => 'फेरि जप गर्नुहोस्';
+
+  @override
+  String get group_accumulator_finish_session => 'सत्र समाप्त गर्नुहोस्';
+
+  @override
   String get share_this_quote => 'यो उद्धरण साझा गर्नुहोस्';
 
   @override

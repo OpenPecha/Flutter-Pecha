@@ -1722,6 +1722,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_accumulator_recite_now => 'Recite now';
 
   @override
+  String get group_accumulator_chant_again => 'Chant again';
+
+  @override
+  String get group_accumulator_finish_session => 'Finish session';
+
+  @override
   String get share_this_quote => 'Share this quote';
 
   @override

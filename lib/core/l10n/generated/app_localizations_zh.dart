@@ -1640,6 +1640,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_accumulator_recite_now => '立即誦念';
 
   @override
+  String get group_accumulator_chant_again => '再誦一次';
+
+  @override
+  String get group_accumulator_finish_session => '結束課誦';
+
+  @override
   String get share_this_quote => '分享这句话';
 
   @override

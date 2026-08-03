@@ -500,6 +500,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       NavigationSource.normal => Duration.zero,
       NavigationSource.recitationList => Duration.zero,
       NavigationSource.routine => Duration.zero,
+      NavigationSource.groupAccumulatorChant => Duration.zero,
     };
 
     if (duration > Duration.zero) {

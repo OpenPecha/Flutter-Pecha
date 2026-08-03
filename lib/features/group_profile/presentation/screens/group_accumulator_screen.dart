@@ -202,6 +202,7 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: _AccumulatorHeroCard(
             detail: detail,
+            groupTitle: _resolveGroupName(detail.groupId),
             hasJoined: hasJoined,
             isDark: isDark,
             isJoining: _isJoining,
@@ -430,6 +431,7 @@ class _MyContributionsTabState extends State<_MyContributionsTab> {
 
 class _AccumulatorHeroCard extends StatelessWidget {
   final GroupAccumulatorDetail detail;
+  final String? groupTitle;
   final bool hasJoined;
   final bool isDark;
   final bool isJoining;
@@ -437,6 +439,7 @@ class _AccumulatorHeroCard extends StatelessWidget {
 
   const _AccumulatorHeroCard({
     required this.detail,
+    this.groupTitle,
     required this.hasJoined,
     required this.isDark,
     this.isJoining = false,
@@ -446,11 +449,22 @@ class _AccumulatorHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void navigateToRecite() {
-      final textId = detail.textId;
-      if (textId != null && textId.isNotEmpty) {
+      if (detail.hasTextContent) {
+        final textId = detail.textId;
+        if (textId == null || textId.isEmpty) return;
         context.push(
           '/reader/$textId',
-          extra: const NavigationContext(source: NavigationSource.normal),
+          extra: NavigationContext(
+            source: NavigationSource.groupAccumulatorChant,
+            groupAccumulatorId: detail.id,
+            presetAccumulatorId: detail.presetAccumulatorId,
+            groupId: detail.groupId,
+            groupTitle:
+                groupTitle?.trim().isNotEmpty == true
+                    ? groupTitle!.trim()
+                    : null,
+            groupAccumulatorSessionCount: detail.user?.totalCount ?? 0,
+          ),
         );
         return;
       }

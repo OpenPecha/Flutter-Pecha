@@ -1735,6 +1735,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_accumulator_recite_now => 'अभी जाप करें';
 
   @override
+  String get group_accumulator_chant_again => 'फिर से जाप करें';
+
+  @override
+  String get group_accumulator_finish_session => 'सत्र समाप्त करें';
+
+  @override
   String get share_this_quote => 'यह उद्धरण शेयर करें';
 
   @override

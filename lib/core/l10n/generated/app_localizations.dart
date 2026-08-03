@@ -3148,6 +3148,18 @@ abstract class AppLocalizations {
   /// **'Recite now'**
   String get group_accumulator_recite_now;
 
+  /// No description provided for @group_accumulator_chant_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Chant again'**
+  String get group_accumulator_chant_again;
+
+  /// No description provided for @group_accumulator_finish_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish session'**
+  String get group_accumulator_finish_session;
+
   /// No description provided for @share_this_quote.
   ///
   /// In en, this message translates to:

@@ -738,6 +738,8 @@
   "group_accumulator_contributions_empty": "加入此累積以追蹤您的貢獻。",
   "group_accumulator_leaderboard_empty": "尚無誦讀記錄。",
   "group_accumulator_recite_now": "立即誦念",
+  "group_accumulator_chant_again": "再誦一次",
+  "group_accumulator_finish_session": "結束課誦",
 
   "share_this_quote": "分享这句话",
   "shared_from": "分享自",
