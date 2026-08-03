@@ -332,7 +332,6 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
 
   /// Build view for guests who selected AI mode (requires sign in)
   Widget _buildGuestAiModeView(bool isDarkMode) {
-    final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context)!;
     return SafeArea(
       child: Column(
@@ -350,7 +349,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                     Icon(
                       Icons.auto_awesome,
                       size: 80,
-                      color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                      color: AppColors.accentGold.withValues(alpha: 0.7),
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -379,6 +378,8 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                       label: Text(localizations.sign_in),
                       onPressed: () => LoginDrawer.show(context, ref),
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accentGold,
+                        foregroundColor: AppColors.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,
@@ -391,8 +392,8 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                       onPressed: () => setState(() => _isSearchMode = true),
                       child: Text(
                         AppLocalizations.of(context)!.ai_use_search_instead,
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
+                        style: const TextStyle(
+                          color: AppColors.accentGold,
                         ),
                       ),
                     ),
@@ -471,12 +472,12 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? (isDarkMode
-                  ? AppColors.primary.withValues(alpha: 0.2)
-                  : AppColors.primaryContainer)
+                  ? AppColors.accentGold.withValues(alpha: 0.2)
+                  : AppColors.accentGoldContainer)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: isSelected
-              ? Border.all(color: AppColors.primary, width: 1.5)
+              ? Border.all(color: AppColors.accentGold, width: 1.5)
               : Border.all(
                   color: isDarkMode ? AppColors.grey800 : AppColors.grey300,
                 ),
@@ -488,7 +489,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
               icon,
               size: 16,
               color: isSelected
-                  ? AppColors.primary
+                  ? AppColors.accentGold
                   : (isDarkMode ? AppColors.grey400 : AppColors.grey600),
             ),
             const SizedBox(width: 4),
@@ -498,7 +499,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected
-                    ? AppColors.primary
+                    ? AppColors.accentGold
                     : (isDarkMode ? AppColors.grey400 : AppColors.grey600),
               ),
             ),
@@ -526,7 +527,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
               color:
                   isDarkMode
                       ? AppColors.surfaceVariantDark
-                      : AppColors.primarySurface,
+                      : AppColors.accentGoldSurface,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
@@ -630,7 +631,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
                           color:
                               canSend
                                   ? (isDarkMode
-                                      ? AppColors.primaryContainer
+                                      ? AppColors.accentGoldContainer
                                       : AppColors.backgroundDark)
                                   : (isDarkMode
                                       ? AppColors.grey500
@@ -688,13 +689,13 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
           color:
               isSelected
                   ? (isDarkMode
-                      ? AppColors.primary.withValues(alpha: 0.2)
-                      : AppColors.primaryContainer)
+                      ? AppColors.accentGold.withValues(alpha: 0.2)
+                      : AppColors.accentGoldContainer)
                   : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border:
               isSelected
-                  ? Border.all(color: AppColors.primary, width: 1.5)
+                  ? Border.all(color: AppColors.accentGold, width: 1.5)
                   : null,
         ),
         child: Icon(
@@ -702,7 +703,7 @@ class _AiModeScreenState extends ConsumerState<AiModeScreen> {
           size: 22,
           color:
               isSelected
-                  ? AppColors.primary
+                  ? AppColors.accentGold
                   : (isDarkMode
                       ? AppColors.textPrimaryDark
                       : AppColors.textPrimary),

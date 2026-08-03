@@ -227,7 +227,7 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
                         //     focusedBorder: OutlineInputBorder(
                         //       borderRadius: BorderRadius.circular(20),
                         //       borderSide: BorderSide(
-                        //         color: AppColors.primary,
+                        //         color: AppColors.accentGold,
                         //         width: 1.5,
                         //       ),
                         //     ),
@@ -332,7 +332,7 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
                   ref.read(threadListControllerProvider.notifier).loadThreads();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryDarkest,
+                  backgroundColor: AppColors.accentGoldDarkest,
                   foregroundColor: Colors.white,
                 ),
                 child: Text(localizations.ai_retry),
@@ -398,7 +398,7 @@ class _ChatHistoryDrawerState extends ConsumerState<ChatHistoryDrawer> {
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.primary,
+                    color: AppColors.accentGold,
                   ),
                 ),
               ),

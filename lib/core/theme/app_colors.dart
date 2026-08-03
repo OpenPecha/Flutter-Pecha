@@ -3,15 +3,25 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // ============ Primary Colors (Action Negative - Red/Burgundy Theme) ============
-  static const Color primary = Color(0xFFDEAD2D); // MAN 700
-  static const Color primaryLight = Color(0xFFDEAD2D); // MAN 500
-  static const Color primaryDark = Color(0xFFB3861C); // MAN 800
-  static const Color primaryDarkest = Color(0xFF805700); // MAN 900
+  // ============ Primary Colors (Logo Red) ============
+  /// Dominant fill from `assets/images/webuddhist_logo.png`.
+  static const Color primary = Color(0xFFFF0000);
+  static const Color primaryLight = Color(0xFFFF3333);
+  static const Color primaryDark = Color(0xFFAD2424); // darker brand red
+  static const Color primaryDarkest = Color(0xFF871C1C);
 
   /// Primary color containers and tints
-  static const Color primaryContainer = Color(0xFFFAE6E6); // MAN 100
-  static const Color primarySurface = Color(0xFFFCF2F2); // MAN 50
+  static const Color primaryContainer = Color(0xFFFFEBEE); // Red 50
+  static const Color primarySurface = Color(0xFFFFF5F5);
+
+  // ============ Legacy gold (AI + onboarding only) ============
+  /// Previous gold primary — kept so AI / onboarding stay visually unchanged
+  /// while the rest of the app moves to logo red.
+  static const Color accentGold = Color(0xFFDEAD2D);
+  static const Color accentGoldDark = Color(0xFFB3861C);
+  static const Color accentGoldDarkest = Color(0xFF805700);
+  static const Color accentGoldContainer = Color(0xFFFAE6E6);
+  static const Color accentGoldSurface = Color(0xFFFCF2F2);
 
   // ============ Surface Colors ============
   static const Color surfaceLight = Color(0xFFFBF9F4); // Light BG
@@ -98,5 +108,5 @@ class AppColors {
   // ============ Design System Reference ============
   // Figma file: 0TE5qdViUvrisFZfNqODpX/WeBuddhist-App
   // Design system: Monlam Colors
-  // Primary theme: Red/Burgundy Buddhist aesthetic
+  // Primary theme: Logo red (WeBuddhist mark)
 }
