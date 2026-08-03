@@ -131,7 +131,7 @@ class _AuthorTabViewState extends ConsumerState<AuthorTabView> {
                       : localizations.ai_retry,
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.accentGold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -173,7 +173,7 @@ class _AuthorTabViewState extends ConsumerState<AuthorTabView> {
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.accentGold),
             ),
           );
         }

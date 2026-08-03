@@ -120,7 +120,7 @@ class ThreadListItem extends StatelessWidget {
                           color:
                               isDarkMode
                                   ? AppColors.backgroundDark
-                                  : AppColors.primarySurface,
+                                  : AppColors.accentGoldSurface,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
