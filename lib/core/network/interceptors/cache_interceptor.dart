@@ -73,9 +73,10 @@ class CacheInterceptor extends Interceptor {
       _logger.info('🗑️ Auto-invalidated cache for mutation on: $relatedPaths');
     }
 
-    // Cache successful GET responses
+    // Cache successful GET responses (unless the request opted out)
     if (method == 'GET' &&
         statusCode == 200 &&
+        request.extra['no_cache'] != true &&
         _shouldCache(request.path) &&
         !response.extra.containsKey('cached')) {
       final cacheKey = _generateCacheKey(request);

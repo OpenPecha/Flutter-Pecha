@@ -69,6 +69,10 @@ class ProtectedRoutes {
     '/author/groups/{groupId}/join',
     '/author/groups/{groupId}/follow',
 
+    // Event participation (join / leave require auth)
+    '/events/{eventId}/participants',
+    '/events/{eventId}/participants/me',
+
     // Group accumulators (group prayer accumulations)
     '/group-accumulators/',
 
@@ -91,6 +95,9 @@ class ProtectedRoutes {
     // Group detail + members: sends auth when logged in so fields like
     // `is_group_enrolled` reflect the current user (anonymous GET → false).
     '/author/groups/',
+    // Event detail: sends auth when logged in so `is_joined` reflects the
+    // current user (anonymous GET → false).
+    '/events/{eventId}',
   ];
 
   /// Check if a given path is protected (requires authentication).

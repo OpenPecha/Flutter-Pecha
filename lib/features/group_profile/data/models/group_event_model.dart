@@ -61,6 +61,42 @@ class GroupEventLinkModel {
   }
 }
 
+class GroupEventParticipantModel {
+  final String userId;
+  final DateTime? createdAt;
+  final String? username;
+  final String? fullname;
+  final String? avatarUrl;
+
+  const GroupEventParticipantModel({
+    required this.userId,
+    this.createdAt,
+    this.username,
+    this.fullname,
+    this.avatarUrl,
+  });
+
+  factory GroupEventParticipantModel.fromJson(Map<String, dynamic> json) {
+    return GroupEventParticipantModel(
+      userId: json['user_id'] as String? ?? '',
+      createdAt: GroupEventModel._parseDate(json['created_at']),
+      username: json['username'] as String?,
+      fullname: json['fullname'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+    );
+  }
+
+  GroupEventParticipant toEntity() {
+    return GroupEventParticipant(
+      userId: userId,
+      createdAt: createdAt,
+      username: username,
+      fullname: fullname,
+      avatarUrl: avatarUrl,
+    );
+  }
+}
+
 class GroupEventModel {
   final String id;
   final String groupId;
@@ -71,6 +107,7 @@ class GroupEventModel {
   final GroupEventMetadataModel? metadata;
   final ResponsiveImage? image;
   final int participantCount;
+  final bool isJoined;
   final List<GroupEventLinkModel> links;
   final String? planId;
   final String? accumulatorId;
@@ -88,6 +125,7 @@ class GroupEventModel {
     this.metadata,
     this.image,
     this.participantCount = 0,
+    this.isJoined = false,
     this.links = const [],
     this.planId,
     this.accumulatorId,
@@ -109,6 +147,7 @@ class GroupEventModel {
       metadata: _parseMetadata(json['metadata']),
       image: imageJson != null ? ResponsiveImage.fromJson(imageJson) : null,
       participantCount: (json['participant_count'] as num?)?.toInt() ?? 0,
+      isJoined: json['is_joined'] as bool? ?? false,
       links:
           (json['links'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
@@ -137,6 +176,7 @@ class GroupEventModel {
       language: metadata?.language,
       image: image,
       participantCount: participantCount,
+      isJoined: isJoined,
       links: links.map((link) => link.toEntity()).toList(),
       planId: planId,
       accumulatorId: accumulatorId,
@@ -201,6 +241,44 @@ class GroupEventsPageModel {
       total: total,
       skip: skip,
       limit: limit,
+    );
+  }
+}
+
+class GroupEventParticipantsPageModel {
+  final List<GroupEventParticipantModel> participants;
+  final int skip;
+  final int limit;
+  final int total;
+
+  const GroupEventParticipantsPageModel({
+    required this.participants,
+    this.skip = 0,
+    this.limit = 20,
+    this.total = 0,
+  });
+
+  factory GroupEventParticipantsPageModel.fromJson(Map<String, dynamic> json) {
+    return GroupEventParticipantsPageModel(
+      participants:
+          (json['participants'] as List<dynamic>?)
+              ?.whereType<Map<String, dynamic>>()
+              .map(GroupEventParticipantModel.fromJson)
+              .toList() ??
+          const [],
+      skip: (json['skip'] as num?)?.toInt() ?? 0,
+      limit: (json['limit'] as num?)?.toInt() ?? 20,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  GroupEventParticipantsPage toEntity() {
+    return GroupEventParticipantsPage(
+      participants:
+          participants.map((participant) => participant.toEntity()).toList(),
+      skip: skip,
+      limit: limit,
+      total: total,
     );
   }
 }

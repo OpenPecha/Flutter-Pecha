@@ -7,8 +7,8 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class GroupProfileEventsTab extends ConsumerWidget {
   final String groupId;
@@ -63,14 +63,16 @@ class GroupProfileEventsTab extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               itemCount: page.events.length,
               itemBuilder: (context, index) {
+                final event = page.events[index];
                 return Padding(
                   padding: EdgeInsets.only(
                     bottom: index == page.events.length - 1 ? 0 : 16,
                   ),
                   child: _GroupEventCard(
-                    event: page.events[index],
+                    event: event,
                     isDark: isDark,
                     lineHeight: lineHeight,
+                    onTap: () => context.push('/home/events/${event.id}'),
                   ),
                 );
               },
@@ -98,11 +100,13 @@ class _GroupEventCard extends StatelessWidget {
   final GroupEvent event;
   final bool isDark;
   final double? lineHeight;
+  final VoidCallback? onTap;
 
   const _GroupEventCard({
     required this.event,
     required this.isDark,
     this.lineHeight,
+    this.onTap,
   });
 
   @override
@@ -120,84 +124,88 @@ class _GroupEventCard extends StatelessWidget {
       shadowColor: Colors.black.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 140,
-            width: double.infinity,
-            child:
-                event.image != null && !event.image!.isEmpty
-                    ? ResponsiveCoverImage(
-                      image: event.image,
-                      fit: BoxFit.cover,
-                    )
-                    : ColoredBox(
-                      color:
-                          isDark
-                              ? AppColors.surfaceVariantDark
-                              : AppColors.grey100,
-                      child: Icon(
-                        AppAssets.calendarDots,
-                        size: 40,
-                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 140,
+              width: double.infinity,
+              child:
+                  event.image != null && !event.image!.isEmpty
+                      ? ResponsiveCoverImage(
+                        image: event.image,
+                        fit: BoxFit.cover,
+                      )
+                      : ColoredBox(
+                        color:
+                            isDark
+                                ? AppColors.surfaceVariantDark
+                                : AppColors.grey100,
+                        child: Icon(
+                          AppAssets.calendarDots,
+                          size: 40,
+                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+                        ),
                       ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: lineHeight,
                     ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    height: lineHeight,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (dateLabel != null || event.participantCount > 0) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      if (dateLabel != null)
-                        Expanded(
-                          child: Text(
-                            dateLabel,
+                  if (dateLabel != null || event.participantCount > 0) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (dateLabel != null)
+                          Expanded(
+                            child: Text(
+                              dateLabel,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: secondaryColor,
+                                height: lineHeight,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        if (event.participantCount > 0) ...[
+                          Icon(
+                            AppAssets.usersThree,
+                            size: 16,
+                            color: secondaryColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${event.participantCount}',
                             style: TextStyle(
                               fontSize: 14,
                               color: secondaryColor,
                               height: lineHeight,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        Icon(
-                          PhosphorIconsRegular.users,
-                          size: 16,
-                          color: secondaryColor,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${event.participantCount}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: secondaryColor,
-                            height: lineHeight,
-                          ),
-                        ),
-                      
-                    ],
-                  ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
