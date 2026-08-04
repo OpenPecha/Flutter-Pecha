@@ -227,16 +227,18 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     }
   }
 
-  int _groupChantSessionCount() {
+  int _groupChantSessionCount([Map<String, int>? counts]) {
     final ctx = _chantContext;
     if (ctx == null) return 0;
-    final counts = ref.watch(
-      groupAccumulationCountsProvider(ctx.presetAccumulatorId!),
-    );
-    return counts[ctx.groupAccumulatorId!] ??
-        ref
-            .read(groupAccumulationCountsProvider(ctx.presetAccumulatorId!).notifier)
-            .countFor(ctx.groupAccumulatorId!);
+    final presetId = ctx.presetAccumulatorId!;
+    final groupAccumulatorId = ctx.groupAccumulatorId!;
+    final notifier =
+        ref.read(groupAccumulationCountsProvider(presetId).notifier);
+    if (counts != null) {
+      return counts[groupAccumulatorId] ??
+          notifier.countFor(groupAccumulatorId);
+    }
+    return notifier.countFor(groupAccumulatorId);
   }
 
   /// Create the audio controller when the reader was opened from a plan and the
@@ -445,8 +447,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
         !isPanelOpen && (_hasAudio || isActionBarVisible);
     final chantBarHeight =
         _isGroupAccumulatorChant ? GroupAccumulatorChantBar.barHeight : 0.0;
-    final chantSessionCount =
-        _isGroupAccumulatorChant ? _groupChantSessionCount() : 0;
+    final chantSessionCount = _isGroupAccumulatorChant
+        ? _groupChantSessionCount(
+            ref.watch(
+              groupAccumulationCountsProvider(
+                _chantContext!.presetAccumulatorId!,
+              ),
+            ),
+          )
+        : 0;
     final contentBottomPadding =
         (isBottomOverlayVisible
             ? (_bottomOverlayHeight > 0
