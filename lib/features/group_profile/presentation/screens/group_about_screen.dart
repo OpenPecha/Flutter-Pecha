@@ -6,7 +6,6 @@ import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final _logger = AppLogger('GroupAboutScreen');
@@ -147,7 +146,7 @@ class _AboutLinkTile extends StatelessWidget {
         (uri.scheme != 'http' && uri.scheme != 'https')) {
       _logger.warning('Blocked invalid group link URL: ${link.url}');
       if (context.mounted) {
-        context.showSnackBar(context.l10n.link_invalid);
+        _showSnackBar(context, context.l10n.link_invalid);
       }
       return;
     }
@@ -158,7 +157,7 @@ class _AboutLinkTile extends StatelessWidget {
       } else {
         _logger.warning('Cannot launch group link URL: ${link.url}');
         if (context.mounted) {
-          context.showSnackBar(context.l10n.link_cannot_open);
+          _showSnackBar(context, context.l10n.link_cannot_open);
         }
       }
     } catch (e, stackTrace) {
@@ -168,9 +167,15 @@ class _AboutLinkTile extends StatelessWidget {
         stackTrace,
       );
       if (context.mounted) {
-        context.showSnackBar(context.l10n.link_invalid);
+        _showSnackBar(context, context.l10n.link_invalid);
       }
     }
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
