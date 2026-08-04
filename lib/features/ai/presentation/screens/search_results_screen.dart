@@ -214,10 +214,10 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen>
         isScrollable: true,
         // KEY FIX: This aligns tabs to the start (left) of the screen
         tabAlignment: TabAlignment.start,
-        labelColor: AppColors.primary,
+        labelColor: AppColors.accentGold,
         unselectedLabelColor:
             isDarkMode ? AppColors.grey400 : AppColors.grey600,
-        indicatorColor: AppColors.primary,
+        indicatorColor: AppColors.accentGold,
         indicatorWeight: 3,
         indicatorSize:
             TabBarIndicatorSize.label, // Indicator matches text width

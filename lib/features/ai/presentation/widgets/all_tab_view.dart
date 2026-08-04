@@ -59,7 +59,7 @@ class AllTabView extends StatelessWidget {
                 ),
                 label: Text(searchState.isLoading ? localizations.search_retrying : localizations.ai_retry),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.accentGold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -339,10 +339,10 @@ class AllTabView extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.5),
+              color: AppColors.accentGold.withValues(alpha: 0.5),
               width: 1,
             ),
-            color: AppColors.primary.withValues(alpha: 0.05),
+            color: AppColors.accentGold.withValues(alpha: 0.05),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -350,7 +350,7 @@ class AllTabView extends StatelessWidget {
               Text(
                 localizations.search_show_more,
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.accentGold,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -359,7 +359,7 @@ class AllTabView extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_rounded,
                 size: 16,
-                color: AppColors.primary,
+                color: AppColors.accentGold,
               ),
             ],
           ),

@@ -69,6 +69,9 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.accentGold,
+                  ),
                   child: Text(localizations.common_ok),
                 ),
               ],

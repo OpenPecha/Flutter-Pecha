@@ -76,6 +76,7 @@ class TraditionsFormField extends StatelessWidget {
                       children: traditions
                           .map((tradition) => _TraditionChip(
                                 label: tradition.traditionName,
+                                isDark: isDark,
                                 onRemove: () => onRemove(tradition),
                               ))
                           .toList(),
@@ -92,10 +93,12 @@ class TraditionsFormField extends StatelessWidget {
 class _TraditionChip extends StatelessWidget {
   const _TraditionChip({
     required this.label,
+    required this.isDark,
     required this.onRemove,
   });
 
   final String label;
+  final bool isDark;
   final VoidCallback onRemove;
 
   @override
@@ -103,7 +106,7 @@ class _TraditionChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(left: 12, right: 4, top: 4, bottom: 4),
       decoration: BoxDecoration(
-        color: AppColors.grey100,
+        color: isDark ? AppColors.chipBackgroundDark : AppColors.grey100,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -111,20 +114,21 @@ class _TraditionChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
             ),
           ),
           GestureDetector(
             onTap: onRemove,
             behavior: HitTestBehavior.opaque,
-            child: const Padding(
-              padding: EdgeInsets.all(4),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
               child: Icon(
                 Icons.close,
                 size: 16,
-                color: AppColors.grey800,
+                color: isDark ? AppColors.grey500 : AppColors.grey800,
               ),
             ),
           ),

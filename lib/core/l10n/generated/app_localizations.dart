@@ -3148,6 +3148,12 @@ abstract class AppLocalizations {
   /// **'Join this accumulation to track your contributions.'**
   String get group_accumulator_contributions_empty;
 
+  /// No description provided for @group_accumulator_leaderboard_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recitations yet.'**
+  String get group_accumulator_leaderboard_empty;
+
   /// No description provided for @group_accumulator_recite_now.
   ///
   /// In en, this message translates to:
@@ -3525,6 +3531,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} min session'**
   String timer_minute_session(int minutes);
+
+  /// No description provided for @timer_notification_in_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Meditation in progress'**
+  String get timer_notification_in_progress;
+
+  /// No description provided for @timer_notification_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused · {time} left'**
+  String timer_notification_paused(String time);
+
+  /// No description provided for @timer_notification_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session is complete'**
+  String get timer_notification_complete;
 
   /// No description provided for @ai_use_search_instead.
   ///

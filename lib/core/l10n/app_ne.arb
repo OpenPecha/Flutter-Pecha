@@ -804,6 +804,7 @@
   "group_accumulator_recited": "जप",
   "group_accumulator_total": "कुल",
   "group_accumulator_contributions_empty": "आफ्नो योगदान ट्र्याक गर्न यो संचयमा सामेल हुनुहोस्।",
+  "group_accumulator_leaderboard_empty": "अहिलेसम्म कुनै जप छैन।",
   "group_accumulator_recite_now": "अहिले जप गर्नुहोस्",
 
   "share_this_quote": "यो उद्धरण साझा गर्नुहोस्",

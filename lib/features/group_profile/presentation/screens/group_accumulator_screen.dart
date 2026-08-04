@@ -479,8 +479,10 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   bool _hasRequestedInitialLoad = false;
   GroupAccumulatorMemberSort _sort = GroupAccumulatorMemberSort.total;
 
-  GroupAccumulatorMembersKey get _membersKey =>
-      GroupAccumulatorMembersKey(accumulatorId: widget.accumulatorId);
+  GroupAccumulatorMembersKey get _membersKey => GroupAccumulatorMembersKey(
+    accumulatorId: widget.accumulatorId,
+    sortBy: _sort,
+  );
 
   @override
   void initState() {
@@ -499,7 +501,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   void _loadInitialIfNeeded({bool force = false}) {
     if (_hasRequestedInitialLoad && !force) return;
     _hasRequestedInitialLoad = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.microtask(() {
       if (!mounted) return;
       ref
           .read(groupAccumulatorMembersProvider(_membersKey).notifier)
@@ -517,6 +519,17 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     }
   }
 
+  void _onSortChanged(GroupAccumulatorMemberSort sort) {
+    if (_sort == sort) return;
+    setState(() => _sort = sort);
+    Future.microtask(() {
+      if (!mounted) return;
+      ref
+          .read(groupAccumulatorMembersProvider(_membersKey).notifier)
+          .loadInitial();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final membersState = ref.watch(
@@ -528,7 +541,17 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       intlFormatLocaleOf(context),
     );
 
-    if (membersState.isLoading && membersState.members.isEmpty) {
+    if ((membersState.isLoading || !membersState.hasLoadedOnce) &&
+        membersState.members.isEmpty &&
+        membersState.error == null) {
+      if (!membersState.isLoading) {
+        Future.microtask(() {
+          if (!mounted) return;
+          ref
+              .read(groupAccumulatorMembersProvider(_membersKey).notifier)
+              .loadInitial();
+        });
+      }
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -547,13 +570,37 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       );
     }
 
-    final sortedMembers = sortAccumulatorMembers(membersState.members, _sort);
+    final sortedMembers =
+        sortAccumulatorMembers(membersState.members, _sort).where((member) {
+          final count =
+              _sort == GroupAccumulatorMemberSort.today
+                  ? member.todayCount
+                  : member.totalCount;
+          return count > 0;
+        }).toList();
+
+    final hasAnyPositive = membersState.members.any((member) {
+      final count =
+          _sort == GroupAccumulatorMemberSort.today
+              ? member.todayCount
+              : member.totalCount;
+      return count > 0;
+    });
+
+    final showEmptyMessage =
+        membersState.hasLoadedOnce &&
+        !hasAnyPositive &&
+        !membersState.isLoading &&
+        !membersState.isLoadingMore &&
+        membersState.error == null;
 
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       itemCount:
-          1 + sortedMembers.length + (membersState.isLoadingMore ? 1 : 0),
+          1 +
+          (showEmptyMessage ? 1 : sortedMembers.length) +
+          (membersState.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == 0) {
           return Padding(
@@ -575,14 +622,25 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                 _SortToggle(
                   sort: _sort,
                   isDark: widget.isDark,
-                  onChanged: (sort) => setState(() => _sort = sort),
+                  onChanged: _onSortChanged,
                 ),
               ],
             ),
           );
         }
 
-        final memberIndex = index - 1;
+        if (showEmptyMessage && index == 1) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(
+              context.l10n.group_accumulator_leaderboard_empty,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: secondaryColor),
+            ),
+          );
+        }
+
+        final memberIndex = index - 1 - (showEmptyMessage ? 1 : 0);
         if (memberIndex < sortedMembers.length) {
           final member = sortedMembers[memberIndex];
           final count =

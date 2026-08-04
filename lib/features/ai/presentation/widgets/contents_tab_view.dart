@@ -62,7 +62,7 @@ class ContentsTabView extends ConsumerWidget {
                       : localizations.ai_retry,
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.accentGold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

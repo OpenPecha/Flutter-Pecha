@@ -1744,6 +1744,9 @@ class AppLocalizationsBo extends AppLocalizations {
       'ཁྱེད་ཀྱི་སྐྱེལ་མ་ལ་རྗེས་འདེད་བྱེད་ཆེད་བསགས་གྲངས་འདིར་ཞུགས་རོགས།';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'ད་ལྟ་བརྗོད་ཚད་མེད།';
+
+  @override
   String get group_accumulator_recite_now => 'ད་ལྟ་བཟླས་བརྗོད་གནང་།';
 
   @override
@@ -1972,6 +1975,17 @@ class AppLocalizationsBo extends AppLocalizations {
   String timer_minute_session(int minutes) {
     return 'སྐར་མ་ $minutes ཡི་ཉམས་ལེན།';
   }
+
+  @override
+  String get timer_notification_in_progress => 'Meditation in progress';
+
+  @override
+  String timer_notification_paused(String time) {
+    return 'Paused · $time left';
+  }
+
+  @override
+  String get timer_notification_complete => 'Your session is complete';
 
   @override
   String get ai_use_search_instead => 'དེའི་ཚབ་ཏུ་འཚོལ་བཤེར་སྤྱོད།';

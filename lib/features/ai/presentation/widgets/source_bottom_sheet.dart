@@ -92,6 +92,9 @@ class _SourceBottomSheetState extends ConsumerState<SourceBottomSheet> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.accentGold,
+                  ),
                   child: Text(localizations.common_ok),
                 ),
               ],
@@ -194,7 +197,11 @@ class _SourceBottomSheetState extends ConsumerState<SourceBottomSheet> {
                       Container(
                         color: (isDarkMode ? Colors.black : Colors.white)
                             .withValues(alpha: 0.7),
-                        child: const Center(child: CircularProgressIndicator()),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.accentGold,
+                          ),
+                        ),
                       ),
                   ],
                 ),

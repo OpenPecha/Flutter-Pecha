@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 class RoutineItemChip extends StatelessWidget {
   final String label;
@@ -9,13 +10,13 @@ class RoutineItemChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0x33DEAD2D),
+        color: AppColors.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          color: Color(0xFFB28A24),
+          color: AppColors.primaryDark,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

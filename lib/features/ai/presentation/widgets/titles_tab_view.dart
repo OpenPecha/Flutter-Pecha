@@ -131,7 +131,7 @@ class _TitlesTabViewState extends ConsumerState<TitlesTabView> {
                       : localizations.ai_retry,
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.accentGold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -173,7 +173,7 @@ class _TitlesTabViewState extends ConsumerState<TitlesTabView> {
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.accentGold),
             ),
           );
         }

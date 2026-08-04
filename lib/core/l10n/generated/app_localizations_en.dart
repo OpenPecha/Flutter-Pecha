@@ -1722,6 +1722,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Join this accumulation to track your contributions.';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'No recitations yet.';
+
+  @override
   String get group_accumulator_recite_now => 'Recite now';
 
   @override
@@ -1947,6 +1950,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String timer_minute_session(int minutes) {
     return '$minutes min session';
   }
+
+  @override
+  String get timer_notification_in_progress => 'Meditation in progress';
+
+  @override
+  String timer_notification_paused(String time) {
+    return 'Paused · $time left';
+  }
+
+  @override
+  String get timer_notification_complete => 'Your session is complete';
 
   @override
   String get ai_use_search_instead => 'Use Search Instead';

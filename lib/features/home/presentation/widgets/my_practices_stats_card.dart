@@ -16,6 +16,8 @@ class MyPracticesStatsCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   static const _borderRadius = 20.0;
+  static final _cardColor =
+      Color.lerp(AppColors.cardDark, AppColors.blue, 0.18)!;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +26,13 @@ class MyPracticesStatsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Material(
-        color: AppColors.blue,
+        color: _cardColor,
         borderRadius: BorderRadius.circular(_borderRadius),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -62,7 +64,7 @@ class MyPracticesStatsCard extends StatelessWidget {
                     height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
@@ -104,9 +106,9 @@ class _ArrowButton extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: const SizedBox(
-          width: 32,
-          height: 32,
-          child: Icon(AppAssets.arrowRight, color: AppColors.blue),
+          width: 28,
+          height: 28,
+          child: Icon(AppAssets.arrowRight, color: AppColors.blue, size: 18),
         ),
       ),
     );

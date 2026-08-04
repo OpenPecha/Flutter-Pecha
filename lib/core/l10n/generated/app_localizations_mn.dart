@@ -1739,6 +1739,9 @@ class AppLocalizationsMn extends AppLocalizations {
       'Хувь нэмрээ хянахын тулд энэ хуримтлалд нэгдэнэ үү.';
 
   @override
+  String get group_accumulator_leaderboard_empty => 'Одоогоор уншлага байхгүй.';
+
+  @override
   String get group_accumulator_recite_now => 'Одоо уншина уу';
 
   @override
@@ -1971,6 +1974,17 @@ class AppLocalizationsMn extends AppLocalizations {
   String timer_minute_session(int minutes) {
     return '$minutes минутын дасгал';
   }
+
+  @override
+  String get timer_notification_in_progress => 'Meditation in progress';
+
+  @override
+  String timer_notification_paused(String time) {
+    return 'Paused · $time left';
+  }
+
+  @override
+  String get timer_notification_complete => 'Your session is complete';
 
   @override
   String get ai_use_search_instead => 'Оронд нь хайлт ашиглах';

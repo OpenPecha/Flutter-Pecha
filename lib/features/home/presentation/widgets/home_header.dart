@@ -3,8 +3,8 @@ import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/constants/app_config.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
-import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/streak_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/today_events_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/today_event_badge.dart';
@@ -17,23 +17,41 @@ import 'package:go_router/go_router.dart';
 
 /// Home tab app bar with greeting and quick actions.
 class HomeTabAppBar extends ConsumerWidget implements PreferredSizeWidget {
-  const HomeTabAppBar({super.key});
+  const HomeTabAppBar({
+    super.key,
+    required this.toolbarHeight,
+    required this.firstName,
+  });
 
-  /// Tall enough for two-line Tibetan greetings without clipping ascenders.
-  static const double toolbarHeight = 70;
+  final double toolbarHeight;
+  final String? firstName;
+
   static const double tibetanGreetingTopPadding = 6;
   static const double _actionsReserveWidth = 148;
+  static const double _tibetanNameLineSpacing = 2;
+
+  static double toolbarHeightFor({
+    required BuildContext context,
+    required bool hasName,
+  }) {
+    final isTwoLineTibetanGreeting = context.isTibetanLocale && hasName;
+    if (!isTwoLineTibetanGreeting) {
+      return kToolbarHeight;
+    }
+
+    final fontSize = getLocalizedFontSize(AppTextSize.body);
+    final lineHeightPx = fontSize * AppFontConfig.tibetanCompactLineHeight;
+    return tibetanGreetingTopPadding +
+        lineHeightPx +
+        _tibetanNameLineSpacing +
+        lineHeightPx;
+  }
 
   @override
-  Size get preferredSize => const Size.fromHeight(toolbarHeight);
+  Size get preferredSize => Size.fromHeight(toolbarHeight);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider).user;
-    final firstName = user?.firstName ?? user?.username;
-    final hasName = firstName?.isNotEmpty ?? false;
-    final isTibetanGreeting = context.isTibetanLocale && hasName;
-
     final streakCount = ref
         .watch(streakFutureProvider)
         .maybeWhen(
@@ -45,8 +63,6 @@ class HomeTabAppBar extends ConsumerWidget implements PreferredSizeWidget {
       toolbarHeight: toolbarHeight,
       titleWidget: _Greeting(
         firstName: firstName,
-        toolbarHeight: toolbarHeight,
-        alignToBottom: isTibetanGreeting,
         maxWidth:
             MediaQuery.sizeOf(context).width -
             MainTabAppBar.titleSpacing -
@@ -97,26 +113,21 @@ class HomeEventBanner extends ConsumerWidget {
 }
 
 class _Greeting extends StatelessWidget {
-  const _Greeting({
-    required this.firstName,
-    required this.maxWidth,
-    required this.toolbarHeight,
-    this.alignToBottom = false,
-  });
+  const _Greeting({required this.firstName, required this.maxWidth});
 
   final String? firstName;
   final double maxWidth;
-  final double toolbarHeight;
-  final bool alignToBottom;
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final greetingFontSize = getLocalizedFontSize(AppTextSize.titleLarge);
+    final greetingFontSize = getLocalizedFontSize(
+      context.isTibetanLocale ? AppTextSize.body : AppTextSize.title,
+    );
     final greetingStyle = MainTabAppBar.titleStyle(
       context,
-    ).copyWith(color: colorScheme.onSurface);
+    ).copyWith(color: colorScheme.onSurface, fontSize: greetingFontSize);
     final strutStyle = context.tibetanStrutStyle(
       greetingFontSize,
       compact: true,
@@ -165,18 +176,14 @@ class _Greeting extends StatelessWidget {
 
     return SizedBox(
       width: maxWidth,
-      height: toolbarHeight,
-      child: Align(
-        alignment: alignToBottom ? Alignment.bottomLeft : Alignment.centerLeft,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top:
-                context.isTibetanLocale
-                    ? HomeTabAppBar.tibetanGreetingTopPadding
-                    : 0,
-          ),
-          child: greetingContent,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top:
+              context.isTibetanLocale
+                  ? HomeTabAppBar.tibetanGreetingTopPadding
+                  : 0,
         ),
+        child: greetingContent,
       ),
     );
   }

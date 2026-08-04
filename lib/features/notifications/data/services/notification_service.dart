@@ -287,6 +287,12 @@ class NotificationService {
       await androidImplementation.createNotificationChannel(
         NotificationChannels.routineBlockChannel,
       );
+      await androidImplementation.createNotificationChannel(
+        NotificationChannels.timerSessionChannel,
+      );
+      await androidImplementation.createNotificationChannel(
+        NotificationChannels.timerCompleteChannel,
+      );
       _logger.info('Android notification channels created');
     }
   }
@@ -380,6 +386,15 @@ class NotificationService {
     if (payload != null && payload.isNotEmpty) {
       try {
         final data = jsonDecode(payload) as Map<String, dynamic>;
+
+        // Meditation timer notifications carry no destination — the timer
+        // screen is already the top route, so tapping should just bring the app
+        // forward. Without this guard the tap falls through to the routine
+        // branch below and yanks the user to My Practices mid-session.
+        if (data['type'] == NotificationChannels.timerSessionId) {
+          _logger.info('Timer session notification tapped — no navigation');
+          return;
+        }
 
         // Foreground push (FCM) notifications are shown through this shared
         // plugin. Forward push-shaped payloads to the push navigator so they
