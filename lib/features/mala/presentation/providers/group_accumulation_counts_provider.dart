@@ -197,6 +197,12 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
     _sync.onTap(roundComplete: true);
   }
 
+  /// Clears in-memory session count after a successful finish-session DELETE.
+  void markSessionEnded(String groupAccumulatorId) {
+    _postResetGroupIds.add(groupAccumulatorId);
+    state = {...state, groupAccumulatorId: 0};
+  }
+
   /// Resets the user's group count to zero by soft-deleting on the server
   /// (`DELETE /group-accumulators/{id}`). Unsynced taps are flushed first.
   /// Returns false on failure.

@@ -61,6 +61,26 @@ class GroupAccumulatorRemoteDatasource {
     }
   }
 
+  /// `DELETE /group-accumulators/{group_accumulator_id}` — end the user's
+  /// active chant session (204 No Content on success).
+  Future<void> deleteGroupAccumulator(String groupAccumulatorId) async {
+    try {
+      final response = await dio.delete(
+        '/group-accumulators/$groupAccumulatorId',
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      }
+      throw _statusToException(
+        response.statusCode,
+        'Failed to end group accumulator session',
+      );
+    } on DioException catch (e) {
+      _logger.error('Dio error in deleteGroupAccumulator', e);
+      throw _dioToException(e, 'Failed to end group accumulator session');
+    }
+  }
+
   Future<void> joinGroupAccumulator(String accumulatorId) async {
     try {
       final response = await dio.post('/group-accumulators/$accumulatorId/join');

@@ -90,6 +90,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
 
   // Group accumulation chant session
   bool _hasSeededInitialChantCount = false;
+  bool _chantSessionFinished = false;
 
   NavigationContext? get _chantContext {
     final ctx = widget.navigationContext;
@@ -188,13 +189,20 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
   Future<void> _finishChantSession() async {
     final ctx = _chantContext;
     if (ctx != null) {
-      await ref.read(malaSyncManagerProvider).flush(SyncReason.screenLeave);
+      final success = await finishGroupAccumulatorSession(
+        ref: ref,
+        groupAccumulatorId: ctx.groupAccumulatorId!,
+        presetId: ctx.presetAccumulatorId!,
+        groupId: ctx.groupId,
+      );
       if (!mounted) return;
-      ref.invalidate(groupAccumulatorDetailProvider(ctx.groupAccumulatorId!));
-      final groupId = ctx.groupId;
-      if (groupId != null && groupId.isNotEmpty) {
-        ref.invalidate(groupAccumulatorsProvider(groupId));
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.something_went_wrong)),
+        );
+        return;
       }
+      _chantSessionFinished = true;
     }
     if (mounted && context.canPop()) {
       context.pop();
@@ -347,7 +355,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
             notifier.closeCommentary();
             notifier.closeTranslation();
             _invalidatePlanProviders();
-            if (_isGroupAccumulatorChant) {
+            if (_isGroupAccumulatorChant && !_chantSessionFinished) {
               unawaited(
                 ref.read(malaSyncManagerProvider).flush(SyncReason.screenLeave),
               );
