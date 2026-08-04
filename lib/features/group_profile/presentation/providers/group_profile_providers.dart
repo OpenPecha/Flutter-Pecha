@@ -8,6 +8,8 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/group_profile/data/datasource/group_profile_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_profile/data/repositories/group_profile_repository_impl.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_events_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_member.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/domain/repositories/group_profile_repository.dart';
@@ -546,4 +548,26 @@ final groupMembersProvider = StateNotifierProvider.autoDispose
     repository: ref.watch(groupProfileRepositoryProvider),
     groupId: groupId,
   );
+});
+
+final groupEventsProvider = FutureProvider.autoDispose
+    .family<Either<Failure, GroupEventsPage>, String>((ref, groupId) async {
+  final repository = ref.watch(groupProfileRepositoryProvider);
+  return repository.getGroupEvents(groupId);
+});
+
+final groupEventDetailProvider = FutureProvider.autoDispose
+    .family<Either<Failure, GroupEvent>, String>((ref, eventId) async {
+  final language = ref.watch(contentLanguageProvider);
+  final repository = ref.watch(groupProfileRepositoryProvider);
+  return repository.getGroupEventDetail(eventId, language: language);
+});
+
+final groupEventParticipantsProvider = FutureProvider.autoDispose
+    .family<Either<Failure, GroupEventParticipantsPage>, String>((
+  ref,
+  eventId,
+) async {
+  final repository = ref.watch(groupProfileRepositoryProvider);
+  return repository.getGroupEventParticipants(eventId, skip: 0, limit: 20);
 });

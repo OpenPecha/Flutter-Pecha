@@ -16,7 +16,7 @@ class DeepLinkUrlBuilder {
       pathSegments: ['open', 'reader', textId],
     );
   }
-  
+
   static Uri seriesLink({required String seriesId}) {
     return Uri(
       scheme: 'https',
@@ -83,6 +83,14 @@ class DeepLinkUrlBuilder {
       scheme: 'https',
       host: _host,
       pathSegments: ['open', 'group', groupId],
+    );
+  }
+
+  static Uri eventLink({required String eventId}) {
+    return Uri(
+      scheme: 'https',
+      host: _host,
+      pathSegments: ['open', 'events', eventId],
     );
   }
 

@@ -1588,6 +1588,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_links_title => '連結';
 
   @override
+  String get group_about_description => '簡介';
+
+  @override
+  String get group_about_empty => '暫無相關資訊';
+
+  @override
   String group_and_more_links(int count) {
     return '及另外 $count 個連結';
   }

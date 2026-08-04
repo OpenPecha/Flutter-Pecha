@@ -1668,6 +1668,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_links_title => 'Links';
 
   @override
+  String get group_about_description => 'Description';
+
+  @override
+  String get group_about_empty => 'No information available yet';
+
+  @override
   String group_and_more_links(int count) {
     return 'and $count more links';
   }

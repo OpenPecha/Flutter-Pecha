@@ -1685,6 +1685,12 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_links_title => 'Холбоосууд';
 
   @override
+  String get group_about_description => 'Тайлбар';
+
+  @override
+  String get group_about_empty => 'Одоогоор мэдээлэл алга байна';
+
+  @override
   String group_and_more_links(int count) {
     return 'болон дахиад $count холбоос';
   }

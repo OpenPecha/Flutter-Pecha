@@ -1689,6 +1689,12 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_links_title => 'लिङ्कहरू';
 
   @override
+  String get group_about_description => 'विवरण';
+
+  @override
+  String get group_about_empty => 'हाल कुनै जानकारी उपलब्ध छैन';
+
+  @override
   String group_and_more_links(int count) {
     return 'र अरू $count लिङ्कहरू';
   }

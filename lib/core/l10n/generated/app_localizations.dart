@@ -3058,6 +3058,18 @@ abstract class AppLocalizations {
   /// **'Links'**
   String get group_links_title;
 
+  /// No description provided for @group_about_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get group_about_description;
+
+  /// No description provided for @group_about_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No information available yet'**
+  String get group_about_empty;
+
   /// No description provided for @group_and_more_links.
   ///
   /// In en, this message translates to:
