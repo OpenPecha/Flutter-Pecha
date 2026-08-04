@@ -806,6 +806,11 @@
   "group_accumulator_recite_now": "Одоо уншина уу",
   "group_accumulator_chant_again": "Дахин унших",
   "group_accumulator_finish_session": "Хичээл дуусгах",
+  "group_accumulator_session_complete": "Хичээл дууслаа!",
+  "group_accumulator_session_recitations": "Та энэ хичээлд {count} удаа уншлаа",
+  "group_accumulator_session_share_message": "Би WeBuddhist дээр {group} бүлгийн \"{accumulation}\" хуримтлалд {count} удаа уншлаа. Та ч бас надтай нэгдээрэй!",
+  "group_accumulator_session_share_message_no_group": "Би WeBuddhist дээр \"{accumulation}\" бүлгийн хуримтлалд {count} удаа уншлаа. Та ч бас надтай нэгдээрэй!",
+  "group_accumulator_session_share_error": "Хичээлийг хуваалцах боломжгүй байна. Дахин оролдоно уу",
 
   "share_this_quote": "Энэ ишлэлийг хуваалцах",
   "shared_from": "Хуваалцсан:",

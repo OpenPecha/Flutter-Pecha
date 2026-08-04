@@ -188,7 +188,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
 
   Future<void> _finishChantSession() async {
     final ctx = _chantContext;
+    int? finishedSessionCount;
     if (ctx != null) {
+      final sessionCount = _groupChantSessionCount();
       final success = await finishGroupAccumulatorSession(
         ref: ref,
         groupAccumulatorId: ctx.groupAccumulatorId!,
@@ -203,9 +205,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
         return;
       }
       _chantSessionFinished = true;
+      finishedSessionCount = sessionCount;
     }
     if (mounted && context.canPop()) {
-      context.pop();
+      context.pop(finishedSessionCount);
     }
   }
 

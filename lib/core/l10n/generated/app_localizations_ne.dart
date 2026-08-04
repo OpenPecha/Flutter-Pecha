@@ -1749,6 +1749,35 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_accumulator_finish_session => 'सत्र समाप्त गर्नुहोस्';
 
   @override
+  String get group_accumulator_session_complete => 'सत्र पूरा भयो!';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'तपाईंले यो सत्रमा $count जप पूरा गर्नुभयो';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'मैले WeBuddhist मा $group को सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'मैले WeBuddhist मा सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'सत्र साझा गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्';
+
+  @override
   String get share_this_quote => 'यो उद्धरण साझा गर्नुहोस्';
 
   @override

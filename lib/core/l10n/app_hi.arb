@@ -806,6 +806,11 @@
   "group_accumulator_recite_now": "अभी जाप करें",
   "group_accumulator_chant_again": "फिर से जाप करें",
   "group_accumulator_finish_session": "सत्र समाप्त करें",
+  "group_accumulator_session_complete": "सत्र पूरा हुआ!",
+  "group_accumulator_session_recitations": "आपने इस सत्र में {count} जाप पूरे किए",
+  "group_accumulator_session_share_message": "मैंने WeBuddhist पर {group} के सामूहिक संचय \"{accumulation}\" में {count} जाप पूरे किए। आप भी मेरे साथ जुड़ें!",
+  "group_accumulator_session_share_message_no_group": "मैंने WeBuddhist पर सामूहिक संचय \"{accumulation}\" में {count} जाप पूरे किए। आप भी मेरे साथ जुड़ें!",
+  "group_accumulator_session_share_error": "सत्र साझा नहीं हो सका। कृपया पुनः प्रयास करें",
 
   "share_this_quote": "यह उद्धरण शेयर करें",
   "shared_from": "यहाँ से शेयर किया गया",

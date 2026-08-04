@@ -740,6 +740,11 @@
   "group_accumulator_recite_now": "立即誦念",
   "group_accumulator_chant_again": "再誦一次",
   "group_accumulator_finish_session": "結束課誦",
+  "group_accumulator_session_complete": "課誦完成！",
+  "group_accumulator_session_recitations": "您在本課誦中完成了 {count} 次誦讀",
+  "group_accumulator_session_share_message": "我在 WeBuddhist 上完成了 {group} 的累积活动「{accumulation}」中的 {count} 次誦讀，快来加入我吧！",
+  "group_accumulator_session_share_message_no_group": "我在 WeBuddhist 上完成了累积活动「{accumulation}」中的 {count} 次誦讀，快来加入我吧！",
+  "group_accumulator_session_share_error": "無法分享課誦，請重試",
 
   "share_this_quote": "分享这句话",
   "shared_from": "分享自",

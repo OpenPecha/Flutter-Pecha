@@ -7,6 +7,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_hero_card.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_session_complete_sheet.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
@@ -202,11 +203,11 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: _AccumulatorHeroCard(
             detail: detail,
-            groupTitle: _resolveGroupName(detail.groupId),
             hasJoined: hasJoined,
             isDark: isDark,
             isJoining: _isJoining,
             onJoinTap: () => _onJoinTap(detail),
+            onReciteTap: () => _onReciteTap(context, detail),
           ),
         ),
         TabBar(
@@ -271,6 +272,50 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
         content: Text(context.l10n.group_accumulator_join_error),
         backgroundColor: Colors.red,
       ),
+    );
+  }
+
+  Future<void> _onReciteTap(
+    BuildContext context,
+    GroupAccumulatorDetail detail,
+  ) async {
+    if (!detail.hasTextContent) {
+      final presetId = detail.presetAccumulatorId;
+      if (presetId.isEmpty) return;
+      context.push(
+        '/mala',
+        extra: {'presetId': presetId, 'groupAccumulatorId': detail.id},
+      );
+      return;
+    }
+
+    final textId = detail.textId;
+    if (textId == null || textId.isEmpty) return;
+
+    final sessionCount = await context.push<int>(
+      '/reader/$textId',
+      extra: NavigationContext(
+        source: NavigationSource.groupAccumulatorChant,
+        groupAccumulatorId: detail.id,
+        presetAccumulatorId: detail.presetAccumulatorId,
+        groupId: detail.groupId,
+        groupTitle:
+            _resolveGroupName(detail.groupId)?.trim().isNotEmpty == true
+                ? _resolveGroupName(detail.groupId)!.trim()
+                : null,
+        groupAccumulatorSessionCount: detail.user?.totalCount ?? 0,
+      ),
+    );
+
+    if (!context.mounted || sessionCount == null) return;
+
+    showGroupAccumulatorSessionCompleteSheet(
+      context,
+      sessionCount: sessionCount,
+      accumulationTitle: detail.title,
+      accumulatorId: detail.id,
+      groupId: detail.groupId,
+      groupName: _resolveGroupName(detail.groupId),
     );
   }
 
@@ -431,59 +476,30 @@ class _MyContributionsTabState extends State<_MyContributionsTab> {
 
 class _AccumulatorHeroCard extends StatelessWidget {
   final GroupAccumulatorDetail detail;
-  final String? groupTitle;
   final bool hasJoined;
   final bool isDark;
   final bool isJoining;
   final VoidCallback? onJoinTap;
+  final VoidCallback? onReciteTap;
 
   const _AccumulatorHeroCard({
     required this.detail,
-    this.groupTitle,
     required this.hasJoined,
     required this.isDark,
     this.isJoining = false,
     this.onJoinTap,
+    this.onReciteTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    void navigateToRecite() {
-      if (detail.hasTextContent) {
-        final textId = detail.textId;
-        if (textId == null || textId.isEmpty) return;
-        context.push(
-          '/reader/$textId',
-          extra: NavigationContext(
-            source: NavigationSource.groupAccumulatorChant,
-            groupAccumulatorId: detail.id,
-            presetAccumulatorId: detail.presetAccumulatorId,
-            groupId: detail.groupId,
-            groupTitle:
-                groupTitle?.trim().isNotEmpty == true
-                    ? groupTitle!.trim()
-                    : null,
-            groupAccumulatorSessionCount: detail.user?.totalCount ?? 0,
-          ),
-        );
-        return;
-      }
-
-      final presetId = detail.presetAccumulatorId;
-      if (presetId.isEmpty) return;
-      context.push(
-        '/mala',
-        extra: {'presetId': presetId, 'groupAccumulatorId': detail.id},
-      );
-    }
-
     return GroupAccumulatorHeroCard(
       detail: detail,
       hasJoined: hasJoined,
       isDark: isDark,
       isJoining: isJoining,
       onJoinTap: onJoinTap,
-      onActionTap: hasJoined ? navigateToRecite : null,
+      onActionTap: hasJoined ? onReciteTap : null,
     );
   }
 }

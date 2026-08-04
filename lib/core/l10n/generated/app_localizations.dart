@@ -3160,6 +3160,43 @@ abstract class AppLocalizations {
   /// **'Finish session'**
   String get group_accumulator_finish_session;
 
+  /// No description provided for @group_accumulator_session_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete!'**
+  String get group_accumulator_session_complete;
+
+  /// No description provided for @group_accumulator_session_recitations.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed {count} recitations this session'**
+  String group_accumulator_session_recitations(int count);
+
+  /// No description provided for @group_accumulator_session_share_message.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed {count} recitations in \"{accumulation}\", a group accumulation by {group} on WeBuddhist. Come join me!'**
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  );
+
+  /// No description provided for @group_accumulator_session_share_message_no_group.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed {count} recitations in the group accumulation \"{accumulation}\" on WeBuddhist. Come join me!'**
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  );
+
+  /// No description provided for @group_accumulator_session_share_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to share session. Please try again'**
+  String get group_accumulator_session_share_error;
+
   /// No description provided for @share_this_quote.
   ///
   /// In en, this message translates to:

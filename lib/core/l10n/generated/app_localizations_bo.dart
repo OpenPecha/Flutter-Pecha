@@ -1750,6 +1750,35 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_accumulator_finish_session => 'སྐབས་མཇུག་སྒྲིལ།';
 
   @override
+  String get group_accumulator_session_complete => 'སྐབས་འདི་ཚང་མ་བསྐངས་ཟིན།';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'ཁྱེད་ཀྱིས་སྐབས་འདིར་བཟླས་བརྗོད་ $count བསྐངས་ཟིན།';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'ངས WeBuddhist ཐོག་ $group གི་བསགས་གྲངས་ $accumulation ནང་བཟླས་བརྗོད་ $count བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'ངས WeBuddhist ཐོག་བསགས་གྲངས་ $accumulation ནང་བཟླས་བརྗོད་ $count བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'སྐབས་མཇུག་བགོས་མ་ཐུབ། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
+
+  @override
   String get share_this_quote => 'གསུང་ཚིག་འདི་སྤེལ།';
 
   @override

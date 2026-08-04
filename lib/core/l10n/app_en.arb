@@ -833,6 +833,41 @@
   "group_accumulator_recite_now": "Recite now",
   "group_accumulator_chant_again": "Chant again",
   "group_accumulator_finish_session": "Finish session",
+  "group_accumulator_session_complete": "Session complete!",
+  "group_accumulator_session_recitations": "You completed {count} recitations this session",
+  "@group_accumulator_session_recitations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_accumulator_session_share_message": "I completed {count} recitations in \"{accumulation}\", a group accumulation by {group} on WeBuddhist. Come join me!",
+  "@group_accumulator_session_share_message": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "accumulation": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "group_accumulator_session_share_message_no_group": "I completed {count} recitations in the group accumulation \"{accumulation}\" on WeBuddhist. Come join me!",
+  "@group_accumulator_session_share_message_no_group": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "accumulation": {
+        "type": "String"
+      }
+    }
+  },
+  "group_accumulator_session_share_error": "Unable to share session. Please try again",
   "@group_and_more_links": {
     "placeholders": {
       "count": {
