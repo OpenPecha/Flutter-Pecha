@@ -184,7 +184,7 @@ class _GroupEventCard extends StatelessWidget {
                           ),
                         if (event.participantCount > 0) ...[
                           Icon(
-                            AppAssets.usersThree,
+                            AppAssets.usercard,
                             size: 16,
                             color: secondaryColor,
                           ),
