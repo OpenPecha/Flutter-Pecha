@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+final _logger = AppLogger('GroupAboutScreen');
 
 class GroupAboutScreen extends StatelessWidget {
   final String title;
@@ -137,13 +141,36 @@ class _AboutLinkTile extends StatelessWidget {
 
   const _AboutLinkTile({required this.link, required this.isDark});
 
-  Future<void> _launchUrl() async {
+  Future<void> _launchUrl(BuildContext context) async {
+    final uri = Uri.tryParse(link.url.trim());
+    if (uri == null ||
+        (uri.scheme != 'http' && uri.scheme != 'https')) {
+      _logger.warning('Blocked invalid group link URL: ${link.url}');
+      if (context.mounted) {
+        context.showSnackBar(context.l10n.link_invalid);
+      }
+      return;
+    }
+
     try {
-      final uri = Uri.parse(link.url);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        _logger.warning('Cannot launch group link URL: ${link.url}');
+        if (context.mounted) {
+          context.showSnackBar(context.l10n.link_cannot_open);
+        }
       }
-    } catch (_) {}
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to launch group link URL: ${link.url}',
+        e,
+        stackTrace,
+      );
+      if (context.mounted) {
+        context.showSnackBar(context.l10n.link_invalid);
+      }
+    }
   }
 
   @override
@@ -154,7 +181,7 @@ class _AboutLinkTile extends StatelessWidget {
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
 
     return InkWell(
-      onTap: _launchUrl,
+      onTap: () => _launchUrl(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(

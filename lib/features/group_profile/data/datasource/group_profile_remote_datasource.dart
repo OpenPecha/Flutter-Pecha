@@ -213,7 +213,9 @@ class GroupProfileRemoteDatasource {
   Future<void> joinGroupEvent(String eventId) async {
     try {
       final response = await dio.post('/events/$eventId/participants');
-      if (response.statusCode != 204) {
+      if (response.statusCode != 200 &&
+          response.statusCode != 201 &&
+          response.statusCode != 204) {
         throw _statusToException(response.statusCode, 'Failed to attend event');
       }
     } on DioException catch (e) {
