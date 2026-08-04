@@ -102,7 +102,7 @@ class _GroupEventDetailScreenState
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
           ),
-          IconButton(icon: const Icon(AppAssets.share), onPressed: _shareEvent),
+          IconButton(icon: const Icon(AppAssets.readerShare), onPressed: _shareEvent, iconSize: 22,),
         ],
       ),
     );
@@ -128,6 +128,7 @@ class _GroupEventDetailScreenState
 
     final isAttending = _attendingOverride ?? event.isJoined;
     final totalAttending = _attendeeCount(event, isAttending);
+    final hasVideos = _hasVideos(event);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(14, 8, 14, 32),
@@ -146,14 +147,18 @@ class _GroupEventDetailScreenState
           const SizedBox(height: 16),
           _EventInfoCard(event: event, isDark: isDark),
           const SizedBox(height: 16),
-          _buildTabs(isDark),
+          _buildTabs(isDark, hasVideos: hasVideos),
           const SizedBox(height: 12),
-          _selectedTab == 0
+          hasVideos && _selectedTab == 0
               ? _VideosPanel(event: event, isDark: isDark)
               : _AboutPanel(event: event, isDark: isDark),
         ],
       ),
     );
+  }
+
+  bool _hasVideos(GroupEvent event) {
+    return event.links.any((link) => link.url.isNotEmpty);
   }
 
   int _attendeeCount(GroupEvent event, bool isAttending) {
@@ -234,19 +239,21 @@ class _GroupEventDetailScreenState
     );
   }
 
-  Widget _buildTabs(bool isDark) {
+  Widget _buildTabs(bool isDark, {required bool hasVideos}) {
     return Row(
       children: [
-        _EventTabButton(
-          label: 'Videos',
-          selected: _selectedTab == 0,
-          isDark: isDark,
-          onTap: () => setState(() => _selectedTab = 0),
-        ),
-        const SizedBox(width: 20),
+        if (hasVideos) ...[
+          _EventTabButton(
+            label: 'Videos',
+            selected: _selectedTab == 0,
+            isDark: isDark,
+            onTap: () => setState(() => _selectedTab = 0),
+          ),
+          const SizedBox(width: 20),
+        ],
         _EventTabButton(
           label: 'About',
-          selected: _selectedTab == 1,
+          selected: !hasVideos || _selectedTab == 1,
           isDark: isDark,
           onTap: () => setState(() => _selectedTab = 1),
         ),
