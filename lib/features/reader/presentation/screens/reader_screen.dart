@@ -564,7 +564,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
           Positioned(
             left: 0,
             right: 0,
-            bottom: chantBarHeight,
+            bottom: isActionBarVisible ? 0 : chantBarHeight,
             child: _MeasuredSize(
               onChange: (size) {
                 if ((_bottomOverlayHeight - size.height).abs() < 1) return;
