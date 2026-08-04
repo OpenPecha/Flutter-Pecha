@@ -168,59 +168,55 @@ class _GroupEventDetailScreenState
         isDark ? AppColors.surfaceVariantDark : AppColors.surfaceWhite;
     final secondaryBorder = isDark ? AppColors.grey800 : AppColors.grey300;
 
+    final attendButton = ElevatedButton(
+      onPressed:
+          _isSubmitting
+              ? null
+              : () => isAttending ? _leaveEvent(event) : _attendEvent(event),
+      style: ElevatedButton.styleFrom(
+        elevation: 0,
+        minimumSize: const Size(0, 44),
+        backgroundColor:
+            isAttending
+                ? (isDark
+                    ? AppColors.surfaceVariantDark
+                    : AppColors.grey100)
+                : (isDark
+                    ? AppColors.surfaceWhite
+                    : AppColors.textPrimary),
+        foregroundColor:
+            isAttending
+                ? (isDark
+                    ? AppColors.textTertiaryDark
+                    : AppColors.textPrimary)
+                : (isDark
+                    ? AppColors.textPrimary
+                    : AppColors.surfaceWhite),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+      child:
+          _isSubmitting
+              ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+              : Text(isAttending ? 'Attending' : 'Attend'),
+    );
+
+    if (!isAttending) {
+      return SizedBox(width: double.infinity, child: attendButton);
+    }
+
     return Row(
       children: [
-        Expanded(
-          child: ElevatedButton(
-            onPressed:
-                _isSubmitting
-                    ? null
-                    : () =>
-                        isAttending ? _leaveEvent(event) : _attendEvent(event),
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              minimumSize: const Size(0, 44),
-              backgroundColor:
-                  isAttending
-                      ? (isDark
-                          ? AppColors.surfaceVariantDark
-                          : AppColors.grey100)
-                      : (isDark
-                          ? AppColors.surfaceWhite
-                          : AppColors.textPrimary),
-              foregroundColor:
-                  isAttending
-                      ? (isDark
-                          ? AppColors.textTertiaryDark
-                          : AppColors.textPrimary)
-                      : (isDark
-                          ? AppColors.textPrimary
-                          : AppColors.surfaceWhite),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child:
-                _isSubmitting
-                    ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : Text(isAttending ? 'Attending' : 'Attend'),
-          ),
-        ),
+        Expanded(child: attendButton),
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton(
-            onPressed:
-                _isSubmitting
-                    ? null
-                    : isAttending
-                    ? _shareEvent
-                    // Not attending: nothing to leave, so this is just a
-                    // dismissive label with no backend call.
-                    : () {},
+            onPressed: _isSubmitting ? null : _shareEvent,
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(0, 44),
               backgroundColor: secondaryButtonColor,
@@ -231,7 +227,7 @@ class _GroupEventDetailScreenState
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-            child: Text(isAttending ? 'Invite' : "Can't make it"),
+            child: const Text('Invite'),
           ),
         ),
       ],
