@@ -791,6 +791,8 @@
   "group_follower": "дагагч",
   "group_followers": "дагагчид",
   "group_links_title": "Холбоосууд",
+  "group_about_description": "Тайлбар",
+  "group_about_empty": "Одоогоор мэдээлэл алга байна",
   "group_and_more_links": "болон дахиад {count} холбоос",
   "group_practice_with_us": "Бидэнтэй хамт дадлага хий",
   "series_practicing_with_group": "{groupName}-тай хамт дадлага хийж байна",

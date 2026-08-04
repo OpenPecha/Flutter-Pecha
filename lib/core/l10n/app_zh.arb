@@ -725,6 +725,8 @@
   "group_follower": "位追蹤者",
   "group_followers": "位追蹤者",
   "group_links_title": "連結",
+  "group_about_description": "簡介",
+  "group_about_empty": "暫無相關資訊",
   "group_and_more_links": "及另外 {count} 個連結",
   "group_practice_with_us": "與我們一起修行",
   "series_practicing_with_group": "與 {groupName} 一起修行",

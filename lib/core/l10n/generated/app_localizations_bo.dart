@@ -1690,6 +1690,12 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_links_title => 'འབྲེལ་ཐག';
 
   @override
+  String get group_about_description => 'ངོ་སྤྲོད།';
+
+  @override
+  String get group_about_empty => 'ད་ལྟའི་ཆར་ཆ་འཕྲིན་མེད།';
+
+  @override
   String group_and_more_links(int count) {
     return 'དང་འབྲེལ་ཐག་གཞན་ $count';
   }

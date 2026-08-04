@@ -1681,6 +1681,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_links_title => 'लिंक';
 
   @override
+  String get group_about_description => 'विवरण';
+
+  @override
+  String get group_about_empty => 'अभी कोई जानकारी उपलब्ध नहीं है';
+
+  @override
   String group_and_more_links(int count) {
     return 'और $count और लिंक';
   }

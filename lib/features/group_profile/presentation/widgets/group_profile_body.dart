@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
@@ -13,9 +14,10 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_accum
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/screens/group_about_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_events_tab.dart';
-import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_members_tab.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
@@ -25,7 +27,6 @@ import 'package:flutter_pecha/features/plans/data/utils/plan_date_format.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class GroupProfileBody extends ConsumerStatefulWidget {
   final GroupProfile profile;
@@ -54,7 +55,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   final Set<String> _localGroupEnrolledSeriesIds = {};
   ProviderSubscription<bool>? _membersTabActiveSub;
   ProviderSubscription<bool>? _membersNeedsRefreshSub;
-  bool _isAboutExpanded = false;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
 
@@ -185,7 +185,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final profile = _resolveProfile();
     final isDark = widget.isDark;
 
-    final orderedLinks = GroupProfileLinksDrawer.orderedLinks(
+    final orderedLinks = GroupProfileLinkUtils.orderedLinks(
       profile.socialLinks,
     );
 
@@ -208,11 +208,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           ),
           const SizedBox(height: 14),
         ],
-        _buildProfileHeader(profile, isDark, lineHeight),
-        if (orderedLinks.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _buildLinksSummary(orderedLinks, isDark, lineHeight),
-        ],
+        _buildProfileHeader(profile, isDark, lineHeight, orderedLinks),
         const SizedBox(height: 20),
         Expanded(child: _buildDescriptionLongContent(profile)),
       ],
@@ -239,11 +235,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                     ),
                     const SizedBox(height: 14),
                   ],
-                  _buildProfileHeader(profile, isDark, lineHeight),
-                  if (orderedLinks.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _buildLinksSummary(orderedLinks, isDark, lineHeight),
-                  ],
+                  _buildProfileHeader(profile, isDark, lineHeight, orderedLinks),
                   const SizedBox(height: 20),
                   _GroupFollowButton(profile: profile, isDark: isDark),
                   const SizedBox(height: 24),
@@ -255,7 +247,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       body: TabBarView(
         controller: _tabController!,
         children: [
-          _buildEmptyTab('No news yet', isDark, lineHeight),
+          _buildEmptyTab('No posts yet', isDark, lineHeight),
           GroupProfileEventsTab(
             groupId: profile.id,
             isDark: isDark,
@@ -293,6 +285,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     GroupProfile profile,
     bool isDark,
     double? lineHeight,
+    List<GroupProfileSocialLink> orderedLinks,
   ) {
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
@@ -378,7 +371,16 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           ),
           if (aboutDescription != null) ...[
             const SizedBox(height: 8),
-            _buildHeaderAboutDescription(aboutDescription, isDark, lineHeight),
+            _buildHeaderAboutDescription(
+              profile,
+              aboutDescription,
+              orderedLinks,
+              isDark,
+              lineHeight,
+            ),
+          ] else if (orderedLinks.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildLinksEntryRow(profile, orderedLinks, isDark, lineHeight),
           ] else if (profile.subTitle != null &&
               profile.subTitle!.trim().isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -397,56 +399,111 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   Widget _buildHeaderAboutDescription(
+    GroupProfile profile,
     String description,
+    List<GroupProfileSocialLink> orderedLinks,
     bool isDark,
     double? lineHeight,
   ) {
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
-    final actionColor = isDark ? AppColors.textPrimaryDark : AppColors.grey800;
-    final isCollapsible = description.length > 110;
+    final actionColor = isDark ? AppColors.grey500 : AppColors.grey500;
 
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeInOut,
-      alignment: Alignment.topLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 13,
-              color: secondaryColor,
-              height: lineHeight,
-            ),
-            maxLines: _isAboutExpanded || !isCollapsible ? null : 2,
-            overflow:
-                _isAboutExpanded || !isCollapsible
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
-          ),
-          if (isCollapsible)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                setState(() => _isAboutExpanded = !_isAboutExpanded);
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 2, right: 12, bottom: 2),
-                child: Text(
-                  _isAboutExpanded ? context.l10n.less : context.l10n.more,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: actionColor,
-                    height: lineHeight,
-                  ),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final style = TextStyle(
+          fontSize: 13,
+          color: secondaryColor,
+          height: lineHeight,
+        );
+
+        final textSpan = TextSpan(text: description, style: style);
+        final textPainter = TextPainter(
+          text: textSpan,
+          maxLines: 2,
+          textDirection: Directionality.of(context),
+        );
+
+        textPainter.layout(maxWidth: constraints.maxWidth);
+
+        void openAboutScreen() {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => GroupAboutScreen(
+                title: profile.title,
+                description: description,
+                links: orderedLinks,
               ),
             ),
-        ],
-      ),
+          );
+        }
+
+        final moreTapSpan = TextSpan(
+          text: context.l10n.more,
+          style: style.copyWith(
+            color: actionColor,
+            fontWeight: FontWeight.w500,
+          ),
+          recognizer: TapGestureRecognizer()..onTap = openAboutScreen,
+        );
+
+        // Description fits within the collapsed height, but if there are
+        // links to show, keep a "more" affordance so users can still reach
+        // the About screen where those links live.
+        if (!textPainter.didExceedMaxLines) {
+          if (orderedLinks.isEmpty) {
+            return Text.rich(textSpan);
+          }
+          return Text.rich(
+            TextSpan(
+              text: description,
+              style: style,
+              children: [const TextSpan(text: '  '), moreTapSpan],
+            ),
+          );
+        }
+
+        final moreSpan = TextSpan(
+          text: '... ',
+          style: style,
+          children: [moreTapSpan],
+        );
+
+        int endIndex = description.length;
+        int startIndex = 0;
+
+        while (startIndex < endIndex) {
+          int mid = startIndex + ((endIndex - startIndex) ~/ 2);
+          final testSpan = TextSpan(
+            text: description.substring(0, mid),
+            style: style,
+            children: [moreSpan],
+          );
+          final testPainter = TextPainter(
+            text: testSpan,
+            maxLines: 2,
+            textDirection: Directionality.of(context),
+          );
+          testPainter.layout(maxWidth: constraints.maxWidth);
+
+          if (testPainter.didExceedMaxLines) {
+            endIndex = mid;
+          } else {
+            startIndex = mid + 1;
+          }
+        }
+
+        final validLength = (startIndex - 1).clamp(0, description.length);
+        final truncatedText = description.substring(0, validLength).trimRight();
+
+        return Text.rich(
+          TextSpan(
+            text: truncatedText,
+            style: style,
+            children: [moreSpan],
+          ),
+        );
+      },
     );
   }
 
@@ -461,7 +518,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
-  Widget _buildLinksSummary(
+  Widget _buildLinksEntryRow(
+    GroupProfile profile,
     List<GroupProfileSocialLink> links,
     bool isDark,
     double? lineHeight,
@@ -471,48 +529,48 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: GestureDetector(
-        onTap: () {
-          if (moreCount > 0) {
-            GroupProfileLinksDrawer.show(context, links);
-          } else {
-            _launchUrl(primaryLink.url);
-          }
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Row(
-          children: [
-            Icon(AppAssets.linkSimple, size: 18, color: secondaryColor),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text.rich(
-                TextSpan(
-                  style: TextStyle(
-                    fontSize: 14,
-                    color:
-                        isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimary,
-                    height: lineHeight,
-                  ),
-                  children: [
-                    TextSpan(text: primaryLink.url),
-                    if (moreCount > 0)
-                      TextSpan(
-                        text:
-                            ' ${context.l10n.group_and_more_links(moreCount)}',
-                        style: TextStyle(color: secondaryColor),
-                      ),
-                  ],
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => GroupAboutScreen(
+              title: profile.title,
+              links: links,
             ),
-          ],
-        ),
+          ),
+        );
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        children: [
+          Icon(AppAssets.linkSimple, size: 18, color: secondaryColor),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: TextStyle(
+                  fontSize: 14,
+                  color:
+                      isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimary,
+                  height: lineHeight,
+                ),
+                children: [
+                  TextSpan(text: primaryLink.url),
+                  if (moreCount > 0)
+                    TextSpan(
+                      text:
+                          ' ${context.l10n.group_and_more_links(moreCount)}',
+                      style: TextStyle(color: secondaryColor),
+                    ),
+                ],
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -543,7 +601,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             fontWeight: FontWeight.w500,
           ),
           tabs: [
-            const Tab(text: 'News'),
+            const Tab(text: 'Post'),
             const Tab(text: 'Events'),
             Tab(text: context.l10n.tab_practices),
             Tab(text: membersTabLabel),
@@ -1005,14 +1063,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
-  Future<void> _launchUrl(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    } catch (_) {}
-  }
 }
 
 class _GroupFollowButton extends ConsumerWidget {

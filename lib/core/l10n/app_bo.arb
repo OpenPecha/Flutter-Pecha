@@ -725,6 +725,8 @@
   "group_follower": "རྗེས་འབྲང་པ།",
   "group_followers": "རྗེས་འབྲང་པ།",
   "group_links_title": "འབྲེལ་ཐག",
+  "group_about_description": "ངོ་སྤྲོད།",
+  "group_about_empty": "ད་ལྟའི་ཆར་ཆ་འཕྲིན་མེད།",
   "group_and_more_links": "དང་འབྲེལ་ཐག་གཞན་ {count}",
   "group_practice_with_us": "ང་ཚོ་དང་མཉམ་དུ་སྒོམ་གྱི།",
   "series_practicing_with_group": "{groupName} དང་མཉམ་དུ་ཉམས་ལེན་བྱེད",

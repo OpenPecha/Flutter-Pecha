@@ -802,6 +802,8 @@
   "group_follower": "follower",
   "group_followers": "followers",
   "group_links_title": "Links",
+  "group_about_description": "Description",
+  "group_about_empty": "No information available yet",
   "group_and_more_links": "and {count} more links",
   "group_practice_with_us": "Practice with us",
   "series_practicing_with_group": "Practicing with {groupName}",
