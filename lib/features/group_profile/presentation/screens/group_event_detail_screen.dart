@@ -397,49 +397,77 @@ class _AttendeesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shown = participants.take(3).toList();
+    final shown = participants.take(2).toList();
     final remaining = math.max(0, totalAttending - shown.length);
     final textColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
 
+    final double avatarSize = 28.0;
+    final double overlap = 18.0;
+
+    final int totalItems = shown.length + (remaining > 0 ? 1 : 0);
+    final double stackWidth =
+        totalItems == 0 ? 0 : (totalItems - 1) * overlap + avatarSize;
+
     return Row(
       children: [
-        SizedBox(
-          width: shown.isEmpty ? 0 : 18.0 + (shown.length - 1) * 16,
-          height: 24,
-          child: Stack(
-            children: [
-              for (var i = 0; i < shown.length; i++)
-                Positioned(
-                  left: i * 16,
-                  child: _ParticipantAvatar(
-                    participant: shown[i],
-                    isDark: isDark,
+        if (totalItems > 0)
+          SizedBox(
+            width: stackWidth,
+            height: avatarSize,
+            child: Stack(
+              children: [
+                for (var i = 0; i < shown.length; i++)
+                  Positioned(
+                    left: i * overlap,
+                    child: _ParticipantAvatar(
+                      participant: shown[i],
+                      isDark: isDark,
+                      size: avatarSize,
+                    ),
                   ),
-                ),
-            ],
-          ),
-        ),
-        if (remaining > 0) ...[
-          const SizedBox(width: 4),
-          Container(
-            width: 22,
-            height: 22,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isDark ? AppColors.grey800 : AppColors.grey100,
+                if (remaining > 0)
+                  Positioned(
+                    left: shown.length * overlap,
+                    child: Container(
+                      width: avatarSize,
+                      height: avatarSize,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? AppColors.grey800
+                            : const Color(0xFFE8E5DF),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.scaffoldBackgroundDark
+                              : AppColors.surfaceLight,
+                          width: 2,
+                        ),
+                      ),
+                      child: Text(
+                        '+$remaining',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.greyDark,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            child: Text(
-              '+$remaining',
-              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
-            ),
           ),
-        ],
-        const SizedBox(width: 8),
+        if (totalItems > 0) const SizedBox(width: 8),
         Text(
           '$totalAttending attending',
-          style: TextStyle(fontSize: 13, color: textColor),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: textColor,
+          ),
         ),
       ],
     );
@@ -449,15 +477,20 @@ class _AttendeesRow extends StatelessWidget {
 class _ParticipantAvatar extends StatelessWidget {
   final GroupEventParticipant participant;
   final bool isDark;
+  final double size;
 
-  const _ParticipantAvatar({required this.participant, required this.isDark});
+  const _ParticipantAvatar({
+    required this.participant,
+    required this.isDark,
+    this.size = 24.0,
+  });
 
   @override
   Widget build(BuildContext context) {
     final avatarUrl = participant.avatarUrl;
     return Container(
-      width: 24,
-      height: 24,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
@@ -483,15 +516,30 @@ class _ParticipantAvatar extends StatelessWidget {
 
   Widget _avatarFallback() {
     final name = participant.displayName;
+    final initials = _getInitials(name);
+    
     return ColoredBox(
       color: AppColors.primary,
       child: Center(
         child: Text(
-          name.isNotEmpty ? name.characters.first.toUpperCase() : '?',
-          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
+          initials,
+          style: TextStyle(
+            fontSize: size * 0.4,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primaryDarkest,
+          ),
         ),
       ),
     );
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length > 1) {
+      return '${parts[0].characters.first}${parts[1].characters.first}'.toUpperCase();
+    }
+    return name.characters.take(2).toString().toUpperCase();
   }
 }
 
