@@ -191,7 +191,7 @@ class _ResourcesPanel extends StatefulWidget {
 
 class _ResourcesPanelState extends State<_ResourcesPanel> {
   static const double _headerHeight = 70;
-  static const double _collapsedContentHeight = 348;
+  static const double _collapsedContentHeight = 328;
   static const double _videosSectionHeight = 280;
 
   late final DraggableScrollableController _sheetController;
@@ -450,10 +450,10 @@ class _ResourcesPanelState extends State<_ResourcesPanel> {
           child: Row(
             children: [
               widget.copyButton,
-              const SizedBox(width: 12),
-              widget.shareButton,
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               widget.bookmarkButton,
+              const SizedBox(width: 8),
+              widget.shareButton,
             ],
           ),
         ),
@@ -628,7 +628,7 @@ class _SegmentVideoCard extends StatelessWidget {
   }
 }
 
-/// Icon-above-label action button used in the Copy/Share row.
+/// Compact horizontal pill used in the Copy/Share/Bookmark row.
 class _IconActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -650,40 +650,36 @@ class _IconActionButton extends StatelessWidget {
 
     return Material(
       color: backgroundColor,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: isLoading ? null : onTap,
-        child: SizedBox(
-          width: 78,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 7),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isLoading)
-                  SizedBox(
-                    width: 23,
-                    height: 23,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: foreground,
-                    ),
-                  )
-                else
-                  Icon(icon, size: 23, color: foreground),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  style: theme.textTheme.labelMedium?.copyWith(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 13),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isLoading)
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
                     color: foreground,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                )
+              else
+                Icon(icon, size: 18, color: foreground),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: foreground,
                 ),
-              ],
-            ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
       ),
