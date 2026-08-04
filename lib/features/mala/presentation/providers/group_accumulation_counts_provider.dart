@@ -197,6 +197,25 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
     _sync.onTap(roundComplete: true);
   }
 
+  /// Adds [count] offline recitations on top of the current session total.
+  void addCount({
+    required String groupAccumulatorId,
+    required List<AccumulatorGroup> groups,
+    required int count,
+  }) {
+    if (count <= 0) return;
+
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    _postResetGroupIds.remove(groupAccumulatorId);
+    final current = countFor(groupAccumulatorId, groups);
+    final newTotal = current + count;
+    state = {...state, groupAccumulatorId: newTotal};
+    unawaited(_local.addGroupToTotal(userId, groupAccumulatorId, count));
+    _sync.onTap(roundComplete: true);
+  }
+
   /// Clears in-memory session count after a successful finish-session DELETE.
   void markSessionEnded(String groupAccumulatorId) {
     _postResetGroupIds.add(groupAccumulatorId);

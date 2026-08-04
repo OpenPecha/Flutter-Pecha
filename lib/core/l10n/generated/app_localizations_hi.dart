@@ -1741,6 +1741,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_accumulator_finish_session => 'सत्र समाप्त करें';
 
   @override
+  String get group_accumulator_offline_recitation => 'ऑफ़लाइन जाप';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'ऑफ़लाइन जाप जोड़ें:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'इस ऐप के बाहर किए गए जापों की संख्या जोड़ें।';
+
+  @override
   String get group_accumulator_session_complete => 'सत्र पूरा हुआ!';
 
   @override

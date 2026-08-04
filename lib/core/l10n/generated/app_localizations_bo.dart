@@ -1750,6 +1750,17 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_accumulator_finish_session => 'སྐབས་མཇུག་སྒྲིལ།';
 
   @override
+  String get group_accumulator_offline_recitation => 'དྲ་ཐོག་མིན་བཟླས་བརྗོད།';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'དྲ་ཐོག་མིན་བཟླས་བརྗོད་སྣོན།';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'Add the number of chants you did outside this app.';
+
+  @override
   String get group_accumulator_session_complete => 'སྐབས་འདི་ཚང་མ་བསྐངས་ཟིན།';
 
   @override

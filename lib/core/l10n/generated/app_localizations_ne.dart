@@ -1749,6 +1749,17 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_accumulator_finish_session => 'सत्र समाप्त गर्नुहोस्';
 
   @override
+  String get group_accumulator_offline_recitation => 'अफलाइन जप';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'अफलाइन जप थप्नुहोस्:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'यो एप बाहिर गरेका जपको संख्या थप्नुहोस्।';
+
+  @override
   String get group_accumulator_session_complete => 'सत्र पूरा भयो!';
 
   @override

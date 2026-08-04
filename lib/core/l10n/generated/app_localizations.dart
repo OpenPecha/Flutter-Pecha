@@ -3160,6 +3160,24 @@ abstract class AppLocalizations {
   /// **'Finish session'**
   String get group_accumulator_finish_session;
 
+  /// No description provided for @group_accumulator_offline_recitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline recitation'**
+  String get group_accumulator_offline_recitation;
+
+  /// No description provided for @group_accumulator_add_offline_chants_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add offline chants:'**
+  String get group_accumulator_add_offline_chants_title;
+
+  /// No description provided for @group_accumulator_add_offline_chants_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the number of chants you did outside this app.'**
+  String get group_accumulator_add_offline_chants_message;
+
   /// No description provided for @group_accumulator_session_complete.
   ///
   /// In en, this message translates to:

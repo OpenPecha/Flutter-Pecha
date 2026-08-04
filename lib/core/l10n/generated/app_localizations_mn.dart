@@ -1745,6 +1745,17 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_accumulator_finish_session => 'Хичээл дуусгах';
 
   @override
+  String get group_accumulator_offline_recitation => 'Офлайн уншлага';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'Офлайн уншлага нэмэх:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'Энэ апп-аас гадуур хийсэн уншлагын тоог нэмнэ үү.';
+
+  @override
   String get group_accumulator_session_complete => 'Хичээл дууслаа!';
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_router.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/add_offline_chants_dialog.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_chant_bar.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_chant_footer.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
@@ -184,6 +185,20 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
   void _onChantAgain() {
     _scrollToTop?.call();
     _incrementGroupChantCount();
+  }
+
+  Future<void> _addOfflineChantCount() async {
+    final count = await showAddOfflineChantsDialog(context);
+    if (count == null || count <= 0 || !mounted) return;
+
+    final ctx = _chantContext;
+    if (ctx == null) return;
+
+    ref.read(groupAccumulationCountsProvider(ctx.presetAccumulatorId!).notifier).addCount(
+      groupAccumulatorId: ctx.groupAccumulatorId!,
+      groups: const [],
+      count: count,
+    );
   }
 
   Future<void> _finishChantSession() async {
@@ -723,10 +738,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
       context,
       textId: widget.textId,
       showAddToPractices: showAddToPractices,
+      showOfflineRecitation: _isGroupAccumulatorChant,
       onAddToPractices:
           showAddToPractices
               ? () => _openRoutineWithRecitation(context, textDetail)
               : null,
+      onAddOfflineRecitation:
+          _isGroupAccumulatorChant ? _addOfflineChantCount : null,
     );
   }
 

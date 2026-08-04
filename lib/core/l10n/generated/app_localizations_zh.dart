@@ -1646,6 +1646,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_accumulator_finish_session => '結束課誦';
 
   @override
+  String get group_accumulator_offline_recitation => '離線誦念';
+
+  @override
+  String get group_accumulator_add_offline_chants_title => '新增離線誦念：';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      '新增您在此應用程式外完成的誦念次數。';
+
+  @override
   String get group_accumulator_session_complete => '課誦完成！';
 
   @override
