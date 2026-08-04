@@ -95,8 +95,9 @@ class ProtectedRoutes {
     // Group detail + members: sends auth when logged in so fields like
     // `is_group_enrolled` reflect the current user (anonymous GET → false).
     '/author/groups/',
-    // Event detail: sends auth when logged in so `is_joined` reflects the
+    // Events list/detail: sends auth when logged in so `is_joined` reflects the
     // current user (anonymous GET → false).
+    '/events',
     '/events/{eventId}',
   ];
 

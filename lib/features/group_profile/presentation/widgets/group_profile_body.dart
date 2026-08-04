@@ -55,6 +55,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   final Set<String> _localGroupEnrolledSeriesIds = {};
   ProviderSubscription<bool>? _membersTabActiveSub;
   ProviderSubscription<bool>? _membersNeedsRefreshSub;
+  late final TapGestureRecognizer _moreRecognizer;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
 
@@ -78,6 +79,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   @override
   void initState() {
     super.initState();
+    _moreRecognizer = TapGestureRecognizer();
     if (_isCommunityGroup(widget.profile)) {
       _tabController = TabController(
         length: 4,
@@ -125,6 +127,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     _membersNeedsRefreshSub?.close();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
+    _moreRecognizer.dispose();
     super.dispose();
   }
 
@@ -438,13 +441,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           );
         }
 
+        _moreRecognizer.onTap = openAboutScreen;
+
         final moreTapSpan = TextSpan(
           text: context.l10n.more,
           style: style.copyWith(
             color: actionColor,
             fontWeight: FontWeight.w500,
           ),
-          recognizer: TapGestureRecognizer()..onTap = openAboutScreen,
+          recognizer: _moreRecognizer,
         );
 
         // Description fits within the collapsed height, but if there are
@@ -799,8 +804,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   Widget _buildDescriptionLongContent(GroupProfile profile) {
-    final descriptionLong = profile.description?.trim();
-    if (descriptionLong == null || descriptionLong.isEmpty) {
+    final content = _aboutDescription(profile);
+    if (content == null) {
       return const SizedBox.shrink();
     }
 
@@ -809,7 +814,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       child: PlanInlineMarkdownView(
-        content: descriptionLong,
+        content: content,
         fontSize: bodyFontSize,
       ),
     );
