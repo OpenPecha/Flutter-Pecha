@@ -330,7 +330,8 @@ Future<bool> joinGroupAccumulator({
 }
 
 /// Ends a group accumulation chant session by flushing pending counts and
-/// refreshing accumulator data. Does not call `DELETE /group-accumulators/{id}`.
+/// refreshing accumulator data. Does not delete or reset local/server counts;
+/// per-visit session display in the reader is handled separately via a baseline.
 Future<bool> finishGroupAccumulatorSession({
   required WidgetRef ref,
   required String groupAccumulatorId,
