@@ -1646,6 +1646,50 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_accumulator_recite_now => '立即誦念';
 
   @override
+  String get group_accumulator_chant_again => '再誦一次';
+
+  @override
+  String get group_accumulator_finish_session => '結束課誦';
+
+  @override
+  String get group_accumulator_offline_recitation => '離線誦念';
+
+  @override
+  String get group_accumulator_add_offline_chants_title => '新增離線誦念：';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      '新增您在此應用程式外完成的誦念次數。';
+
+  @override
+  String get group_accumulator_session_complete => '課誦完成！';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return '您在本課誦中完成了 $count 次誦讀';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return '我在 WeBuddhist 上完成了 $group 的累积活动「$accumulation」中的 $count 次誦讀，快来加入我吧！';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return '我在 WeBuddhist 上完成了累积活动「$accumulation」中的 $count 次誦讀，快来加入我吧！';
+  }
+
+  @override
+  String get group_accumulator_session_share_error => '無法分享課誦，請重試';
+
+  @override
   String get share_this_quote => '分享这句话';
 
   @override

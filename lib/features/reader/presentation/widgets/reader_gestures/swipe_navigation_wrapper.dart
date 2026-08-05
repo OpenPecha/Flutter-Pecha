@@ -45,7 +45,10 @@ class _SwipeNavigationWrapperState
     final state = ref.watch(readerNotifierProvider(widget.params));
     final navigationContext = state.navigationContext;
     final hideBottomNav = state.hasSelection && !state.isCommentaryOpen;
-    final showBottomBar = !hideBottomNav && !state.isCommentaryOpen;
+    final isGroupChant =
+        navigationContext?.source == NavigationSource.groupAccumulatorChant;
+    final showBottomBar =
+        !hideBottomNav && !state.isCommentaryOpen && !isGroupChant;
 
     final canSwipe = navigationContext != null && navigationContext.canSwipe;
 

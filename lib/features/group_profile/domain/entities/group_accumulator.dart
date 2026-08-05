@@ -4,6 +4,8 @@ import 'package:flutter_pecha/shared/domain/value_objects/responsive_image.dart'
 class GroupAccumulator extends Equatable {
   final String id;
   final String presetAccumulatorId;
+  final String? textId;
+  final String? mantraId;
   final String groupId;
   final String title;
   final ResponsiveImage? image;
@@ -17,6 +19,8 @@ class GroupAccumulator extends Equatable {
   const GroupAccumulator({
     required this.id,
     required this.presetAccumulatorId,
+    this.textId,
+    this.mantraId,
     required this.groupId,
     required this.title,
     this.image,
@@ -27,6 +31,10 @@ class GroupAccumulator extends Equatable {
     this.memberCount = 0,
     this.totalCount = 0,
   });
+
+  bool get hasTextContent => textId != null && textId!.isNotEmpty;
+
+  bool get hasMantraContent => mantraId != null && mantraId!.isNotEmpty;
 
   bool get hasJoined => isJoined == true;
 
@@ -41,6 +49,8 @@ class GroupAccumulator extends Equatable {
   List<Object?> get props => [
     id,
     presetAccumulatorId,
+    textId,
+    mantraId,
     groupId,
     title,
     image,
@@ -60,6 +70,8 @@ class GroupAccumulatorDetail extends GroupAccumulator {
   const GroupAccumulatorDetail({
     required super.id,
     required super.presetAccumulatorId,
+    super.textId,
+    super.mantraId,
     required super.groupId,
     required super.title,
     super.image,

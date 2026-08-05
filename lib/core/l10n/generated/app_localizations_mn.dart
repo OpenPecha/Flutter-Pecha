@@ -1745,6 +1745,52 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_accumulator_recite_now => 'Одоо уншина уу';
 
   @override
+  String get group_accumulator_chant_again => 'Дахин унших';
+
+  @override
+  String get group_accumulator_finish_session => 'Хичээл дуусгах';
+
+  @override
+  String get group_accumulator_offline_recitation => 'Офлайн уншлага';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'Офлайн уншлага нэмэх:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'Энэ апп-аас гадуур хийсэн уншлагын тоог нэмнэ үү.';
+
+  @override
+  String get group_accumulator_session_complete => 'Хичээл дууслаа!';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'Та энэ хичээлд $count удаа уншлаа';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'Би WeBuddhist дээр $group бүлгийн \"$accumulation\" хуримтлалд $count удаа уншлаа. Та ч бас надтай нэгдээрэй!';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'Би WeBuddhist дээр \"$accumulation\" бүлгийн хуримтлалд $count удаа уншлаа. Та ч бас надтай нэгдээрэй!';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'Хичээлийг хуваалцах боломжгүй байна. Дахин оролдоно уу';
+
+  @override
   String get share_this_quote => 'Энэ ишлэлийг хуваалцах';
 
   @override

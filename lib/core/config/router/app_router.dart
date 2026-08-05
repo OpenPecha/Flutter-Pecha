@@ -615,6 +615,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               source = NavigationSource.recitationList;
             } else if (sourceStr == 'routine') {
               source = NavigationSource.routine;
+            } else if (sourceStr == 'groupAccumulatorChant') {
+              source = NavigationSource.groupAccumulatorChant;
             }
 
             navigationContext = NavigationContext(
@@ -622,6 +624,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               targetSegmentId: segmentId,
               planTextItems: planTextItems,
               currentTextIndex: currentTextIndex ?? 0,
+              groupAccumulatorId: extra['groupAccumulatorId'] as String?,
+              presetAccumulatorId: extra['presetAccumulatorId'] as String?,
+              groupId: extra['groupId'] as String?,
+              groupTitle: extra['groupTitle'] as String?,
+              groupAccumulatorSessionCount:
+                  extra['groupAccumulatorSessionCount'] as int?,
             );
           } else if (segmentId != null && segmentId.isNotEmpty) {
             navigationContext = NavigationContext(

@@ -384,6 +384,7 @@ class _ResourcesPanelState extends State<_ResourcesPanel> {
                 clipBehavior: Clip.antiAlias,
                 child: SafeArea(
                   top: false,
+                  bottom: false,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -472,7 +473,7 @@ class _ResourcesPanelState extends State<_ResourcesPanel> {
         if (showMorePrompt) _SwipeForMorePrompt(onTap: _expand),
         if (showVideos && widget.videos.isNotEmpty)
           _VideosSection(videos: widget.videos, onVideoTap: _openSegmentVideo),
-        const SizedBox(height: 12),
+        SizedBox(height: 12 + MediaQuery.paddingOf(context).bottom),
       ],
     );
   }
