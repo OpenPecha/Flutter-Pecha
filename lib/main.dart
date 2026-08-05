@@ -220,6 +220,12 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _bootstrapTolgee() async {
+    // localeProvider starts on the default language and only reaches the stored
+    // one after a storage read, so fetching before that would pull the wrong
+    // language. This also covers a restore that lands before build() registers
+    // the localeProvider listener, which nothing downstream could recover from.
+    await ref.read(localeProvider.notifier).ensureInitialized();
+    if (!mounted) return;
     final bool ready = await TolgeeService.initialize(
       locale: ref.read(localeProvider),
     );
