@@ -77,8 +77,15 @@ class TolgeeService {
       return Future<bool>.value(false);
     }
     final Future<bool> run = _chain.then((_) => _load());
-    // A failed run must not poison the queue for later language changes.
-    _chain = run.then<void>((_) {}, onError: (Object _) {});
+    // Swallow so a failed run cannot poison the queue for later language
+    // changes, but surface it: callers reach this via `unawaited`, so nothing
+    // else would ever report an error that escaped `_load`.
+    _chain = run.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.warning('Tolgee load run failed', error, stackTrace);
+      },
+    );
     return run;
   }
 
