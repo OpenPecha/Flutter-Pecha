@@ -190,8 +190,10 @@ bundled ARB only. This is also the kill switch if a bad translation ships.
 
 ### Tolgee project requirements
 
-- Language tags must be the bare codes `en`, `bo`, `zh`, `hi`, `mn`, `ne`. The
-  SDK matches these exactly, so a tag like `en-US` will not be found.
+- App UI locales use bare codes (`en`, `bo`, `zh`, `hi`, `mn`, `ne`). Tolgee
+  Content Delivery language tags (and CDN filenames) must be `en`, `bo-IN`,
+  `zh-Hant-TW`, `hi`, `mn`, `ne` — the app maps `bo`/`zh` to those CDN tags
+  via `TolgeeLocaleMap`. Publishing `bo.json` or `zh.json` will 404.
 - Enable ICU placeholder support so plural strings are served as ICU source.
 - Content Delivery must export **flat** JSON (nesting and arrays disabled),
   one file per language at `<TOLGEE_CDN_URL>/<tag>.json`. The SDK's CDN parser
