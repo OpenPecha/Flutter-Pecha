@@ -15,6 +15,8 @@ abstract class GroupAccumulatorRepositoryInterface {
 
   Future<Either<Failure, void>> joinGroupAccumulator(String accumulatorId);
 
+  Future<Either<Failure, void>> deleteGroupAccumulator(String groupAccumulatorId);
+
   Future<Either<Failure, GroupAccumulatorMembersPage>> getGroupAccumulatorMembers(
     String accumulatorId, {
     required int skip,

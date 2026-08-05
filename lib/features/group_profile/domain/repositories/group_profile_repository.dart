@@ -1,5 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_events_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_members_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 
@@ -29,4 +31,21 @@ abstract class GroupProfileRepositoryInterface {
     required int skip,
     required int limit,
   });
+
+  Future<Either<Failure, GroupEventsPage>> getGroupEvents(String groupId);
+
+  Future<Either<Failure, GroupEvent>> getGroupEventDetail(
+    String eventId, {
+    required String language,
+  });
+
+  Future<Either<Failure, GroupEventParticipantsPage>> getGroupEventParticipants(
+    String eventId, {
+    required int skip,
+    required int limit,
+  });
+
+  Future<Either<Failure, void>> joinGroupEvent(String eventId);
+
+  Future<Either<Failure, void>> leaveGroupEvent(String eventId);
 }

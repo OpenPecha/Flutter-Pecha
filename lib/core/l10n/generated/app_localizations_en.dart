@@ -1668,6 +1668,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_links_title => 'Links';
 
   @override
+  String get group_about_description => 'Description';
+
+  @override
+  String get group_about_empty => 'No information available yet';
+
+  @override
   String group_and_more_links(int count) {
     return 'and $count more links';
   }
@@ -1720,6 +1726,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get group_accumulator_recite_now => 'Recite now';
+
+  @override
+  String get group_accumulator_chant_again => 'Chant again';
+
+  @override
+  String get group_accumulator_finish_session => 'Finish session';
+
+  @override
+  String get group_accumulator_offline_recitation => 'Offline recitation';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'Add offline chants:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'Add the number of chants you did outside this app.';
+
+  @override
+  String get group_accumulator_session_complete => 'Session complete!';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'You completed $count recitations this session';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'I completed $count recitations in \"$accumulation\", a group accumulation by $group on WeBuddhist. Come join me!';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'I completed $count recitations in the group accumulation \"$accumulation\" on WeBuddhist. Come join me!';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'Unable to share session. Please try again';
 
   @override
   String get share_this_quote => 'Share this quote';

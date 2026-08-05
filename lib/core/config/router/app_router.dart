@@ -13,6 +13,7 @@ import 'package:flutter_pecha/features/auth/presentation/screens/splash_screen.d
 import 'package:flutter_pecha/features/calendar/presentation/screens/tibetan_calendar_screen.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_profile_screen.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/main_navigation_screen.dart';
@@ -162,7 +163,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/open', name: 'open', redirect: (_, __) => AppRoutes.home),
       GoRoute(
         path: "/login",
-        name: "login", 
+        name: "login",
         builder: (context, state) => const LoginPage(),
       ),
       // onboarding route
@@ -264,6 +265,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     accumulatorId: accumulatorId,
                     groupTitle: groupTitle,
                   );
+                },
+              ),
+              GoRoute(
+                path: "events/:eventId",
+                name: "home-group-event",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final eventId = state.pathParameters['eventId'] ?? '';
+                  return GroupEventDetailScreen(eventId: eventId);
                 },
               ),
               GoRoute(
@@ -605,6 +615,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               source = NavigationSource.recitationList;
             } else if (sourceStr == 'routine') {
               source = NavigationSource.routine;
+            } else if (sourceStr == 'groupAccumulatorChant') {
+              source = NavigationSource.groupAccumulatorChant;
             }
 
             navigationContext = NavigationContext(
@@ -612,6 +624,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               targetSegmentId: segmentId,
               planTextItems: planTextItems,
               currentTextIndex: currentTextIndex ?? 0,
+              groupAccumulatorId: extra['groupAccumulatorId'] as String?,
+              presetAccumulatorId: extra['presetAccumulatorId'] as String?,
+              groupId: extra['groupId'] as String?,
+              groupTitle: extra['groupTitle'] as String?,
+              groupAccumulatorSessionCount:
+                  extra['groupAccumulatorSessionCount'] as int?,
             );
           } else if (segmentId != null && segmentId.isNotEmpty) {
             navigationContext = NavigationContext(

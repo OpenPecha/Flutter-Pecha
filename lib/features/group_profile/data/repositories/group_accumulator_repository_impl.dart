@@ -80,6 +80,30 @@ class GroupAccumulatorRepositoryImpl
   }
 
   @override
+  Future<Either<Failure, void>> deleteGroupAccumulator(
+    String groupAccumulatorId,
+  ) async {
+    try {
+      await remote.deleteGroupAccumulator(groupAccumulatorId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(
+        UnknownFailure('Failed to end group accumulator session: $e'),
+      );
+    }
+  }
+
+  @override
   Future<Either<Failure, GroupAccumulatorMembersPage>>
   getGroupAccumulatorMembers(
     String accumulatorId, {

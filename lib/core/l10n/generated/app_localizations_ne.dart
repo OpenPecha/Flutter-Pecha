@@ -1689,6 +1689,12 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_links_title => 'लिङ्कहरू';
 
   @override
+  String get group_about_description => 'विवरण';
+
+  @override
+  String get group_about_empty => 'हाल कुनै जानकारी उपलब्ध छैन';
+
+  @override
   String group_and_more_links(int count) {
     return 'र अरू $count लिङ्कहरू';
   }
@@ -1741,6 +1747,52 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get group_accumulator_recite_now => 'अहिले जप गर्नुहोस्';
+
+  @override
+  String get group_accumulator_chant_again => 'फेरि जप गर्नुहोस्';
+
+  @override
+  String get group_accumulator_finish_session => 'सत्र समाप्त गर्नुहोस्';
+
+  @override
+  String get group_accumulator_offline_recitation => 'अफलाइन जप';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'अफलाइन जप थप्नुहोस्:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'यो एप बाहिर गरेका जपको संख्या थप्नुहोस्।';
+
+  @override
+  String get group_accumulator_session_complete => 'सत्र पूरा भयो!';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'तपाईंले यो सत्रमा $count जप पूरा गर्नुभयो';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'मैले WeBuddhist मा $group को सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'मैले WeBuddhist मा सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'सत्र साझा गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्';
 
   @override
   String get share_this_quote => 'यो उद्धरण साझा गर्नुहोस्';

@@ -4,6 +4,8 @@ import 'package:flutter_pecha/shared/domain/value_objects/responsive_image.dart'
 class GroupAccumulatorModel {
   final String id;
   final String presetAccumulatorId;
+  final String? textId;
+  final String? mantraId;
   final String groupId;
   final String title;
   final Map<String, dynamic>? imageJson;
@@ -19,6 +21,8 @@ class GroupAccumulatorModel {
   GroupAccumulatorModel({
     required this.id,
     required this.presetAccumulatorId,
+    this.textId,
+    this.mantraId,
     required this.groupId,
     required this.title,
     this.imageJson,
@@ -36,6 +40,8 @@ class GroupAccumulatorModel {
     return GroupAccumulatorModel(
       id: json['id'] as String? ?? '',
       presetAccumulatorId: json['preset_accumulator_id'] as String? ?? '',
+      textId: json['text_id'] as String?,
+      mantraId: json['mantra_id'] as String?,
       groupId: json['group_id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       imageJson: json['image'] as Map<String, dynamic>?,
@@ -54,6 +60,8 @@ class GroupAccumulatorModel {
     return GroupAccumulator(
       id: id,
       presetAccumulatorId: presetAccumulatorId,
+      textId: textId,
+      mantraId: mantraId,
       groupId: groupId,
       title: title,
       image:
@@ -71,6 +79,8 @@ class GroupAccumulatorModel {
     return GroupAccumulatorDetail(
       id: id,
       presetAccumulatorId: presetAccumulatorId,
+      textId: textId,
+      mantraId: mantraId,
       groupId: groupId,
       title: title,
       image:

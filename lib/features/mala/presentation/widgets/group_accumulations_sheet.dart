@@ -29,17 +29,22 @@ class GroupAccumulationsSheet extends ConsumerStatefulWidget {
     required this.presetId,
     required this.groups,
     required this.personalLifetimeCount,
+    this.showPersonalRow = true,
   });
 
   final String presetId;
   final List<AccumulatorGroup> groups;
   final int personalLifetimeCount;
 
+  /// When false (e.g. group chant reader), only group rows are shown.
+  final bool showPersonalRow;
+
   static Future<void> show(
     BuildContext context, {
     required String presetId,
     required List<AccumulatorGroup> groups,
     required int personalLifetimeCount,
+    bool showPersonalRow = true,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -51,6 +56,7 @@ class GroupAccumulationsSheet extends ConsumerStatefulWidget {
             presetId: presetId,
             groups: groups,
             personalLifetimeCount: personalLifetimeCount,
+            showPersonalRow: showPersonalRow,
           ),
     );
   }
@@ -124,26 +130,28 @@ class _GroupAccumulationsSheetState
                 ),
               ),
               const SizedBox(height: 12),
-              _SelectableAccumulationRow(
-                isSelected: selection.isPersonal,
-                accentColor: accentColor,
-                onTap:
-                    () =>
-                        ref
-                            .read(
-                              malaAccumulationSelectionProvider(
-                                widget.presetId,
-                              ).notifier,
-                            )
-                            .selectPersonal(),
-                leading: _UserAvatar(avatarUrl: user?.avatarUrl),
-                title: user != null ? _userDisplayName(user) : '—',
-                formattedCount: NumberFormat.decimalPattern(
-                  locale,
-                ).format(widget.personalLifetimeCount),
-              ),
-              const SizedBox(height: 12),
-              Divider(height: 1, thickness: 1, color: dividerColor),
+              if (widget.showPersonalRow) ...[
+                _SelectableAccumulationRow(
+                  isSelected: selection.isPersonal,
+                  accentColor: accentColor,
+                  onTap:
+                      () =>
+                          ref
+                              .read(
+                                malaAccumulationSelectionProvider(
+                                  widget.presetId,
+                                ).notifier,
+                              )
+                              .selectPersonal(),
+                  leading: _UserAvatar(avatarUrl: user?.avatarUrl),
+                  title: user != null ? _userDisplayName(user) : '—',
+                  formattedCount: NumberFormat.decimalPattern(
+                    locale,
+                  ).format(widget.personalLifetimeCount),
+                ),
+                const SizedBox(height: 12),
+                Divider(height: 1, thickness: 1, color: dividerColor),
+              ],
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                 child: Text(

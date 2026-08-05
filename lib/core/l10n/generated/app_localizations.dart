@@ -3058,6 +3058,18 @@ abstract class AppLocalizations {
   /// **'Links'**
   String get group_links_title;
 
+  /// No description provided for @group_about_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get group_about_description;
+
+  /// No description provided for @group_about_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No information available yet'**
+  String get group_about_empty;
+
   /// No description provided for @group_and_more_links.
   ///
   /// In en, this message translates to:
@@ -3147,6 +3159,73 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recite now'**
   String get group_accumulator_recite_now;
+
+  /// No description provided for @group_accumulator_chant_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Chant again'**
+  String get group_accumulator_chant_again;
+
+  /// No description provided for @group_accumulator_finish_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish session'**
+  String get group_accumulator_finish_session;
+
+  /// No description provided for @group_accumulator_offline_recitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline recitation'**
+  String get group_accumulator_offline_recitation;
+
+  /// No description provided for @group_accumulator_add_offline_chants_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add offline chants:'**
+  String get group_accumulator_add_offline_chants_title;
+
+  /// No description provided for @group_accumulator_add_offline_chants_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the number of chants you did outside this app.'**
+  String get group_accumulator_add_offline_chants_message;
+
+  /// No description provided for @group_accumulator_session_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete!'**
+  String get group_accumulator_session_complete;
+
+  /// No description provided for @group_accumulator_session_recitations.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed {count} recitations this session'**
+  String group_accumulator_session_recitations(int count);
+
+  /// No description provided for @group_accumulator_session_share_message.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed {count} recitations in \"{accumulation}\", a group accumulation by {group} on WeBuddhist. Come join me!'**
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  );
+
+  /// No description provided for @group_accumulator_session_share_message_no_group.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed {count} recitations in the group accumulation \"{accumulation}\" on WeBuddhist. Come join me!'**
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  );
+
+  /// No description provided for @group_accumulator_session_share_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to share session. Please try again'**
+  String get group_accumulator_session_share_error;
 
   /// No description provided for @share_this_quote.
   ///

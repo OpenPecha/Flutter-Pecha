@@ -6,6 +6,8 @@ enum NavigationSource {
   deepLink,
   recitationList,
   routine,
+  /// Text reader opened from a group accumulation with chant counting.
+  groupAccumulatorChant,
 }
 
 /// Discriminator for the kind of content a [PlanTextItem] carries.
@@ -316,6 +318,18 @@ class NavigationContext {
   /// The day-level audio URL shared by all tasks in this plan day.
   final String? dayAudioUrl;
 
+  /// Group accumulation chant session — set when [source] is
+  /// [NavigationSource.groupAccumulatorChant].
+  final String? groupAccumulatorId;
+  final String? presetAccumulatorId;
+  final String? groupId;
+
+  /// Community / group name shown in the group profile app bar before chant.
+  final String? groupTitle;
+
+  /// User session count from `GET /group-accumulators/{id}` before entering.
+  final int? groupAccumulatorSessionCount;
+
   const NavigationContext({
     required this.source,
     this.planId,
@@ -326,7 +340,21 @@ class NavigationContext {
     this.navigationDirection,
     this.autoPlay = false,
     this.dayAudioUrl,
+    this.groupAccumulatorId,
+    this.presetAccumulatorId,
+    this.groupId,
+    this.groupTitle,
+    this.groupAccumulatorSessionCount,
   });
+
+  /// True when the reader should show chant-again / finish-session controls
+  /// and increment the group accumulation count.
+  bool get isGroupAccumulatorChant =>
+      source == NavigationSource.groupAccumulatorChant &&
+      groupAccumulatorId != null &&
+      groupAccumulatorId!.isNotEmpty &&
+      presetAccumulatorId != null &&
+      presetAccumulatorId!.isNotEmpty;
 
   /// Whether this context can navigate between plan items at all
   /// (i.e. it has a non-empty list of items and a valid index).
@@ -393,6 +421,11 @@ class NavigationContext {
     SwipeDirection? navigationDirection,
     bool? autoPlay,
     String? dayAudioUrl,
+    String? groupAccumulatorId,
+    String? presetAccumulatorId,
+    String? groupId,
+    String? groupTitle,
+    int? groupAccumulatorSessionCount,
   }) {
     return NavigationContext(
       source: source ?? this.source,
@@ -404,6 +437,13 @@ class NavigationContext {
       navigationDirection: navigationDirection ?? this.navigationDirection,
       autoPlay: autoPlay ?? this.autoPlay,
       dayAudioUrl: dayAudioUrl ?? this.dayAudioUrl,
+      groupAccumulatorId: groupAccumulatorId ?? this.groupAccumulatorId,
+      presetAccumulatorId:
+          presetAccumulatorId ?? this.presetAccumulatorId,
+      groupId: groupId ?? this.groupId,
+      groupTitle: groupTitle ?? this.groupTitle,
+      groupAccumulatorSessionCount:
+          groupAccumulatorSessionCount ?? this.groupAccumulatorSessionCount,
     );
   }
 

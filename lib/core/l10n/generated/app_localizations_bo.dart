@@ -1690,6 +1690,12 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_links_title => 'འབྲེལ་ཐག';
 
   @override
+  String get group_about_description => 'ངོ་སྤྲོད།';
+
+  @override
+  String get group_about_empty => 'ད་ལྟའི་ཆར་ཆ་འཕྲིན་མེད།';
+
+  @override
   String group_and_more_links(int count) {
     return 'དང་འབྲེལ་ཐག་གཞན་ $count';
   }
@@ -1742,6 +1748,52 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_accumulator_recite_now => 'ད་ལྟ་བཟླས་བརྗོད་གནང་།';
+
+  @override
+  String get group_accumulator_chant_again => 'ཡང་བསྐྱར་བཟླས་བརྗོད།';
+
+  @override
+  String get group_accumulator_finish_session => 'སྐབས་མཇུག་སྒྲིལ།';
+
+  @override
+  String get group_accumulator_offline_recitation => 'དྲ་ཐོག་མིན་བཟླས་བརྗོད།';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'དྲ་ཐོག་མིན་བཟླས་བརྗོད་སྣོན།';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'Add the number of chants you did outside this app.';
+
+  @override
+  String get group_accumulator_session_complete => 'སྐབས་འདི་ཚང་མ་བསྐངས་ཟིན།';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'ཁྱེད་ཀྱིས་སྐབས་འདིར་བཟླས་བརྗོད་ $count བསྐངས་ཟིན།';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'ངས WeBuddhist ཐོག་ $group གི་བསགས་གྲངས་ $accumulation ནང་བཟླས་བརྗོད་ $count བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'ངས WeBuddhist ཐོག་བསགས་གྲངས་ $accumulation ནང་བཟླས་བརྗོད་ $count བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'སྐབས་མཇུག་བགོས་མ་ཐུབ། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
 
   @override
   String get share_this_quote => 'གསུང་ཚིག་འདི་སྤེལ།';
