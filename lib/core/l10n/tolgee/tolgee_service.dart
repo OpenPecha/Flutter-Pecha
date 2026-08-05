@@ -175,12 +175,14 @@ class TolgeeService {
               : 'Tolgee switched to ${target.languageCode} (CDN tag $cdnTag)',
         );
         return true;
-      } catch (error) {
+      } catch (error, stackTrace) {
         TolgeeBridge.active = false;
         _logger.warning(
           isFirstLoad
-              ? 'Tolgee init failed ($error); using bundled ARB'
-              : 'Tolgee language switch failed ($error)',
+              ? 'Tolgee init failed; using bundled ARB'
+              : 'Tolgee language switch failed',
+          error,
+          stackTrace,
         );
         return false;
       }
