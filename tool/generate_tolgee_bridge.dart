@@ -140,13 +140,20 @@ List<_Parameter> _parseParameters(String raw) {
   if (trimmed.isEmpty) {
     return const <_Parameter>[];
   }
-  return trimmed.split(',').map((String part) {
-    final List<String> tokens = part.trim().split(RegExp(r'\s+'));
-    return _Parameter(
-      type: tokens.sublist(0, tokens.length - 1).join(' '),
-      name: tokens.last,
-    );
-  }).toList();
+  // gen-l10n wraps long signatures and leaves a trailing comma; splitting on
+  // ',' then yields an empty last segment that must be discarded.
+  return trimmed
+      .split(',')
+      .map((String part) => part.trim())
+      .where((String part) => part.isNotEmpty)
+      .map((String part) {
+        final List<String> tokens = part.split(RegExp(r'\s+'));
+        return _Parameter(
+          type: tokens.sublist(0, tokens.length - 1).join(' '),
+          name: tokens.last,
+        );
+      })
+      .toList();
 }
 
 String _render(List<_Member> members) {

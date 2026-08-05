@@ -3234,6 +3234,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_about_description => TolgeeBridge.get(
+    localeName,
+    'group_about_description',
+    () => _fallback.group_about_description,
+  );
+
+  @override
+  String get group_about_empty => TolgeeBridge.get(
+    localeName,
+    'group_about_empty',
+    () => _fallback.group_about_empty,
+  );
+
+  @override
   String group_and_more_links(int count) => TolgeeBridge.format(
     localeName,
     'group_and_more_links',
@@ -3339,6 +3353,98 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'group_accumulator_recite_now',
     () => _fallback.group_accumulator_recite_now,
+  );
+
+  @override
+  String get group_accumulator_chant_again => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_chant_again',
+    () => _fallback.group_accumulator_chant_again,
+  );
+
+  @override
+  String get group_accumulator_finish_session => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_finish_session',
+    () => _fallback.group_accumulator_finish_session,
+  );
+
+  @override
+  String get group_accumulator_offline_recitation => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_offline_recitation',
+    () => _fallback.group_accumulator_offline_recitation,
+  );
+
+  @override
+  String get group_accumulator_add_offline_chants_title => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_add_offline_chants_title',
+    () => _fallback.group_accumulator_add_offline_chants_title,
+  );
+
+  @override
+  String get group_accumulator_add_offline_chants_message => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_add_offline_chants_message',
+    () => _fallback.group_accumulator_add_offline_chants_message,
+  );
+
+  @override
+  String get group_accumulator_session_complete => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_session_complete',
+    () => _fallback.group_accumulator_session_complete,
+  );
+
+  @override
+  String group_accumulator_session_recitations(int count) =>
+      TolgeeBridge.format(
+        localeName,
+        'group_accumulator_session_recitations',
+        <String, Object>{'count': count},
+        () => _fallback.group_accumulator_session_recitations(count),
+      );
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) => TolgeeBridge.format(
+    localeName,
+    'group_accumulator_session_share_message',
+    <String, Object>{
+      'count': count,
+      'accumulation': accumulation,
+      'group': group,
+    },
+    () => _fallback.group_accumulator_session_share_message(
+      count,
+      accumulation,
+      group,
+    ),
+  );
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) => TolgeeBridge.format(
+    localeName,
+    'group_accumulator_session_share_message_no_group',
+    <String, Object>{'count': count, 'accumulation': accumulation},
+    () => _fallback.group_accumulator_session_share_message_no_group(
+      count,
+      accumulation,
+    ),
+  );
+
+  @override
+  String get group_accumulator_session_share_error => TolgeeBridge.get(
+    localeName,
+    'group_accumulator_session_share_error',
+    () => _fallback.group_accumulator_session_share_error,
   );
 
   @override
