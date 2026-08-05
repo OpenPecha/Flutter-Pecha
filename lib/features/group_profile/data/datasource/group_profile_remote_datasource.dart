@@ -120,6 +120,48 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<GroupEventsPageModel> fetchConnectEvents({
+    required bool includeUnfollowed,
+    required String language,
+    int skip = 0,
+    int limit = 20,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        'skip': skip,
+        'limit': limit,
+        'language': language,
+      };
+      if (includeUnfollowed) {
+        queryParameters['include_unfollowed'] = true;
+      }
+
+      final response = await dio.get(
+        '/events',
+        queryParameters: queryParameters,
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupEventsPageModel.fromJson(
+          response.data as Map<String, dynamic>,
+          language: language,
+        );
+      } else {
+        _logger.error(
+          'Failed to load connect events: ${response.statusCode}',
+        );
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load events',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchConnectEvents', e);
+      throw _dioToException(e, 'Failed to load events');
+    }
+  }
+
   Future<GroupEventsPageModel> fetchGroupEvents(String groupId) async {
     try {
       final response = await dio.get(

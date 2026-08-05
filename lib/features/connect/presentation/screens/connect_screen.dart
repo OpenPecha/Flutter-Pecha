@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/group_search_screen.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_events_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_groups_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/followed_groups_row.dart';
 import 'package:flutter_pecha/shared/widgets/main_tab_app_bar.dart';
@@ -36,6 +38,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
     await Future.wait([
       ref.refresh(myGroupsProvider.future),
       ref.read(discoverGroupsProvider.notifier).refresh(),
+      ref.read(myConnectEventsProvider.notifier).refresh(),
+      ref.read(discoverConnectEventsProvider.notifier).refresh(),
     ]);
   }
 
@@ -96,7 +100,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
               controller: _tabController,
               children: [
                 const SizedBox.shrink(),
-                const SizedBox.shrink(),
+                ConnectEventsTab(
+                  myGroups: displayedMyGroups,
+                  onRefresh: _onRefresh,
+                ),
                 const SizedBox.shrink(),
                 ConnectGroupsTab(
                   myGroups: displayedMyGroups,

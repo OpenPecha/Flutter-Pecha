@@ -102,7 +102,11 @@ class _GroupEventDetailScreenState
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
           ),
-          IconButton(icon: const Icon(AppAssets.readerShare), onPressed: _shareEvent, iconSize: 22,),
+          IconButton(
+            icon: const Icon(AppAssets.readerShare),
+            onPressed: _shareEvent,
+            iconSize: 22,
+          ),
         ],
       ),
     );
@@ -183,23 +187,13 @@ class _GroupEventDetailScreenState
         minimumSize: const Size(0, 44),
         backgroundColor:
             isAttending
-                ? (isDark
-                    ? AppColors.surfaceVariantDark
-                    : AppColors.grey100)
-                : (isDark
-                    ? AppColors.surfaceWhite
-                    : AppColors.textPrimary),
+                ? (isDark ? AppColors.surfaceVariantDark : AppColors.grey100)
+                : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary),
         foregroundColor:
             isAttending
-                ? (isDark
-                    ? AppColors.textTertiaryDark
-                    : AppColors.textPrimary)
-                : (isDark
-                    ? AppColors.textPrimary
-                    : AppColors.surfaceWhite),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+                ? (isDark ? AppColors.textTertiaryDark : AppColors.textPrimary)
+                : (isDark ? AppColors.textPrimary : AppColors.surfaceWhite),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       child:
           _isSubmitting
@@ -435,13 +429,15 @@ class _AttendeesRow extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isDark
-                            ? AppColors.grey800
-                            : const Color(0xFFE8E5DF),
+                        color:
+                            isDark
+                                ? AppColors.grey800
+                                : const Color(0xFFE8E5DF),
                         border: Border.all(
-                          color: isDark
-                              ? AppColors.scaffoldBackgroundDark
-                              : AppColors.surfaceLight,
+                          color:
+                              isDark
+                                  ? AppColors.scaffoldBackgroundDark
+                                  : AppColors.surfaceLight,
                           width: 2,
                         ),
                       ),
@@ -450,9 +446,10 @@ class _AttendeesRow extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? AppColors.textPrimaryDark
-                              : AppColors.greyDark,
+                          color:
+                              isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.greyDark,
                         ),
                       ),
                     ),
@@ -517,7 +514,7 @@ class _ParticipantAvatar extends StatelessWidget {
   Widget _avatarFallback() {
     final name = participant.displayName;
     final initials = _getInitials(name);
-    
+
     return ColoredBox(
       color: AppColors.primary,
       child: Center(
@@ -537,7 +534,8 @@ class _ParticipantAvatar extends StatelessWidget {
     if (name.isEmpty) return '?';
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.length > 1) {
-      return '${parts[0].characters.first}${parts[1].characters.first}'.toUpperCase();
+      return '${parts[0].characters.first}${parts[1].characters.first}'
+          .toUpperCase();
     }
     return name.characters.take(2).toString().toUpperCase();
   }
