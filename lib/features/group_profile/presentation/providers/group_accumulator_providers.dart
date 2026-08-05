@@ -255,6 +255,33 @@ bool accumulatorHasJoined(
   return accumulator.isJoined == true;
 }
 
+void refreshGroupAccumulatorData(
+  WidgetRef ref, {
+  required String accumulatorId,
+  String? groupId,
+}) {
+  ref.invalidate(groupAccumulatorDetailProvider(accumulatorId));
+  ref.invalidate(
+    groupAccumulatorMembersProvider(
+      GroupAccumulatorMembersKey(
+        accumulatorId: accumulatorId,
+        sortBy: GroupAccumulatorMemberSort.total,
+      ),
+    ),
+  );
+  ref.invalidate(
+    groupAccumulatorMembersProvider(
+      GroupAccumulatorMembersKey(
+        accumulatorId: accumulatorId,
+        sortBy: GroupAccumulatorMemberSort.today,
+      ),
+    ),
+  );
+  if (groupId != null && groupId.isNotEmpty) {
+    ref.invalidate(groupAccumulatorsProvider(groupId));
+  }
+}
+
 Future<bool> joinGroupAccumulator({
   required WidgetRef ref,
   required String accumulatorId,
@@ -287,24 +314,10 @@ Future<bool> joinGroupAccumulator({
         .markAutoJoinedFromPracticeEnrollment(group: resolvedGroup);
   }
 
-  ref.invalidate(groupAccumulatorsProvider(groupId));
-  ref.invalidate(groupAccumulatorDetailProvider(accumulatorId));
-
-  ref.invalidate(
-    groupAccumulatorMembersProvider(
-      GroupAccumulatorMembersKey(
-        accumulatorId: accumulatorId,
-        sortBy: GroupAccumulatorMemberSort.total,
-      ),
-    ),
-  );
-  ref.invalidate(
-    groupAccumulatorMembersProvider(
-      GroupAccumulatorMembersKey(
-        accumulatorId: accumulatorId,
-        sortBy: GroupAccumulatorMemberSort.today,
-      ),
-    ),
+  refreshGroupAccumulatorData(
+    ref,
+    accumulatorId: accumulatorId,
+    groupId: groupId,
   );
 
   final refreshFuture = Future.wait([
@@ -358,10 +371,11 @@ Future<bool> finishGroupAccumulatorSession({
       .read(groupAccumulationCountsProvider(presetId).notifier)
       .markSessionEnded(groupAccumulatorId);
 
-  ref.invalidate(groupAccumulatorDetailProvider(groupAccumulatorId));
-  if (groupId != null && groupId.isNotEmpty) {
-    ref.invalidate(groupAccumulatorsProvider(groupId));
-  }
+  refreshGroupAccumulatorData(
+    ref,
+    accumulatorId: groupAccumulatorId,
+    groupId: groupId,
+  );
   ref.invalidate(joinedGroupUserCountsProvider(presetId));
   ref.invalidate(joinedAccumulatorGroupsProvider(presetId));
 

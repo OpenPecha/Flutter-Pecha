@@ -15,6 +15,8 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_accum
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_sync_manager.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -282,10 +284,12 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
     if (!detail.hasTextContent) {
       final presetId = detail.presetAccumulatorId;
       if (presetId.isEmpty) return;
-      context.push(
+      await context.push(
         '/mala',
         extra: {'presetId': presetId, 'groupAccumulatorId': detail.id},
       );
+      if (!context.mounted) return;
+      await _refreshAfterPractice(detail);
       return;
     }
 
@@ -307,7 +311,11 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
       ),
     );
 
-    if (!context.mounted || sessionCount == null) return;
+    if (!context.mounted) return;
+
+    await _refreshAfterPractice(detail);
+
+    if (sessionCount == null) return;
 
     showGroupAccumulatorSessionCompleteSheet(
       context,
@@ -316,6 +324,18 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
       accumulatorId: detail.id,
       groupId: detail.groupId,
       groupName: _resolveGroupName(detail.groupId),
+    );
+  }
+
+  Future<void> _refreshAfterPractice(GroupAccumulatorDetail detail) async {
+    try {
+      await ref.read(malaSyncManagerProvider).flush(SyncReason.screenLeave);
+    } catch (_) {}
+
+    refreshGroupAccumulatorData(
+      ref,
+      accumulatorId: detail.id,
+      groupId: detail.groupId,
     );
   }
 
