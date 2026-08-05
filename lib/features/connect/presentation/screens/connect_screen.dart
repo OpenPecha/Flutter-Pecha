@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
-import 'package:flutter_pecha/core/theme/font_config.dart';
-import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
-import 'package:flutter_pecha/features/connect/domain/entities/discover_groups_page.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_header.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/discover_group_card.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/discover_groups_section.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/my_groups_section_skeleton.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/group_search_screen.dart';
-import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_groups_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/followed_groups_row.dart';
 import 'package:flutter_pecha/shared/widgets/main_tab_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +16,22 @@ class ConnectScreen extends ConsumerStatefulWidget {
   ConsumerState<ConnectScreen> createState() => _ConnectScreenState();
 }
 
-class _ConnectScreenState extends ConsumerState<ConnectScreen> {
+class _ConnectScreenState extends ConsumerState<ConnectScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   Future<void> _onRefresh() async {
     await Future.wait([
       ref.refresh(myGroupsProvider.future),
@@ -49,6 +59,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       discoverGroups: discoverState.groups,
       joinedGroupIds: joinedGroupIds,
     );
+    final myGroupsLoading =
+        myGroupsAsync.isLoading && displayedMyGroups.isEmpty;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -71,142 +83,83 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            ..._buildDiscoverGroupsSlivers(
-              context,
-              discoverState,
-              displayedDiscoverGroups,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FollowedGroupsRow(
+            groups: displayedMyGroups,
+            isLoading: myGroupsLoading,
+          ),
+          _ConnectMainTabBar(controller: _tabController, isDark: isDark),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                const SizedBox.shrink(),
+                const SizedBox.shrink(),
+                const SizedBox.shrink(),
+                ConnectGroupsTab(
+                  myGroups: displayedMyGroups,
+                  discoverGroups: displayedDiscoverGroups,
+                  discoverState: discoverState,
+                  myGroupsLoading: myGroupsLoading,
+                  onRefresh: _onRefresh,
+                ),
+              ],
             ),
-            ..._buildMyGroupsSlivers(
-              context,
-              myGroupsAsync,
-              displayedMyGroups,
-              isDark,
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  List<Widget> _buildDiscoverGroupsSlivers(
-    BuildContext context,
-    DiscoverGroupsState discoverState,
-    List<GroupProfile> groups,
-  ) {
-    if (groups.isNotEmpty) {
-      return [
-        const SliverToBoxAdapter(child: ConnectHeader()),
-        SliverToBoxAdapter(
-          child: DiscoverGroupsSection(
-            groups: groups,
-            total: groups.length,
-          ),
-        ),
-      ];
-    }
+class _ConnectMainTabBar extends StatelessWidget {
+  const _ConnectMainTabBar({
+    required this.controller,
+    required this.isDark,
+  });
 
-    if (discoverState.isLoading && discoverState.groups.isEmpty) {
-      return const [
-        SliverToBoxAdapter(child: ConnectHeader()),
-        SliverToBoxAdapter(child: MyGroupsSectionSkeleton()),
-      ];
-    }
+  final TabController controller;
+  final bool isDark;
 
-    if (discoverState.error != null && groups.isEmpty) {
-      return [
-        const SliverToBoxAdapter(child: ConnectHeader()),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            child: ErrorStateWidget(
-              error: discoverState.error!,
-              onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
-              customMessage: context.l10n.connect_groups_load_error,
-            ),
-          ),
-        ),
-      ];
-    }
+  @override
+  Widget build(BuildContext context) {
+    final labelColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final unselectedColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
 
-    return const [];
-  }
-
-  List<Widget> _buildMyGroupsSlivers(
-    BuildContext context,
-    AsyncValue<DiscoverGroupsPage> myGroupsAsync,
-    List<GroupProfile> displayedMyGroups,
-    bool isDark,
-  ) {
-    if (myGroupsAsync.isLoading && displayedMyGroups.isEmpty) {
-      return const [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 48),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-        ),
-      ];
-    }
-
-    if (displayedMyGroups.isEmpty) {
-      return [_buildStaticConnectImage()];
-    }
-
-    return [
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-        sliver: SliverToBoxAdapter(
-          child: Text(
-            context.l10n.my_groups,
-            strutStyle: context.tibetanStrutStyle(18, compact: true),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              height:
-                  context.isTibetanLocale
-                      ? AppFontConfig.tibetanCompactLineHeight
-                      : null,
-              leadingDistribution:
-                  context.isTibetanLocale
-                      ? AppFontConfig.tibetanLeadingDistribution
-                      : null,
-            ),
-          ),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: dividerColor)),
       ),
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-        sliver: SliverList.separated(
-          itemCount: displayedMyGroups.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            return DiscoverGroupCard(
-              group: displayedMyGroups[index],
-              showJoinButton: false,
-            );
-          },
+      child: TabBar(
+        controller: controller,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        labelColor: labelColor,
+        unselectedLabelColor: unselectedColor,
+        indicatorColor: labelColor,
+        indicatorWeight: 2,
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: Colors.transparent,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+        labelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
         ),
-      ),
-    ];
-  }
-
-  Widget _buildStaticConnectImage() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: AspectRatio(
-            aspectRatio: 16 / 10,
-            child: Image.asset(AppAssets.connect, fit: BoxFit.cover),
-          ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
         ),
+        tabs: const [
+          Tab(text: 'Feed'),
+          Tab(text: 'Events'),
+          Tab(text: 'Posts'),
+          Tab(text: 'Groups'),
+        ],
       ),
     );
   }

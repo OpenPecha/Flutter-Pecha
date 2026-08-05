@@ -106,7 +106,7 @@ class _DiscoverGroupsScreenState extends ConsumerState<DiscoverGroupsScreen> {
           );
         }
 
-        return DiscoverGroupCard(group: groups[index]);
+        return DiscoverGroupCard(group: groups[index], showJoinButton: true);
       },
     );
   }
