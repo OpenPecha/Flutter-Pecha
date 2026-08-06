@@ -1072,6 +1072,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get continueWithApple => '使用 Apple 繼續';
 
   @override
+  String get continueWithPhone => '使用手機號碼繼續';
+
+  @override
   String get continueAsGuest => '以訪客身份繼續';
 
   @override

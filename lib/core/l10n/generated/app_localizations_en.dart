@@ -1127,6 +1127,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithApple => 'Continue with Apple';
 
   @override
+  String get continueWithPhone => 'Continue with phone';
+
+  @override
   String get continueAsGuest => 'Continue as guest';
 
   @override

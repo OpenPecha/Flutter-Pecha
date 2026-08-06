@@ -17,6 +17,7 @@ set -euo pipefail
   echo "AI_URL=${DEV_AI_URL:-}"
   echo "AUTH0_SCHEME=org.pecha.app.dev"
   echo "AUTH0_AUDIENCE=${DEV_AUTH0_AUDIENCE:-}"
+  echo "PHONE_LOGIN_ENABLED=${DEV_PHONE_LOGIN_ENABLED:-false}"
   echo "ENVIRONMENT=development"
 } > .env.dev
 
@@ -26,6 +27,7 @@ set -euo pipefail
   echo "AI_URL=${STAGING_AI_URL:-}"
   echo "AUTH0_SCHEME=org.pecha.app.staging"
   echo "AUTH0_AUDIENCE=${STAGING_AUTH0_AUDIENCE:-}"
+  echo "PHONE_LOGIN_ENABLED=${STAGING_PHONE_LOGIN_ENABLED:-false}"
   echo "ENVIRONMENT=staging"
 } > .env.staging
 
@@ -35,6 +37,7 @@ set -euo pipefail
   echo "AI_URL=${AI_URL:-}"
   echo "AUTH0_SCHEME=org.pecha.app"
   echo "AUTH0_AUDIENCE=${AUTH0_AUDIENCE:-}"
+  echo "PHONE_LOGIN_ENABLED=${PHONE_LOGIN_ENABLED:-false}"
   echo "ENVIRONMENT=production"
 } > .env.prod
 

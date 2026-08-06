@@ -1136,6 +1136,9 @@ class AppLocalizationsMn extends AppLocalizations {
   String get continueWithApple => 'Apple-ээр үргэлжлүүлэх';
 
   @override
+  String get continueWithPhone => 'Утасны дугаараар үргэлжлүүлэх';
+
+  @override
   String get continueAsGuest => 'Зочноор үргэлжлүүлэх';
 
   @override

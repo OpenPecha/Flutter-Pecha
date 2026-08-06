@@ -1144,6 +1144,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get continueWithApple => 'Apple བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
 
   @override
+  String get continueWithPhone => 'ཁ་པར་ཨང་གྲངས་བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
+
+  @override
   String get continueAsGuest => 'མགྲོན་པོའི་ངོ་བོའི་ཐོག་ནས་མུ་མཐུད་རོགས།';
 
   @override

@@ -84,6 +84,19 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, AuthCredentials>> loginWithPhone() async {
+    try {
+      final credentials = await _authService.loginWithPhone();
+      if (credentials == null) {
+        return const Left(AuthenticationFailure('Phone login failed'));
+      }
+      return Right(_toAuthCredentials(credentials));
+    } catch (e) {
+      return Left(AuthenticationFailure('Phone login failed: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> localLogout() async {
     try {
       await _authService.localLogout();

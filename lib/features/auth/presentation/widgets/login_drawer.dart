@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/env.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'social_login_button.dart';
@@ -167,6 +168,26 @@ class _LoginDrawerState extends ConsumerState<LoginDrawer>
                               color: Colors.white,
                               size: 24,
                             ),
+                          ),
+                        ),
+                      ],
+                      if (Env.phoneLoginEnabled) ...[
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SocialLoginButton(
+                            connection: 'sms',
+                            icon: Icons.phone_android,
+                            iconColor: Colors.black,
+                            label: l10n.continueWithPhone,
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            iconWidget: const Icon(
+                              Icons.phone_android,
+                              color: Colors.black,
+                              size: 20,
+                            ),
+                            isBorder: true,
                           ),
                         ),
                       ],
