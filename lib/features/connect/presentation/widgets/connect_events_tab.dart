@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_segmented_control.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,8 +32,7 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab> {
   };
 
   Map<String, String> get _groupLocations => {
-    for (final group in widget.myGroups)
-      group.id: _locationForGroup(group),
+    for (final group in widget.myGroups) group.id: _locationForGroup(group),
   };
 
   @override
@@ -104,7 +104,10 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab> {
     );
   }
 
-  Widget _buildEventsList(BuildContext context, ConnectEventsState eventsState) {
+  Widget _buildEventsList(
+    BuildContext context,
+    ConnectEventsState eventsState,
+  ) {
     if (eventsState.isLoading && eventsState.events.isEmpty) {
       return const CustomScrollView(
         physics: AlwaysScrollableScrollPhysics(),
@@ -137,13 +140,28 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab> {
     }
 
     if (eventsState.events.isEmpty && !eventsState.isLoading) {
+      if (_selectedSegment == 0) {
+        return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: ConnectMyEmptyState(
+                type: ConnectMyEmptyStateType.events,
+                onBrowseTap: () => setState(() => _selectedSegment = 1),
+              ),
+            ),
+          ],
+        );
+      }
+
       return CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverFillRemaining(
             child: Center(
               child: Text(
-                _selectedSegment == 0 ? 'No events yet' : 'No events to discover',
+                'No events to discover',
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColors.textSecondary,

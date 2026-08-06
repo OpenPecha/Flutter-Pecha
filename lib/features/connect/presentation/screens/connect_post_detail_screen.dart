@@ -227,6 +227,7 @@ class _ConnectPostDetailScreenState
       backgroundColor:
           isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _buildTopBar(context, isDark),

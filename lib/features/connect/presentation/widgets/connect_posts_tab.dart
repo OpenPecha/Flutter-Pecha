@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_segmented_control.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -115,13 +116,28 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
     }
 
     if (postsState.posts.isEmpty && !postsState.isLoading) {
+      if (_selectedSegment == 0) {
+        return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: ConnectMyEmptyState(
+                type: ConnectMyEmptyStateType.posts,
+                onBrowseTap: () => setState(() => _selectedSegment = 1),
+              ),
+            ),
+          ],
+        );
+      }
+
       return CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverFillRemaining(
             child: Center(
               child: Text(
-                _selectedSegment == 0 ? 'No posts yet' : 'No posts to discover',
+                'No posts to discover',
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColors.textSecondary,

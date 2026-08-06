@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_segmented_control.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/discover_group_card.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -92,15 +93,14 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
     }
 
     if (widget.myGroups.isEmpty) {
-      return const CustomScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+      return CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverFillRemaining(
-            child: Center(
-              child: Text(
-                'No groups yet',
-                style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
-              ),
+            hasScrollBody: false,
+            child: ConnectMyEmptyState(
+              type: ConnectMyEmptyStateType.groups,
+              onBrowseTap: () => setState(() => _selectedSegment = 1),
             ),
           ),
         ],
