@@ -6,6 +6,7 @@ import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,10 +18,12 @@ class ConnectPostCard extends ConsumerStatefulWidget {
     super.key,
     required this.post,
     this.includeUnfollowed = false,
+    this.syncFeedProvider = false,
   });
 
   final ConnectPost post;
   final bool includeUnfollowed;
+  final bool syncFeedProvider;
 
   @override
   ConsumerState<ConnectPostCard> createState() => _ConnectPostCardState();
@@ -189,6 +192,13 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
                 ? discoverConnectPostsProvider
                 : myConnectPostsProvider;
         ref.read(provider.notifier).updatePost(updatedPost);
+        if (widget.syncFeedProvider) {
+          final feedProvider =
+              widget.includeUnfollowed
+                  ? discoverConnectFeedProvider
+                  : myConnectFeedProvider;
+          ref.read(feedProvider.notifier).updatePost(updatedPost);
+        }
       },
     );
   }

@@ -112,6 +112,8 @@ class ProtectedRoutes {
     // Post comments list: sends auth when logged in so `liked_by_me` reflects
     // the current user on each comment.
     '/groups/author/posts/{postId}/comments',
+    // Group feeds: sends auth when logged in for user-specific fields.
+    '/author/groups/feeds',
   ];
 
   /// Check if a given path is protected (requires authentication).

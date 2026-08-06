@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/connect/data/models/connect_feed_model.dart';
 import 'package:flutter_pecha/features/connect/data/models/connect_post_comment_model.dart';
+import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item.dart';
 import 'package:flutter_pecha/features/connect/data/models/connect_post_model.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
@@ -121,6 +123,46 @@ class ConnectRemoteDatasource {
     } on DioException catch (e) {
       _logger.error('Dio error in fetchConnectPosts', e);
       throw _dioToException(e, 'Failed to load posts');
+    }
+  }
+
+  Future<ConnectFeedPage> fetchConnectFeeds({
+    required bool includeUnfollowed,
+    required String language,
+    int skip = 0,
+    int limit = 20,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        'skip': skip,
+        'limit': limit,
+        'language': language,
+      };
+      if (includeUnfollowed) {
+        queryParameters['include_unfollowed'] = true;
+      }
+
+      final response = await dio.get(
+        '/author/groups/feeds',
+        queryParameters: queryParameters,
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode != 200) {
+        _logger.error('Failed to load connect feeds: ${response.statusCode}');
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load feed',
+        );
+      }
+
+      return ConnectFeedPageModel.fromJson(
+        response.data as Map<String, dynamic>,
+        language: language,
+      ).toEntity();
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchConnectFeeds', e);
+      throw _dioToException(e, 'Failed to load feed');
     }
   }
 

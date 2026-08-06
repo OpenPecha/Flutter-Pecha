@@ -1,4 +1,5 @@
 import 'package:flutter_pecha/core/error/failures.dart';
+import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/discover_groups_page.dart';
@@ -20,6 +21,13 @@ abstract class ConnectRepository {
 
   Future<Either<Failure, ConnectPostsPage>> getConnectPosts({
     required bool includeUnfollowed,
+    int skip = 0,
+    int limit = 20,
+  });
+
+  Future<Either<Failure, ConnectFeedPage>> getConnectFeeds({
+    required bool includeUnfollowed,
+    required String language,
     int skip = 0,
     int limit = 20,
   });
