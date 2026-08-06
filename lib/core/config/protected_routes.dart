@@ -73,6 +73,9 @@ class ProtectedRoutes {
     '/events/{eventId}/participants',
     '/events/{eventId}/participants/me',
 
+    // Post likes (like / unlike require auth)
+    '/groups/author/posts/{postId}/likes',
+
     // Group accumulators (group prayer accumulations)
     '/group-accumulators/',
 
@@ -99,6 +102,9 @@ class ProtectedRoutes {
     // current user (anonymous GET → false).
     '/events',
     '/events/{eventId}',
+    // Posts feed: sends auth when logged in so `liked_by_me` reflects the
+    // current user (anonymous GET → false).
+    '/groups/author/posts',
   ];
 
   /// Check if a given path is protected (requires authentication).

@@ -3,10 +3,12 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/group_search_screen.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_events_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_groups_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_posts_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/followed_groups_row.dart';
 import 'package:flutter_pecha/shared/widgets/main_tab_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +42,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
       ref.read(discoverGroupsProvider.notifier).refresh(),
       ref.read(myConnectEventsProvider.notifier).refresh(),
       ref.read(discoverConnectEventsProvider.notifier).refresh(),
+      ref.read(myConnectPostsProvider.notifier).refresh(),
+      ref.read(discoverConnectPostsProvider.notifier).refresh(),
     ]);
   }
 
@@ -104,7 +108,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
                   myGroups: displayedMyGroups,
                   onRefresh: _onRefresh,
                 ),
-                const SizedBox.shrink(),
+                ConnectPostsTab(onRefresh: _onRefresh),
                 ConnectGroupsTab(
                   myGroups: displayedMyGroups,
                   discoverGroups: displayedDiscoverGroups,

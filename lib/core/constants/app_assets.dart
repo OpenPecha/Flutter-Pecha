@@ -83,6 +83,9 @@ class AppAssets {
   static const IconData lock = PhosphorIconsRegular.lock;
   static const IconData flame = PhosphorIconsFill.fire;
   static const IconData share = PhosphorIconsRegular.export;
+  static const IconData heart = PhosphorIconsRegular.heart;
+  static const IconData heartFill = PhosphorIconsFill.heart;
+  static const IconData chatCircle = PhosphorIconsRegular.chatCircle;
 
   // ========== ACTION ICONS ==========
   static const IconData plus = PhosphorIconsRegular.plus;
