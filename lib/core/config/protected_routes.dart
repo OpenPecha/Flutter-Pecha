@@ -76,6 +76,10 @@ class ProtectedRoutes {
     // Post likes (like / unlike require auth)
     '/groups/author/posts/{postId}/likes',
 
+    // Comment delete / like require auth
+    '/groups/author/comments/{commentId}',
+    '/groups/author/comments/{commentId}/likes',
+
     // Group accumulators (group prayer accumulations)
     '/group-accumulators/',
 
@@ -105,6 +109,9 @@ class ProtectedRoutes {
     // Posts feed: sends auth when logged in so `liked_by_me` reflects the
     // current user (anonymous GET → false).
     '/groups/author/posts',
+    // Post comments list: sends auth when logged in so `liked_by_me` reflects
+    // the current user on each comment.
+    '/groups/author/posts/{postId}/comments',
   ];
 
   /// Check if a given path is protected (requires authentication).

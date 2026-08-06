@@ -9,6 +9,7 @@ import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ConnectPostCard extends ConsumerStatefulWidget {
@@ -36,8 +37,9 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
     final base = _likeCountOverride ?? widget.post.likeCount;
     if (_likedOverride == null) return base;
     if (_likedOverride! && !widget.post.likedByMe) return base + 1;
-    if (!_likedOverride! && widget.post.likedByMe)
+    if (!_likedOverride! && widget.post.likedByMe) {
       return (base - 1).clamp(0, 1 << 31);
+    }
     return base;
   }
 
@@ -55,71 +57,88 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
             .where((item) => item.isImage && item.url.isNotEmpty)
             .toList();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _openDetail,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _AuthorRow(
-              name: post.creatorName,
-              avatarUrl: post.creatorImageUrl,
-              isDark: isDark,
-            ),
-            if (caption.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                caption,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
-                ),
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            if (imageMedia.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _PostMediaGallery(media: imageMedia, isDark: isDark),
-            ],
-            const SizedBox(height: 12),
-            Row(
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _ActionButton(
-                  icon: _isLiked ? AppAssets.heartFill : AppAssets.heart,
-                  iconColor:
-                      _isLiked
-                          ? AppColors.error
-                          : (isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textSecondary),
-                  count: _likeCount,
-                  isLoading: _isSubmittingLike,
-                  onTap: _toggleLike,
+                _AuthorRow(
+                  name: post.creatorName,
+                  avatarUrl: post.creatorImageUrl,
+                  isDark: isDark,
                 ),
-                const SizedBox(width: 20),
-                _ActionButton(
-                  icon: AppAssets.chatCircle,
-                  count: post.commentCount,
-                  onTap: () {},
-                ),
-                const Spacer(),
-                _ActionButton(
-                  icon: AppAssets.readerShare,
-                  onTap: () => _sharePost(post),
+                if (caption.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    caption,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (imageMedia.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _PostMediaGallery(media: imageMedia, isDark: isDark),
+                ],
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _ActionButton(
+                      icon: _isLiked ? AppAssets.heartFill : AppAssets.heart,
+                      iconColor:
+                          _isLiked
+                              ? AppColors.error
+                              : (isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondary),
+                      count: _likeCount,
+                      isLoading: _isSubmittingLike,
+                      onTap: _toggleLike,
+                    ),
+                    const SizedBox(width: 20),
+                    _ActionButton(
+                      icon: AppAssets.chatCircle,
+                      count: post.commentCount,
+                      onTap: _openDetail,
+                    ),
+                    const Spacer(),
+                    _ActionButton(
+                      icon: AppAssets.readerShare,
+                      onTap: () => _sharePost(post),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _openDetail() {
+    context.push(
+      '/home/posts/${widget.post.id}',
+      extra: {
+        'post': widget.post,
+        'includeUnfollowed': widget.includeUnfollowed,
+      },
     );
   }
 
