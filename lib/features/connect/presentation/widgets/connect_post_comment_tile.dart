@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
@@ -48,83 +49,90 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final comment = widget.comment;
-    final displayName = connectCommentDisplayName(comment.userEmail);
+    final displayName = comment.user.displayName;
     final relativeTime = connectCommentRelativeTime(comment.createdAt);
-    final currentUserId = ref.watch(userProvider).user?.id;
-    final isOwnComment =
-        currentUserId != null && currentUserId == comment.userId;
+    final currentUserEmail = ref.watch(userProvider).user?.email;
+    final isOwnComment = isConnectCommentOwnedByEmail(
+      comment: comment,
+      currentUserEmail: currentUserEmail,
+    );
     final indent = comment.isReply ? 44.0 : 0.0;
 
     return Padding(
       padding: EdgeInsets.only(left: indent, bottom: 20),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CommentAvatar(name: displayName, isDark: isDark),
-          const SizedBox(width: 10),
-          Expanded(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _CommentAvatar(
+                name: displayName,
+                avatarUrl: comment.user.avatarUrl,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14,
+                      color:
+                          isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
+                      height: 1.3,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: displayName,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      if (relativeTime.isNotEmpty) ...[
+                        TextSpan(
+                          text: ' · $relativeTime',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color:
+                                isDark
+                                    ? AppColors.textTertiaryDark
+                                    : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              if (isOwnComment)
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    AppAssets.dotsThreeVertical,
+                    size: 18,
+                    color:
+                        isDark
+                            ? AppColors.textTertiaryDark
+                            : AppColors.textSecondary,
+                  ),
+                  padding: EdgeInsets.zero,
+                  onSelected: (value) {
+                    if (value == 'delete') _confirmDelete(comment);
+                  },
+                  itemBuilder:
+                      (_) => const [
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Delete'),
+                        ),
+                      ],
+                ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 42),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontSize: 14,
-                            color:
-                                isDark
-                                    ? AppColors.textPrimaryDark
-                                    : AppColors.textPrimary,
-                            height: 1.3,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: displayName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (relativeTime.isNotEmpty) ...[
-                              TextSpan(
-                                text: ' · $relativeTime',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color:
-                                      isDark
-                                          ? AppColors.textTertiaryDark
-                                          : AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (isOwnComment)
-                      PopupMenuButton<String>(
-                        icon: Icon(
-                          AppAssets.dotsThreeVertical,
-                          size: 18,
-                          color:
-                              isDark
-                                  ? AppColors.textTertiaryDark
-                                  : AppColors.textSecondary,
-                        ),
-                        onSelected: (value) {
-                          if (value == 'delete') _confirmDelete(comment);
-                        },
-                        itemBuilder:
-                            (_) => const [
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text('Delete'),
-                              ),
-                            ],
-                      ),
-                  ],
-                ),
                 const SizedBox(height: 4),
                 _CommentText(text: comment.text, isDark: isDark),
                 const SizedBox(height: 8),
@@ -242,27 +250,41 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
 }
 
 class _CommentAvatar extends StatelessWidget {
-  const _CommentAvatar({required this.name, required this.isDark});
+  const _CommentAvatar({
+    required this.name,
+    this.avatarUrl,
+    required this.isDark,
+  });
 
   final String name;
+  final String? avatarUrl;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     final initial =
         name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    final hasAvatar = avatarUrl != null && avatarUrl!.trim().isNotEmpty;
 
     return CircleAvatar(
       radius: 16,
       backgroundColor: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-      child: Text(
-        initial,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-        ),
-      ),
+      backgroundImage:
+          hasAvatar ? avatarUrl!.cachedNetworkImageProvider : null,
+      child:
+          hasAvatar
+              ? null
+              : Text(
+                initial,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color:
+                      isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimary,
+                ),
+              ),
     );
   }
 }

@@ -11,7 +11,6 @@ import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comm
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_comments_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/utils/connect_comment_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_comment_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -100,8 +99,7 @@ class _ConnectPostDetailScreenState
 
     setState(() {
       _replyTarget = comment;
-      _commentController.text =
-          '@${connectCommentMentionHandle(comment.userEmail)} ';
+      _commentController.text = '@${comment.user.mentionHandle} ';
       _commentController.selection = TextSelection.collapsed(
         offset: _commentController.text.length,
       );
@@ -449,7 +447,7 @@ class _ConnectPostDetailScreenState
                 children: [
                   Expanded(
                     child: Text(
-                      'Replying to @${connectCommentMentionHandle(_replyTarget!.userEmail)}',
+                        'Replying to @${_replyTarget!.user.mentionHandle}',
                       style: TextStyle(
                         fontSize: 13,
                         color:

@@ -1,11 +1,42 @@
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
 
+class ConnectPostCommentUserModel {
+  final String? firstName;
+  final String? lastName;
+  final String email;
+  final String? avatarUrl;
+
+  const ConnectPostCommentUserModel({
+    this.firstName,
+    this.lastName,
+    required this.email,
+    this.avatarUrl,
+  });
+
+  factory ConnectPostCommentUserModel.fromJson(Map<String, dynamic> json) {
+    return ConnectPostCommentUserModel(
+      firstName: json['first_name'] as String?,
+      lastName: json['last_name'] as String?,
+      email: json['email'] as String? ?? '',
+      avatarUrl: json['avatar_url'] as String?,
+    );
+  }
+
+  ConnectPostCommentUser toEntity() {
+    return ConnectPostCommentUser(
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      avatarUrl: avatarUrl,
+    );
+  }
+}
+
 class ConnectPostCommentModel {
   final String id;
   final String postId;
-  final String userId;
   final String? parentCommentId;
-  final String userEmail;
+  final ConnectPostCommentUserModel user;
   final String text;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -15,9 +46,8 @@ class ConnectPostCommentModel {
   const ConnectPostCommentModel({
     required this.id,
     required this.postId,
-    required this.userId,
     this.parentCommentId,
-    required this.userEmail,
+    required this.user,
     required this.text,
     this.createdAt,
     this.updatedAt,
@@ -26,12 +56,19 @@ class ConnectPostCommentModel {
   });
 
   factory ConnectPostCommentModel.fromJson(Map<String, dynamic> json) {
+    final userJson = json['user'];
+    final user =
+        userJson is Map<String, dynamic>
+            ? ConnectPostCommentUserModel.fromJson(userJson)
+            : ConnectPostCommentUserModel(
+              email: json['user_email'] as String? ?? '',
+            );
+
     return ConnectPostCommentModel(
       id: json['id'] as String? ?? '',
       postId: json['post_id'] as String? ?? '',
-      userId: json['user_id'] as String? ?? '',
       parentCommentId: json['parent_comment_id'] as String?,
-      userEmail: json['user_email'] as String? ?? '',
+      user: user,
       text: json['text'] as String? ?? '',
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
@@ -44,9 +81,8 @@ class ConnectPostCommentModel {
     return ConnectPostComment(
       id: id,
       postId: postId,
-      userId: userId,
       parentCommentId: parentCommentId,
-      userEmail: userEmail,
+      user: user.toEntity(),
       text: text,
       createdAt: createdAt,
       updatedAt: updatedAt,
