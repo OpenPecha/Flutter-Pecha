@@ -260,7 +260,7 @@ class _OpenButton extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        'Open',
+        context.l10n.connect_open,
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,

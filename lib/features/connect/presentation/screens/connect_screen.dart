@@ -165,11 +165,11 @@ class _ConnectMainTabBar extends StatelessWidget {
           fontSize: 15,
           fontWeight: FontWeight.w500,
         ),
-        tabs: const [
-          Tab(text: 'Feed'),
-          Tab(text: 'Events'),
-          Tab(text: 'Posts'),
-          Tab(text: 'Groups'),
+        tabs: [
+          Tab(text: context.l10n.connect_tab_feed),
+          Tab(text: context.l10n.connect_tab_events),
+          Tab(text: context.l10n.connect_tab_posts),
+          Tab(text: context.l10n.connect_tab_groups),
         ],
       ),
     );

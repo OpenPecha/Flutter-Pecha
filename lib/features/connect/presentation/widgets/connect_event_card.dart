@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
@@ -44,7 +45,10 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     final event = widget.event;
     final isAttending = _attendingOverride ?? event.isJoined;
     final participantCount = _participantCount(event, isAttending);
-    final title = event.title.trim().isNotEmpty ? event.title.trim() : 'Event';
+    final title =
+        event.title.trim().isNotEmpty
+            ? event.title.trim()
+            : context.l10n.connect_event_fallback_title;
     final detailsLine = _formatDetailsLine(
       context,
       event,
@@ -164,20 +168,22 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    final location = _resolveLocation(event.groupId, ref);
+    final location = _resolveLocation(event.groupId, ref, context);
     if (location != null && location.isNotEmpty) {
       parts.add(location);
     }
 
     if (participantCount > 0) {
-      parts.add('$participantCount attending');
+      parts.add(
+        context.l10n.connect_event_participants_attending(participantCount),
+      );
     }
 
     if (parts.isEmpty) return null;
     return parts.join(' · ');
   }
 
-  String? _resolveLocation(String groupId, WidgetRef ref) {
+  String? _resolveLocation(String groupId, WidgetRef ref, BuildContext context) {
     final cached = widget.groupLocations[groupId];
     if (cached != null && cached.isNotEmpty) return cached;
     if (groupId.isEmpty) return null;
@@ -189,7 +195,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
         if (profile.tags.isNotEmpty) return profile.tags.first;
         final subtitle = profile.subTitle?.trim();
         if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-        return 'Online';
+        return context.l10n.connect_online;
       },
     );
   }
@@ -254,15 +260,19 @@ class _EventGroupLabel extends ConsumerWidget {
       data:
           (either) => either.fold(
             (_) => const SizedBox.shrink(),
-            (profile) => _GroupNameText(name: _groupLabel(profile)),
+            (profile) => _GroupNameText(
+              name: _groupLabel(profile, context),
+            ),
           ),
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
 
-  String _groupLabel(GroupProfile profile) {
-    return profile.title.trim().isNotEmpty ? profile.title.trim() : 'Group';
+  String _groupLabel(GroupProfile profile, BuildContext context) {
+    return profile.title.trim().isNotEmpty
+        ? profile.title.trim()
+        : context.l10n.connect_group_fallback_title;
   }
 }
 
@@ -342,7 +352,9 @@ class _AttendButton extends StatelessWidget {
                 )
               else
                 Text(
-                  isAttending ? 'Attending' : 'Attend',
+                  isAttending
+                      ? context.l10n.connect_event_attending
+                      : context.l10n.connect_event_attend,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

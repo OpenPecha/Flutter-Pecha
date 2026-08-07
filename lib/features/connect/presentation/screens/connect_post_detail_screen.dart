@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
@@ -288,7 +289,7 @@ class _ConnectPostDetailScreenState
         _buildPostCard(context, isDark, commentCount),
         const SizedBox(height: 24),
         Text(
-          '$commentCount ${commentCount == 1 ? 'comment' : 'comments'}',
+          context.l10n.connect_post_comments_count(commentCount),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 16),
@@ -296,7 +297,7 @@ class _ConnectPostDetailScreenState
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Text(
-              'No comments yet. Start the conversation.',
+              context.l10n.connect_post_comments_empty,
               style: TextStyle(
                 fontSize: 15,
                 color:
@@ -364,11 +365,11 @@ class _ConnectPostDetailScreenState
             if (shouldTruncate)
               GestureDetector(
                 onTap: () => setState(() => _captionExpanded = true),
-                child: const Padding(
-                  padding: EdgeInsets.only(top: 4),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    'more',
-                    style: TextStyle(
+                    context.l10n.connect_caption_more,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -429,7 +430,7 @@ class _PostAuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : 'Author';
+    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
 
     return Row(
       children: [

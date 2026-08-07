@@ -1366,6 +1366,240 @@ abstract class AppLocalizations {
   /// **'Congratulations, you\'ve joined all our groups! Check back soon. New ones are on the way'**
   String get connect_groups_empty_subtitle;
 
+  /// No description provided for @connect_tab_feed.
+  ///
+  /// In en, this message translates to:
+  /// **'Feed'**
+  String get connect_tab_feed;
+
+  /// No description provided for @connect_tab_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get connect_tab_events;
+
+  /// No description provided for @connect_tab_posts.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts'**
+  String get connect_tab_posts;
+
+  /// No description provided for @connect_tab_groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get connect_tab_groups;
+
+  /// No description provided for @connect_segment_my.
+  ///
+  /// In en, this message translates to:
+  /// **'My'**
+  String get connect_segment_my;
+
+  /// No description provided for @connect_segment_discover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get connect_segment_discover;
+
+  /// No description provided for @connect_empty_discover_posts.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts to discover'**
+  String get connect_empty_discover_posts;
+
+  /// No description provided for @connect_empty_discover_events.
+  ///
+  /// In en, this message translates to:
+  /// **'No events to discover'**
+  String get connect_empty_discover_events;
+
+  /// No description provided for @connect_empty_discover_feed.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to discover'**
+  String get connect_empty_discover_feed;
+
+  /// No description provided for @connect_empty_discover_groups.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups to discover'**
+  String get connect_empty_discover_groups;
+
+  /// No description provided for @connect_all_groups.
+  ///
+  /// In en, this message translates to:
+  /// **'All groups'**
+  String get connect_all_groups;
+
+  /// No description provided for @connect_my_empty_feed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your groups have been quiet'**
+  String get connect_my_empty_feed_title;
+
+  /// No description provided for @connect_my_empty_events_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming events'**
+  String get connect_my_empty_events_title;
+
+  /// No description provided for @connect_my_empty_posts_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts yet'**
+  String get connect_my_empty_posts_title;
+
+  /// No description provided for @connect_my_empty_groups_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet'**
+  String get connect_my_empty_groups_title;
+
+  /// No description provided for @connect_my_empty_feed_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new from the groups you have joined. Other groups are posting today.'**
+  String get connect_my_empty_feed_subtitle;
+
+  /// No description provided for @connect_my_empty_events_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'None of your groups have anything scheduled. Other groups have events open to everyone.'**
+  String get connect_my_empty_events_subtitle;
+
+  /// No description provided for @connect_my_empty_posts_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your groups have not posted anything. See what other groups are sharing.'**
+  String get connect_my_empty_posts_subtitle;
+
+  /// No description provided for @connect_my_empty_groups_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not joined any groups yet. Discover communities to practice with.'**
+  String get connect_my_empty_groups_subtitle;
+
+  /// No description provided for @connect_my_empty_feed_browse.
+  ///
+  /// In en, this message translates to:
+  /// **'See what other groups share'**
+  String get connect_my_empty_feed_browse;
+
+  /// No description provided for @connect_my_empty_events_browse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse open events'**
+  String get connect_my_empty_events_browse;
+
+  /// No description provided for @connect_my_empty_posts_browse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse other posts'**
+  String get connect_my_empty_posts_browse;
+
+  /// No description provided for @connect_comment_replying_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Replying to @{handle}'**
+  String connect_comment_replying_to(String handle);
+
+  /// No description provided for @connect_comment_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you think of this?'**
+  String get connect_comment_hint;
+
+  /// No description provided for @connect_comment_reply_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a reply...'**
+  String get connect_comment_reply_hint;
+
+  /// No description provided for @connect_comment_reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get connect_comment_reply;
+
+  /// No description provided for @connect_comment_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete comment?'**
+  String get connect_comment_delete_title;
+
+  /// No description provided for @connect_comment_delete_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This comment will be permanently removed.'**
+  String get connect_comment_delete_message;
+
+  /// No description provided for @connect_comment_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete comment'**
+  String get connect_comment_delete_failed;
+
+  /// No description provided for @connect_post_comments_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 comment} other{{count} comments}}'**
+  String connect_post_comments_count(int count);
+
+  /// No description provided for @connect_post_comments_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet. Start the conversation.'**
+  String get connect_post_comments_empty;
+
+  /// No description provided for @connect_caption_more.
+  ///
+  /// In en, this message translates to:
+  /// **'more'**
+  String get connect_caption_more;
+
+  /// No description provided for @connect_online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get connect_online;
+
+  /// No description provided for @connect_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get connect_open;
+
+  /// No description provided for @connect_event_fallback_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get connect_event_fallback_title;
+
+  /// No description provided for @connect_group_fallback_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get connect_group_fallback_title;
+
+  /// No description provided for @connect_event_attend.
+  ///
+  /// In en, this message translates to:
+  /// **'Attend'**
+  String get connect_event_attend;
+
+  /// No description provided for @connect_event_attending.
+  ///
+  /// In en, this message translates to:
+  /// **'Attending'**
+  String get connect_event_attending;
+
+  /// No description provided for @connect_event_participants_attending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} attending'**
+  String connect_event_participants_attending(int count);
+
   /// No description provided for @search_groups.
   ///
   /// In en, this message translates to:

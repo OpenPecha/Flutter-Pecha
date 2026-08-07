@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
@@ -31,8 +32,16 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     for (final group in widget.myGroups) group.id: group.title,
   };
 
-  Map<String, String> get _groupLocations => {
-    for (final group in widget.myGroups) group.id: _locationForGroup(group),
+  String _locationForGroup(GroupProfile group, BuildContext context) {
+    if (group.tags.isNotEmpty) return group.tags.first;
+    final subtitle = group.subTitle?.trim();
+    if (subtitle != null && subtitle.isNotEmpty) return subtitle;
+    return context.l10n.connect_online;
+  }
+
+  Map<String, String> _groupLocations(BuildContext context) => {
+    for (final group in widget.myGroups)
+      group.id: _locationForGroup(group, context),
   };
 
   @override
@@ -46,13 +55,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     } else {
       ref.read(discoverConnectFeedProvider.notifier).ensureLoaded();
     }
-  }
-
-  String _locationForGroup(GroupProfile group) {
-    if (group.tags.isNotEmpty) return group.tags.first;
-    final subtitle = group.subTitle?.trim();
-    if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-    return 'Online';
   }
 
   ConnectFeedState _myState() {
@@ -73,6 +75,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
   Widget build(BuildContext context) {
     final myState = _myState();
     final discoverState = _discoverState();
+    final groupLocations = _groupLocations(context);
 
     return ConnectMyDiscoverTab(
       onSegmentChanged: handleSegmentChanged,
@@ -97,8 +100,10 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
           ),
           itemBuilder:
               (context, index) => _buildFeedItem(
+                context,
                 myState.items[index],
                 includeUnfollowed: false,
+                groupLocations: groupLocations,
               ),
         );
       },
@@ -111,11 +116,13 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
           hasMore: discoverState.hasMore,
           scrollController: scrollController,
           onRetry: () => ref.read(discoverConnectFeedProvider.notifier).retry(),
-          emptyDiscoverMessage: 'Nothing to discover',
+          emptyDiscoverMessage: context.l10n.connect_empty_discover_feed,
           itemBuilder:
               (context, index) => _buildFeedItem(
+                context,
                 discoverState.items[index],
                 includeUnfollowed: true,
+                groupLocations: groupLocations,
               ),
         );
       },
@@ -123,8 +130,10 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
   }
 
   Widget _buildFeedItem(
+    BuildContext context,
     ConnectFeedItem item, {
     required bool includeUnfollowed,
+    required Map<String, String> groupLocations,
   }) {
     final groupNames = {
       ..._groupNames,
@@ -143,7 +152,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
       return ConnectEventCard(
         event: item.event!,
         groupNames: groupNames,
-        groupLocations: _groupLocations,
+        groupLocations: groupLocations,
       );
     }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 class ConnectCommentComposer extends StatelessWidget {
@@ -25,6 +26,7 @@ class ConnectCommentComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
@@ -50,7 +52,7 @@ class ConnectCommentComposer extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Replying to @$replyHandle',
+                      l10n.connect_comment_replying_to(replyHandle!),
                       style: TextStyle(
                         fontSize: 13,
                         color:
@@ -78,8 +80,8 @@ class ConnectCommentComposer extends StatelessWidget {
                 isDark: isDark,
                 hintText:
                     replyHandle == null
-                        ? 'What do you think of this?'
-                        : 'Write a reply...',
+                        ? l10n.connect_comment_hint
+                        : l10n.connect_comment_reply_hint,
                 onSubmit: onSubmit,
               )),
               const SizedBox(width: 10),

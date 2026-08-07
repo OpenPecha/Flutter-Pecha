@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
@@ -100,14 +101,14 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab>
           hasMore: discoverState.hasMore,
           scrollController: scrollController,
           onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
-          emptyDiscoverMessage: 'No groups to discover',
+          emptyDiscoverMessage: context.l10n.connect_empty_discover_groups,
           separatorHeight: 12,
           leadingItemCount: 1,
           leadingItemBuilder:
               (context) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  'All groups',
+                  context.l10n.connect_all_groups,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,

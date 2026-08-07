@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_segmented_control.dart';
 
 typedef ConnectSegmentChildBuilder =
@@ -98,7 +99,10 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
           child: ConnectSegmentedControl(
-            segments: const ['My', 'Discover'],
+            segments: [
+              context.l10n.connect_segment_my,
+              context.l10n.connect_segment_discover,
+            ],
             selectedIndex: _selectedSegment,
             onChanged: _selectSegment,
           ),

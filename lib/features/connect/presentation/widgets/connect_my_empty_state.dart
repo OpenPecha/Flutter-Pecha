@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 enum ConnectMyEmptyStateType { feed, events, posts, groups }
@@ -17,6 +19,7 @@ class ConnectMyEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
@@ -39,7 +42,7 @@ class ConnectMyEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            _title,
+            _title(l10n),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
@@ -50,7 +53,7 @@ class ConnectMyEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            _subtitle,
+            _subtitle(l10n),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, color: subtitleColor, height: 1.5),
           ),
@@ -69,7 +72,7 @@ class ConnectMyEmptyState extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                _browseLabel,
+                _browseLabel(l10n),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -82,28 +85,24 @@ class ConnectMyEmptyState extends StatelessWidget {
     );
   }
 
-  String get _title => switch (type) {
-    ConnectMyEmptyStateType.feed => 'Your groups have been quiet',
-    ConnectMyEmptyStateType.events => 'No upcoming events',
-    ConnectMyEmptyStateType.posts => 'No posts yet',
-    ConnectMyEmptyStateType.groups => 'No groups yet',
+  String _title(AppLocalizations l10n) => switch (type) {
+    ConnectMyEmptyStateType.feed => l10n.connect_my_empty_feed_title,
+    ConnectMyEmptyStateType.events => l10n.connect_my_empty_events_title,
+    ConnectMyEmptyStateType.posts => l10n.connect_my_empty_posts_title,
+    ConnectMyEmptyStateType.groups => l10n.connect_my_empty_groups_title,
   };
 
-  String get _subtitle => switch (type) {
-    ConnectMyEmptyStateType.feed =>
-      'Nothing new from the groups you have joined. Other groups are posting today.',
-    ConnectMyEmptyStateType.events =>
-      'None of your groups have anything scheduled. Other groups have events open to everyone.',
-    ConnectMyEmptyStateType.posts =>
-      'Your groups have not posted anything. See what other groups are sharing.',
-    ConnectMyEmptyStateType.groups =>
-      'You have not joined any groups yet. Discover communities to practice with.',
+  String _subtitle(AppLocalizations l10n) => switch (type) {
+    ConnectMyEmptyStateType.feed => l10n.connect_my_empty_feed_subtitle,
+    ConnectMyEmptyStateType.events => l10n.connect_my_empty_events_subtitle,
+    ConnectMyEmptyStateType.posts => l10n.connect_my_empty_posts_subtitle,
+    ConnectMyEmptyStateType.groups => l10n.connect_my_empty_groups_subtitle,
   };
 
-  String get _browseLabel => switch (type) {
-    ConnectMyEmptyStateType.feed => 'See what other groups share',
-    ConnectMyEmptyStateType.events => 'Browse open events',
-    ConnectMyEmptyStateType.posts => 'Browse other posts',
-    ConnectMyEmptyStateType.groups => 'Discover groups',
+  String _browseLabel(AppLocalizations l10n) => switch (type) {
+    ConnectMyEmptyStateType.feed => l10n.connect_my_empty_feed_browse,
+    ConnectMyEmptyStateType.events => l10n.connect_my_empty_events_browse,
+    ConnectMyEmptyStateType.posts => l10n.connect_my_empty_posts_browse,
+    ConnectMyEmptyStateType.groups => l10n.discover_groups,
   };
 }

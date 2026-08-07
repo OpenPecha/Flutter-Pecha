@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/destructive_confirmation_dialog.dart';
@@ -130,8 +131,8 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
                                 ? AppColors.textTertiaryDark
                                 : AppColors.textSecondary,
                       ),
-                      child: const Text(
-                        'Reply',
+                      child: Text(
+                        context.l10n.connect_comment_reply,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -190,8 +191,8 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
   Future<void> _confirmDelete(ConnectPostComment comment) async {
     final success = await showDestructiveConfirmationDialog(
       context,
-      title: 'Delete comment?',
-      message: 'This comment will be permanently removed.',
+      title: context.l10n.connect_comment_delete_title,
+      message: context.l10n.connect_comment_delete_message,
       onConfirmed:
           () => ref
               .read(connectPostCommentsProvider(widget.postId).notifier)
@@ -200,9 +201,9 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
 
     if (!mounted || success != false) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Failed to delete comment')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.connect_comment_delete_failed)),
+    );
   }
 }
 
@@ -254,7 +255,7 @@ class _CommentActionMenu extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Delete',
+                    context.l10n.delete,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,

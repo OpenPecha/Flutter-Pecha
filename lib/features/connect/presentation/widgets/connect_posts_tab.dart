@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
@@ -92,7 +93,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
           scrollController: scrollController,
           onRetry:
               () => ref.read(discoverConnectPostsProvider.notifier).retry(),
-          emptyDiscoverMessage: 'No posts to discover',
+          emptyDiscoverMessage: context.l10n.connect_empty_discover_posts,
           itemBuilder:
               (context, index) => ConnectPostCard(
                 post: discoverState.posts[index],
