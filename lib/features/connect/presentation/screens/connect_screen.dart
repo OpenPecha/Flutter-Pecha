@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/group_search_screen.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_events_tab.dart';
@@ -38,16 +35,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
     super.dispose();
   }
 
-  Future<void> _onRefresh() async {
+  Future<void> _onGroupsRefresh() async {
     await Future.wait([
       ref.refresh(myGroupsProvider.future),
       ref.read(discoverGroupsProvider.notifier).refresh(),
-      ref.read(myConnectEventsProvider.notifier).refresh(),
-      ref.read(discoverConnectEventsProvider.notifier).refresh(),
-      ref.read(myConnectPostsProvider.notifier).refresh(),
-      ref.read(discoverConnectPostsProvider.notifier).refresh(),
-      ref.read(myConnectFeedProvider.notifier).refresh(),
-      ref.read(discoverConnectFeedProvider.notifier).refresh(),
     ]);
   }
 
@@ -107,21 +98,15 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                ConnectFeedTab(
-                  myGroups: displayedMyGroups,
-                  onRefresh: _onRefresh,
-                ),
-                ConnectEventsTab(
-                  myGroups: displayedMyGroups,
-                  onRefresh: _onRefresh,
-                ),
-                ConnectPostsTab(onRefresh: _onRefresh),
+                ConnectFeedTab(myGroups: displayedMyGroups),
+                ConnectEventsTab(myGroups: displayedMyGroups),
+                const ConnectPostsTab(),
                 ConnectGroupsTab(
                   myGroups: displayedMyGroups,
                   discoverGroups: displayedDiscoverGroups,
                   discoverState: discoverState,
                   myGroupsLoading: myGroupsLoading,
-                  onRefresh: _onRefresh,
+                  onRefresh: _onGroupsRefresh,
                 ),
               ],
             ),

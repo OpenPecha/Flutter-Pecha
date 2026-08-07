@@ -9,9 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Posts tab content with My / Discover sub-tabs.
 class ConnectPostsTab extends ConsumerStatefulWidget {
-  const ConnectPostsTab({super.key, required this.onRefresh});
-
-  final Future<void> Function() onRefresh;
+  const ConnectPostsTab({super.key});
 
   @override
   ConsumerState<ConnectPostsTab> createState() => _ConnectPostsTabState();
@@ -76,10 +74,8 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
             index: _selectedSegment,
             children: [
               RefreshIndicator(
-                onRefresh: () async {
-                  await widget.onRefresh();
-                  await ref.read(myConnectPostsProvider.notifier).refresh();
-                },
+                onRefresh:
+                    () => ref.read(myConnectPostsProvider.notifier).refresh(),
                 child: _buildPostsList(
                   context,
                   myState,
@@ -91,10 +87,9 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
                 ),
               ),
               RefreshIndicator(
-                onRefresh: () async {
-                  await widget.onRefresh();
-                  await ref.read(discoverConnectPostsProvider.notifier).refresh();
-                },
+                onRefresh:
+                    () =>
+                        ref.read(discoverConnectPostsProvider.notifier).refresh(),
                 child: _buildPostsList(
                   context,
                   discoverState,

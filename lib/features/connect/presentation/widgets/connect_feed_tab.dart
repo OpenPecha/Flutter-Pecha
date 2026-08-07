@@ -15,11 +15,9 @@ class ConnectFeedTab extends ConsumerStatefulWidget {
   const ConnectFeedTab({
     super.key,
     required this.myGroups,
-    required this.onRefresh,
   });
 
   final List<GroupProfile> myGroups;
-  final Future<void> Function() onRefresh;
 
   @override
   ConsumerState<ConnectFeedTab> createState() => _ConnectFeedTabState();
@@ -100,10 +98,8 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
             index: _selectedSegment,
             children: [
               RefreshIndicator(
-                onRefresh: () async {
-                  await widget.onRefresh();
-                  await ref.read(myConnectFeedProvider.notifier).refresh();
-                },
+                onRefresh:
+                    () => ref.read(myConnectFeedProvider.notifier).refresh(),
                 child: _buildFeedList(
                   context,
                   myState,
@@ -115,10 +111,9 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
                 ),
               ),
               RefreshIndicator(
-                onRefresh: () async {
-                  await widget.onRefresh();
-                  await ref.read(discoverConnectFeedProvider.notifier).refresh();
-                },
+                onRefresh:
+                    () =>
+                        ref.read(discoverConnectFeedProvider.notifier).refresh(),
                 child: _buildFeedList(
                   context,
                   discoverState,

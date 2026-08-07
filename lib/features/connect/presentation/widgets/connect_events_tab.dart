@@ -13,11 +13,9 @@ class ConnectEventsTab extends ConsumerStatefulWidget {
   const ConnectEventsTab({
     super.key,
     required this.myGroups,
-    required this.onRefresh,
   });
 
   final List<GroupProfile> myGroups;
-  final Future<void> Function() onRefresh;
 
   @override
   ConsumerState<ConnectEventsTab> createState() => _ConnectEventsTabState();
@@ -97,10 +95,8 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab> {
             index: _selectedSegment,
             children: [
               RefreshIndicator(
-                onRefresh: () async {
-                  await widget.onRefresh();
-                  await ref.read(myConnectEventsProvider.notifier).refresh();
-                },
+                onRefresh:
+                    () => ref.read(myConnectEventsProvider.notifier).refresh(),
                 child: _buildEventsList(
                   context,
                   myState,
@@ -111,12 +107,11 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab> {
                 ),
               ),
               RefreshIndicator(
-                onRefresh: () async {
-                  await widget.onRefresh();
-                  await ref
-                      .read(discoverConnectEventsProvider.notifier)
-                      .refresh();
-                },
+                onRefresh:
+                    () =>
+                        ref
+                            .read(discoverConnectEventsProvider.notifier)
+                            .refresh(),
                 child: _buildEventsList(
                   context,
                   discoverState,
