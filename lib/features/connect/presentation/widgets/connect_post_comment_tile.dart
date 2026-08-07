@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
+import 'package:flutter_pecha/core/widgets/destructive_confirmation_dialog.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
@@ -105,26 +106,9 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
                 ),
               ),
               if (isOwnComment)
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    AppAssets.dotsThreeVertical,
-                    size: 18,
-                    color:
-                        isDark
-                            ? AppColors.textTertiaryDark
-                            : AppColors.textSecondary,
-                  ),
-                  padding: EdgeInsets.zero,
-                  onSelected: (value) {
-                    if (value == 'delete') _confirmDelete(comment);
-                  },
-                  itemBuilder:
-                      (_) => const [
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text('Delete'),
-                        ),
-                      ],
+                _CommentActionMenu(
+                  isDark: isDark,
+                  onDelete: () => _confirmDelete(comment),
                 ),
             ],
           ),
@@ -214,38 +198,84 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
   }
 
   Future<void> _confirmDelete(ConnectPostComment comment) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Delete comment?'),
-            content: const Text(
-              'This comment will be permanently removed.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
+    final success = await showDestructiveConfirmationDialog(
+      context,
+      title: 'Delete comment?',
+      message: 'This comment will be permanently removed.',
+      onConfirmed:
+          () => ref
+              .read(connectPostCommentsProvider(widget.postId).notifier)
+              .deleteComment(comment.id),
     );
 
-    if (confirmed != true || !mounted) return;
-
-    final success = await ref
-        .read(connectPostCommentsProvider(widget.postId).notifier)
-        .deleteComment(comment.id);
-
-    if (!mounted || success) return;
+    if (!mounted || success != false) return;
 
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Failed to delete comment')));
+  }
+}
+
+class _CommentActionMenu extends StatelessWidget {
+  const _CommentActionMenu({
+    required this.isDark,
+    required this.onDelete,
+  });
+
+  final bool isDark;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: Icon(
+        AppAssets.dotsThreeVertical,
+        size: 18,
+        color:
+            isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
+      ),
+      padding: EdgeInsets.zero,
+      offset: const Offset(0, 28),
+      elevation: 6,
+      shadowColor: Colors.black.withValues(alpha: 0.12),
+      surfaceTintColor: Colors.transparent,
+      color: isDark ? AppColors.surfaceDark : AppColors.surfaceWhite,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? AppColors.grey800 : AppColors.grey300,
+        ),
+      ),
+      onSelected: (value) {
+        if (value == 'delete') onDelete();
+      },
+      itemBuilder:
+          (context) => [
+            PopupMenuItem<String>(
+              value: 'delete',
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  Icon(
+                    AppAssets.trash,
+                    size: 18,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Delete',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+    );
   }
 }
 
