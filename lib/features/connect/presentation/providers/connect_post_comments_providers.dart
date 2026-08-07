@@ -1,6 +1,7 @@
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_comment_utils.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ConnectPostCommentsState {
@@ -176,15 +177,17 @@ class ConnectPostCommentsNotifier
       final removedCount = state.comments.length - remaining.length;
       state = state.copyWith(
         comments: remaining,
-        total: (state.total - removedCount).clamp(0, 1 << 31),
+        total: clampConnectLikeCount(state.total - removedCount),
       );
       return true;
     });
   }
 
-  Future<bool> toggleCommentLike(ConnectPostComment comment) async {
+  Future<bool> toggleCommentLike(
+    ConnectPostComment comment, {
+    required bool wasLiked,
+  }) async {
     final repository = ref.read(connectRepositoryProvider);
-    final wasLiked = comment.likedByMe;
     final result =
         wasLiked
             ? await repository.unlikeComment(comment.id)
@@ -196,13 +199,12 @@ class ConnectPostCommentsNotifier
       final updatedComments =
           state.comments.map((item) {
             if (item.id != comment.id) return item;
-            final nextCount =
-                wasLiked
-                    ? (item.likeCount - 1).clamp(0, 1 << 31)
-                    : item.likeCount + 1;
             return item.copyWith(
               likedByMe: !wasLiked,
-              likeCount: nextCount,
+              likeCount: nextLikeCountAfterToggle(
+                currentCount: item.likeCount,
+                wasLiked: wasLiked,
+              ),
             );
           }).toList();
       state = state.copyWith(comments: updatedComments);

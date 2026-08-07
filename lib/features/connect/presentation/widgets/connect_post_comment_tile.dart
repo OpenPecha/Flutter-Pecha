@@ -9,6 +9,7 @@ import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.da
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_comments_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_comment_utils.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ConnectPostCommentTile extends ConsumerStatefulWidget {
@@ -29,21 +30,14 @@ class ConnectPostCommentTile extends ConsumerStatefulWidget {
 }
 
 class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile> {
-  bool? _likedOverride;
-  int? _likeCountOverride;
-  bool _isSubmittingLike = false;
+  final ConnectOptimisticLikeState _likeState = ConnectOptimisticLikeState();
 
-  bool get _isLiked => _likedOverride ?? widget.comment.likedByMe;
+  bool get _isLiked => _likeState.isLiked(widget.comment.likedByMe);
 
-  int get _likeCount {
-    final base = _likeCountOverride ?? widget.comment.likeCount;
-    if (_likedOverride == null) return base;
-    if (_likedOverride! && !widget.comment.likedByMe) return base + 1;
-    if (!_likedOverride! && widget.comment.likedByMe) {
-      return (base - 1).clamp(0, 1 << 31);
-    }
-    return base;
-  }
+  int get _likeCount => _likeState.likeCount(
+    serverLikeCount: widget.comment.likeCount,
+    serverLikedByMe: widget.comment.likedByMe,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +142,7 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
                     _CommentLikeButton(
                       isLiked: _isLiked,
                       likeCount: _likeCount,
-                      isLoading: _isSubmittingLike,
+                      isLoading: _likeState.isSubmitting,
                       isDark: isDark,
                       onTap: () => _toggleLike(comment),
                     ),
@@ -163,7 +157,7 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
   }
 
   Future<void> _toggleLike(ConnectPostComment comment) async {
-    if (_isSubmittingLike) return;
+    if (_likeState.isSubmitting) return;
 
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
@@ -172,29 +166,25 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
     }
 
     final wasLiked = _isLiked;
-    setState(() {
-      _isSubmittingLike = true;
-      _likedOverride = !wasLiked;
-    });
+    setState(() => _likeState.beginToggle(wasLiked));
 
     final success = await ref
         .read(connectPostCommentsProvider(widget.postId).notifier)
-        .toggleCommentLike(comment);
+        .toggleCommentLike(comment, wasLiked: wasLiked);
 
     if (!mounted) return;
 
     if (!success) {
-      setState(() {
-        _isSubmittingLike = false;
-        _likedOverride = wasLiked;
-      });
+      setState(() => _likeState.revert(wasLiked));
       return;
     }
 
-    setState(() {
-      _isSubmittingLike = false;
-      _likeCountOverride = _likeCount;
-    });
+    setState(
+      () => _likeState.commitSuccess(
+        serverLikeCount: comment.likeCount,
+        serverLikedByMe: comment.likedByMe,
+      ),
+    );
   }
 
   Future<void> _confirmDelete(ConnectPostComment comment) async {

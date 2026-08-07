@@ -6,9 +6,8 @@ import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_like_actions.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -30,21 +29,14 @@ class ConnectPostCard extends ConsumerStatefulWidget {
 }
 
 class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
-  bool? _likedOverride;
-  int? _likeCountOverride;
-  bool _isSubmittingLike = false;
+  final ConnectOptimisticLikeState _likeState = ConnectOptimisticLikeState();
 
-  bool get _isLiked => _likedOverride ?? widget.post.likedByMe;
+  bool get _isLiked => _likeState.isLiked(widget.post.likedByMe);
 
-  int get _likeCount {
-    final base = _likeCountOverride ?? widget.post.likeCount;
-    if (_likedOverride == null) return base;
-    if (_likedOverride! && !widget.post.likedByMe) return base + 1;
-    if (!_likedOverride! && widget.post.likedByMe) {
-      return (base - 1).clamp(0, 1 << 31);
-    }
-    return base;
-  }
+  int get _likeCount => _likeState.likeCount(
+    serverLikeCount: widget.post.likeCount,
+    serverLikedByMe: widget.post.likedByMe,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +103,7 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
                                   ? AppColors.textSecondaryDark
                                   : AppColors.textSecondary),
                       count: _likeCount,
-                      isLoading: _isSubmittingLike,
+                      isLoading: _likeState.isSubmitting,
                       onTap: _toggleLike,
                     ),
                     const SizedBox(width: 20),
@@ -146,7 +138,7 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
   }
 
   Future<void> _toggleLike() async {
-    if (_isSubmittingLike) return;
+    if (_likeState.isSubmitting) return;
 
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
@@ -155,51 +147,33 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
     }
 
     final wasLiked = _isLiked;
-    setState(() {
-      _isSubmittingLike = true;
-      _likedOverride = !wasLiked;
-    });
+    setState(() => _likeState.beginToggle(wasLiked));
 
-    final repository = ref.read(connectRepositoryProvider);
-    final result =
-        wasLiked
-            ? await repository.unlikePost(widget.post.id)
-            : await repository.likePost(widget.post.id);
+    final result = await ref
+        .read(connectPostLikeActionsProvider)
+        .toggleLike(
+          post: widget.post,
+          wasLiked: wasLiked,
+          optimisticLikeCount: _likeCount,
+          includeUnfollowed: widget.includeUnfollowed,
+          syncFeed: widget.syncFeedProvider,
+        );
 
     if (!mounted) return;
 
-    result.fold(
-      (failure) {
-        setState(() {
-          _isSubmittingLike = false;
-          _likedOverride = wasLiked;
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message)));
-      },
-      (_) {
-        final updatedPost = widget.post.copyWith(
-          likedByMe: !wasLiked,
-          likeCount: _likeCount,
-        );
-        setState(() {
-          _isSubmittingLike = false;
-          _likeCountOverride = updatedPost.likeCount;
-        });
-        final provider =
-            widget.includeUnfollowed
-                ? discoverConnectPostsProvider
-                : myConnectPostsProvider;
-        ref.read(provider.notifier).updatePost(updatedPost);
-        if (widget.syncFeedProvider) {
-          final feedProvider =
-              widget.includeUnfollowed
-                  ? discoverConnectFeedProvider
-                  : myConnectFeedProvider;
-          ref.read(feedProvider.notifier).updatePost(updatedPost);
-        }
-      },
+    if (!result.isSuccess) {
+      setState(() => _likeState.revert(wasLiked));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.errorMessage!)),
+      );
+      return;
+    }
+
+    setState(
+      () => _likeState.commitSuccess(
+        serverLikeCount: widget.post.likeCount,
+        serverLikedByMe: widget.post.likedByMe,
+      ),
     );
   }
 

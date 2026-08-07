@@ -9,8 +9,9 @@ import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.da
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post_comment.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_comments_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_like_actions.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_comment_tile.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_comment_composer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,9 +38,7 @@ class ConnectPostDetailScreen extends ConsumerStatefulWidget {
 class _ConnectPostDetailScreenState
     extends ConsumerState<ConnectPostDetailScreen> {
   late ConnectPost _post;
-  bool? _likedOverride;
-  int? _likeCountOverride;
-  bool _isSubmittingLike = false;
+  final ConnectOptimisticLikeState _likeState = ConnectOptimisticLikeState();
   bool _captionExpanded = false;
   ConnectPostComment? _replyTarget;
   final TextEditingController _commentController = TextEditingController();
@@ -72,17 +71,12 @@ class _ConnectPostDetailScreenState
     );
   }
 
-  bool get _isLiked => _likedOverride ?? _post.likedByMe;
+  bool get _isLiked => _likeState.isLiked(_post.likedByMe);
 
-  int get _likeCount {
-    final base = _likeCountOverride ?? _post.likeCount;
-    if (_likedOverride == null) return base;
-    if (_likedOverride! && !_post.likedByMe) return base + 1;
-    if (!_likedOverride! && _post.likedByMe) {
-      return (base - 1).clamp(0, 1 << 31);
-    }
-    return base;
-  }
+  int get _likeCount => _likeState.likeCount(
+    serverLikeCount: _post.likeCount,
+    serverLikedByMe: _post.likedByMe,
+  );
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
@@ -149,7 +143,7 @@ class _ConnectPostDetailScreenState
   }
 
   Future<void> _toggleLike() async {
-    if (_isSubmittingLike) return;
+    if (_likeState.isSubmitting) return;
 
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
@@ -158,46 +152,34 @@ class _ConnectPostDetailScreenState
     }
 
     final wasLiked = _isLiked;
-    setState(() {
-      _isSubmittingLike = true;
-      _likedOverride = !wasLiked;
-    });
+    setState(() => _likeState.beginToggle(wasLiked));
 
-    final repository = ref.read(connectRepositoryProvider);
-    final result =
-        wasLiked
-            ? await repository.unlikePost(_post.id)
-            : await repository.likePost(_post.id);
+    final result = await ref
+        .read(connectPostLikeActionsProvider)
+        .toggleLike(
+          post: _post,
+          wasLiked: wasLiked,
+          optimisticLikeCount: _likeCount,
+          includeUnfollowed: widget.includeUnfollowed,
+        );
 
     if (!mounted) return;
 
-    result.fold(
-      (failure) {
-        setState(() {
-          _isSubmittingLike = false;
-          _likedOverride = wasLiked;
-        });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message)));
-      },
-      (_) {
-        final updatedPost = _post.copyWith(
-          likedByMe: !wasLiked,
-          likeCount: _likeCount,
-        );
-        setState(() {
-          _isSubmittingLike = false;
-          _likeCountOverride = updatedPost.likeCount;
-          _post = updatedPost;
-        });
-        final provider =
-            widget.includeUnfollowed
-                ? discoverConnectPostsProvider
-                : myConnectPostsProvider;
-        ref.read(provider.notifier).updatePost(updatedPost);
-      },
-    );
+    if (!result.isSuccess) {
+      setState(() => _likeState.revert(wasLiked));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.errorMessage!)),
+      );
+      return;
+    }
+
+    setState(() {
+      _likeState.commitSuccess(
+        serverLikeCount: _post.likeCount,
+        serverLikedByMe: _post.likedByMe,
+      );
+      _post = result.updatedPost!;
+    });
   }
 
   Future<void> _sharePost() async {
@@ -411,7 +393,7 @@ class _ConnectPostDetailScreenState
                             ? AppColors.textSecondaryDark
                             : AppColors.textSecondary),
                 count: _likeCount,
-                isLoading: _isSubmittingLike,
+                isLoading: _likeState.isSubmitting,
                 onTap: _toggleLike,
               ),
               const SizedBox(width: 20),
