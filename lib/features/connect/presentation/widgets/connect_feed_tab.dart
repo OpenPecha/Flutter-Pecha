@@ -27,7 +27,8 @@ class ConnectFeedTab extends ConsumerStatefulWidget {
 
 class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
   int _selectedSegment = 0;
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _myScrollController = ScrollController();
+  final ScrollController _discoverScrollController = ScrollController();
 
   Map<String, String> get _groupNames => {
     for (final group in widget.myGroups) group.id: group.title,
@@ -41,25 +42,34 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _myScrollController.addListener(_onMyScroll);
+    _discoverScrollController.addListener(_onDiscoverScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    _myScrollController.removeListener(_onMyScroll);
+    _discoverScrollController.removeListener(_onDiscoverScroll);
+    _myScrollController.dispose();
+    _discoverScrollController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final provider =
-          _selectedSegment == 0
-              ? myConnectFeedProvider
-              : discoverConnectFeedProvider;
-      ref.read(provider.notifier).loadMore();
+  void _onMyScroll() => _onScroll(_myScrollController, myConnectFeedProvider);
+
+  void _onDiscoverScroll() =>
+      _onScroll(_discoverScrollController, discoverConnectFeedProvider);
+
+  void _onScroll(
+    ScrollController controller,
+    StateNotifierProvider<ConnectFeedNotifier, ConnectFeedState> provider,
+  ) {
+    if (!controller.hasClients) return;
+    if (controller.position.pixels <
+        controller.position.maxScrollExtent - 200) {
+      return;
     }
+    ref.read(provider.notifier).loadMore();
   }
 
   String _locationForGroup(GroupProfile group) {
@@ -71,11 +81,8 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
 
   @override
   Widget build(BuildContext context) {
-    final feedState = ref.watch(
-      _selectedSegment == 0
-          ? myConnectFeedProvider
-          : discoverConnectFeedProvider,
-    );
+    final myState = ref.watch(myConnectFeedProvider);
+    final discoverState = ref.watch(discoverConnectFeedProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -85,29 +92,59 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
           child: ConnectSegmentedControl(
             segments: const ['My', 'Discover'],
             selectedIndex: _selectedSegment,
-            onChanged: (index) {
-              setState(() => _selectedSegment = index);
-            },
+            onChanged: (index) => setState(() => _selectedSegment = index),
           ),
         ),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              await widget.onRefresh();
-              final provider =
-                  _selectedSegment == 0
-                      ? myConnectFeedProvider
-                      : discoverConnectFeedProvider;
-              await ref.read(provider.notifier).refresh();
-            },
-            child: _buildFeedList(context, feedState),
+          child: IndexedStack(
+            index: _selectedSegment,
+            children: [
+              RefreshIndicator(
+                onRefresh: () async {
+                  await widget.onRefresh();
+                  await ref.read(myConnectFeedProvider.notifier).refresh();
+                },
+                child: _buildFeedList(
+                  context,
+                  myState,
+                  scrollController: _myScrollController,
+                  includeUnfollowed: false,
+                  isMySegment: true,
+                  onRetry: () => ref.read(myConnectFeedProvider.notifier).retry(),
+                  onBrowseDiscover: () => setState(() => _selectedSegment = 1),
+                ),
+              ),
+              RefreshIndicator(
+                onRefresh: () async {
+                  await widget.onRefresh();
+                  await ref.read(discoverConnectFeedProvider.notifier).refresh();
+                },
+                child: _buildFeedList(
+                  context,
+                  discoverState,
+                  scrollController: _discoverScrollController,
+                  includeUnfollowed: true,
+                  isMySegment: false,
+                  onRetry:
+                      () => ref.read(discoverConnectFeedProvider.notifier).retry(),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFeedList(BuildContext context, ConnectFeedState feedState) {
+  Widget _buildFeedList(
+    BuildContext context,
+    ConnectFeedState feedState, {
+    required ScrollController scrollController,
+    required bool includeUnfollowed,
+    required bool isMySegment,
+    required VoidCallback onRetry,
+    VoidCallback? onBrowseDiscover,
+  }) {
     if (feedState.isLoading && feedState.items.isEmpty) {
       return const CustomScrollView(
         physics: AlwaysScrollableScrollPhysics(),
@@ -126,13 +163,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
           SliverFillRemaining(
             child: ErrorStateWidget(
               error: feedState.error!,
-              onRetry: () {
-                final provider =
-                    _selectedSegment == 0
-                        ? myConnectFeedProvider
-                        : discoverConnectFeedProvider;
-                ref.read(provider.notifier).retry();
-              },
+              onRetry: onRetry,
             ),
           ),
         ],
@@ -140,7 +171,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
     }
 
     if (feedState.items.isEmpty && !feedState.isLoading) {
-      if (_selectedSegment == 0) {
+      if (isMySegment && onBrowseDiscover != null) {
         return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -148,7 +179,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
               hasScrollBody: false,
               child: ConnectMyEmptyState(
                 type: ConnectMyEmptyStateType.feed,
-                onBrowseTap: () => setState(() => _selectedSegment = 1),
+                onBrowseTap: onBrowseDiscover,
               ),
             ),
           ],
@@ -174,7 +205,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
     }
 
     return ListView.separated(
-      controller: _scrollController,
+      controller: scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
       itemCount: feedState.items.length + (feedState.hasMore ? 1 : 0),
@@ -193,13 +224,16 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab> {
         }
 
         final item = feedState.items[index];
-        return _buildFeedItem(context, item);
+        return _buildFeedItem(context, item, includeUnfollowed: includeUnfollowed);
       },
     );
   }
 
-  Widget _buildFeedItem(BuildContext context, ConnectFeedItem item) {
-    final includeUnfollowed = _selectedSegment == 1;
+  Widget _buildFeedItem(
+    BuildContext context,
+    ConnectFeedItem item, {
+    required bool includeUnfollowed,
+  }) {
     final groupNames = {
       ..._groupNames,
       if (item.groupName.isNotEmpty) item.groupId: item.groupName,

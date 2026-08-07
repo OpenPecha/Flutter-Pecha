@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 
-/// Pill-shaped segmented control used inside the Connect Groups tab.
+/// Pill-shaped segmented control used inside Connect tabs.
 class ConnectSegmentedControl extends StatelessWidget {
   const ConnectSegmentedControl({
     super.key,
@@ -32,81 +32,89 @@ class ConnectSegmentedControl extends StatelessWidget {
         color: trackColor,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: Row(
-        children: [
-          for (var i = 0; i < segments.length; i++)
-            Expanded(
-              child: _Segment(
-                label: segments[i],
-                isSelected: selectedIndex == i,
-                selectedColor: selectedColor,
-                selectedTextColor: selectedTextColor,
-                unselectedTextColor: unselectedTextColor,
-                isDark: isDark,
-                onTap: () => onChanged(i),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final segmentWidth = constraints.maxWidth / segments.length;
+
+          return Stack(
+            children: [
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                left: selectedIndex * segmentWidth,
+                top: 0,
+                bottom: 0,
+                width: segmentWidth,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: selectedColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow:
+                        !isDark
+                            ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ]
+                            : null,
+                  ),
+                ),
               ),
-            ),
-        ],
+              Row(
+                children: [
+                  for (var i = 0; i < segments.length; i++)
+                    Expanded(
+                      child: _SegmentLabel(
+                        label: segments[i],
+                        isSelected: selectedIndex == i,
+                        selectedTextColor: selectedTextColor,
+                        unselectedTextColor: unselectedTextColor,
+                        onTap: () {
+                          if (selectedIndex != i) onChanged(i);
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _Segment extends StatelessWidget {
-  const _Segment({
+class _SegmentLabel extends StatelessWidget {
+  const _SegmentLabel({
     required this.label,
     required this.isSelected,
-    required this.selectedColor,
     required this.selectedTextColor,
     required this.unselectedTextColor,
-    required this.isDark,
     required this.onTap,
   });
 
   final String label;
   final bool isSelected;
-  final Color selectedColor;
   final Color selectedTextColor;
   final Color unselectedTextColor;
-  final bool isDark;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? selectedColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow:
-                isSelected && !isDark
-                    ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ]
-                    : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? selectedTextColor : unselectedTextColor,
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? selectedTextColor : unselectedTextColor,
           ),
         ),
       ),

@@ -19,39 +19,46 @@ class ConnectPostsTab extends ConsumerStatefulWidget {
 
 class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
   int _selectedSegment = 0;
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _myScrollController = ScrollController();
+  final ScrollController _discoverScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _myScrollController.addListener(_onMyScroll);
+    _discoverScrollController.addListener(_onDiscoverScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    _myScrollController.removeListener(_onMyScroll);
+    _discoverScrollController.removeListener(_onDiscoverScroll);
+    _myScrollController.dispose();
+    _discoverScrollController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final provider =
-          _selectedSegment == 0
-              ? myConnectPostsProvider
-              : discoverConnectPostsProvider;
-      ref.read(provider.notifier).loadMore();
+  void _onMyScroll() => _onScroll(_myScrollController, myConnectPostsProvider);
+
+  void _onDiscoverScroll() =>
+      _onScroll(_discoverScrollController, discoverConnectPostsProvider);
+
+  void _onScroll(
+    ScrollController controller,
+    StateNotifierProvider<ConnectPostsNotifier, ConnectPostsState> provider,
+  ) {
+    if (!controller.hasClients) return;
+    if (controller.position.pixels <
+        controller.position.maxScrollExtent - 200) {
+      return;
     }
+    ref.read(provider.notifier).loadMore();
   }
 
   @override
   Widget build(BuildContext context) {
-    final postsState = ref.watch(
-      _selectedSegment == 0
-          ? myConnectPostsProvider
-          : discoverConnectPostsProvider,
-    );
+    final myState = ref.watch(myConnectPostsProvider);
+    final discoverState = ref.watch(discoverConnectPostsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,29 +68,59 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
           child: ConnectSegmentedControl(
             segments: const ['My', 'Discover'],
             selectedIndex: _selectedSegment,
-            onChanged: (index) {
-              setState(() => _selectedSegment = index);
-            },
+            onChanged: (index) => setState(() => _selectedSegment = index),
           ),
         ),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              await widget.onRefresh();
-              final provider =
-                  _selectedSegment == 0
-                      ? myConnectPostsProvider
-                      : discoverConnectPostsProvider;
-              await ref.read(provider.notifier).refresh();
-            },
-            child: _buildPostsList(context, postsState),
+          child: IndexedStack(
+            index: _selectedSegment,
+            children: [
+              RefreshIndicator(
+                onRefresh: () async {
+                  await widget.onRefresh();
+                  await ref.read(myConnectPostsProvider.notifier).refresh();
+                },
+                child: _buildPostsList(
+                  context,
+                  myState,
+                  scrollController: _myScrollController,
+                  includeUnfollowed: false,
+                  isMySegment: true,
+                  onRetry: () => ref.read(myConnectPostsProvider.notifier).retry(),
+                  onBrowseDiscover: () => setState(() => _selectedSegment = 1),
+                ),
+              ),
+              RefreshIndicator(
+                onRefresh: () async {
+                  await widget.onRefresh();
+                  await ref.read(discoverConnectPostsProvider.notifier).refresh();
+                },
+                child: _buildPostsList(
+                  context,
+                  discoverState,
+                  scrollController: _discoverScrollController,
+                  includeUnfollowed: true,
+                  isMySegment: false,
+                  onRetry:
+                      () => ref.read(discoverConnectPostsProvider.notifier).retry(),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPostsList(BuildContext context, ConnectPostsState postsState) {
+  Widget _buildPostsList(
+    BuildContext context,
+    ConnectPostsState postsState, {
+    required ScrollController scrollController,
+    required bool includeUnfollowed,
+    required bool isMySegment,
+    required VoidCallback onRetry,
+    VoidCallback? onBrowseDiscover,
+  }) {
     if (postsState.isLoading && postsState.posts.isEmpty) {
       return const CustomScrollView(
         physics: AlwaysScrollableScrollPhysics(),
@@ -102,13 +139,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
           SliverFillRemaining(
             child: ErrorStateWidget(
               error: postsState.error!,
-              onRetry: () {
-                final provider =
-                    _selectedSegment == 0
-                        ? myConnectPostsProvider
-                        : discoverConnectPostsProvider;
-                ref.read(provider.notifier).retry();
-              },
+              onRetry: onRetry,
             ),
           ),
         ],
@@ -116,7 +147,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
     }
 
     if (postsState.posts.isEmpty && !postsState.isLoading) {
-      if (_selectedSegment == 0) {
+      if (isMySegment && onBrowseDiscover != null) {
         return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -124,7 +155,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
               hasScrollBody: false,
               child: ConnectMyEmptyState(
                 type: ConnectMyEmptyStateType.posts,
-                onBrowseTap: () => setState(() => _selectedSegment = 1),
+                onBrowseTap: onBrowseDiscover,
               ),
             ),
           ],
@@ -150,7 +181,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
     }
 
     return ListView.separated(
-      controller: _scrollController,
+      controller: scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
       itemCount: postsState.posts.length + (postsState.hasMore ? 1 : 0),
@@ -171,7 +202,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab> {
         final post = postsState.posts[index];
         return ConnectPostCard(
           post: post,
-          includeUnfollowed: _selectedSegment == 1,
+          includeUnfollowed: includeUnfollowed,
         );
       },
     );

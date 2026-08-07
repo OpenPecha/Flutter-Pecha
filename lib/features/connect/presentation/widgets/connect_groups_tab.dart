@@ -68,12 +68,18 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
           ),
         ),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: widget.onRefresh,
-            child:
-                _selectedSegment == 0
-                    ? _buildMyGroupsList(context)
-                    : _buildDiscoverGroupsList(context),
+          child: IndexedStack(
+            index: _selectedSegment,
+            children: [
+              RefreshIndicator(
+                onRefresh: widget.onRefresh,
+                child: _buildMyGroupsList(context),
+              ),
+              RefreshIndicator(
+                onRefresh: widget.onRefresh,
+                child: _buildDiscoverGroupsList(context),
+              ),
+            ],
           ),
         ),
       ],
