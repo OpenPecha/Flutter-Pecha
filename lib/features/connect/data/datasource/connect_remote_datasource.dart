@@ -95,10 +95,7 @@ class ConnectRemoteDatasource {
     int limit = 20,
   }) async {
     try {
-      final queryParameters = <String, dynamic>{
-        'skip': skip,
-        'limit': limit,
-      };
+      final queryParameters = <String, dynamic>{'skip': skip, 'limit': limit};
       if (includeUnfollowed) {
         queryParameters['include_unfollowed'] = true;
       }
@@ -111,10 +108,7 @@ class ConnectRemoteDatasource {
 
       if (response.statusCode != 200) {
         _logger.error('Failed to load connect posts: ${response.statusCode}');
-        throw _statusToException(
-          response.statusCode,
-          'Failed to load posts',
-        );
+        throw _statusToException(response.statusCode, 'Failed to load posts');
       }
 
       return ConnectPostsPageModel.fromJson(
@@ -150,10 +144,7 @@ class ConnectRemoteDatasource {
 
       if (response.statusCode != 200) {
         _logger.error('Failed to load connect feeds: ${response.statusCode}');
-        throw _statusToException(
-          response.statusCode,
-          'Failed to load feed',
-        );
+        throw _statusToException(response.statusCode, 'Failed to load feed');
       }
 
       return ConnectFeedPageModel.fromJson(
@@ -239,25 +230,20 @@ class ConnectRemoteDatasource {
         data: payload,
       );
 
-      if (response.statusCode != 200 &&
-          response.statusCode != 201 &&
-          response.statusCode != 204) {
-        throw _statusToException(
-          response.statusCode,
-          'Failed to post comment',
-        );
+      if (response.statusCode != 201) {
+        throw _statusToException(response.statusCode, 'Failed to post comment');
       }
 
       final data = response.data;
-      if (data is Map<String, dynamic>) {
-        final commentJson =
-            data['comment'] is Map<String, dynamic>
-                ? data['comment'] as Map<String, dynamic>
-                : data;
-        return ConnectPostCommentModel.fromJson(commentJson).toEntity();
+      if (data is! Map<String, dynamic>) {
+        throw const ServerException('Failed to parse created comment');
       }
 
-      throw const ServerException('Failed to parse created comment');
+      final commentJson =
+          data['comment'] is Map<String, dynamic>
+              ? data['comment'] as Map<String, dynamic>
+              : data;
+      return ConnectPostCommentModel.fromJson(commentJson).toEntity();
     } on DioException catch (e) {
       _logger.error('Dio error in createPostComment', e);
       throw _dioToException(e, 'Failed to post comment');
