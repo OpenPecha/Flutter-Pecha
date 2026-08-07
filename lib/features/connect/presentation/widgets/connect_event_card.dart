@@ -5,6 +5,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
@@ -207,7 +208,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     final result =
         isAttending
             ? await repository.leaveGroupEvent(event.id)
-            : await repository.joinGroupEvent(event.id);
+            : await joinGroupEventEnsuringGroupMembership(ref: ref, event: event);
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 

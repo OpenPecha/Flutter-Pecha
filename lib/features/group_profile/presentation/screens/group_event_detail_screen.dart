@@ -11,6 +11,7 @@ import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
@@ -263,9 +264,10 @@ class _GroupEventDetailScreenState
     }
 
     setState(() => _isSubmitting = true);
-    final result = await ref
-        .read(groupProfileRepositoryProvider)
-        .joinGroupEvent(event.id);
+    final result = await joinGroupEventEnsuringGroupMembership(
+      ref: ref,
+      event: event,
+    );
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
