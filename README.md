@@ -109,7 +109,12 @@ The app uses Flutter's built-in internationalization (l10n) with ARB files for t
 2. Generate localization files:
 ```sh
 flutter gen-l10n
+dart run tool/generate_tolgee_bridge.dart
 ```
+
+The second command regenerates the Tolgee bridge so the new key can also be
+updated over the air. CI fails if it is skipped — see
+[Over-the-air translations](#-over-the-air-translations-tolgee).
 
 3. Use in your widget:
 ```dart
@@ -135,6 +140,70 @@ Usage:
 ```dart
 Text(context.l10n.greeting('John'))
 ```
+
+## 🌍 Over-the-air translations (Tolgee)
+
+Translation text can be corrected in [Tolgee](https://tolgee.io) and picked up
+by installed apps without shipping a new release. Nothing changes at call
+sites: `context.l10n.my_key` keeps working exactly as before.
+
+### How it works
+
+`tool/generate_tolgee_bridge.dart` reads the gen-l10n output and emits
+`TolgeeAppLocalizations`, a subclass of `AppLocalizations` that overrides every
+key. Each override asks Tolgee first and falls back to the bundled ARB value.
+It is registered in `main.dart` in place of `AppLocalizations.delegate`.
+
+The ARB files stay the source of truth in git and are the offline fallback;
+Tolgee is an override layer on top of them.
+
+```
+context.l10n.my_key
+  -> TolgeeAppLocalizations.my_key      (generated override)
+     -> Tolgee CDN value                (if loaded and for the right language)
+     -> bundled ARB value               (otherwise)
+```
+
+Because the bundled ARB is always the fallback, the app behaves exactly as it
+did before Tolgee whenever the SDK is disabled, offline, still fetching, or
+missing a key.
+
+### Configuration
+
+Set these in `.env.dev` / `.env.staging` / `.env.prod`:
+
+| Variable | Purpose |
+| --- | --- |
+| `TOLGEE_API_URL` | Tolgee API base, defaults to `https://app.tolgee.io/v2` |
+| `TOLGEE_API_KEY` | Read-only scoped project key |
+| `TOLGEE_CDN_URL` | Content Delivery base URL |
+| `TOLGEE_ENABLED` | Optional override; defaults to on when key and CDN URL are set |
+
+Leaving `TOLGEE_API_KEY` empty disables the integration and the app uses the
+bundled ARB only. This is also the kill switch if a bad translation ships.
+
+> **The API key ships inside the app.** `.env` files are bundled as assets, so
+> anything in them can be extracted from a release build. Use a project key
+> scoped to `translations.view` and `languages.view` only — the SDK also
+> contains a write API, so a leaked write-capable key would let anyone rewrite
+> the app's copy.
+
+### Tolgee project requirements
+
+- App UI locales use bare codes (`en`, `bo`, `zh`, `hi`, `mn`, `ne`). Tolgee
+  Content Delivery language tags (and CDN filenames) must be `en`, `bo-IN`,
+  `zh-Hant-TW`, `hi`, `mn`, `ne` — the app maps `bo`/`zh` to those CDN tags
+  via `TolgeeLocaleMap`. Publishing `bo.json` or `zh.json` will 404.
+- Enable ICU placeholder support so plural strings are served as ICU source.
+- Content Delivery must export **flat** JSON (nesting and arrays disabled),
+  one file per language at `<TOLGEE_CDN_URL>/<tag>.json`. The SDK's CDN parser
+  expects `{"key": "value"}` and cannot read nested objects.
+
+### When updates apply
+
+Translations are fetched on app start and on language change. An edit in
+Tolgee reaches users on their next app launch; there is no live push. A cold
+start with no network shows the bundled ARB text.
 
 ## ⚙️ Project Structure
 

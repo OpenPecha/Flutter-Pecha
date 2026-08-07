@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/l10n/tolgee/tolgee_localizations_delegate.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_pecha/core/storage/storage_keys.dart';
@@ -261,7 +262,7 @@ class NotificationSyncEngine {
         final hasRecitation =
             block.items.any((i) => i.type == RoutineItemType.recitation);
         if (hasRecitation) {
-          final l10n = lookupAppLocalizations(_ref.read(localeProvider));
+          final l10n = tolgeeAppLocalizationsFor(_ref.read(localeProvider));
           final entries = computeForRecitationBlock(
             block,
             now,

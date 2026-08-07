@@ -40,8 +40,9 @@ import 'package:flutter_pecha/features/timer/data/datasource/timers_local_dataso
 import 'package:flutter_pecha/features/timer/presentation/providers/timers_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
+import 'package:flutter_pecha/core/l10n/tolgee/tolgee_localizations_delegate.dart';
+import 'package:flutter_pecha/core/l10n/tolgee/tolgee_service.dart';
 import 'package:fquery/fquery.dart';
 import 'core/theme/app_theme.dart';
 import 'core/localization/material_localizations_bo.dart';
@@ -212,6 +213,30 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Deliberately not awaited in main(): the first frame renders with the
+    // bundled ARB strings and swaps to the Tolgee versions once they arrive,
+    // so a slow or unreachable CDN can never delay app startup.
+    unawaited(_bootstrapTolgee());
+  }
+
+  Future<void> _bootstrapTolgee() async {
+    // localeProvider starts on the default language and only reaches the stored
+    // one after a storage read, so fetching before that would pull the wrong
+    // language. This also covers a restore that lands before build() registers
+    // the localeProvider listener, which nothing downstream could recover from.
+    await ref.read(localeProvider.notifier).ensureInitialized();
+    if (!mounted) return;
+    final bool ready = await TolgeeService.initialize(
+      locale: ref.read(localeProvider),
+    );
+    if (!ready || !mounted) return;
+    ref.read(tolgeeRevisionProvider.notifier).state++;
+  }
+
+  Future<void> _applyTolgeeLocale(Locale locale) async {
+    final bool changed = await TolgeeService.setLocale(locale);
+    if (!changed || !mounted) return;
+    ref.read(tolgeeRevisionProvider.notifier).state++;
   }
 
   @override
@@ -247,6 +272,14 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     final locale = ref.watch(localeProvider);
     final themeMode = ref.watch(themeModeProvider);
     final authState = ref.watch(authProvider);
+    final tolgeeRevision = ref.watch(tolgeeRevisionProvider);
+
+    // Tolgee holds one language in memory at a time, so a UI language change
+    // has to trigger a fetch for the newly selected one.
+    ref.listen<Locale>(localeProvider, (previous, next) {
+      if (previous == next) return;
+      unawaited(_applyTolgeeLocale(next));
+    });
 
     // Get the singleton router instance - same instance is reused across rebuilds
     // final router = AppRouter().router;
@@ -355,7 +388,9 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         localizationsDelegates: [
           MaterialLocalizationsBo.delegate,
           CupertinoLocalizationsBo.delegate,
-          AppLocalizations.delegate,
+          // Replaces AppLocalizations.delegate so every `context.l10n` lookup
+          // can be overridden from Tolgee at runtime.
+          TolgeeAppLocalizationsDelegate(revision: tolgeeRevision),
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
