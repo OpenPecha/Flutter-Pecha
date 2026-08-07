@@ -12,6 +12,7 @@ import 'package:flutter_pecha/features/connect/presentation/providers/connect_po
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_comment_tile.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_comment_composer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -220,10 +221,14 @@ class _ConnectPostDetailScreenState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final commentsState = ref.watch(connectPostCommentsProvider(widget.postId));
+    final isSubmittingComment = ref.watch(
+      connectPostCommentsProvider(widget.postId).select((state) => state.isSubmitting),
+    );
     final commentCount =
         commentsState.total > 0 ? commentsState.total : _post.commentCount;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor:
           isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
       body: SafeArea(
@@ -232,9 +237,20 @@ class _ConnectPostDetailScreenState
           children: [
             _buildTopBar(context, isDark),
             Expanded(
-              child: _buildBody(context, isDark, commentsState, commentCount),
+              child: MediaQuery.removeViewInsets(
+                context: context,
+                removeBottom: true,
+                child: _buildBody(context, isDark, commentsState, commentCount),
+              ),
             ),
-            _buildCommentComposer(context, isDark, commentsState.isSubmitting),
+            ConnectCommentComposer(
+              controller: _commentController,
+              focusNode: _commentFocusNode,
+              isSubmitting: isSubmittingComment,
+              onSubmit: _submitComment,
+              replyHandle: _replyTarget?.user.mentionHandle,
+              onClearReply: _clearReply,
+            ),
           ],
         ),
       ),
@@ -416,128 +432,6 @@ class _ConnectPostDetailScreenState
     );
   }
 
-  Widget _buildCommentComposer(
-    BuildContext context,
-    bool isDark,
-    bool isSubmitting,
-  ) {
-    final canSend = _commentController.text.trim().isNotEmpty && !isSubmitting;
-    final borderColor = isDark ? AppColors.grey800 : AppColors.grey300;
-    final fillColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceWhite,
-        border: Border(top: BorderSide(color: borderColor)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        16,
-        12,
-        8,
-        12 + MediaQuery.viewPaddingOf(context).bottom,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_replyTarget != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8, left: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                        'Replying to @${_replyTarget!.user.mentionHandle}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color:
-                            isDark
-                                ? AppColors.textTertiaryDark
-                                : AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(AppAssets.x, size: 18),
-                    onPressed: _clearReply,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-            ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _commentController,
-                  focusNode: _commentFocusNode,
-                  minLines: 1,
-                  maxLines: 4,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _submitComment(),
-                  onChanged: (_) => setState(() {}),
-                  style: TextStyle(
-                    fontSize: 15,
-                    color:
-                        isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    hintText:
-                        _replyTarget == null
-                            ? 'Write a comment...'
-                            : 'Write a reply...',
-                    hintStyle: TextStyle(
-                      fontSize: 15,
-                      color:
-                          isDark
-                              ? AppColors.textTertiaryDark
-                              : AppColors.textSecondary,
-                    ),
-                    filled: true,
-                    fillColor: fillColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                onPressed: canSend ? _submitComment : null,
-                icon:
-                    isSubmitting
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : Icon(
-                          AppAssets.paperPlaneRight,
-                          size: 22,
-                          color:
-                              canSend
-                                  ? AppColors.primaryDark
-                                  : (isDark
-                                      ? AppColors.textTertiaryDark
-                                      : AppColors.textSecondary),
-                        ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _PostAuthorRow extends StatelessWidget {
