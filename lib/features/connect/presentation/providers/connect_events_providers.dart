@@ -46,14 +46,19 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
     required this.ref,
     required this.includeUnfollowed,
     required this.language,
-  }) : super(const ConnectEventsState()) {
-    loadInitial();
-  }
+  }) : super(const ConnectEventsState());
 
   final Ref ref;
   final bool includeUnfollowed;
   final String language;
   static const int _limit = 20;
+  bool _loadRequested = false;
+
+  void ensureLoaded() {
+    if (_loadRequested) return;
+    _loadRequested = true;
+    loadInitial();
+  }
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -122,13 +127,15 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
   }
 
   Future<void> refresh() async {
+    _loadRequested = false;
     state = const ConnectEventsState();
-    await loadInitial();
+    ensureLoaded();
   }
 
   void retry() {
     if (state.events.isEmpty) {
-      loadInitial();
+      _loadRequested = false;
+      ensureLoaded();
     } else {
       loadMore();
     }
@@ -136,7 +143,9 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
 }
 
 final myConnectEventsProvider =
-    StateNotifierProvider<ConnectEventsNotifier, ConnectEventsState>((ref) {
+    StateNotifierProvider.autoDispose<ConnectEventsNotifier, ConnectEventsState>((
+      ref,
+    ) {
       final language = ref.watch(contentLanguageProvider);
       return ConnectEventsNotifier(
         ref: ref,
@@ -146,7 +155,9 @@ final myConnectEventsProvider =
     });
 
 final discoverConnectEventsProvider =
-    StateNotifierProvider<ConnectEventsNotifier, ConnectEventsState>((ref) {
+    StateNotifierProvider.autoDispose<ConnectEventsNotifier, ConnectEventsState>((
+      ref,
+    ) {
       final language = ref.watch(contentLanguageProvider);
       return ConnectEventsNotifier(
         ref: ref,

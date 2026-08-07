@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
@@ -10,21 +11,42 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_profi
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Feed tab content with My / Discover sub-tabs.
-class ConnectFeedTab extends ConsumerWidget {
+class ConnectFeedTab extends ConsumerStatefulWidget {
   const ConnectFeedTab({
     super.key,
     required this.myGroups,
+    this.isActive = true,
   });
 
   final List<GroupProfile> myGroups;
+  final bool isActive;
 
+  @override
+  ConsumerState<ConnectFeedTab> createState() => _ConnectFeedTabState();
+}
+
+class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
+    with ConnectLazyMyDiscoverTabMixin<ConnectFeedTab> {
   Map<String, String> get _groupNames => {
-    for (final group in myGroups) group.id: group.title,
+    for (final group in widget.myGroups) group.id: group.title,
   };
 
   Map<String, String> get _groupLocations => {
-    for (final group in myGroups) group.id: _locationForGroup(group),
+    for (final group in widget.myGroups) group.id: _locationForGroup(group),
   };
+
+  @override
+  bool readTabActive(ConnectFeedTab widget) => widget.isActive;
+
+  @override
+  void loadActiveSegment() {
+    if (!isTabActive) return;
+    if (selectedSegment == 0) {
+      ref.read(myConnectFeedProvider.notifier).ensureLoaded();
+    } else {
+      ref.read(discoverConnectFeedProvider.notifier).ensureLoaded();
+    }
+  }
 
   String _locationForGroup(GroupProfile group) {
     if (group.tags.isNotEmpty) return group.tags.first;
@@ -33,12 +55,27 @@ class ConnectFeedTab extends ConsumerWidget {
     return 'Online';
   }
 
+  ConnectFeedState _myState() {
+    if (!isTabActive || selectedSegment != 0) {
+      return const ConnectFeedState();
+    }
+    return ref.watch(myConnectFeedProvider);
+  }
+
+  ConnectFeedState _discoverState() {
+    if (!isTabActive || selectedSegment != 1) {
+      return const ConnectFeedState();
+    }
+    return ref.watch(discoverConnectFeedProvider);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final myState = ref.watch(myConnectFeedProvider);
-    final discoverState = ref.watch(discoverConnectFeedProvider);
+  Widget build(BuildContext context) {
+    final myState = _myState();
+    final discoverState = _discoverState();
 
     return ConnectMyDiscoverTab(
+      onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectFeedProvider.notifier).refresh(),
       onDiscoverRefresh:
           () => ref.read(discoverConnectFeedProvider.notifier).refresh(),

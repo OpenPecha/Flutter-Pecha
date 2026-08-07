@@ -27,12 +27,20 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      setState(() {});
+    }
   }
 
   Future<void> _onGroupsRefresh() async {
@@ -44,23 +52,18 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
 
   @override
   Widget build(BuildContext context) {
-    final discoverState = ref.watch(discoverGroupsProvider);
     final myGroupsAsync = ref.watch(myGroupsProvider);
     final pendingGroups = ref.watch(pendingJoinedGroupsProvider);
     final pendingUnjoinedIds = ref.watch(pendingUnjoinedGroupIdsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final activeTabIndex = _tabController.index;
 
     final apiGroups = myGroupsAsync.valueOrNull?.groups ?? const [];
     final displayedMyGroups = mergeMyGroupsWithPending(
       apiGroups: apiGroups,
       pendingGroups: pendingGroups,
       pendingUnjoinedIds: pendingUnjoinedIds,
-    );
-    final joinedGroupIds = displayedMyGroups.map((group) => group.id).toSet();
-    final displayedDiscoverGroups = filterDiscoverGroups(
-      discoverGroups: discoverState.groups,
-      joinedGroupIds: joinedGroupIds,
     );
     final myGroupsLoading =
         myGroupsAsync.isLoading && displayedMyGroups.isEmpty;
@@ -98,15 +101,20 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                ConnectFeedTab(myGroups: displayedMyGroups),
-                ConnectEventsTab(myGroups: displayedMyGroups),
-                const ConnectPostsTab(),
+                ConnectFeedTab(
+                  myGroups: displayedMyGroups,
+                  isActive: activeTabIndex == 0,
+                ),
+                ConnectEventsTab(
+                  myGroups: displayedMyGroups,
+                  isActive: activeTabIndex == 1,
+                ),
+                ConnectPostsTab(isActive: activeTabIndex == 2),
                 ConnectGroupsTab(
                   myGroups: displayedMyGroups,
-                  discoverGroups: displayedDiscoverGroups,
-                  discoverState: discoverState,
                   myGroupsLoading: myGroupsLoading,
                   onRefresh: _onGroupsRefresh,
+                  isActive: activeTabIndex == 3,
                 ),
               ],
             ),

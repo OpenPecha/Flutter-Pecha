@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
@@ -8,21 +9,42 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_profi
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Events tab content with My / Discover sub-tabs.
-class ConnectEventsTab extends ConsumerWidget {
+class ConnectEventsTab extends ConsumerStatefulWidget {
   const ConnectEventsTab({
     super.key,
     required this.myGroups,
+    this.isActive = true,
   });
 
   final List<GroupProfile> myGroups;
+  final bool isActive;
 
+  @override
+  ConsumerState<ConnectEventsTab> createState() => _ConnectEventsTabState();
+}
+
+class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
+    with ConnectLazyMyDiscoverTabMixin<ConnectEventsTab> {
   Map<String, String> get _groupNames => {
-    for (final group in myGroups) group.id: group.title,
+    for (final group in widget.myGroups) group.id: group.title,
   };
 
   Map<String, String> get _groupLocations => {
-    for (final group in myGroups) group.id: _locationForGroup(group),
+    for (final group in widget.myGroups) group.id: _locationForGroup(group),
   };
+
+  @override
+  bool readTabActive(ConnectEventsTab widget) => widget.isActive;
+
+  @override
+  void loadActiveSegment() {
+    if (!isTabActive) return;
+    if (selectedSegment == 0) {
+      ref.read(myConnectEventsProvider.notifier).ensureLoaded();
+    } else {
+      ref.read(discoverConnectEventsProvider.notifier).ensureLoaded();
+    }
+  }
 
   String _locationForGroup(GroupProfile group) {
     if (group.tags.isNotEmpty) return group.tags.first;
@@ -31,12 +53,27 @@ class ConnectEventsTab extends ConsumerWidget {
     return 'Online';
   }
 
+  ConnectEventsState _myState() {
+    if (!isTabActive || selectedSegment != 0) {
+      return const ConnectEventsState();
+    }
+    return ref.watch(myConnectEventsProvider);
+  }
+
+  ConnectEventsState _discoverState() {
+    if (!isTabActive || selectedSegment != 1) {
+      return const ConnectEventsState();
+    }
+    return ref.watch(discoverConnectEventsProvider);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final myState = ref.watch(myConnectEventsProvider);
-    final discoverState = ref.watch(discoverConnectEventsProvider);
+  Widget build(BuildContext context) {
+    final myState = _myState();
+    final discoverState = _discoverState();
 
     return ConnectMyDiscoverTab(
+      onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
       onDiscoverRefresh:
           () => ref.read(discoverConnectEventsProvider.notifier).refresh(),

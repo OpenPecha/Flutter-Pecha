@@ -44,13 +44,18 @@ class ConnectPostsNotifier extends StateNotifier<ConnectPostsState> {
   ConnectPostsNotifier({
     required this.ref,
     required this.includeUnfollowed,
-  }) : super(const ConnectPostsState()) {
-    loadInitial();
-  }
+  }) : super(const ConnectPostsState());
 
   final Ref ref;
   final bool includeUnfollowed;
   static const int _limit = 20;
+  bool _loadRequested = false;
+
+  void ensureLoaded() {
+    if (_loadRequested) return;
+    _loadRequested = true;
+    loadInitial();
+  }
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -117,13 +122,15 @@ class ConnectPostsNotifier extends StateNotifier<ConnectPostsState> {
   }
 
   Future<void> refresh() async {
+    _loadRequested = false;
     state = const ConnectPostsState();
-    await loadInitial();
+    ensureLoaded();
   }
 
   void retry() {
     if (state.posts.isEmpty) {
-      loadInitial();
+      _loadRequested = false;
+      ensureLoaded();
     } else {
       loadMore();
     }
@@ -140,11 +147,15 @@ class ConnectPostsNotifier extends StateNotifier<ConnectPostsState> {
 }
 
 final myConnectPostsProvider =
-    StateNotifierProvider<ConnectPostsNotifier, ConnectPostsState>((ref) {
+    StateNotifierProvider.autoDispose<ConnectPostsNotifier, ConnectPostsState>((
+      ref,
+    ) {
       return ConnectPostsNotifier(ref: ref, includeUnfollowed: false);
     });
 
 final discoverConnectPostsProvider =
-    StateNotifierProvider<ConnectPostsNotifier, ConnectPostsState>((ref) {
+    StateNotifierProvider.autoDispose<ConnectPostsNotifier, ConnectPostsState>((
+      ref,
+    ) {
       return ConnectPostsNotifier(ref: ref, includeUnfollowed: true);
     });

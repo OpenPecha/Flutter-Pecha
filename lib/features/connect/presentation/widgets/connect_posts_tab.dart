@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
@@ -7,15 +8,54 @@ import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Posts tab content with My / Discover sub-tabs.
-class ConnectPostsTab extends ConsumerWidget {
-  const ConnectPostsTab({super.key});
+class ConnectPostsTab extends ConsumerStatefulWidget {
+  const ConnectPostsTab({
+    super.key,
+    this.isActive = true,
+  });
+
+  final bool isActive;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final myState = ref.watch(myConnectPostsProvider);
-    final discoverState = ref.watch(discoverConnectPostsProvider);
+  ConsumerState<ConnectPostsTab> createState() => _ConnectPostsTabState();
+}
+
+class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
+    with ConnectLazyMyDiscoverTabMixin<ConnectPostsTab> {
+  @override
+  bool readTabActive(ConnectPostsTab widget) => widget.isActive;
+
+  @override
+  void loadActiveSegment() {
+    if (!isTabActive) return;
+    if (selectedSegment == 0) {
+      ref.read(myConnectPostsProvider.notifier).ensureLoaded();
+    } else {
+      ref.read(discoverConnectPostsProvider.notifier).ensureLoaded();
+    }
+  }
+
+  ConnectPostsState _myState() {
+    if (!isTabActive || selectedSegment != 0) {
+      return const ConnectPostsState();
+    }
+    return ref.watch(myConnectPostsProvider);
+  }
+
+  ConnectPostsState _discoverState() {
+    if (!isTabActive || selectedSegment != 1) {
+      return const ConnectPostsState();
+    }
+    return ref.watch(discoverConnectPostsProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final myState = _myState();
+    final discoverState = _discoverState();
 
     return ConnectMyDiscoverTab(
+      onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectPostsProvider.notifier).refresh(),
       onDiscoverRefresh:
           () => ref.read(discoverConnectPostsProvider.notifier).refresh(),

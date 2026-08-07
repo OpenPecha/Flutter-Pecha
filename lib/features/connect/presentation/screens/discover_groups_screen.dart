@@ -21,6 +21,9 @@ class _DiscoverGroupsScreenState extends ConsumerState<DiscoverGroupsScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(discoverGroupsProvider.notifier).ensureLoaded();
+    });
   }
 
   @override

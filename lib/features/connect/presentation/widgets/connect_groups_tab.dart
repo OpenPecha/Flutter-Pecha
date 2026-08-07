@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
@@ -9,33 +10,71 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_profi
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Groups tab content with My / Discover sub-tabs.
-class ConnectGroupsTab extends ConsumerWidget {
+class ConnectGroupsTab extends ConsumerStatefulWidget {
   const ConnectGroupsTab({
     super.key,
     required this.myGroups,
-    required this.discoverGroups,
-    required this.discoverState,
     required this.myGroupsLoading,
     required this.onRefresh,
+    this.isActive = true,
   });
 
   final List<GroupProfile> myGroups;
-  final List<GroupProfile> discoverGroups;
-  final DiscoverGroupsState discoverState;
   final bool myGroupsLoading;
   final Future<void> Function() onRefresh;
+  final bool isActive;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConnectGroupsTab> createState() => _ConnectGroupsTabState();
+}
+
+class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab>
+    with ConnectLazyMyDiscoverTabMixin<ConnectGroupsTab> {
+  @override
+  bool readTabActive(ConnectGroupsTab widget) => widget.isActive;
+
+  @override
+  void loadActiveSegment() {
+    if (!isTabActive || selectedSegment != 1) return;
+    ref.read(discoverGroupsProvider.notifier).ensureLoaded();
+  }
+
+  DiscoverGroupsState _discoverState() {
+    if (!isTabActive || selectedSegment != 1) {
+      return const DiscoverGroupsState();
+    }
+    return ref.watch(discoverGroupsProvider);
+  }
+
+  List<GroupProfile> _discoverGroups(DiscoverGroupsState discoverState) {
+    if (!isTabActive || selectedSegment != 1) {
+      return const [];
+    }
+
+    final joinedGroupIds = widget.myGroups.map((group) => group.id).toSet();
+    return filterDiscoverGroups(
+      discoverGroups: discoverState.groups,
+      joinedGroupIds: joinedGroupIds,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final discoverState = _discoverState();
+    final discoverGroups = _discoverGroups(discoverState);
+
     return ConnectMyDiscoverTab(
-      onMyRefresh: onRefresh,
-      onDiscoverRefresh: onRefresh,
+      onSegmentChanged: handleSegmentChanged,
+      onMyRefresh: widget.onRefresh,
+      onDiscoverRefresh: widget.onRefresh,
       onDiscoverLoadMore:
-          () => ref.read(discoverGroupsProvider.notifier).loadMore(),
+          isTabActive && selectedSegment == 1
+              ? () => ref.read(discoverGroupsProvider.notifier).loadMore()
+              : null,
       myBuilder: (context, _, switchToDiscover) {
         return ConnectPaginatedListView(
-          items: myGroups,
-          isLoading: myGroupsLoading,
+          items: widget.myGroups,
+          isLoading: widget.myGroupsLoading,
           isLoadingMore: false,
           error: null,
           hasMore: false,
@@ -47,7 +86,7 @@ class ConnectGroupsTab extends ConsumerWidget {
           ),
           itemBuilder:
               (context, index) => DiscoverGroupCard(
-                group: myGroups[index],
+                group: widget.myGroups[index],
                 showOpenButton: true,
               ),
         );

@@ -47,14 +47,19 @@ class ConnectFeedNotifier extends StateNotifier<ConnectFeedState> {
     required this.ref,
     required this.includeUnfollowed,
     required this.language,
-  }) : super(const ConnectFeedState()) {
-    loadInitial();
-  }
+  }) : super(const ConnectFeedState());
 
   final Ref ref;
   final bool includeUnfollowed;
   final String language;
   static const int _limit = 20;
+  bool _loadRequested = false;
+
+  void ensureLoaded() {
+    if (_loadRequested) return;
+    _loadRequested = true;
+    loadInitial();
+  }
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -123,13 +128,15 @@ class ConnectFeedNotifier extends StateNotifier<ConnectFeedState> {
   }
 
   Future<void> refresh() async {
+    _loadRequested = false;
     state = const ConnectFeedState();
-    await loadInitial();
+    ensureLoaded();
   }
 
   void retry() {
     if (state.items.isEmpty) {
-      loadInitial();
+      _loadRequested = false;
+      ensureLoaded();
     } else {
       loadMore();
     }
@@ -153,7 +160,9 @@ class ConnectFeedNotifier extends StateNotifier<ConnectFeedState> {
 }
 
 final myConnectFeedProvider =
-    StateNotifierProvider<ConnectFeedNotifier, ConnectFeedState>((ref) {
+    StateNotifierProvider.autoDispose<ConnectFeedNotifier, ConnectFeedState>((
+      ref,
+    ) {
       final language = ref.watch(contentLanguageProvider);
       return ConnectFeedNotifier(
         ref: ref,
@@ -163,7 +172,9 @@ final myConnectFeedProvider =
     });
 
 final discoverConnectFeedProvider =
-    StateNotifierProvider<ConnectFeedNotifier, ConnectFeedState>((ref) {
+    StateNotifierProvider.autoDispose<ConnectFeedNotifier, ConnectFeedState>((
+      ref,
+    ) {
       final language = ref.watch(contentLanguageProvider);
       return ConnectFeedNotifier(
         ref: ref,

@@ -19,6 +19,7 @@ class ConnectMyDiscoverTab extends StatefulWidget {
     this.onDiscoverRefresh,
     this.onMyLoadMore,
     this.onDiscoverLoadMore,
+    this.onSegmentChanged,
   });
 
   final ConnectSegmentChildBuilder myBuilder;
@@ -27,6 +28,7 @@ class ConnectMyDiscoverTab extends StatefulWidget {
   final Future<void> Function()? onDiscoverRefresh;
   final VoidCallback? onMyLoadMore;
   final VoidCallback? onDiscoverLoadMore;
+  final ValueChanged<int>? onSegmentChanged;
 
   @override
   State<ConnectMyDiscoverTab> createState() => _ConnectMyDiscoverTabState();
@@ -48,6 +50,9 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
     if (widget.onDiscoverLoadMore != null) {
       _discoverScrollController.addListener(_onDiscoverScroll);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onSegmentChanged?.call(_selectedSegment);
+    });
   }
 
   @override
@@ -77,7 +82,13 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
     loadMore();
   }
 
-  void _switchToDiscover() => setState(() => _selectedSegment = 1);
+  void _switchToDiscover() => _selectSegment(1);
+
+  void _selectSegment(int index) {
+    if (_selectedSegment == index) return;
+    setState(() => _selectedSegment = index);
+    widget.onSegmentChanged?.call(index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +100,7 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
           child: ConnectSegmentedControl(
             segments: const ['My', 'Discover'],
             selectedIndex: _selectedSegment,
-            onChanged: (index) => setState(() => _selectedSegment = index),
+            onChanged: _selectSegment,
           ),
         ),
         Expanded(
