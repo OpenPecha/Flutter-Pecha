@@ -44,7 +44,8 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
 
   String? _userId;
   bool _isResetting = false;
-  /// Groups recently reset; ignore stale server totals until GET confirms 0.
+  /// Groups recently reset via [resetCount]; ignore stale server totals until
+  /// GET confirms 0.
   final Set<String> _postResetGroupIds = {};
 
   bool get isResetting => _isResetting;
@@ -216,8 +217,9 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
     _sync.onTap(roundComplete: true);
   }
 
-  /// Clears in-memory session count after a successful finish-session DELETE.
-  void markSessionEnded(String groupAccumulatorId) {
+  /// Clears in-memory count after a successful reset DELETE. Hive is cleared
+  /// separately by [MalaSyncManager.resetGroupAccumulator].
+  void _markLocalCountResetAfterDelete(String groupAccumulatorId) {
     _postResetGroupIds.add(groupAccumulatorId);
     state = {...state, groupAccumulatorId: 0};
   }
@@ -239,8 +241,7 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
         deleteGroupAccumulator: _deleteGroupAccumulator,
       );
       if (!mounted) return false;
-      _postResetGroupIds.add(groupAccumulatorId);
-      state = {...state, groupAccumulatorId: 0};
+      _markLocalCountResetAfterDelete(groupAccumulatorId);
       return true;
     } catch (_) {
       return false;
