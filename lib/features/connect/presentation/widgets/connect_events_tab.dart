@@ -55,24 +55,13 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     return context.l10n.connect_online;
   }
 
-  ConnectEventsState _myState() {
-    if (!isTabActive || selectedSegment != 0) {
-      return const ConnectEventsState();
-    }
-    return ref.watch(myConnectEventsProvider);
-  }
-
-  ConnectEventsState _discoverState() {
-    if (!isTabActive || selectedSegment != 1) {
-      return const ConnectEventsState();
-    }
-    return ref.watch(discoverConnectEventsProvider);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final myState = _myState();
-    final discoverState = _discoverState();
+    // Watch both providers unconditionally so they stay alive across
+    // My/Discover segment switches; only `loadActiveSegment()` decides
+    // when to actually fetch.
+    final myState = ref.watch(myConnectEventsProvider);
+    final discoverState = ref.watch(discoverConnectEventsProvider);
     final groupLocations = _groupLocations(context);
 
     return ConnectMyDiscoverTab(

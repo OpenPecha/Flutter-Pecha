@@ -40,18 +40,7 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab>
     ref.read(discoverGroupsProvider.notifier).ensureLoaded();
   }
 
-  DiscoverGroupsState _discoverState() {
-    if (!isTabActive || selectedSegment != 1) {
-      return const DiscoverGroupsState();
-    }
-    return ref.watch(discoverGroupsProvider);
-  }
-
   List<GroupProfile> _discoverGroups(DiscoverGroupsState discoverState) {
-    if (!isTabActive || selectedSegment != 1) {
-      return const [];
-    }
-
     final joinedGroupIds = widget.myGroups.map((group) => group.id).toSet();
     return filterDiscoverGroups(
       discoverGroups: discoverState.groups,
@@ -61,7 +50,9 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab>
 
   @override
   Widget build(BuildContext context) {
-    final discoverState = _discoverState();
+    // Watch unconditionally so it stays alive across My/Discover segment
+    // switches; only `loadActiveSegment()` decides when to actually fetch.
+    final discoverState = ref.watch(discoverGroupsProvider);
     final discoverGroups = _discoverGroups(discoverState);
 
     return ConnectMyDiscoverTab(

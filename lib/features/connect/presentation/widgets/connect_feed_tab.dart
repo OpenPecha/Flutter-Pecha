@@ -57,24 +57,13 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     }
   }
 
-  ConnectFeedState _myState() {
-    if (!isTabActive || selectedSegment != 0) {
-      return const ConnectFeedState();
-    }
-    return ref.watch(myConnectFeedProvider);
-  }
-
-  ConnectFeedState _discoverState() {
-    if (!isTabActive || selectedSegment != 1) {
-      return const ConnectFeedState();
-    }
-    return ref.watch(discoverConnectFeedProvider);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final myState = _myState();
-    final discoverState = _discoverState();
+    // Watch both providers unconditionally so they stay alive across
+    // My/Discover segment switches; only `loadActiveSegment()` decides
+    // when to actually fetch.
+    final myState = ref.watch(myConnectFeedProvider);
+    final discoverState = ref.watch(discoverConnectFeedProvider);
     final groupLocations = _groupLocations(context);
 
     return ConnectMyDiscoverTab(

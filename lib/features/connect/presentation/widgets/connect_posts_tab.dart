@@ -36,24 +36,13 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
     }
   }
 
-  ConnectPostsState _myState() {
-    if (!isTabActive || selectedSegment != 0) {
-      return const ConnectPostsState();
-    }
-    return ref.watch(myConnectPostsProvider);
-  }
-
-  ConnectPostsState _discoverState() {
-    if (!isTabActive || selectedSegment != 1) {
-      return const ConnectPostsState();
-    }
-    return ref.watch(discoverConnectPostsProvider);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final myState = _myState();
-    final discoverState = _discoverState();
+    // Watch both providers unconditionally so they stay alive across
+    // My/Discover segment switches; only `loadActiveSegment()` decides
+    // when to actually fetch.
+    final myState = ref.watch(myConnectPostsProvider);
+    final discoverState = ref.watch(discoverConnectPostsProvider);
 
     return ConnectMyDiscoverTab(
       onSegmentChanged: handleSegmentChanged,
