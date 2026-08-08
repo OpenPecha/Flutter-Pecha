@@ -61,13 +61,18 @@ class DiscoverGroupsNotifier extends StateNotifier<DiscoverGroupsState> {
   DiscoverGroupsNotifier({
     required this.repository,
     required this.language,
-  }) : super(const DiscoverGroupsState()) {
-    loadInitial();
-  }
+  }) : super(const DiscoverGroupsState());
 
   final ConnectRepository repository;
   final String language;
   static const int _limit = 20;
+  bool _loadRequested = false;
+
+  void ensureLoaded() {
+    if (_loadRequested) return;
+    _loadRequested = true;
+    loadInitial();
+  }
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -128,8 +133,9 @@ class DiscoverGroupsNotifier extends StateNotifier<DiscoverGroupsState> {
   }
 
   Future<void> refresh() async {
+    _loadRequested = false;
     state = const DiscoverGroupsState();
-    await loadInitial();
+    ensureLoaded();
   }
 
   void removeGroups(Set<String> groupIds) {
@@ -144,7 +150,8 @@ class DiscoverGroupsNotifier extends StateNotifier<DiscoverGroupsState> {
 
   void retry() {
     if (state.groups.isEmpty) {
-      loadInitial();
+      _loadRequested = false;
+      ensureLoaded();
     } else {
       loadMore();
     }
@@ -152,7 +159,7 @@ class DiscoverGroupsNotifier extends StateNotifier<DiscoverGroupsState> {
 }
 
 final discoverGroupsProvider =
-    StateNotifierProvider<DiscoverGroupsNotifier, DiscoverGroupsState>(
+    StateNotifierProvider.autoDispose<DiscoverGroupsNotifier, DiscoverGroupsState>(
       (ref) {
         final language = ref.watch(contentLanguageProvider);
         return DiscoverGroupsNotifier(

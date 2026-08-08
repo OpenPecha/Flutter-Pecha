@@ -20,11 +20,15 @@ class DiscoverGroupCard extends ConsumerWidget {
   const DiscoverGroupCard({
     super.key,
     required this.group,
-    this.showJoinButton = true,
+    this.showJoinButton = false,
+    this.showOpenButton = false,
+    this.subtitleOverride,
   });
 
   final GroupProfile group;
   final bool showJoinButton;
+  final bool showOpenButton;
+  final String? subtitleOverride;
 
   static const double _titleFontSize = 15;
   static const double _subtitleFontSize = 13;
@@ -47,7 +51,7 @@ class DiscoverGroupCard extends ConsumerWidget {
       GroupFollowSuccess(countDelta: final delta) => delta,
       _ => 0,
     };
-    final subtitleText = _subtitle(context, countDelta);
+    final subtitleText = subtitleOverride ?? _subtitle(context, countDelta);
     final hasTibetanTitle = _containsTibetan(group.title);
     final hasTibetanSubtitle =
         context.isTibetanLocale || _containsTibetan(subtitleText);
@@ -88,6 +92,16 @@ class DiscoverGroupCard extends ConsumerWidget {
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(16),
+            boxShadow:
+                isDark
+                    ? null
+                    : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,6 +150,8 @@ class DiscoverGroupCard extends ConsumerWidget {
               const SizedBox(width: 8),
               if (showJoinButton)
                 _JoinButton(group: group, isDark: isDark, followKey: followKey)
+              else if (showOpenButton)
+                _OpenButton(isDark: isDark)
               else
                 Icon(AppAssets.caretRight, size: 16, color: subtitleColor),
             ],
@@ -226,6 +242,35 @@ class _GroupAvatar extends StatelessWidget {
   }
 }
 
+class _OpenButton extends StatelessWidget {
+  const _OpenButton({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
+
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        context.l10n.connect_open,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
+}
+
 class _JoinButton extends ConsumerWidget {
   const _JoinButton({
     required this.group,
@@ -249,8 +294,9 @@ class _JoinButton extends ConsumerWidget {
             isLoading ? null : () => _onJoinPressed(context, ref, followKey),
         style: TextButton.styleFrom(
           backgroundColor:
-              isDark ? AppColors.cardBorderDark : AppColors.grey100,
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
+              isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+          foregroundColor:
+              isDark ? AppColors.textPrimary : AppColors.surfaceWhite,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
