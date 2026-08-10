@@ -11,6 +11,7 @@ import 'package:flutter_pecha/features/group_profile/data/repositories/group_pro
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_events_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_member.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/domain/repositories/group_profile_repository.dart';
 import 'package:flutter_pecha/features/group_profile/domain/usecases/get_group_profile_usecase.dart';
@@ -45,6 +46,19 @@ final groupProfileProvider = FutureProvider.autoDispose
   final useCase = ref.watch(getGroupProfileUseCaseProvider);
   return useCase(
     GetGroupProfileParams(groupId: groupId, language: language),
+  );
+});
+
+final groupPracticesProvider = FutureProvider.autoDispose
+    .family<Either<Failure, GroupPracticesPage>, String>((ref, groupId) async {
+  ref.watch(authProvider);
+  final language = ref.watch(contentLanguageProvider);
+  final repository = ref.watch(groupProfileRepositoryProvider);
+  return repository.getGroupPractices(
+    groupId,
+    language: language,
+    skip: 0,
+    limit: 20,
   );
 });
 
@@ -127,6 +141,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
 
   void _invalidateGroupProfile() {
     _ref.invalidate(groupProfileProvider(_key.groupId));
+    _ref.invalidate(groupPracticesProvider(_key.groupId));
   }
 
   void _refreshGroupMembers() {
@@ -369,6 +384,23 @@ Future<bool> confirmGroupPracticeChangeIfNeeded(
   return confirmed == true;
 }
 
+bool? seriesGroupEnrollmentStatusFromPractices(
+  GroupPracticesPage page,
+  String seriesId, {
+  Set<String> localEnrolledSeriesIds = const {},
+}) {
+  for (final practice in page.practices) {
+    final series = practice.series;
+    if (series != null && series.id == seriesId) {
+      return seriesGroupEnrollmentStatus(
+        series,
+        localEnrolledSeriesIds: localEnrolledSeriesIds,
+      );
+    }
+  }
+  return null;
+}
+
 /// Enrolls in a series via [groupId] and updates group join UI optimistically.
 Future<bool> enrollSeriesThroughGroup({
   required WidgetRef ref,
@@ -389,6 +421,7 @@ Future<bool> enrollSeriesThroughGroup({
         .markAutoJoinedFromPracticeEnrollment(group: profile),
   );
   ref.invalidate(groupProfileProvider(groupId));
+  ref.invalidate(groupPracticesProvider(groupId));
   return true;
 }
 
@@ -407,6 +440,7 @@ Future<void> completeGroupPracticeEnrollmentFlow({
         .syncJoinStatusFromServer(connectGroup: profile),
   );
   ref.invalidate(groupProfileProvider(groupId));
+  ref.invalidate(groupPracticesProvider(groupId));
 }
 
 class GroupMembersState {

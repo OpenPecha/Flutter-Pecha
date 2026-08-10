@@ -275,7 +275,7 @@ void refreshGroupAccumulatorData(
     ),
   );
   if (groupId != null && groupId.isNotEmpty) {
-    ref.invalidate(groupAccumulatorsProvider(groupId));
+    ref.invalidate(groupPracticesProvider(groupId));
   }
 }
 
@@ -319,7 +319,7 @@ Future<bool> joinGroupAccumulator({
 
   final refreshFuture = Future.wait([
     ref.read(groupAccumulatorDetailProvider(accumulatorId).future),
-    ref.read(groupAccumulatorsProvider(groupId).future),
+    ref.read(groupPracticesProvider(groupId).future),
   ]);
 
   if (awaitRefresh) {
