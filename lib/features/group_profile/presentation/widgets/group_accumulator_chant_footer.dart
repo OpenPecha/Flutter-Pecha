@@ -68,7 +68,9 @@ class _ChantActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: backgroundColor.withValues(alpha: onTap == null ? 0.45 : 1),
-      borderRadius: BorderRadius.circular(GroupAccumulatorChantFooter._borderRadius),
+      borderRadius: BorderRadius.circular(
+        GroupAccumulatorChantFooter._borderRadius,
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,

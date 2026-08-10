@@ -29,6 +29,10 @@ class MyGroupsScreen extends ConsumerWidget {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         title: Text(context.l10n.my_groups),
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(AppAssets.arrowLeft),
+        ),
       ),
       body: myGroupsAsync.when(
         loading: () {

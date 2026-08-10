@@ -11,6 +11,8 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/screens/login_page.dart';
 import 'package:flutter_pecha/features/auth/presentation/screens/splash_screen.dart';
 import 'package:flutter_pecha/features/calendar/presentation/screens/tibetan_calendar_screen.dart';
+import 'package:flutter_pecha/features/connect/presentation/screens/connect_post_detail_screen.dart';
+import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
@@ -274,6 +276,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) {
                   final eventId = state.pathParameters['eventId'] ?? '';
                   return GroupEventDetailScreen(eventId: eventId);
+                },
+              ),
+              GoRoute(
+                path: "posts/:postId",
+                name: "home-connect-post",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final postId = state.pathParameters['postId'] ?? '';
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final post = extra?['post'] as ConnectPost?;
+                  final includeUnfollowed =
+                      extra?['includeUnfollowed'] as bool? ?? false;
+                  return ConnectPostDetailScreen(
+                    postId: postId,
+                    initialPost: post,
+                    includeUnfollowed: includeUnfollowed,
+                  );
                 },
               ),
               GoRoute(

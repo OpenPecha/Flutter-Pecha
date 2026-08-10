@@ -1369,6 +1369,282 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_tab_feed => TolgeeBridge.get(
+    localeName,
+    'connect_tab_feed',
+    () => _fallback.connect_tab_feed,
+  );
+
+  @override
+  String get connect_tab_events => TolgeeBridge.get(
+    localeName,
+    'connect_tab_events',
+    () => _fallback.connect_tab_events,
+  );
+
+  @override
+  String get connect_tab_posts => TolgeeBridge.get(
+    localeName,
+    'connect_tab_posts',
+    () => _fallback.connect_tab_posts,
+  );
+
+  @override
+  String get connect_tab_groups => TolgeeBridge.get(
+    localeName,
+    'connect_tab_groups',
+    () => _fallback.connect_tab_groups,
+  );
+
+  @override
+  String get connect_segment_my => TolgeeBridge.get(
+    localeName,
+    'connect_segment_my',
+    () => _fallback.connect_segment_my,
+  );
+
+  @override
+  String get connect_segment_discover => TolgeeBridge.get(
+    localeName,
+    'connect_segment_discover',
+    () => _fallback.connect_segment_discover,
+  );
+
+  @override
+  String get connect_empty_discover_posts => TolgeeBridge.get(
+    localeName,
+    'connect_empty_discover_posts',
+    () => _fallback.connect_empty_discover_posts,
+  );
+
+  @override
+  String get connect_empty_discover_events => TolgeeBridge.get(
+    localeName,
+    'connect_empty_discover_events',
+    () => _fallback.connect_empty_discover_events,
+  );
+
+  @override
+  String get connect_empty_discover_feed => TolgeeBridge.get(
+    localeName,
+    'connect_empty_discover_feed',
+    () => _fallback.connect_empty_discover_feed,
+  );
+
+  @override
+  String get connect_empty_discover_groups => TolgeeBridge.get(
+    localeName,
+    'connect_empty_discover_groups',
+    () => _fallback.connect_empty_discover_groups,
+  );
+
+  @override
+  String get connect_all_groups => TolgeeBridge.get(
+    localeName,
+    'connect_all_groups',
+    () => _fallback.connect_all_groups,
+  );
+
+  @override
+  String get connect_my_empty_feed_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_feed_title',
+    () => _fallback.connect_my_empty_feed_title,
+  );
+
+  @override
+  String get connect_my_empty_events_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_events_title',
+    () => _fallback.connect_my_empty_events_title,
+  );
+
+  @override
+  String get connect_my_empty_posts_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_posts_title',
+    () => _fallback.connect_my_empty_posts_title,
+  );
+
+  @override
+  String get connect_my_empty_groups_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_groups_title',
+    () => _fallback.connect_my_empty_groups_title,
+  );
+
+  @override
+  String get connect_my_empty_feed_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_feed_subtitle',
+    () => _fallback.connect_my_empty_feed_subtitle,
+  );
+
+  @override
+  String get connect_my_empty_events_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_events_subtitle',
+    () => _fallback.connect_my_empty_events_subtitle,
+  );
+
+  @override
+  String get connect_my_empty_posts_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_posts_subtitle',
+    () => _fallback.connect_my_empty_posts_subtitle,
+  );
+
+  @override
+  String get connect_my_empty_groups_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_groups_subtitle',
+    () => _fallback.connect_my_empty_groups_subtitle,
+  );
+
+  @override
+  String get connect_my_empty_feed_browse => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_feed_browse',
+    () => _fallback.connect_my_empty_feed_browse,
+  );
+
+  @override
+  String get connect_my_empty_events_browse => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_events_browse',
+    () => _fallback.connect_my_empty_events_browse,
+  );
+
+  @override
+  String get connect_my_empty_posts_browse => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_posts_browse',
+    () => _fallback.connect_my_empty_posts_browse,
+  );
+
+  @override
+  String connect_comment_replying_to(String handle) => TolgeeBridge.format(
+    localeName,
+    'connect_comment_replying_to',
+    <String, Object>{'handle': handle},
+    () => _fallback.connect_comment_replying_to(handle),
+  );
+
+  @override
+  String get connect_comment_hint => TolgeeBridge.get(
+    localeName,
+    'connect_comment_hint',
+    () => _fallback.connect_comment_hint,
+  );
+
+  @override
+  String get connect_comment_reply_hint => TolgeeBridge.get(
+    localeName,
+    'connect_comment_reply_hint',
+    () => _fallback.connect_comment_reply_hint,
+  );
+
+  @override
+  String get connect_comment_reply => TolgeeBridge.get(
+    localeName,
+    'connect_comment_reply',
+    () => _fallback.connect_comment_reply,
+  );
+
+  @override
+  String get connect_comment_delete_title => TolgeeBridge.get(
+    localeName,
+    'connect_comment_delete_title',
+    () => _fallback.connect_comment_delete_title,
+  );
+
+  @override
+  String get connect_comment_delete_message => TolgeeBridge.get(
+    localeName,
+    'connect_comment_delete_message',
+    () => _fallback.connect_comment_delete_message,
+  );
+
+  @override
+  String get connect_comment_delete_failed => TolgeeBridge.get(
+    localeName,
+    'connect_comment_delete_failed',
+    () => _fallback.connect_comment_delete_failed,
+  );
+
+  @override
+  String connect_post_comments_count(int count) => TolgeeBridge.format(
+    localeName,
+    'connect_post_comments_count',
+    <String, Object>{'count': count},
+    () => _fallback.connect_post_comments_count(count),
+  );
+
+  @override
+  String get connect_post_comments_empty => TolgeeBridge.get(
+    localeName,
+    'connect_post_comments_empty',
+    () => _fallback.connect_post_comments_empty,
+  );
+
+  @override
+  String get connect_caption_more => TolgeeBridge.get(
+    localeName,
+    'connect_caption_more',
+    () => _fallback.connect_caption_more,
+  );
+
+  @override
+  String get connect_online => TolgeeBridge.get(
+    localeName,
+    'connect_online',
+    () => _fallback.connect_online,
+  );
+
+  @override
+  String get connect_open => TolgeeBridge.get(
+    localeName,
+    'connect_open',
+    () => _fallback.connect_open,
+  );
+
+  @override
+  String get connect_event_fallback_title => TolgeeBridge.get(
+    localeName,
+    'connect_event_fallback_title',
+    () => _fallback.connect_event_fallback_title,
+  );
+
+  @override
+  String get connect_group_fallback_title => TolgeeBridge.get(
+    localeName,
+    'connect_group_fallback_title',
+    () => _fallback.connect_group_fallback_title,
+  );
+
+  @override
+  String get connect_event_attend => TolgeeBridge.get(
+    localeName,
+    'connect_event_attend',
+    () => _fallback.connect_event_attend,
+  );
+
+  @override
+  String get connect_event_attending => TolgeeBridge.get(
+    localeName,
+    'connect_event_attending',
+    () => _fallback.connect_event_attending,
+  );
+
+  @override
+  String connect_event_participants_attending(int count) => TolgeeBridge.format(
+    localeName,
+    'connect_event_participants_attending',
+    <String, Object>{'count': count},
+    () => _fallback.connect_event_participants_attending(count),
+  );
+
+  @override
   String get search_groups => TolgeeBridge.get(
     localeName,
     'search_groups',
