@@ -234,10 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _navigateToSeries(Series series) {
-    context.pushNamed(
-      'home-series-detail',
-      pathParameters: {'id': series.id},
-    );
+    context.pushNamed('home-series-detail', pathParameters: {'id': series.id});
   }
 
   @override
@@ -258,11 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const HomeEventBanner(),
-          SizedBox(height: HomeScreenConstants.bodyVerticalPadding),
-          _buildBody(context, l10n),
-        ],
+        children: [const HomeEventBanner(), _buildBody(context, l10n)],
       ),
     );
   }
@@ -313,7 +306,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: HomeScreenConstants.cardSpacing),
                   _buildVerseOfDaySection(),
                   const SizedBox(height: HomeScreenConstants.cardSpacing),
                   HomeShortcutsRow(
