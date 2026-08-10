@@ -7,12 +7,16 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_hero_card.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_session_complete_sheet.dart';
+import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_sync_manager.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -205,6 +209,7 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
             isDark: isDark,
             isJoining: _isJoining,
             onJoinTap: () => _onJoinTap(detail),
+            onReciteTap: () => _onReciteTap(context, detail),
           ),
         ),
         TabBar(
@@ -269,6 +274,68 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
         content: Text(context.l10n.group_accumulator_join_error),
         backgroundColor: Colors.red,
       ),
+    );
+  }
+
+  Future<void> _onReciteTap(
+    BuildContext context,
+    GroupAccumulatorDetail detail,
+  ) async {
+    if (!detail.hasTextContent) {
+      final presetId = detail.presetAccumulatorId;
+      if (presetId.isEmpty) return;
+      await context.push(
+        '/mala',
+        extra: {'presetId': presetId, 'groupAccumulatorId': detail.id},
+      );
+      if (!context.mounted) return;
+      await _refreshAfterPractice(detail);
+      return;
+    }
+
+    final textId = detail.textId;
+    if (textId == null || textId.isEmpty) return;
+
+    final sessionCount = await context.push<int>(
+      '/reader/$textId',
+      extra: NavigationContext(
+        source: NavigationSource.groupAccumulatorChant,
+        groupAccumulatorId: detail.id,
+        presetAccumulatorId: detail.presetAccumulatorId,
+        groupId: detail.groupId,
+        groupTitle:
+            _resolveGroupName(detail.groupId)?.trim().isNotEmpty == true
+                ? _resolveGroupName(detail.groupId)!.trim()
+                : null,
+        groupAccumulatorSessionCount: detail.user?.totalCount ?? 0,
+      ),
+    );
+
+    if (!context.mounted) return;
+
+    await _refreshAfterPractice(detail);
+
+    if (sessionCount == null) return;
+
+    showGroupAccumulatorSessionCompleteSheet(
+      context,
+      sessionCount: sessionCount,
+      accumulationTitle: detail.title,
+      accumulatorId: detail.id,
+      groupId: detail.groupId,
+      groupName: _resolveGroupName(detail.groupId),
+    );
+  }
+
+  Future<void> _refreshAfterPractice(GroupAccumulatorDetail detail) async {
+    try {
+      await ref.read(malaSyncManagerProvider).flush(SyncReason.screenLeave);
+    } catch (_) {}
+
+    refreshGroupAccumulatorData(
+      ref,
+      accumulatorId: detail.id,
+      groupId: detail.groupId,
     );
   }
 
@@ -433,6 +500,7 @@ class _AccumulatorHeroCard extends StatelessWidget {
   final bool isDark;
   final bool isJoining;
   final VoidCallback? onJoinTap;
+  final VoidCallback? onReciteTap;
 
   const _AccumulatorHeroCard({
     required this.detail,
@@ -440,26 +508,18 @@ class _AccumulatorHeroCard extends StatelessWidget {
     required this.isDark,
     this.isJoining = false,
     this.onJoinTap,
+    this.onReciteTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    void navigateToMala() {
-      final presetId = detail.presetAccumulatorId;
-      if (presetId.isEmpty) return;
-      context.push(
-        '/mala',
-        extra: {'presetId': presetId, 'groupAccumulatorId': detail.id},
-      );
-    }
-
     return GroupAccumulatorHeroCard(
       detail: detail,
       hasJoined: hasJoined,
       isDark: isDark,
       isJoining: isJoining,
       onJoinTap: onJoinTap,
-      onActionTap: hasJoined ? navigateToMala : null,
+      onActionTap: hasJoined ? onReciteTap : null,
     );
   }
 }

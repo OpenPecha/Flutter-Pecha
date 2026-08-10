@@ -204,6 +204,16 @@ class DeepLinkRouter {
 
     if (segments.length >= 3 &&
         segments[0] == 'open' &&
+        segments[1] == 'events') {
+      final eventId = segments[2];
+      return _DeepLinkDestination(
+        '/home/events/${Uri.encodeComponent(eventId)}',
+        opensOnTop: true,
+      );
+    }
+
+    if (segments.length >= 3 &&
+        segments[0] == 'open' &&
         segments[1] == 'group-accumulator') {
       final accumulatorId = segments[2];
       final groupId = uri.queryParameters['group'];

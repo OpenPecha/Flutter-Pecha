@@ -1,6 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_router.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/add_offline_chants_dialog.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_chant_bar.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_chant_footer.dart';
+import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/accumulator_groups_provider.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/group_accumulation_counts_provider.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_accumulation_selection_provider.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_settings_provider.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_sync_manager.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/plan_days_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_audio_button.dart';
@@ -25,6 +38,7 @@ import 'package:flutter_pecha/features/reader/presentation/widgets/reader_search
 import 'package:flutter_pecha/features/reader/presentation/widgets/reader_settings/reader_settings_screen.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/utils/get_language.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/texts/data/models/text_detail.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,6 +87,22 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
   double _bottomOverlayHeight = 0;
   // Scroll controller callback
   void Function(String segmentId, {double? alignment})? _scrollToSegment;
+  VoidCallback? _scrollToTop;
+
+  // Group accumulation chant session
+  bool _hasSeededInitialChantCount = false;
+  bool _chantSessionFinished = false;
+
+  /// Absolute count already synced before this reader visit; UI shows the delta.
+  int _chantSessionBaseline = 0;
+
+  NavigationContext? get _chantContext {
+    final ctx = widget.navigationContext;
+    if (ctx == null || !ctx.isGroupAccumulatorChant) return null;
+    return ctx;
+  }
+
+  bool get _isGroupAccumulatorChant => _chantContext != null;
 
   // ─── Audio ─────────────────────────────────────────────────────────────
   // Plays the current SOURCE_REFERENCE subtask's audio when the reader is
@@ -91,6 +121,121 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
       navigationContext: widget.navigationContext,
     );
     _initAudio();
+    _initGroupAccumulatorChantSession();
+  }
+
+  void _initGroupAccumulatorChantSession() {
+    final ctx = _chantContext;
+    if (ctx == null) return;
+
+    final presetId = ctx.presetAccumulatorId!;
+    final groupAccumulatorId = ctx.groupAccumulatorId!;
+    final sessionCount = ctx.groupAccumulatorSessionCount ?? 0;
+
+    Future.microtask(() async {
+      if (!mounted) return;
+      await ref
+          .read(
+            malaAccumulationSelectionProvider(presetId).notifier,
+          )
+          .applyNavigationIntent(groupAccumulatorId);
+      if (!mounted) return;
+      final countsNotifier = ref.read(
+        groupAccumulationCountsProvider(presetId).notifier,
+      );
+      await countsNotifier.mergeFromServerCounts({
+        groupAccumulatorId: sessionCount,
+      });
+      if (!mounted) return;
+      _chantSessionBaseline = countsNotifier.countFor(groupAccumulatorId);
+      _seedInitialChantCountIfNeeded();
+    });
+  }
+
+  void _seedInitialChantCountIfNeeded() {
+    if (_hasSeededInitialChantCount) return;
+    _hasSeededInitialChantCount = true;
+
+    final ctx = _chantContext;
+    if (ctx == null) return;
+
+    _incrementGroupChantCount();
+  }
+
+  void _incrementGroupChantCount() {
+    final ctx = _chantContext;
+    if (ctx == null) return;
+
+    final presetId = ctx.presetAccumulatorId!;
+    final groupAccumulatorId = ctx.groupAccumulatorId!;
+    final settings = ref.read(malaSettingsProvider);
+    ref.read(groupAccumulationCountsProvider(presetId).notifier).increment(
+      groupAccumulatorId: groupAccumulatorId,
+      groups: const [],
+      soundEnabled: settings.soundEnabled,
+      vibrationEnabled: settings.vibrationEnabled,
+      beadsPerRound: kBeadsPerRound,
+    );
+  }
+
+  void _onChantAgain() {
+    _scrollToTop?.call();
+    _incrementGroupChantCount();
+  }
+
+  Future<void> _addOfflineChantCount() async {
+    final count = await showAddOfflineChantsDialog(context);
+    if (count == null || count <= 0 || !mounted) return;
+
+    final ctx = _chantContext;
+    if (ctx == null) return;
+
+    ref.read(groupAccumulationCountsProvider(ctx.presetAccumulatorId!).notifier).addCount(
+      groupAccumulatorId: ctx.groupAccumulatorId!,
+      groups: const [],
+      count: count,
+    );
+  }
+
+  Future<void> _finishChantSession() async {
+    final ctx = _chantContext;
+    int? finishedSessionCount;
+    if (ctx != null) {
+      final sessionCount = _groupChantSessionCount();
+      final success = await finishGroupAccumulatorSession(
+        ref: ref,
+        groupAccumulatorId: ctx.groupAccumulatorId!,
+        presetId: ctx.presetAccumulatorId!,
+        groupId: ctx.groupId,
+      );
+      if (!mounted) return;
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.something_went_wrong)),
+        );
+        return;
+      }
+      _chantSessionFinished = true;
+      finishedSessionCount = sessionCount;
+    }
+    if (mounted && context.canPop()) {
+      context.pop(finishedSessionCount);
+    }
+  }
+
+  int _groupChantSessionCount([Map<String, int>? counts]) {
+    final ctx = _chantContext;
+    if (ctx == null) return 0;
+    final presetId = ctx.presetAccumulatorId!;
+    final groupAccumulatorId = ctx.groupAccumulatorId!;
+    final notifier =
+        ref.read(groupAccumulationCountsProvider(presetId).notifier);
+    final absolute =
+        counts != null
+            ? counts[groupAccumulatorId] ??
+                notifier.countFor(groupAccumulatorId)
+            : notifier.countFor(groupAccumulatorId);
+    return (absolute - _chantSessionBaseline).clamp(0, absolute);
   }
 
   /// Create the audio controller when the reader was opened from a plan and the
@@ -199,6 +344,18 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     final notifier = ref.read(readerNotifierProvider(_params).notifier);
     final readerTheme = _readerTheme(context);
 
+    if (_isGroupAccumulatorChant) {
+      final presetId = _chantContext!.presetAccumulatorId!;
+      ref.watch(joinedAccumulatorGroupsProvider(presetId));
+      ref.listen(joinedGroupUserCountsProvider(presetId), (_, next) {
+        next.whenData((counts) {
+          ref
+              .read(groupAccumulationCountsProvider(presetId).notifier)
+              .mergeFromServerCounts(counts);
+        });
+      });
+    }
+
     return Theme(
       data: readerTheme,
       child: PopScope(
@@ -215,6 +372,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
             notifier.closeCommentary();
             notifier.closeTranslation();
             _invalidatePlanProviders();
+            if (_isGroupAccumulatorChant && !_chantSessionFinished) {
+              unawaited(
+                ref.read(malaSyncManagerProvider).flush(SyncReason.screenLeave),
+              );
+            }
           });
         },
         child: Scaffold(
@@ -280,13 +442,32 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     final isActionBarVisible = state.hasSelection && !isPanelOpen;
     final isBottomOverlayVisible =
         !isPanelOpen && (_hasAudio || isActionBarVisible);
+    final chantBarHeight =
+        _isGroupAccumulatorChant ? GroupAccumulatorChantBar.barHeight : 0.0;
+    final chantSessionCount = _isGroupAccumulatorChant
+        ? _groupChantSessionCount(
+            ref.watch(
+              groupAccumulationCountsProvider(
+                _chantContext!.presetAccumulatorId!,
+              ),
+            ),
+          )
+        : 0;
     final contentBottomPadding =
-        isBottomOverlayVisible
+        (isBottomOverlayVisible
             ? (_bottomOverlayHeight > 0
                 ? _bottomOverlayHeight + 16
                 : _selectedSegmentOverlayFallbackHeight)
-            : _defaultContentBottomPadding;
+            : _defaultContentBottomPadding) +
+        chantBarHeight;
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final chantFooter =
+        _isGroupAccumulatorChant && !isPanelOpen
+            ? GroupAccumulatorChantFooter(
+              onChantAgain: _onChantAgain,
+              onFinishSession: _finishChantSession,
+            )
+            : null;
 
     return Stack(
       children: [
@@ -357,15 +538,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
                         visibleSegmentIds:
                             widget.navigationContext?.currentSegmentIds,
                         bottomPadding: contentBottomPadding,
+                        chantSessionFooter: chantFooter,
                         onScrollDirectionChanged: _onScrollDirectionChanged,
                         onScrollControllerReady: (scrollFn) {
                           _scrollToSegment = scrollFn;
+                        },
+                        onScrollToTopReady: (scrollFn) {
+                          _scrollToTop = scrollFn;
                         },
                       ),
                     ),
                   ),
                 ),
               ),
+              if (_isGroupAccumulatorChant)
+                GroupAccumulatorChantBar(
+                  presetId: _chantContext!.presetAccumulatorId!,
+                  groupAccumulatorId: _chantContext!.groupAccumulatorId!,
+                  sessionCount: chantSessionCount,
+                  chantTitle: textDetail!.title,
+                  chantTitleFontFamily: getFontFamily(textDetail.language),
+                ),
             ],
           ),
         ),
@@ -377,7 +570,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: isActionBarVisible ? 0 : chantBarHeight,
             child: _MeasuredSize(
               onChange: (size) {
                 if ((_bottomOverlayHeight - size.height).abs() < 1) return;
@@ -551,10 +744,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
       context,
       textId: widget.textId,
       showAddToPractices: showAddToPractices,
+      showOfflineRecitation: _isGroupAccumulatorChant,
       onAddToPractices:
           showAddToPractices
               ? () => _openRoutineWithRecitation(context, textDetail)
               : null,
+      onAddOfflineRecitation:
+          _isGroupAccumulatorChant ? _addOfflineChantCount : null,
     );
   }
 

@@ -44,7 +44,8 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
 
   String? _userId;
   bool _isResetting = false;
-  /// Groups recently reset; ignore stale server totals until GET confirms 0.
+  /// Groups recently reset via [resetCount]; ignore stale server totals until
+  /// GET confirms 0.
   final Set<String> _postResetGroupIds = {};
 
   bool get isResetting => _isResetting;
@@ -197,6 +198,32 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
     _sync.onTap(roundComplete: true);
   }
 
+  /// Adds [count] offline recitations on top of the current session total.
+  void addCount({
+    required String groupAccumulatorId,
+    required List<AccumulatorGroup> groups,
+    required int count,
+  }) {
+    if (count <= 0) return;
+
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    _postResetGroupIds.remove(groupAccumulatorId);
+    final current = countFor(groupAccumulatorId, groups);
+    final newTotal = current + count;
+    state = {...state, groupAccumulatorId: newTotal};
+    unawaited(_local.addGroupToTotal(userId, groupAccumulatorId, count));
+    _sync.onTap(roundComplete: true);
+  }
+
+  /// Clears in-memory count after a successful reset DELETE. Hive is cleared
+  /// separately by [MalaSyncManager.resetGroupAccumulator].
+  void _markLocalCountResetAfterDelete(String groupAccumulatorId) {
+    _postResetGroupIds.add(groupAccumulatorId);
+    state = {...state, groupAccumulatorId: 0};
+  }
+
   /// Resets the user's group count to zero by soft-deleting on the server
   /// (`DELETE /group-accumulators/{id}`). Unsynced taps are flushed first.
   /// Returns false on failure.
@@ -214,8 +241,7 @@ class GroupAccumulationCountsNotifier extends StateNotifier<Map<String, int>> {
         deleteGroupAccumulator: _deleteGroupAccumulator,
       );
       if (!mounted) return false;
-      _postResetGroupIds.add(groupAccumulatorId);
-      state = {...state, groupAccumulatorId: 0};
+      _markLocalCountResetAfterDelete(groupAccumulatorId);
       return true;
     } catch (_) {
       return false;

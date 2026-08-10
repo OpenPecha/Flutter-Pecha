@@ -268,12 +268,71 @@
   "connect_groups_load_error": "Unable to load groups.\nCheck your connection and try again",
   "connect_groups_empty_title": "No more groups",
   "connect_groups_empty_subtitle": "Congratulations, you've joined all our groups! Check back soon. New ones are on the way",
+  "connect_tab_feed": "Feed",
+  "connect_tab_events": "Events",
+  "connect_tab_posts": "Posts",
+  "connect_tab_groups": "Groups",
+  "connect_segment_my": "My",
+  "connect_segment_discover": "Discover",
+  "connect_empty_discover_posts": "No posts to discover",
+  "connect_empty_discover_events": "No events to discover",
+  "connect_empty_discover_feed": "Nothing to discover",
+  "connect_empty_discover_groups": "No groups to discover",
+  "connect_all_groups": "All groups",
+  "connect_my_empty_feed_title": "Your groups have been quiet",
+  "connect_my_empty_events_title": "No upcoming events",
+  "connect_my_empty_posts_title": "No posts yet",
+  "connect_my_empty_groups_title": "No groups yet",
+  "connect_my_empty_feed_subtitle": "Nothing new from the groups you have joined. Other groups are posting today.",
+  "connect_my_empty_events_subtitle": "None of your groups have anything scheduled. Other groups have events open to everyone.",
+  "connect_my_empty_posts_subtitle": "Your groups have not posted anything. See what other groups are sharing.",
+  "connect_my_empty_groups_subtitle": "You have not joined any groups yet. Discover communities to practice with.",
+  "connect_my_empty_feed_browse": "See what other groups share",
+  "connect_my_empty_events_browse": "Browse open events",
+  "connect_my_empty_posts_browse": "Browse other posts",
+  "connect_comment_replying_to": "Replying to @{handle}",
+  "@connect_comment_replying_to": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_comment_hint": "What do you think of this?",
+  "connect_comment_reply_hint": "Write a reply...",
+  "connect_comment_reply": "Reply",
+  "connect_comment_delete_title": "Delete comment?",
+  "connect_comment_delete_message": "This comment will be permanently removed.",
+  "connect_comment_delete_failed": "Failed to delete comment",
+  "connect_post_comments_count": "{count, plural, =1{1 comment} other{{count} comments}}",
+  "@connect_post_comments_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect_post_comments_empty": "No comments yet. Start the conversation.",
+  "connect_caption_more": "more",
+  "connect_online": "Online",
+  "connect_open": "Open",
+  "connect_event_fallback_title": "Event",
+  "connect_group_fallback_title": "Group",
+  "connect_event_attend": "Attend",
+  "connect_event_attending": "Attending",
+  "connect_event_participants_attending": "{count} attending",
+  "@connect_event_participants_attending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "search_groups": "Search groups",
   "search_for_groups": "Search for groups",
   "no_groups_found": "No matching groups found",
   "explore_coming_soon_subtitle": "A curated space to discover practices, teachings, and community events",
   "learn_coming_soon_subtitle": "Your personal study plans, designed to fit into everyday life",
-  "creator_featured_plan": "Featured plan",
   "creator_featured_plan": "Featured plans",
   "audio_init_error": "Unable to initialize audio player. Check your connection and try again",
   "meditation_audio_load_error": "Unable to load. Check your connection and try again",
@@ -802,6 +861,8 @@
   "group_follower": "follower",
   "group_followers": "followers",
   "group_links_title": "Links",
+  "group_about_description": "Description",
+  "group_about_empty": "No information available yet",
   "group_and_more_links": "and {count} more links",
   "group_practice_with_us": "Practice with us",
   "series_practicing_with_group": "Practicing with {groupName}",
@@ -831,6 +892,46 @@
   "group_accumulator_contributions_empty": "Join this accumulation to track your contributions.",
   "group_accumulator_leaderboard_empty": "No recitations yet.",
   "group_accumulator_recite_now": "Recite now",
+  "group_accumulator_chant_again": "Chant again",
+  "group_accumulator_finish_session": "Finish session",
+  "group_accumulator_offline_recitation": "Offline recitation",
+  "group_accumulator_add_offline_chants_title": "Add offline chants:",
+  "group_accumulator_add_offline_chants_message": "Add the number of chants you did outside this app.",
+  "group_accumulator_session_complete": "Session complete!",
+  "group_accumulator_session_recitations": "You completed {count} recitations this session",
+  "@group_accumulator_session_recitations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_accumulator_session_share_message": "I completed {count} recitations in \"{accumulation}\", a group accumulation by {group} on WeBuddhist. Come join me!",
+  "@group_accumulator_session_share_message": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "accumulation": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "group_accumulator_session_share_message_no_group": "I completed {count} recitations in the group accumulation \"{accumulation}\" on WeBuddhist. Come join me!",
+  "@group_accumulator_session_share_message_no_group": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "accumulation": {
+        "type": "String"
+      }
+    }
+  },
+  "group_accumulator_session_share_error": "Unable to share session. Please try again",
   "@group_and_more_links": {
     "placeholders": {
       "count": {

@@ -8,6 +8,9 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_accum
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/domain/repositories/group_accumulator_repository.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/accumulator_groups_provider.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_providers.dart';
+import 'package:flutter_pecha/features/mala/presentation/providers/mala_sync_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -249,6 +252,33 @@ bool accumulatorHasJoined(
   return accumulator.isJoined == true;
 }
 
+void refreshGroupAccumulatorData(
+  WidgetRef ref, {
+  required String accumulatorId,
+  String? groupId,
+}) {
+  ref.invalidate(groupAccumulatorDetailProvider(accumulatorId));
+  ref.invalidate(
+    groupAccumulatorMembersProvider(
+      GroupAccumulatorMembersKey(
+        accumulatorId: accumulatorId,
+        sortBy: GroupAccumulatorMemberSort.total,
+      ),
+    ),
+  );
+  ref.invalidate(
+    groupAccumulatorMembersProvider(
+      GroupAccumulatorMembersKey(
+        accumulatorId: accumulatorId,
+        sortBy: GroupAccumulatorMemberSort.today,
+      ),
+    ),
+  );
+  if (groupId != null && groupId.isNotEmpty) {
+    ref.invalidate(groupAccumulatorsProvider(groupId));
+  }
+}
+
 Future<bool> joinGroupAccumulator({
   required WidgetRef ref,
   required String accumulatorId,
@@ -281,24 +311,10 @@ Future<bool> joinGroupAccumulator({
         .markAutoJoinedFromPracticeEnrollment(group: resolvedGroup);
   }
 
-  ref.invalidate(groupAccumulatorsProvider(groupId));
-  ref.invalidate(groupAccumulatorDetailProvider(accumulatorId));
-
-  ref.invalidate(
-    groupAccumulatorMembersProvider(
-      GroupAccumulatorMembersKey(
-        accumulatorId: accumulatorId,
-        sortBy: GroupAccumulatorMemberSort.total,
-      ),
-    ),
-  );
-  ref.invalidate(
-    groupAccumulatorMembersProvider(
-      GroupAccumulatorMembersKey(
-        accumulatorId: accumulatorId,
-        sortBy: GroupAccumulatorMemberSort.today,
-      ),
-    ),
+  refreshGroupAccumulatorData(
+    ref,
+    accumulatorId: accumulatorId,
+    groupId: groupId,
   );
 
   final refreshFuture = Future.wait([
@@ -309,6 +325,32 @@ Future<bool> joinGroupAccumulator({
   if (awaitRefresh) {
     await refreshFuture;
   }
+
+  return true;
+}
+
+/// Ends a group accumulation chant session by flushing pending counts and
+/// refreshing accumulator data. Does not delete or reset local/server counts;
+/// per-visit session display in the reader is handled separately via a baseline.
+Future<bool> finishGroupAccumulatorSession({
+  required WidgetRef ref,
+  required String groupAccumulatorId,
+  required String presetId,
+  String? groupId,
+}) async {
+  try {
+    await ref.read(malaSyncManagerProvider).flush(SyncReason.screenLeave);
+  } catch (_) {
+    // Leaving the reader should still succeed even if flush fails.
+  }
+
+  refreshGroupAccumulatorData(
+    ref,
+    accumulatorId: groupAccumulatorId,
+    groupId: groupId,
+  );
+  ref.invalidate(joinedGroupUserCountsProvider(presetId));
+  ref.invalidate(joinedAccumulatorGroupsProvider(presetId));
 
   return true;
 }

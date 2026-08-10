@@ -65,6 +65,37 @@ class Env {
     return apiKey != null && apiKey.isNotEmpty;
   }
 
+  /// Tolgee API base URL, used to list the project's languages on startup.
+  static String get tolgeeApiUrl =>
+      dotenv.env['TOLGEE_API_URL'] ?? 'https://app.tolgee.io/v2';
+
+  /// Tolgee project API key.
+  ///
+  /// This ships inside the bundled `.env` asset and can be extracted from a
+  /// released build, so it must be a read-only scoped key.
+  static String? get tolgeeApiKey => dotenv.env['TOLGEE_API_KEY'];
+
+  /// Tolgee Content Delivery base URL. Translations are read from
+  /// `$tolgeeCdnUrl/<languageTag>.json`.
+  static String? get tolgeeCdnUrl => dotenv.env['TOLGEE_CDN_URL'];
+
+  /// Whether over-the-air translations are enabled for this build.
+  ///
+  /// Defaults to enabled when both a key and a CDN URL are present, so a build
+  /// without Tolgee credentials silently uses the bundled ARB translations.
+  static bool get tolgeeEnabled {
+    final String? enabledFlag = dotenv.env['TOLGEE_ENABLED'];
+    if (enabledFlag != null && enabledFlag.isNotEmpty) {
+      return enabledFlag.toLowerCase() == 'true';
+    }
+    final String? apiKey = tolgeeApiKey;
+    final String? cdnUrl = tolgeeCdnUrl;
+    return apiKey != null &&
+        apiKey.isNotEmpty &&
+        cdnUrl != null &&
+        cdnUrl.isNotEmpty;
+  }
+
   /// Normalized flavor label for analytics super properties
   static String get appFlavor {
     final String env = environment.toLowerCase();

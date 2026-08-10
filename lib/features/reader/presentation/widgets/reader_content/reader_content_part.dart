@@ -34,6 +34,9 @@ class ReaderContentPart extends ConsumerStatefulWidget {
   final void Function(bool isScrollingDown)? onScrollDirectionChanged;
   final void Function(void Function(String segmentId, {double? alignment}))?
   onScrollControllerReady;
+  final void Function(VoidCallback scrollToTop)? onScrollToTopReady;
+  final Widget? chantSessionFooter;
+
   const ReaderContentPart({
     super.key,
     required this.params,
@@ -43,6 +46,8 @@ class ReaderContentPart extends ConsumerStatefulWidget {
     this.bottomPadding = 60,
     this.onScrollDirectionChanged,
     this.onScrollControllerReady,
+    this.onScrollToTopReady,
+    this.chantSessionFooter,
   });
 
   @override
@@ -110,6 +115,7 @@ class _ReaderContentPartState extends ConsumerState<ReaderContentPart> {
     // Expose scroll controller to parent
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onScrollControllerReady?.call(_scrollToSegment);
+      widget.onScrollToTopReady?.call(_scrollToTop);
     });
   }
 
@@ -345,6 +351,17 @@ class _ReaderContentPartState extends ConsumerState<ReaderContentPart> {
     });
   }
 
+  void _scrollToTop() {
+    if (!_itemScrollController.isAttached) return;
+
+    _isProgrammaticScroll = true;
+    _itemScrollController.jumpTo(index: 0);
+    _logger.debug('Scrolled to top of reader content');
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _isProgrammaticScroll = false;
+    });
+  }
+
   void _scrollToSegment(String segmentId, {double? alignment}) {
     final state = ref.read(readerNotifierProvider(widget.params));
     final content = state.content;
@@ -509,8 +526,12 @@ class _ReaderContentPartState extends ConsumerState<ReaderContentPart> {
     final bool isCollapsed = _isCollapsed;
     final List<FlattenedItem> collapsedItems =
         isCollapsed ? _buildCollapsedItems(content) : const [];
+    final bool showChantFooter =
+        !isCollapsed && widget.chantSessionFooter != null;
     final int listItemCount =
-        isCollapsed ? collapsedItems.length + 1 : content.itemCount;
+        isCollapsed
+            ? collapsedItems.length + 1
+            : content.itemCount + (showChantFooter ? 1 : 0);
 
     return Column(
       children: [
@@ -558,6 +579,10 @@ class _ReaderContentPartState extends ConsumerState<ReaderContentPart> {
                     onSegmentTap:
                         (segment) => notifier.toggleSegmentSelection(segment),
                   );
+                }
+
+                if (showChantFooter && index >= content.itemCount) {
+                  return widget.chantSessionFooter!;
                 }
 
                 final item = content.getItemAt(index);

@@ -705,6 +705,141 @@ class AppLocalizationsHi extends AppLocalizations {
       'बधाई हो, आप हमारे सभी समूहों में शामिल हो चुके हैं! जल्द फिर देखें। नए समूह जल्द आ रहे हैं';
 
   @override
+  String get connect_tab_feed => 'Feed';
+
+  @override
+  String get connect_tab_events => 'Events';
+
+  @override
+  String get connect_tab_posts => 'Posts';
+
+  @override
+  String get connect_tab_groups => 'Groups';
+
+  @override
+  String get connect_segment_my => 'My';
+
+  @override
+  String get connect_segment_discover => 'Discover';
+
+  @override
+  String get connect_empty_discover_posts => 'No posts to discover';
+
+  @override
+  String get connect_empty_discover_events => 'No events to discover';
+
+  @override
+  String get connect_empty_discover_feed => 'Nothing to discover';
+
+  @override
+  String get connect_empty_discover_groups => 'No groups to discover';
+
+  @override
+  String get connect_all_groups => 'All groups';
+
+  @override
+  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+
+  @override
+  String get connect_my_empty_events_title => 'No upcoming events';
+
+  @override
+  String get connect_my_empty_posts_title => 'No posts yet';
+
+  @override
+  String get connect_my_empty_groups_title => 'No groups yet';
+
+  @override
+  String get connect_my_empty_feed_subtitle =>
+      'Nothing new from the groups you have joined. Other groups are posting today.';
+
+  @override
+  String get connect_my_empty_events_subtitle =>
+      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+
+  @override
+  String get connect_my_empty_posts_subtitle =>
+      'Your groups have not posted anything. See what other groups are sharing.';
+
+  @override
+  String get connect_my_empty_groups_subtitle =>
+      'You have not joined any groups yet. Discover communities to practice with.';
+
+  @override
+  String get connect_my_empty_feed_browse => 'See what other groups share';
+
+  @override
+  String get connect_my_empty_events_browse => 'Browse open events';
+
+  @override
+  String get connect_my_empty_posts_browse => 'Browse other posts';
+
+  @override
+  String connect_comment_replying_to(String handle) {
+    return 'Replying to @$handle';
+  }
+
+  @override
+  String get connect_comment_hint => 'What do you think of this?';
+
+  @override
+  String get connect_comment_reply_hint => 'Write a reply...';
+
+  @override
+  String get connect_comment_reply => 'Reply';
+
+  @override
+  String get connect_comment_delete_title => 'Delete comment?';
+
+  @override
+  String get connect_comment_delete_message =>
+      'This comment will be permanently removed.';
+
+  @override
+  String get connect_comment_delete_failed => 'Failed to delete comment';
+
+  @override
+  String connect_post_comments_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comments',
+      one: '1 comment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get connect_post_comments_empty =>
+      'No comments yet. Start the conversation.';
+
+  @override
+  String get connect_caption_more => 'more';
+
+  @override
+  String get connect_online => 'Online';
+
+  @override
+  String get connect_open => 'Open';
+
+  @override
+  String get connect_event_fallback_title => 'Event';
+
+  @override
+  String get connect_group_fallback_title => 'Group';
+
+  @override
+  String get connect_event_attend => 'Attend';
+
+  @override
+  String get connect_event_attending => 'Attending';
+
+  @override
+  String connect_event_participants_attending(int count) {
+    return '$count attending';
+  }
+
+  @override
   String get search_groups => 'समूह खोजें';
 
   @override
@@ -1681,6 +1816,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_links_title => 'लिंक';
 
   @override
+  String get group_about_description => 'विवरण';
+
+  @override
+  String get group_about_empty => 'अभी कोई जानकारी उपलब्ध नहीं है';
+
+  @override
   String group_and_more_links(int count) {
     return 'और $count और लिंक';
   }
@@ -1733,6 +1874,52 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_accumulator_recite_now => 'अभी जाप करें';
+
+  @override
+  String get group_accumulator_chant_again => 'फिर से जाप करें';
+
+  @override
+  String get group_accumulator_finish_session => 'सत्र समाप्त करें';
+
+  @override
+  String get group_accumulator_offline_recitation => 'ऑफ़लाइन जाप';
+
+  @override
+  String get group_accumulator_add_offline_chants_title =>
+      'ऑफ़लाइन जाप जोड़ें:';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      'इस ऐप के बाहर किए गए जापों की संख्या जोड़ें।';
+
+  @override
+  String get group_accumulator_session_complete => 'सत्र पूरा हुआ!';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return 'आपने इस सत्र में $count जाप पूरे किए';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return 'मैंने WeBuddhist पर $group के सामूहिक संचय \"$accumulation\" में $count जाप पूरे किए। आप भी मेरे साथ जुड़ें!';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return 'मैंने WeBuddhist पर सामूहिक संचय \"$accumulation\" में $count जाप पूरे किए। आप भी मेरे साथ जुड़ें!';
+  }
+
+  @override
+  String get group_accumulator_session_share_error =>
+      'सत्र साझा नहीं हो सका। कृपया पुनः प्रयास करें';
 
   @override
   String get share_this_quote => 'यह उद्धरण शेयर करें';

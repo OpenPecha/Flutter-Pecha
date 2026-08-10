@@ -664,6 +664,141 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_groups_empty_subtitle => '恭喜，你已加入我們所有的社群！請稍後再來，更多社群即將推出';
 
   @override
+  String get connect_tab_feed => 'Feed';
+
+  @override
+  String get connect_tab_events => 'Events';
+
+  @override
+  String get connect_tab_posts => 'Posts';
+
+  @override
+  String get connect_tab_groups => 'Groups';
+
+  @override
+  String get connect_segment_my => 'My';
+
+  @override
+  String get connect_segment_discover => 'Discover';
+
+  @override
+  String get connect_empty_discover_posts => 'No posts to discover';
+
+  @override
+  String get connect_empty_discover_events => 'No events to discover';
+
+  @override
+  String get connect_empty_discover_feed => 'Nothing to discover';
+
+  @override
+  String get connect_empty_discover_groups => 'No groups to discover';
+
+  @override
+  String get connect_all_groups => 'All groups';
+
+  @override
+  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+
+  @override
+  String get connect_my_empty_events_title => 'No upcoming events';
+
+  @override
+  String get connect_my_empty_posts_title => 'No posts yet';
+
+  @override
+  String get connect_my_empty_groups_title => 'No groups yet';
+
+  @override
+  String get connect_my_empty_feed_subtitle =>
+      'Nothing new from the groups you have joined. Other groups are posting today.';
+
+  @override
+  String get connect_my_empty_events_subtitle =>
+      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+
+  @override
+  String get connect_my_empty_posts_subtitle =>
+      'Your groups have not posted anything. See what other groups are sharing.';
+
+  @override
+  String get connect_my_empty_groups_subtitle =>
+      'You have not joined any groups yet. Discover communities to practice with.';
+
+  @override
+  String get connect_my_empty_feed_browse => 'See what other groups share';
+
+  @override
+  String get connect_my_empty_events_browse => 'Browse open events';
+
+  @override
+  String get connect_my_empty_posts_browse => 'Browse other posts';
+
+  @override
+  String connect_comment_replying_to(String handle) {
+    return 'Replying to @$handle';
+  }
+
+  @override
+  String get connect_comment_hint => 'What do you think of this?';
+
+  @override
+  String get connect_comment_reply_hint => 'Write a reply...';
+
+  @override
+  String get connect_comment_reply => 'Reply';
+
+  @override
+  String get connect_comment_delete_title => 'Delete comment?';
+
+  @override
+  String get connect_comment_delete_message =>
+      'This comment will be permanently removed.';
+
+  @override
+  String get connect_comment_delete_failed => 'Failed to delete comment';
+
+  @override
+  String connect_post_comments_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comments',
+      one: '1 comment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get connect_post_comments_empty =>
+      'No comments yet. Start the conversation.';
+
+  @override
+  String get connect_caption_more => 'more';
+
+  @override
+  String get connect_online => 'Online';
+
+  @override
+  String get connect_open => 'Open';
+
+  @override
+  String get connect_event_fallback_title => 'Event';
+
+  @override
+  String get connect_group_fallback_title => 'Group';
+
+  @override
+  String get connect_event_attend => 'Attend';
+
+  @override
+  String get connect_event_attending => 'Attending';
+
+  @override
+  String connect_event_participants_attending(int count) {
+    return '$count attending';
+  }
+
+  @override
   String get search_groups => '搜尋社群';
 
   @override
@@ -1588,6 +1723,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_links_title => '連結';
 
   @override
+  String get group_about_description => '簡介';
+
+  @override
+  String get group_about_empty => '暫無相關資訊';
+
+  @override
   String group_and_more_links(int count) {
     return '及另外 $count 個連結';
   }
@@ -1638,6 +1779,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_accumulator_recite_now => '立即誦念';
+
+  @override
+  String get group_accumulator_chant_again => '再誦一次';
+
+  @override
+  String get group_accumulator_finish_session => '結束課誦';
+
+  @override
+  String get group_accumulator_offline_recitation => '離線誦念';
+
+  @override
+  String get group_accumulator_add_offline_chants_title => '新增離線誦念：';
+
+  @override
+  String get group_accumulator_add_offline_chants_message =>
+      '新增您在此應用程式外完成的誦念次數。';
+
+  @override
+  String get group_accumulator_session_complete => '課誦完成！';
+
+  @override
+  String group_accumulator_session_recitations(int count) {
+    return '您在本課誦中完成了 $count 次誦讀';
+  }
+
+  @override
+  String group_accumulator_session_share_message(
+    int count,
+    String accumulation,
+    String group,
+  ) {
+    return '我在 WeBuddhist 上完成了 $group 的累积活动「$accumulation」中的 $count 次誦讀，快来加入我吧！';
+  }
+
+  @override
+  String group_accumulator_session_share_message_no_group(
+    int count,
+    String accumulation,
+  ) {
+    return '我在 WeBuddhist 上完成了累积活动「$accumulation」中的 $count 次誦讀，快来加入我吧！';
+  }
+
+  @override
+  String get group_accumulator_session_share_error => '無法分享課誦，請重試';
 
   @override
   String get share_this_quote => '分享这句话';

@@ -29,6 +29,9 @@ docs/
 - **[Authentication Implementation](./architecture/AUTH_IMPLEMENTATION.md)**  
   Complete guide to the authentication architecture, design decisions, and component details.
 
+- **[Tolgee OTA UI translations](./tolgee.md)**  
+  How over-the-air UI strings work via Tolgee CDN, locale tag mapping, and adding keys.
+
 - **[Token Refresh Flow](./architecture/TOKEN_REFRESH_FLOW.md)**  
   Technical deep dive into token refresh mechanism, timing diagrams, and edge cases.
 

@@ -24,12 +24,16 @@ class ReaderMoreBottomSheet extends ConsumerStatefulWidget {
     super.key,
     required this.textId,
     required this.showAddToPractices,
+    this.showOfflineRecitation = false,
     this.onAddToPractices,
+    this.onAddOfflineRecitation,
   });
 
   final String textId;
   final bool showAddToPractices;
+  final bool showOfflineRecitation;
   final VoidCallback? onAddToPractices;
+  final VoidCallback? onAddOfflineRecitation;
 
   @override
   ConsumerState<ReaderMoreBottomSheet> createState() =>
@@ -196,6 +200,25 @@ class _ReaderMoreBottomSheetState extends ConsumerState<ReaderMoreBottomSheet> {
             ),
           ],
 
+          if (widget.showOfflineRecitation) ...[
+            _SectionDivider(theme: theme),
+            ListTile(
+              leading: Icon(
+                AppAssets.plusCircle,
+                color: theme.colorScheme.onSurface,
+              ),
+              title: Text(
+                l10n.group_accumulator_offline_recitation,
+                style: theme.textTheme.bodyLarge,
+              ),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+                widget.onAddOfflineRecitation?.call();
+              },
+            ),
+          ],
+
           // ── Bookmark ───────────────────────────────────────────────────
           _SectionDivider(theme: theme),
           ListTile(
@@ -317,7 +340,9 @@ void showReaderMoreBottomSheet(
   BuildContext context, {
   required String textId,
   required bool showAddToPractices,
+  bool showOfflineRecitation = false,
   VoidCallback? onAddToPractices,
+  VoidCallback? onAddOfflineRecitation,
 }) {
   showModalBottomSheet(
     context: context,
@@ -329,7 +354,9 @@ void showReaderMoreBottomSheet(
         (_) => ReaderMoreBottomSheet(
           textId: textId,
           showAddToPractices: showAddToPractices,
+          showOfflineRecitation: showOfflineRecitation,
           onAddToPractices: onAddToPractices,
+          onAddOfflineRecitation: onAddOfflineRecitation,
         ),
   );
 }

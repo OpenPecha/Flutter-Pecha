@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/group_profile/data/models/group_event_model.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_member_model.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_profile_model.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -119,6 +120,174 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<GroupEventsPageModel> fetchConnectEvents({
+    required bool includeUnfollowed,
+    required String language,
+    int skip = 0,
+    int limit = 20,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        'skip': skip,
+        'limit': limit,
+        'language': language,
+      };
+      if (includeUnfollowed) {
+        queryParameters['include_unfollowed'] = true;
+      }
+
+      final response = await dio.get(
+        '/events',
+        queryParameters: queryParameters,
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupEventsPageModel.fromJson(
+          response.data as Map<String, dynamic>,
+          language: language,
+        );
+      } else {
+        _logger.error(
+          'Failed to load connect events: ${response.statusCode}',
+        );
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load events',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchConnectEvents', e);
+      throw _dioToException(e, 'Failed to load events');
+    }
+  }
+
+  Future<GroupEventsPageModel> fetchGroupEvents(String groupId) async {
+    try {
+      final response = await dio.get(
+        '/events',
+        queryParameters: {'group_id': groupId},
+        // Participant counts and join state change frequently; always fetch fresh.
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupEventsPageModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      } else {
+        _logger.error(
+          'Failed to load group events $groupId: ${response.statusCode}',
+        );
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load group events',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchGroupEvents', e);
+      throw _dioToException(e, 'Failed to load group events');
+    }
+  }
+
+  Future<GroupEventModel> fetchGroupEventDetail(
+    String eventId, {
+    required String language,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/events/$eventId',
+        queryParameters: {'language': language},
+        // `is_joined` and `participant_count` change on every attend/leave;
+        // always fetch fresh rather than risk a stale cache hit.
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupEventModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        _logger.error(
+          'Failed to load group event $eventId: ${response.statusCode}',
+        );
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load group event',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchGroupEventDetail', e);
+      throw _dioToException(e, 'Failed to load group event');
+    }
+  }
+
+  Future<GroupEventParticipantsPageModel> fetchGroupEventParticipants(
+    String eventId, {
+    required int skip,
+    required int limit,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/events/$eventId/participants',
+        queryParameters: {'skip': skip, 'limit': limit},
+        // Membership changes on every attend/leave; always fetch fresh.
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupEventParticipantsPageModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      } else {
+        _logger.error(
+          'Failed to load group event participants $eventId: ${response.statusCode}',
+        );
+        throw _statusToException(
+          response.statusCode,
+          'Failed to load group event participants',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchGroupEventParticipants', e);
+      throw _dioToException(e, 'Failed to load group event participants');
+    }
+  }
+
+  Future<void> joinGroupEvent(String eventId) async {
+    try {
+      final response = await dio.post('/events/$eventId/participants');
+      if (response.statusCode != 200 &&
+          response.statusCode != 201 &&
+          response.statusCode != 204) {
+        throw _statusToException(response.statusCode, 'Failed to attend event');
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in joinGroupEvent', e);
+      throw _dioToException(e, 'Failed to attend event');
+    }
+  }
+
+  Future<void> leaveGroupEvent(String eventId) async {
+    try {
+      final response = await dio.delete(
+        '/events/$eventId/participants/me',
+        options: Options(
+          validateStatus: (status) => status == 204 || status == 404,
+        ),
+      );
+
+      if (response.statusCode == 204) return;
+      if (response.statusCode == 404 &&
+          _isAlreadyNotParticipant(response.data)) {
+        return;
+      }
+
+      throw _statusToException(response.statusCode, 'Failed to leave event');
+    } on DioException catch (e) {
+      _logger.error('Dio error in leaveGroupEvent', e);
+      throw _dioToException(e, 'Failed to leave event');
+    }
+  }
+
   Future<void> unfollowGroup(String groupId, GroupType groupType) async {
     final action = groupType.isPage ? 'follow' : 'join';
     try {
@@ -164,5 +333,11 @@ class GroupProfileRemoteDatasource {
     } else {
       return const NetworkException('Network error');
     }
+  }
+
+  bool _isAlreadyNotParticipant(Object? data) {
+    if (data is! Map<String, dynamic>) return false;
+    final detail = data['detail'];
+    return detail is String && detail.contains('You have not joined event');
   }
 }
