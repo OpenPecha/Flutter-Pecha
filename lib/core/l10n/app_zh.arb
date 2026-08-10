@@ -72,7 +72,7 @@
   "mala_reset_count_confirm": "目前的計數將歸零，但您的累積仍會保留在終身總數中。",
   "mala_reset_confirm": "重設",
   "mala_action_coming_soon": "即將推出",
-  "mala_rounds_count": "{count, plural, =0{0 遍} =1{1 遍} other{{count} 遍}}",
+  "mala_rounds_count": "{count, plural,\n=0 {0 遍}\n=1 {1 遍}\nother {{count} 遍}\n}",
   "@mala_rounds_count": {
     "placeholders": {
       "count": {
@@ -174,7 +174,7 @@
   "practice_plan": "建立每日修持。探索適合您的內容",
   "search_plans": "搜尋計畫...",
   "search_for_plans": "搜尋計畫",
-  "no_plans_found": "找不到相關計畫 ",
+  "no_plans_found": "找不到相關計畫",
   "no_days_available": "找不到相關天數",
   "recitations_title": "唱頌",
   "recitations_my_recitations": "我的清單",
@@ -190,9 +190,9 @@
   "notification_allow_subtitle_enabled": "此應用程式已啟用通知",
   "notification_allow_subtitle_disabled": "需要權限。請點此前往「設定」授權。",
   "notification_allow_subtitle_paused": "提醒已暫停。點此恢復。",
-  "notification_routine_title": "計畫提醒",
-  "notification_routine_subtitle_enabled": "您的修持計畫每日提醒",
-  "notification_routine_subtitle_disabled": "計畫提醒已暫停。點此恢復。",
+  "notification_routine_title": "日常提醒",
+  "notification_routine_subtitle_enabled": "您的每日修持時段提醒",
+  "notification_routine_subtitle_disabled": "日常提醒已暫停。點此恢復。",
   "notification_battery_title": "背景提醒通知",
   "notification_battery_subtitle_enabled": "即使應用程式已關閉，您的提醒通知仍會準時發送。",
   "notification_battery_subtitle_disabled": "部分 Android 手機會暫停背景應用程式以節省電池使用量，這可能導致提醒通知延遲或遺漏。點此確保應用程式持續運行。",
@@ -388,7 +388,7 @@
   "ai_delete_warning": "此操作執行後將無法復原",
   "ai_confirm": "確認",
   "ai_delete": "刪除",
-  "ai_greeting": " {name}，您好！",
+  "ai_greeting": "{name}，您好！",
   "ai_text_not_found": "搜尋不到該文本",
   "ai_text_not_found_message": "搜尋不到標題為《{title}》的文本。\n\n請嘗試其他名稱或換一種方式搜尋。",
   "ai_sources": "來源",
@@ -534,7 +534,7 @@
       }
     }
   },
-  "missedDaysCount": "{count, plural, =0{未錯過天數} =1{錯過1天} other{錯過{count}天}}",
+  "missedDaysCount": "{count, plural,\n=0 {未錯過天數}\n=1 {錯過1天}\nother {錯過{count}天}\n}",
   "@missedDaysCount": {
     "placeholders": {
       "count": {
@@ -694,7 +694,6 @@
   "moon_phase_waning_gibbous": "亏凸月",
   "moon_phase_last_quarter": "下弦月",
   "moon_phase_waning_crescent": "残月",
-
   "join": "加入",
   "joined": "已加入",
   "group_member": "位成員",
@@ -750,7 +749,6 @@
   "group_accumulator_session_share_message": "我在 WeBuddhist 上完成了 {group} 的累积活动「{accumulation}」中的 {count} 次誦讀，快来加入我吧！",
   "group_accumulator_session_share_message_no_group": "我在 WeBuddhist 上完成了累积活动「{accumulation}」中的 {count} 次誦讀，快来加入我吧！",
   "group_accumulator_session_share_error": "無法分享課誦，請重試",
-
   "share_this_quote": "分享这句话",
   "shared_from": "分享自",
   "verse_share_error": "无法分享引文，请重试",
@@ -781,7 +779,6 @@
   "weekday_friday": "週五",
   "weekday_saturday": "週六",
   "weekday_sunday": "週日",
-
   "reader_search_failed": "搜尋失敗。\n請重試",
   "reader_swipe_up_for_more": "向上滑動查看更多",
   "reader_videos": "影片",

@@ -72,7 +72,7 @@
   "mala_reset_count_confirm": "आपकी वर्तमान गिनती शून्य हो जाएगी, लेकिन आपके संचय आपके जीवनभर के कुल में बने रहेंगे।",
   "mala_reset_confirm": "रीसेट करें",
   "mala_action_coming_soon": "जल्द आ रहा है",
-  "mala_rounds_count": "{count, plural, =0{0 राउंड} =1{1 राउंड} other{{count} राउंड}}",
+  "mala_rounds_count": "{count, plural,\n=0 {0 राउंड}\n=1 {1 राउंड}\nother {{count} राउंड}\n}",
   "@mala_rounds_count": {
     "placeholders": {
       "count": {
@@ -169,7 +169,7 @@
   "pali": "पालि",
   "language": "भाषा",
   "plan_unenroll": "नामांकन रद्द करें",
-  "unenroll_confirmation": "क्या आप वाकई इससे नामांकन रद्द करना चाहते हैं ",
+  "unenroll_confirmation": "क्या आप वाकई इससे नामांकन रद्द करना चाहते हैं",
   "unenroll_message": "आपकी प्रगति स्थायी रूप से मिट जाएगी और पुनः प्राप्त नहीं की जा सकेगी",
   "practice_plan": "एक दैनिक अभ्यास बनाएँ। जानें कि आपके लिए क्या सही है।",
   "search_plans": "योजनाएँ खोजें...",
@@ -190,15 +190,15 @@
   "notification_allow_subtitle_enabled": "इस app के लिए नोटिफिकेशन चालू हैं",
   "notification_allow_subtitle_disabled": "अनुमति आवश्यक है। अनुमति देने के लिए सेटिंग्स में टैप करें।",
   "notification_allow_subtitle_paused": "रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।",
-  "notification_routine_title": "योजना रिमाइंडर",
-  "notification_routine_subtitle_enabled": "आपकी योजनाओं के लिए दैनिक रिमाइंडर",
-  "notification_routine_subtitle_disabled": "योजना रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।",
+  "notification_routine_title": "रूटीन रिमाइंडर",
+  "notification_routine_subtitle_enabled": "आपके अभ्यास ब्लॉक के लिए दैनिक रिमाइंडर",
+  "notification_routine_subtitle_disabled": "रूटीन रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।",
   "notification_battery_title": "बैकग्राउंड रिमाइंडर",
   "notification_battery_subtitle_enabled": "आपके रिमाइंडर समय पर भेजे जाते हैं, भले ही app बंद हो।",
   "notification_battery_subtitle_disabled": "कुछ Android फ़ोन बैटरी बचाने के लिए बैकग्राउंड apps रोक देते हैं, जिससे आपके रिमाइंडर देर से आ सकते हैं या छूट सकते हैं। इन्हें चालू रखने के लिए टैप करें।",
-  "notification_recitation_title": "जप रिमाइंडर",
-  "notification_recitation_subtitle_enabled": "आपके जप के लिए दैनिक रिमाइंडर",
-  "notification_recitation_subtitle_disabled": "जप रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।",
+  "notification_recitation_title": "पाठ रिमाइंडर",
+  "notification_recitation_subtitle_enabled": "आपके पाठ के लिए दैनिक रिमाइंडर",
+  "notification_recitation_subtitle_disabled": "पाठ रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।",
   "notification_practice_title": "माला रिमाइंडर",
   "notification_practice_subtitle_enabled": "आपकी माला साधना के लिए दैनिक रिमाइंडर",
   "notification_practice_subtitle_disabled": "माला रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।",
@@ -269,7 +269,7 @@
   "learn_coming_soon_subtitle": "आपकी निजी अध्ययन योजनाएँ, रोज़मर्रा की ज़िंदगी में ढलने के लिए बनाई गईं",
   "creator_featured_plan": "विशेष योजनाएँ",
   "home_no_tags_found": "कोई टैग नहीं मिला",
-  "home_celebrated_by": "इनके द्वारा मनाया जाता है: ",
+  "home_celebrated_by": "इनके द्वारा मनाया जाता है:",
   "reader_settings_tooltip": "रीडर सेटिंग्स",
   "reader_font_size_tooltip": "फ़ॉन्ट आकार",
   "reader_version_title": "संस्करण · {language}",
@@ -590,7 +590,7 @@
       }
     }
   },
-  "missedDaysCount": "{count, plural, =0{0 छूटे हुए दिन} =1{1 छूटा हुआ दिन} other{{count} छूटे हुए दिन}}",
+  "missedDaysCount": "{count, plural,\n=0 {0 छूटे हुए दिन}\n=1 {1 छूटा हुआ दिन}\nother {{count} छूटे हुए दिन}\n}",
   "@missedDaysCount": {
     "placeholders": {
       "count": {
@@ -629,11 +629,11 @@
   "settings_section_personalisation": "वैयक्तिकरण",
   "settings_section_more": "अधिक",
   "settings_section_account": "अकाउंट",
-  "settings_edit_profile": " प्रोफ़ाइल एडिट करें",
+  "settings_edit_profile": "प्रोफ़ाइल एडिट करें",
   "settings_theme": "थीम",
   "settings_notification_row": "नोटिफिकेशन",
   "settings_feedback_row": "फ़ीडबैक",
-  "edit_profile_title": " प्रोफ़ाइल एडिट करें",
+  "edit_profile_title": "प्रोफ़ाइल एडिट करें",
   "edit_profile_save": "सेव करें",
   "edit_profile_first_name": "पहला नाम",
   "edit_profile_last_name": "अंतिम नाम",
@@ -653,7 +653,7 @@
   "edit_profile_tradition_save_failed": "परंपराएँ सेव नहीं हो सकीं। कृपया फिर से प्रयास करें",
   "username_label": "यूज़रनेम",
   "username_taken": "यह नाम पहले से किसी ने ले लिया है",
-  "username_available_label": "उपलब्ध: ",
+  "username_available_label": "उपलब्ध:",
   "username_check_error": "यूज़रनेम जाँचा नहीं जा सका। फिर से प्रयास करें",
   "username_invalid_format": "अमान्य यूज़रनेम प्रारूप",
   "username_min_length": "यूज़रनेम कम से कम 3 अक्षरों का होना चाहिए",
@@ -760,7 +760,6 @@
   "moon_phase_waning_gibbous": "घटता उपपूर्ण चंद्र",
   "moon_phase_last_quarter": "अंतिम चतुर्थांश",
   "moon_phase_waning_crescent": "घटता अर्धचंद्र",
-
   "join": "शामिल हों",
   "joined": "शामिल हो गए",
   "group_member": "सदस्य",
@@ -816,7 +815,6 @@
   "group_accumulator_session_share_message": "मैंने WeBuddhist पर {group} के सामूहिक संचय \"{accumulation}\" में {count} जाप पूरे किए। आप भी मेरे साथ जुड़ें!",
   "group_accumulator_session_share_message_no_group": "मैंने WeBuddhist पर सामूहिक संचय \"{accumulation}\" में {count} जाप पूरे किए। आप भी मेरे साथ जुड़ें!",
   "group_accumulator_session_share_error": "सत्र साझा नहीं हो सका। कृपया पुनः प्रयास करें",
-
   "share_this_quote": "यह उद्धरण शेयर करें",
   "shared_from": "यहाँ से शेयर किया गया",
   "verse_share_error": "उद्धरण शेयर नहीं हो सका। कृपया फिर से प्रयास करें",
@@ -847,7 +845,6 @@
   "weekday_friday": "शुक्र",
   "weekday_saturday": "शनि",
   "weekday_sunday": "रवि",
-
   "reader_search_failed": "खोज विफल रही।\nकृपया पुनः प्रयास करें",
   "reader_swipe_up_for_more": "अधिक के लिए ऊपर स्वाइप करें",
   "reader_videos": "वीडियो",

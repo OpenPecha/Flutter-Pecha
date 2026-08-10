@@ -72,7 +72,7 @@
   "mala_reset_count_confirm": "Одоогийн тооллого тэг болно, гэхдээ таны хуримтлал амьдралын нийт тоонд хадгалагдана.",
   "mala_reset_confirm": "Дахин тохируулах",
   "mala_action_coming_soon": "Удахгүй",
-  "mala_rounds_count": "{count, plural, =0{0 ээлж} =1{1 ээлж} other{{count} ээлж}}",
+  "mala_rounds_count": "{count, plural,\n=0 {0 ээлж}\n=1 {1 ээлж}\nother {{count} ээлж}\n}",
   "@mala_rounds_count": {
     "placeholders": {
       "count": {
@@ -190,15 +190,15 @@
   "notification_allow_subtitle_enabled": "Энэ аппликейшнд мэдэгдэл идэвхжсэн байна",
   "notification_allow_subtitle_disabled": "Зөвшөөрөл шаардлагатай. Тохиргоо хэсэгт олгохын тулд дарна уу.",
   "notification_allow_subtitle_paused": "Сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.",
-  "notification_routine_title": "Төлөвлөгөөний сануулга",
-  "notification_routine_subtitle_enabled": "Таны төлөвлөгөөний өдөр тутмын сануулга",
-  "notification_routine_subtitle_disabled": "Төлөвлөгөөний сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.",
+  "notification_routine_title": "Дадлагын сануулга",
+  "notification_routine_subtitle_enabled": "Таны дадлагын цаг хугацааны өдөр тутмын сануулга",
+  "notification_routine_subtitle_disabled": "Дадлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.",
   "notification_battery_title": "Дэвсгэр сануулга",
   "notification_battery_subtitle_enabled": "Апп хаалттай байсан ч таны сануулга цагтаа илгээгдэнэ.",
   "notification_battery_subtitle_disabled": "Зарим Android утас батерей хэмнэхийн тулд дэвсгэр аппуудыг түр зогсоодог нь таны сануулгыг хойшлуулах буюу алгасах магадлалтай. Үргэлжлүүлэн ажиллуулахын тулд дарна уу.",
-  "notification_recitation_title": "Магтаалын сануулга",
-  "notification_recitation_subtitle_enabled": "Таны магтаалын өдөр тутмын сануулга",
-  "notification_recitation_subtitle_disabled": "Магтаалын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.",
+  "notification_recitation_title": "Уншлагын сануулга",
+  "notification_recitation_subtitle_enabled": "Таны уншлагын өдөр тутмын сануулга",
+  "notification_recitation_subtitle_disabled": "Уншлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.",
   "notification_practice_title": "Эрхийн сануулга",
   "notification_practice_subtitle_enabled": "Таны эрхийн дадлагын өдөр тутмын сануулга",
   "notification_practice_subtitle_disabled": "Эрхийн сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.",
@@ -269,7 +269,7 @@
   "learn_coming_soon_subtitle": "Өдөр тутмын амьдралд тохируулан зохиосон таны хувийн судлах төлөвлөгөө",
   "creator_featured_plan": "Онцлох төлөвлөгөө",
   "home_no_tags_found": "Шошго олдсонгүй",
-  "home_celebrated_by": "Тэмдэглэдэг: ",
+  "home_celebrated_by": "Тэмдэглэдэг:",
   "reader_settings_tooltip": "Уншигчийн тохиргоо",
   "reader_font_size_tooltip": "Үсгийн хэмжээ",
   "reader_version_title": "Хувилбар · {language}",
@@ -590,7 +590,7 @@
       }
     }
   },
-  "missedDaysCount": "{count, plural, =0{0 өдөр алгассан} =1{1 өдөр алгассан} other{{count} өдөр алгассан}}",
+  "missedDaysCount": "{count, plural,\n=0 {0 өдөр алгассан}\n=1 {1 өдөр алгассан}\nother {{count} өдөр алгассан}\n}",
   "@missedDaysCount": {
     "placeholders": {
       "count": {
@@ -653,7 +653,7 @@
   "edit_profile_tradition_save_failed": "Уламжлалыг хадгалж чадсангүй. Дахин оролдоно уу",
   "username_label": "Хэрэглэгчийн нэр",
   "username_taken": "Энэ нэрийг хэн нэгэн аль хэдийн ашигласан байна",
-  "username_available_label": "Боломжтой: ",
+  "username_available_label": "Боломжтой:",
   "username_check_error": "Хэрэглэгчийн нэрийг шалгах боломжгүй. Дахин оролдоно уу",
   "username_invalid_format": "Хэрэглэгчийн нэрийн формат буруу",
   "username_min_length": "Хэрэглэгчийн нэр дор хаяж 3 тэмдэгт байх ёстой",
@@ -760,7 +760,6 @@
   "moon_phase_waning_gibbous": "Хорогдох дугуйвтар сар",
   "moon_phase_last_quarter": "Эцсийн улирал",
   "moon_phase_waning_crescent": "Хорогдох хавирган сар",
-
   "join": "Нэгдэх",
   "joined": "Нэгдсэн",
   "group_member": "гишүүн",
@@ -816,7 +815,6 @@
   "group_accumulator_session_share_message": "Би WeBuddhist дээр {group} бүлгийн \"{accumulation}\" хуримтлалд {count} удаа уншлаа. Та ч бас надтай нэгдээрэй!",
   "group_accumulator_session_share_message_no_group": "Би WeBuddhist дээр \"{accumulation}\" бүлгийн хуримтлалд {count} удаа уншлаа. Та ч бас надтай нэгдээрэй!",
   "group_accumulator_session_share_error": "Хичээлийг хуваалцах боломжгүй байна. Дахин оролдоно уу",
-
   "share_this_quote": "Энэ ишлэлийг хуваалцах",
   "shared_from": "Хуваалцсан:",
   "verse_share_error": "Ишлэлийг хуваалцах боломжгүй. Дахин оролдоно уу",
@@ -847,7 +845,6 @@
   "weekday_friday": "Баа",
   "weekday_saturday": "Бям",
   "weekday_sunday": "Ням",
-
   "reader_search_failed": "Хайлт амжилтгүй боллоо.\nДахин оролдоно уу",
   "reader_swipe_up_for_more": "Илүү ихийг үзэхийн тулд дээш шудрана уу",
   "reader_videos": "Бичлэгүүд",

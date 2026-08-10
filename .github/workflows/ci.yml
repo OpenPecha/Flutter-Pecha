@@ -41,6 +41,9 @@ jobs:
       - name: 🌍 Verify Tolgee bridge is up to date
         run: dart run tool/generate_tolgee_bridge.dart --check
 
+      - name: 🩺 Check ARB consistency
+        run: dart run tool/tolgee_sync.dart doctor
+
       - name: 🎨 Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 

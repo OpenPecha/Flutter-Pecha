@@ -95,22 +95,254 @@ Context-free paths (e.g. notification scheduling) use
 
 ## Adding a new UI string
 
-1. Add the key to all ARB files under `lib/core/l10n/`.
-2. Regenerate:
+1. Add the key and placeholder metadata to `app_en.arb`. Add bundled values to
+   the other ARBs when they are already available.
+2. Create any missing Tolgee keys (always inspect the dry run first):
+
+```sh
+dart run tool/tolgee_sync.dart push --dry-run
+dart run tool/tolgee_sync.dart push
+```
+
+3. Regenerate:
 
 ```sh
 flutter gen-l10n
 dart run tool/generate_tolgee_bridge.dart
 ```
 
-3. Use `context.l10n.your_new_key` in the widget.
-4. Create/update the same key in Tolgee (namespace `webuddhist`) for each language.
-5. Publish Content Delivery.
-6. Relaunch the app (or switch language) to pick up the remote value.
+4. Use `context.l10n.your_new_key` in the widget.
+5. Translate the created key in Tolgee (namespace `webuddhist`).
+6. Publish Content Delivery.
+7. Relaunch the app (or switch language) to pick up the remote value.
 
 CI runs `dart run tool/generate_tolgee_bridge.dart --check` so the generated
 bridge cannot drift from gen-l10n.
 
+## Keeping ARB and Tolgee in sync
+
+`tool/tolgee_sync.dart` is the supported sync tool. The same commands run
+locally and in CI. Bundled ARBs stay the offline fallback; Tolgee CDN remains
+the OTA override. Translation files are never rewritten invisibly during a
+release build — the sync workflow opens a reviewable PR instead.
+
+### Create the write-access sync key
+
+Network sync commands need a **separate** write-capable project API key. Do not
+reuse or widen the read-only `TOLGEE_API_KEY` stored in `.env.*` (those files
+ship inside the app).
+
+1. Open Tolgee → select the WeBuddhist project → **Project API Keys** (Account /
+   project settings → API keys).
+2. Click **+ API Key**.
+3. Grant at least `keys.create`, plus `translations.view` and `languages.view`.
+4. Copy the `tgpak_...` value once and place it only where sync tooling reads it:
+   - **Local:** current shell session, e.g. PowerShell
+     `$env:TOLGEE_SYNC_API_KEY = 'tgpak_...'`
+   - **CI:** GitHub repository secret named exactly `TOLGEE_SYNC_API_KEY`
+     (Settings → Secrets and variables → Actions), used by
+     [`.github/workflows/tolgee-sync.yml`](../.github/workflows/tolgee-sync.yml)
+5. **Rotate after use / if exposed.** If the key was pasted into chat, logged,
+   committed, or shared, revoke/rotate it in the same Project API Keys UI, then
+   update the GitHub secret and any open local shells. Prefer keeping the
+   long-lived copy only as the GitHub Actions secret; export a key into the
+   shell for one-off manual runs.
+
+`TOLGEE_PROJECT_ID` is optional; the tool normally resolves the project from
+the API key.
+
+| Key | Where | Purpose | Scopes |
+| --- | --- | --- | --- |
+| `TOLGEE_API_KEY` | `.env.*` (ships in app) | Runtime OTA / CDN init | read-only (`translations.view`, `languages.view`) |
+| `TOLGEE_SYNC_API_KEY` | shell env / GitHub secret only | Local or CI ARB ↔ Tolgee sync | write sync (`keys.create` + view scopes) |
+
+### Manual vs automatic sync
+
+Both paths call the same Dart tool. **Keep both.**
+
+| | Manual (local) | Automatic (CI) |
+| --- | --- | --- |
+| How | shell + `dart run tool/tolgee_sync.dart ...` | Tolgee Sync workflow (schedule + `workflow_dispatch`) |
+| Write key | `$env:TOLGEE_SYNC_API_KEY` | GitHub secret `TOLGEE_SYNC_API_KEY` |
+| Best for | first sync, dry-runs, debugging, urgent new English keys | keeping bundled fallbacks fresh without remembering to pull |
+| Result | changes in your working tree; you commit/PR | opens a reviewable sync PR (does not merge to `develop` by itself) |
+
+**When automatic sync runs**
+
+- **Schedule:** every Monday at **10:00 AM IST** (`cron: "30 4 * * 1"` = 04:30 UTC in [`.github/workflows/tolgee-sync.yml`](../.github/workflows/tolgee-sync.yml)). GitHub can start scheduled jobs a few minutes late.
+- **Manual:** Actions → **Tolgee Sync** → **Run workflow** (`workflow_dispatch`).
+- Sync does **not** run on every PR. PR CI only runs offline `dart run tool/tolgee_sync.dart doctor` (no push/pull, no write key).
+
+Practical split: store the long-lived write key as the GitHub secret; export a
+key into the shell when you need a manual run; rely on the Monday IST schedule
+day-to-day; use local dry-run/pull for the first large sync or urgent `push`.
+
+### Expected command order
+
+Use this sequence for a full local sync:
+
+1. `dart run tool/tolgee_sync.dart doctor` — offline ARB health first
+2. `$env:TOLGEE_SYNC_API_KEY = 'tgpak_...'` — set write sync key for this shell
+3. `dart run tool/tolgee_sync.dart push --dry-run` — preview missing Tolgee keys
+4. `dart run tool/tolgee_sync.dart push` — create missing keys only (skip if dry-run is empty)
+5. `dart run tool/tolgee_sync.dart pull --dry-run` — preview ARB value/insert changes
+6. `dart run tool/tolgee_sync.dart pull` — write all six ARBs after a clean fetch
+7. `flutter gen-l10n` — regenerate Flutter localizations from ARBs
+8. `dart run tool/generate_tolgee_bridge.dart` — regenerate OTA bridge for CI freshness
+9. `dart run tool/tolgee_sync.dart doctor --remote` — confirm ARB ↔ Tolgee ↔ CDN health
+
+Steps 3–4 are only needed when `app_en.arb` has new keys. Steps 5–8 are the
+usual “bring translator updates into the app” path. Always dry-run before a
+real push or pull.
+
+### Detailed commands
+
+#### 1. Offline doctor
+
+This is the local structural health check for the six ARB files under
+`lib/core/l10n/`. It reports keys present in English but missing from another
+locale, orphan keys, stale `@key` metadata, and ICU placeholder argument-name
+mismatches. It does not talk to Tolgee or the CDN, so no API key is required.
+Exit status stays successful for ordinary “missing translations” (expected
+while languages catch up); it fails only on structural problems such as orphans
+or placeholder mismatches. Run this anytime, including before opening a PR.
+
+```powershell
+dart run tool/tolgee_sync.dart doctor
+```
+
+#### 2. Set the write sync key
+
+Network commands (`push`, `pull`, `doctor --remote`) read
+`TOLGEE_SYNC_API_KEY` from the process environment — not from `.env.*`. The
+value must be a project API key with write scopes, separate from the read-only
+runtime key that ships inside the app. Setting it in PowerShell only affects
+the current terminal session; closing the window clears it. Never commit the
+value, paste it into `.env` files, or check it into git. For recurring
+automation, store the same name as a GitHub Actions secret instead of keeping
+it in a local shell.
+
+```powershell
+$env:TOLGEE_SYNC_API_KEY = 'tgpak_...'
+```
+
+#### 3. Push dry-run
+
+Compares `app_en.arb` message keys against Tolgee’s `webuddhist` namespace and
+prints keys that exist locally but not yet in Tolgee. Nothing is created or
+updated on Tolgee. Always run dry-run first so you can review the exact key
+list; a real push without dry-run is hard to undo if you meant to rename a key
+instead of creating a new one.
+
+```powershell
+dart run tool/tolgee_sync.dart push --dry-run
+```
+
+#### 4. Push
+
+Creates only the missing keys reported by dry-run, uploading the English string
+as the initial translation via Tolgee’s create-only import API. Existing Tolgee
+keys and translator wording are never overwritten or deleted. After create,
+publish Tolgee Content Delivery if you want the new keys on the CDN for OTA;
+the API create alone does not refresh CDN files.
+
+```powershell
+dart run tool/tolgee_sync.dart push
+```
+
+#### 5. Pull dry-run
+
+Fetches all six Tolgee languages in one pass (`en`, `bo-IN`, `zh-Hant-TW`,
+`hi`, `mn`, `ne`), compares them to each `app_*.arb`, and prints per-locale
+counts of values that would update, keys that would insert (only when the key
+already exists in English), and keys left unchanged. No ARB files are written.
+Use this to estimate review size before a real pull — the first pull can be
+large (especially Tibetan).
+
+```powershell
+dart run tool/tolgee_sync.dart pull --dry-run
+```
+
+#### 6. Pull
+
+Applies Tolgee wording into the bundled ARB fallbacks so offline or failed-CDN
+users still see reasonably current copy. It fetches every language into memory
+first, then writes all ARB files; a rate limit or network failure mid-fetch
+leaves the tree untouched. It replaces message values only, preserves
+`@@locale` and `@key` metadata, skips empty Tolgee strings, never deletes local
+keys Tolgee lacks, and may insert a locale key only when that key exists in
+`app_en.arb` and Tolgee has a non-empty translation. Review
+`git diff` on `lib/core/l10n/app_*.arb` before committing.
+
+```powershell
+dart run tool/tolgee_sync.dart pull
+```
+
+#### 7. Regenerate Flutter localizations
+
+After ARB files change, Flutter’s code generator must rebuild
+`lib/core/l10n/generated/` so `AppLocalizations` getters match the new strings.
+Skipping this leaves the app and analyzer out of date relative to the ARBs.
+Expected “N untranslated message(s)” warnings for incomplete locales are normal
+until those languages are pulled or filled.
+
+```powershell
+flutter gen-l10n
+```
+
+#### 8. Regenerate the Tolgee bridge
+
+The OTA bridge (`TolgeeAppLocalizations`) is generated from gen-l10n output.
+After `gen-l10n`, this regenerates overrides so every ARB key can still be
+overridden from the Tolgee CDN at runtime. CI runs this tool with `--check`;
+skipping regeneration after a pull will fail PR CI even if the ARBs themselves
+are correct.
+
+```powershell
+dart run tool/generate_tolgee_bridge.dart
+```
+
+#### 9. Remote doctor
+
+Runs the offline checks and then, using `TOLGEE_SYNC_API_KEY`, compares ARB
+keys to Tolgee, reports per-language translation coverage, and smoke-tests each
+published CDN JSON file (HTTP 200 + flat string map). Coverage gaps and
+Tolgee-only keys are warnings; structural ARB problems still fail. Use this
+after a real push/pull, or whenever you suspect CDN publish lag.
+
+```powershell
+dart run tool/tolgee_sync.dart doctor --remote
+```
+
+### What happens when CI auto-updates
+
+The Tolgee Sync workflow runs on the Monday **10:00 AM IST** schedule (or via
+**Run workflow**). It does **not** silently rewrite `develop` or ship
+translations to production by itself. It runs push → pull → `flutter gen-l10n`
+→ bridge generate → `doctor --remote` → open a PR via
+`peter-evans/create-pull-request`. Humans still review and merge.
+
+**Safe by design**
+
+- Push is create-only — existing Tolgee translations are not overwritten or deleted
+- Pull fetches all six languages before writing any ARB — a mid-run failure should not leave a half-updated tree
+- Empty Tolgee strings are skipped — blanks cannot wipe good local ARB text
+- Local ARB keys are not deleted just because Tolgee lacks them
+- Result is a PR, not a direct commit to `develop` and not a release-build rewrite
+- Bridge freshness check and localization tests run in the workflow
+
+**Watch for**
+
+1. **Large / noisy first PR** — the first pull can rewrite hundreds of strings (especially Tibetan) and reformat some ICU plurals. Review carefully; later PRs should be small.
+2. **Push talks to Tolgee during the job** — a bad new English key already on `develop` can be created in Tolgee before the sync PR merges. ARB file changes still only land via PR.
+3. **Missing or wrong secret** — without `TOLGEE_SYNC_API_KEY` the job fails; a read-only key fails `push`; an overly broad key increases leak risk. Keep scopes tight and rotate if exposed.
+4. **Merge conflicts** — feature branches that also edit ARBs can conflict with the Monday sync PR. Coordinate ownership of sync merges.
+5. **CDN lag** — creating keys or updating Tolgee does not instantly refresh Content Delivery. Runtime OTA still needs publish; bundled ARBs in the sync PR are separate from OTA.
+6. **Bad translator copy** — pull trusts Tolgee wording. After merge, that wording becomes the offline ARB fallback. Skim meaningful diffs, especially `en` and high-traffic keys.
+7. **Untranslated warnings** — keys with no Tolgee text for a locale stay missing in that ARB (`gen-l10n` “N untranslated” warnings). Expected until filled; not a CI crash unless doctor finds structural issues.
+8. **`develop` tip only** — sync checks out `develop`. Unmerged ARB work that exists only on another branch is not pushed or pulled until it lands on `develop`.
+
+**Bottom line:** auto-sync → PR → review → merge. The main operational risks are a large first PR, push creating Tolgee keys before ARB merge, CDN publish lag, and occasional conflicts with parallel ARB edits.
 ## Verify OTA
 
 1. Browser: open  

@@ -72,7 +72,7 @@
   "mala_reset_count_confirm": "तपाईंको हालको गणना शून्यमा फर्कने छ, तर तपाईंका संचयहरू जीवनभरको कुलमा रहने छन्।",
   "mala_reset_confirm": "रिसेट",
   "mala_action_coming_soon": "चाँडै आउँदैछ",
-  "mala_rounds_count": "{count, plural, =0{0 चक्र} =1{1 चक्र} other{{count} चक्र}}",
+  "mala_rounds_count": "{count, plural,\n=0 {0 चक्र}\n=1 {1 चक्र}\nother {{count} चक्र}\n}",
   "@mala_rounds_count": {
     "placeholders": {
       "count": {
@@ -190,15 +190,15 @@
   "notification_allow_subtitle_enabled": "यस एपका लागि सूचनाहरू सक्षम छन्",
   "notification_allow_subtitle_disabled": "अनुमति आवश्यक छ। सेटिङमा गएर दिन ट्याप गर्नुहोस्।",
   "notification_allow_subtitle_paused": "रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।",
-  "notification_routine_title": "योजना रिमाइन्डरहरू",
-  "notification_routine_subtitle_enabled": "तपाईंका योजनाहरूका लागि दैनिक रिमाइन्डरहरू",
-  "notification_routine_subtitle_disabled": "योजना रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।",
+  "notification_routine_title": "दिनचर्या रिमाइन्डरहरू",
+  "notification_routine_subtitle_enabled": "तपाईंका अभ्यास ब्लकहरूका लागि दैनिक रिमाइन्डरहरू",
+  "notification_routine_subtitle_disabled": "दिनचर्या रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।",
   "notification_battery_title": "पृष्ठभूमि रिमाइन्डरहरू",
   "notification_battery_subtitle_enabled": "एप बन्द भएको बेलामा पनि तपाईंका रिमाइन्डरहरू समयमै पठाइन्छन्।",
   "notification_battery_subtitle_disabled": "केही एन्ड्रोइड फोनहरूले ब्याट्री बचाउन पृष्ठभूमि एपहरू रोक्छन्, जसले तपाईंका रिमाइन्डरहरू ढिलो गराउन वा छुटाउन सक्छ। चालु राख्न ट्याप गर्नुहोस्।",
-  "notification_recitation_title": "जप रिमाइन्डर",
-  "notification_recitation_subtitle_enabled": "तपाईंका जपका लागि दैनिक रिमाइन्डरहरू",
-  "notification_recitation_subtitle_disabled": "जप रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।",
+  "notification_recitation_title": "पाठ रिमाइन्डर",
+  "notification_recitation_subtitle_enabled": "तपाईंका पाठहरूका लागि दैनिक रिमाइन्डरहरू",
+  "notification_recitation_subtitle_disabled": "पाठ रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।",
   "notification_practice_title": "माला रिमाइन्डर",
   "notification_practice_subtitle_enabled": "तपाईंको माला अभ्यासका लागि दैनिक रिमाइन्डर",
   "notification_practice_subtitle_disabled": "माला रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।",
@@ -269,7 +269,7 @@
   "learn_coming_soon_subtitle": "तपाईंको दैनिक जीवनमा मिल्ने गरी डिजाइन गरिएका तपाईंका व्यक्तिगत अध्ययन योजनाहरू",
   "creator_featured_plan": "विशेष योजना",
   "home_no_tags_found": "कुनै ट्याग फेला परेन",
-  "home_celebrated_by": "मनाउनेहरू: ",
+  "home_celebrated_by": "मनाउनेहरू:",
   "reader_settings_tooltip": "रिडर सेटिङ",
   "reader_font_size_tooltip": "फन्ट आकार",
   "reader_version_title": "संस्करण · {language}",
@@ -590,7 +590,7 @@
       }
     }
   },
-  "missedDaysCount": "{count, plural, =0{0 छुटेका दिन} =1{1 छुटेको दिन} other{{count} छुटेका दिन}}",
+  "missedDaysCount": "{count, plural,\n=0 {0 छुटेका दिन}\n=1 {1 छुटेको दिन}\nother {{count} छुटेका दिन}\n}",
   "@missedDaysCount": {
     "placeholders": {
       "count": {
@@ -653,7 +653,7 @@
   "edit_profile_tradition_save_failed": "परम्पराहरू सेभ गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्",
   "username_label": "प्रयोगकर्ता नाम",
   "username_taken": "यो नाम कसैले पहिले नै प्रयोग गरिसकेको छ",
-  "username_available_label": "उपलब्ध: ",
+  "username_available_label": "उपलब्ध:",
   "username_check_error": "प्रयोगकर्ता नाम जाँच गर्न सकिएन। फेरि प्रयास गर्नुहोस्",
   "username_invalid_format": "अमान्य प्रयोगकर्ता नाम ढाँचा",
   "username_min_length": "प्रयोगकर्ता नाम कम्तीमा 3 वर्णको हुनुपर्छ",
@@ -760,7 +760,6 @@
   "moon_phase_waning_gibbous": "घट्दो उत्तल चन्द्र",
   "moon_phase_last_quarter": "अन्तिम चौथाइ",
   "moon_phase_waning_crescent": "घट्दो अर्धचन्द्र",
-
   "join": "सामेल हुनुहोस्",
   "joined": "सामेल भयो",
   "group_member": "सदस्य",
@@ -816,7 +815,6 @@
   "group_accumulator_session_share_message": "मैले WeBuddhist मा {group} को सामूहिक संचय \"{accumulation}\" मा {count} जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!",
   "group_accumulator_session_share_message_no_group": "मैले WeBuddhist मा सामूहिक संचय \"{accumulation}\" मा {count} जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!",
   "group_accumulator_session_share_error": "सत्र साझा गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्",
-
   "share_this_quote": "यो उद्धरण साझा गर्नुहोस्",
   "shared_from": "बाट साझा गरिएको",
   "verse_share_error": "उद्धरण साझा गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्",
@@ -847,7 +845,6 @@
   "weekday_friday": "शुक्र",
   "weekday_saturday": "शनि",
   "weekday_sunday": "आइत",
-
   "reader_search_failed": "खोज असफल भयो।\nकृपया पुनः प्रयास गर्नुहोस्",
   "reader_swipe_up_for_more": "थप हेर्न माथि स्वाइप गर्नुहोस्",
   "reader_videos": "भिडियोहरू",
