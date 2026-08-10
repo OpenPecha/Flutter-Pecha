@@ -1555,7 +1555,7 @@ abstract class AppLocalizations {
   /// No description provided for @connect_caption_more.
   ///
   /// In en, this message translates to:
-  /// **'more'**
+  /// **'More'**
   String get connect_caption_more;
 
   /// No description provided for @connect_online.

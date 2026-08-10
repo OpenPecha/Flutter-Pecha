@@ -809,7 +809,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'No comments yet. Start the conversation.';
 
   @override
-  String get connect_caption_more => 'more';
+  String get connect_caption_more => 'More';
 
   @override
   String get connect_online => 'Online';

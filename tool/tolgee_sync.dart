@@ -372,29 +372,48 @@ _PullResult _applyTranslations({
 
 void _writeAllArbsAtomically(Map<String, ArbDocument> documents) {
   final Map<File, String> originals = <File, String>{};
-  final List<File> written = <File>[];
+  final List<File> replaced = <File>[];
+  final List<File> temps = <File>[];
   try {
     for (final ArbDocument document in documents.values) {
       originals[document.file] = document.originalText;
     }
     for (final ArbDocument document in documents.values) {
-      document.file.writeAsStringSync(
-        document.encode(),
-        encoding: utf8,
-        flush: true,
-      );
-      written.add(document.file);
+      final File target = document.file;
+      final File temp = File('${target.path}.tmp.$pid');
+      temps.add(temp);
+      temp.writeAsStringSync(document.encode(), encoding: utf8, flush: true);
+      temp.renameSync(target.path);
+      replaced.add(target);
     }
   } catch (error) {
-    for (final File file in written.reversed) {
+    final List<String> restoreFailures = <String>[];
+    for (final File file in replaced.reversed) {
       final String? original = originals[file];
-      if (original != null) {
+      if (original == null) {
+        continue;
+      }
+      try {
         file.writeAsStringSync(original, encoding: utf8, flush: true);
+      } catch (_) {
+        restoreFailures.add(file.path);
       }
     }
-    throw SyncException(
-      'Could not write all ARB files; changes rolled back: $error',
-    );
+    final String restoreNote =
+        restoreFailures.isEmpty
+            ? 'changes rolled back'
+            : 'rollback incomplete for: ${restoreFailures.join(', ')}';
+    throw SyncException('Could not write all ARB files; $restoreNote: $error');
+  } finally {
+    for (final File temp in temps) {
+      try {
+        if (temp.existsSync()) {
+          temp.deleteSync();
+        }
+      } catch (_) {
+        // Best-effort cleanup of leftover temp files.
+      }
+    }
   }
 }
 
@@ -452,7 +471,13 @@ class ArbDocument {
   final Map<String, dynamic> _values;
 
   Set<String> get messageKeys =>
-      _values.keys.where((String key) => !key.startsWith('@')).toSet();
+      _values.entries
+          .where(
+            (MapEntry<String, dynamic> entry) =>
+                !entry.key.startsWith('@') && entry.value is String,
+          )
+          .map((MapEntry<String, dynamic> entry) => entry.key)
+          .toSet();
 
   Set<String> get metadataKeys =>
       _values.keys
@@ -489,7 +514,9 @@ class TolgeeApi {
     String? projectIdOverride,
     HttpClient? client,
   }) : _projectIdOverride = projectIdOverride,
-       _client = client ?? HttpClient();
+       _client = client ?? HttpClient() {
+    _client.connectionTimeout = const Duration(seconds: 30);
+  }
 
   factory TolgeeApi.fromEnvironment() {
     final Map<String, String> environment = Platform.environment;
@@ -554,7 +581,7 @@ class TolgeeApi {
     do {
       final Object? decoded = await _requestJson(
         'GET',
-        _apiUri('/v2/projects/$projectId/keys', <String, String>{
+        _apiUri('/v2/projects/$projectId/keys', <String, Object>{
           'page': '$page',
           'size': '1000',
         }),
@@ -587,8 +614,8 @@ class TolgeeApi {
     do {
       final Object? decoded = await _requestJson(
         'GET',
-        _apiUri('/v2/projects/$projectId/translations', <String, String>{
-          'languages': tolgeeSyncLanguageTags.values.join(','),
+        _apiUri('/v2/projects/$projectId/translations', <String, Object>{
+          'languages': tolgeeSyncLanguageTags.values.toList(),
           'page': '$page',
           'size': '1000',
         }),
@@ -664,8 +691,16 @@ class TolgeeApi {
     );
   }
 
-  Uri _apiUri(String path, [Map<String, String>? query]) {
-    return Uri.parse('$apiBase$path').replace(queryParameters: query);
+  Uri _apiUri(String path, [Map<String, Object>? query]) {
+    return Uri.parse('$apiBase$path').replace(
+      queryParameters:
+          query == null
+              ? null
+              : <String, dynamic>{
+                for (final MapEntry<String, Object> entry in query.entries)
+                  entry.key: entry.value,
+              },
+    );
   }
 
   Future<Object?> _requestJson(String method, Uri uri, {Object? body}) async {
@@ -690,41 +725,50 @@ class TolgeeApi {
     bool includeApiKey = true,
   }) async {
     const int maxAttempts = 5;
+    const Duration attemptTimeout = Duration(seconds: 60);
+    final bool idempotent = method.toUpperCase() == 'GET';
     for (int attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        final HttpClientRequest request = await _client.openUrl(method, uri);
-        if (includeApiKey) {
-          request.headers.set('X-API-Key', apiKey);
-        }
-        if (body != null) {
-          request.headers.contentType = ContentType.json;
-          request.add(utf8.encode(jsonEncode(body)));
-        }
-        final HttpClientResponse response = await request.close();
-        final List<int> bytes = await _readBytes(response);
-        final _HttpResult result = _HttpResult(
-          statusCode: response.statusCode,
-          bytes: bytes,
-          retryAfter: response.headers.value(HttpHeaders.retryAfterHeader),
-        );
-        if ((response.statusCode == 429 || response.statusCode == 503) &&
+        final _HttpResult result = await () async {
+          final HttpClientRequest request = await _client.openUrl(method, uri);
+          if (includeApiKey) {
+            request.headers.set('X-API-Key', apiKey);
+          }
+          if (body != null) {
+            request.headers.contentType = ContentType.json;
+            request.add(utf8.encode(jsonEncode(body)));
+          }
+          final HttpClientResponse response = await request.close();
+          final List<int> bytes = await _readBytes(response);
+          return _HttpResult(
+            statusCode: response.statusCode,
+            bytes: bytes,
+            retryAfter: response.headers.value(HttpHeaders.retryAfterHeader),
+          );
+        }().timeout(attemptTimeout);
+        if ((result.statusCode == 429 || result.statusCode == 503) &&
             attempt + 1 < maxAttempts) {
           final Duration delay = _retryDelay(result.retryAfter, attempt);
           stderr.writeln(
-            'HTTP ${response.statusCode}; retrying in ${delay.inSeconds}s '
+            'HTTP ${result.statusCode}; retrying in ${delay.inSeconds}s '
             '(${attempt + 2}/$maxAttempts)...',
           );
           await Future<void>.delayed(delay);
           continue;
         }
         return result;
+      } on TimeoutException catch (error) {
+        if (!idempotent || attempt + 1 == maxAttempts) {
+          throw SyncException('Network request timed out: $error');
+        }
+        await Future<void>.delayed(_retryDelay(null, attempt));
       } on SocketException catch (error) {
-        if (attempt + 1 == maxAttempts) {
+        if (!idempotent || attempt + 1 == maxAttempts) {
           throw SyncException('Network request failed: $error');
         }
         await Future<void>.delayed(_retryDelay(null, attempt));
       } on HttpException catch (error) {
-        if (attempt + 1 == maxAttempts) {
+        if (!idempotent || attempt + 1 == maxAttempts) {
           throw SyncException('HTTP request failed: $error');
         }
         await Future<void>.delayed(_retryDelay(null, attempt));
@@ -758,6 +802,8 @@ Duration _retryDelay(String? retryAfter, int attempt) {
         return Duration(seconds: until.inSeconds.clamp(1, 60));
       }
     } on FormatException {
+      // Fall through to exponential backoff.
+    } on HttpException {
       // Fall through to exponential backoff.
     }
   }

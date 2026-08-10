@@ -791,7 +791,7 @@
   "group_followers": "अनुयायी",
   "group_links_title": "लिंक",
   "group_about_description": "विवरण",
-  "group_about_empty": "अभी कोई जानकारी उपलब्ध नहीं है",
+  "group_about_empty": "अभी कोई जानकारी उपलब्ध नहीं",
   "group_and_more_links": "और {count} और लिंक",
   "group_practice_with_us": "हमारे साथ अभ्यास करें",
   "series_practicing_with_group": "{groupName} के साथ अभ्यास",
@@ -803,7 +803,7 @@
   "group_accumulator_recited": "जाप",
   "group_accumulator_total": "कुल",
   "group_accumulator_contributions_empty": "अपने योगदान को ट्रैक करने के लिए इस संचय में शामिल हों।",
-  "group_accumulator_leaderboard_empty": "अभी तक कोई जाप नहीं।",
+  "group_accumulator_leaderboard_empty": "अभी कोई जाप नहीं।",
   "group_accumulator_recite_now": "अभी जाप करें",
   "group_accumulator_chant_again": "फिर से जाप करें",
   "group_accumulator_finish_session": "सत्र समाप्त करें",
@@ -814,7 +814,7 @@
   "group_accumulator_session_recitations": "आपने इस सत्र में {count} जाप पूरे किए",
   "group_accumulator_session_share_message": "मैंने WeBuddhist पर {group} के सामूहिक संचय \"{accumulation}\" में {count} जाप पूरे किए। आप भी मेरे साथ जुड़ें!",
   "group_accumulator_session_share_message_no_group": "मैंने WeBuddhist पर सामूहिक संचय \"{accumulation}\" में {count} जाप पूरे किए। आप भी मेरे साथ जुड़ें!",
-  "group_accumulator_session_share_error": "सत्र साझा नहीं हो सका। कृपया पुनः प्रयास करें",
+  "group_accumulator_session_share_error": "सत्र साझा नहीं कर सके। कृपया पुनः प्रयास करें",
   "share_this_quote": "यह उद्धरण शेयर करें",
   "shared_from": "यहाँ से शेयर किया गया",
   "verse_share_error": "उद्धरण शेयर नहीं हो सका। कृपया फिर से प्रयास करें",
@@ -904,5 +904,75 @@
   "drag_to_resize": "आकार बदलने के लिए खींचें",
   "day_completion_share_message": "मैंने WeBuddhist पर अपने अभ्यास का एक दिन पूरा किया। मेरे साथ जुड़ें और साथ मिलकर रोज़ाना अभ्यास की आदत बनाएं।",
   "group_accumulator_share_message": "मैं WeBuddhist पर {group} के सामूहिक संचय \"{accumulation}\" में भाग ले रहा हूँ। आप भी मेरे साथ जुड़ें!",
-  "group_accumulator_share_message_no_group": "मैं WeBuddhist पर सामूहिक संचय \"{accumulation}\" में भाग ले रहा हूँ। आप भी मेरे साथ जुड़ें!"
+  "group_accumulator_share_message_no_group": "मैं WeBuddhist पर सामूहिक संचय \"{accumulation}\" में भाग ले रहा हूँ। आप भी मेरे साथ जुड़ें!",
+  "connect_tab_feed": "फ़ीड",
+  "connect_tab_events": "कार्यक्रम",
+  "connect_tab_posts": "पोस्ट",
+  "connect_tab_groups": "Groups",
+  "connect_segment_my": "मेरा",
+  "connect_segment_discover": "खोजें",
+  "connect_empty_discover_posts": "खोजने के लिए कोई पोस्ट नहीं",
+  "connect_empty_discover_events": "खोजने के लिए कोई कार्यक्रम नहीं",
+  "connect_empty_discover_feed": "खोजने के लिए कुछ नहीं",
+  "connect_empty_discover_groups": "खोजने के लिए कोई समूह नहीं",
+  "connect_all_groups": "सभी समूह",
+  "connect_my_empty_feed_title": "आपके समूह शांत रहे हैं",
+  "connect_my_empty_events_title": "कोई आगामी कार्यक्रम नहीं",
+  "connect_my_empty_posts_title": "अभी कोई पोस्ट नहीं",
+  "connect_my_empty_groups_title": "अभी कोई समूह नहीं",
+  "connect_my_empty_feed_subtitle": "आपके शामिल समूहों से कुछ नया नहीं है। अन्य समूह आज पोस्ट कर रहे हैं।",
+  "connect_my_empty_events_subtitle": "आपके किसी भी समूह ने कुछ निर्धारित नहीं किया है। अन्य समूहों में सभी के लिए खुले कार्यक्रम हैं।",
+  "connect_my_empty_posts_subtitle": "आपके समूहों ने कुछ भी पोस्ट नहीं किया है। देखें अन्य समूह क्या साझा कर रहे हैं।",
+  "connect_my_empty_groups_subtitle": "आपने अभी तक कोई समूह नहीं जोड़ा है। साथ अभ्यास करने के लिए समुदाय खोजें।",
+  "connect_my_empty_feed_browse": "देखें अन्य समूह क्या साझा कर रहे हैं",
+  "connect_my_empty_events_browse": "खुले कार्यक्रम देखें",
+  "connect_my_empty_posts_browse": "अन्य पोस्ट देखें",
+  "connect_comment_replying_to": "@{handle} को उत्तर दे रहे हैं",
+  "@connect_comment_replying_to": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_comment_hint": "आप इस बारे में क्या सोचते हैं?",
+  "connect_comment_reply_hint": "उत्तर लिखें...",
+  "connect_comment_reply": "उत्तर दें",
+  "connect_comment_delete_title": "टिप्पणी हटाएँ?",
+  "connect_comment_delete_message": "यह टिप्पणी स्थायी रूप से हटा दी जाएगी।",
+  "connect_comment_delete_failed": "टिप्पणी हटाने में विफल",
+  "connect_post_comments_count": "{count, plural, =1 {1 टिप्पणी} other {{count} टिप्पणियाँ}}",
+  "@connect_post_comments_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect_post_comments_empty": "अभी कोई टिप्पणी नहीं। बातचीत शुरू करें।",
+  "connect_caption_more": "और",
+  "connect_online": "ऑनलाइन",
+  "connect_open": "खोलें",
+  "connect_event_fallback_title": "कार्यक्रम",
+  "connect_group_fallback_title": "समूह",
+  "connect_event_attend": "शामिल हों",
+  "connect_event_attending": "शामिल हैं",
+  "connect_event_participants_attending": "{count} शामिल",
+  "@connect_event_participants_attending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timer_notification_in_progress": "ध्यान जारी है",
+  "timer_notification_paused": "रुका हुआ · {time} शेष",
+  "@timer_notification_paused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timer_notification_complete": "आपका सत्र पूरा हुआ"
 }

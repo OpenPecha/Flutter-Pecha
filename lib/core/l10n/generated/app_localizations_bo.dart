@@ -710,138 +710,139 @@ class AppLocalizationsBo extends AppLocalizations {
       'འཚམས་འདྲི་ཞུ། ཁྱེད་ཀྱིས་ང་ཚོའི་ཚོགས་པ་ཚང་མར་ཞུགས་ཟིན། རྗེས་སུ་ཡང་བསྐྱར་གཟིགས་རོགས། གསར་པ་འབྱུང་མུས་ཡིན།';
 
   @override
-  String get connect_tab_feed => 'Feed';
+  String get connect_tab_feed => 'གསར་འགྱུར།';
 
   @override
-  String get connect_tab_events => 'Events';
+  String get connect_tab_events => 'བྱེད་སྒོ།';
 
   @override
-  String get connect_tab_posts => 'Posts';
+  String get connect_tab_posts => 'སྤེལ་བ།';
 
   @override
-  String get connect_tab_groups => 'Groups';
+  String get connect_tab_groups => 'ཚོགས་པ།';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => 'ངའི།';
 
   @override
-  String get connect_segment_discover => 'Discover';
+  String get connect_segment_discover => 'འཚོལ་སྙེག';
 
   @override
-  String get connect_empty_discover_posts => 'No posts to discover';
+  String get connect_empty_discover_posts => 'འཚོལ་རྒྱུའི་སྤེལ་བ་མི་འདུག';
 
   @override
-  String get connect_empty_discover_events => 'No events to discover';
+  String get connect_empty_discover_events => 'འཚོལ་རྒྱུའི་བྱེད་སྒོ་མི་འདུག';
 
   @override
-  String get connect_empty_discover_feed => 'Nothing to discover';
+  String get connect_empty_discover_feed => 'འཚོལ་རྒྱུ་གང་ཡང་མི་འདུག';
 
   @override
-  String get connect_empty_discover_groups => 'No groups to discover';
+  String get connect_empty_discover_groups => 'འཚོལ་རྒྱུའི་ཚོགས་པ་མི་འདུག';
 
   @override
-  String get connect_all_groups => 'All groups';
+  String get connect_all_groups => 'ཚོགས་པ་ཡོངས།';
 
   @override
-  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+  String get connect_my_empty_feed_title =>
+      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་ཁུ་སིམ་མེ་རེད་འདུག';
 
   @override
-  String get connect_my_empty_events_title => 'No upcoming events';
+  String get connect_my_empty_events_title =>
+      'འབྱུང་འགྱུར་གྱི་བྱེད་སྒོ་མི་འདུག';
 
   @override
-  String get connect_my_empty_posts_title => 'No posts yet';
+  String get connect_my_empty_posts_title => 'ད་དུང་སྤེལ་བ་མི་འདུག';
 
   @override
-  String get connect_my_empty_groups_title => 'No groups yet';
+  String get connect_my_empty_groups_title => 'ད་དུང་ཚོགས་པ་མི་འདུག';
 
   @override
   String get connect_my_empty_feed_subtitle =>
-      'Nothing new from the groups you have joined. Other groups are posting today.';
+      'ཁྱེད་ཞུགས་པའི་ཚོགས་པ་ཁག་ལ་གསར་པ་གང་ཡང་མེད། ཚོགས་པ་གཞན་དག་གིས་དེ་རིང་སྤེལ་བཞིན་འདུག';
 
   @override
   String get connect_my_empty_events_subtitle =>
-      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+      'ཁྱེད་ཀྱི་ཚོགས་པ་གང་གིས་ཀྱང་ལས་རིམ་བསྒྲིགས་མི་འདུག ཚོགས་པ་གཞན་ལ་མི་ཐམས་ཅད་ཞུགས་ཆོག་པའི་བྱེད་སྒོ་འདུག';
 
   @override
   String get connect_my_empty_posts_subtitle =>
-      'Your groups have not posted anything. See what other groups are sharing.';
+      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་གང་ཡང་སྤེལ་མི་འདུག ཚོགས་པ་གཞན་གྱིས་གང་སྤེལ་བཞིན་ཡོད་པར་གཟིགས།';
 
   @override
   String get connect_my_empty_groups_subtitle =>
-      'You have not joined any groups yet. Discover communities to practice with.';
+      'ཁྱེད་ད་དུང་ཚོགས་པ་གང་ལའང་ཞུགས་མི་འདུག མཉམ་དུ་ཉམས་ལེན་བྱེད་སའི་སྤྱི་ཚོགས་འཚོལ།';
 
   @override
-  String get connect_my_empty_feed_browse => 'See what other groups share';
+  String get connect_my_empty_feed_browse => 'ཚོགས་པ་གཞན་གྱིས་སྤེལ་བ་ལ་གཟིགས།';
 
   @override
-  String get connect_my_empty_events_browse => 'Browse open events';
+  String get connect_my_empty_events_browse =>
+      'ཐམས་ཅད་ཞུགས་ཆོག་པའི་བྱེད་སྒོ་ལ་གཟིགས།';
 
   @override
-  String get connect_my_empty_posts_browse => 'Browse other posts';
+  String get connect_my_empty_posts_browse => 'སྤེལ་བ་གཞན་ལ་གཟིགས།';
 
   @override
   String connect_comment_replying_to(String handle) {
-    return 'Replying to @$handle';
+    return '@$handle ལ་ལན་འདེབས་བཞིན་པ།';
   }
 
   @override
-  String get connect_comment_hint => 'What do you think of this?';
+  String get connect_comment_hint => 'འདིའི་སྐོར་ལ་ཁྱེད་ཀྱི་བསམ་ཚུལ་ག་རེ་ཡིན།';
 
   @override
-  String get connect_comment_reply_hint => 'Write a reply...';
+  String get connect_comment_reply_hint => 'ལན་ཞིག་འབྲི་རོགས།...';
 
   @override
-  String get connect_comment_reply => 'Reply';
+  String get connect_comment_reply => 'ལན་འདེབས།';
 
   @override
-  String get connect_comment_delete_title => 'Delete comment?';
+  String get connect_comment_delete_title => 'བསམ་ཚུལ་བསུབ་རྒྱུ་ཡིན་ནམ།';
 
   @override
-  String get connect_comment_delete_message =>
-      'This comment will be permanently removed.';
+  String get connect_comment_delete_message => 'བསམ་ཚུལ་འདི་གཏན་དུ་བསུབ་འགྲོ།';
 
   @override
-  String get connect_comment_delete_failed => 'Failed to delete comment';
+  String get connect_comment_delete_failed => 'མཆན་བསུབ་ཐུབ་མ་སོང་།';
 
   @override
   String connect_post_comments_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count comments',
-      one: '1 comment',
+      other: 'བསམ་ཚུལ་ $count',
     );
     return '$_temp0';
   }
 
   @override
   String get connect_post_comments_empty =>
-      'No comments yet. Start the conversation.';
+      'ད་དུང་བསམ་ཚུལ་མི་འདུག གླེང་མོལ་འགོ་བཙུགས།';
 
   @override
-  String get connect_caption_more => 'more';
+  String get connect_caption_more => 'མང་བ།';
 
   @override
-  String get connect_online => 'Online';
+  String get connect_online => 'དྲ་ཐོག';
 
   @override
-  String get connect_open => 'Open';
+  String get connect_open => 'ཁ་ཕྱེ།';
 
   @override
-  String get connect_event_fallback_title => 'Event';
+  String get connect_event_fallback_title => 'བྱེད་སྒོ།';
 
   @override
-  String get connect_group_fallback_title => 'Group';
+  String get connect_group_fallback_title => 'ཚོགས་པ།';
 
   @override
-  String get connect_event_attend => 'Attend';
+  String get connect_event_attend => 'ཞུགས།';
 
   @override
-  String get connect_event_attending => 'Attending';
+  String get connect_event_attending => 'ཞུགས་ཟིན།';
 
   @override
   String connect_event_participants_attending(int count) {
-    return '$count attending';
+    return 'ཞུགས་མཁན་ $count';
   }
 
   @override
@@ -1087,7 +1088,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get ai_start_new_chat => 'འགོ་འཛུགས་བྱེད་པར་ཁ་བརྡ་གསར་པ་ཞིག་བཟོ་རོགས།';
 
   @override
-  String get ai_delete_chat => 'ཁ་བརྡ་བསུབ།';
+  String get ai_delete_chat => 'ཁ་བརྡ་སུབས།';
 
   @override
   String get ai_delete_confirmation =>
@@ -1100,7 +1101,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get ai_confirm => 'གཏན་འཁེལ།';
 
   @override
-  String get ai_delete => 'བསུབ།';
+  String get ai_delete => 'སུབས།';
 
   @override
   String ai_greeting(String name) {
@@ -1736,7 +1737,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String calendar_day_month(int day, int month) {
-    return 'ཟླ་བ་$month ཚེས་$day';
+    return 'ཟླ་བ་$month ཚེས་$day །';
   }
 
   @override
@@ -1826,7 +1827,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_about_description => 'ངོ་སྤྲོད།';
 
   @override
-  String get group_about_empty => 'ད་ལྟའི་ཆར་ཆ་འཕྲིན་མེད།';
+  String get group_about_empty => 'ད་དུང་གནས་ཚུལ་གང་ཡང་མི་འདུག';
 
   @override
   String group_and_more_links(int count) {
@@ -1877,34 +1878,35 @@ class AppLocalizationsBo extends AppLocalizations {
       'ཁྱེད་ཀྱི་བསགས་གྲངས་ལ་རྗེས་འདེད་བྱེད་ཆེད་གྲངས་གསོག་འདི་ལ་ཞུགས་རོགས།';
 
   @override
-  String get group_accumulator_leaderboard_empty => 'ད་ལྟ་བརྗོད་ཚད་མེད།';
+  String get group_accumulator_leaderboard_empty => 'ད་དུང་བཟླས་བརྗོད་མི་འདུག';
 
   @override
   String get group_accumulator_recite_now => 'ད་ལྟ་བཟླས་བརྗོད་གནང་།';
 
   @override
-  String get group_accumulator_chant_again => 'ཡང་བསྐྱར་བཟླས་བརྗོད།';
+  String get group_accumulator_chant_again => 'ཡང་བསྐྱར་བཟླས།';
 
   @override
-  String get group_accumulator_finish_session => 'སྐབས་མཇུག་སྒྲིལ།';
+  String get group_accumulator_finish_session => 'ཐུན་མཇུག་སྒྲིལ།';
 
   @override
-  String get group_accumulator_offline_recitation => 'དྲ་ཐོག་མིན་བཟླས་བརྗོད།';
+  String get group_accumulator_offline_recitation =>
+      'དྲ་ཐོག་མིན་པའི་བཟླས་བརྗོད།';
 
   @override
   String get group_accumulator_add_offline_chants_title =>
-      'དྲ་ཐོག་མིན་བཟླས་བརྗོད་སྣོན།';
+      'དྲ་ཐོག་མིན་པའི་བཟླས་གྲངས་སྣོན།';
 
   @override
   String get group_accumulator_add_offline_chants_message =>
-      'Add the number of chants you did outside this app.';
+      'མཉེན་ཆས་འདིའི་ཕྱི་ལ་བཟླས་པའི་གྲངས་ཀ་སྣོན།';
 
   @override
-  String get group_accumulator_session_complete => 'སྐབས་འདི་ཚང་མ་བསྐངས་ཟིན།';
+  String get group_accumulator_session_complete => 'ཐུན་ཚང་སོང་།';
 
   @override
   String group_accumulator_session_recitations(int count) {
-    return 'ཁྱེད་ཀྱིས་སྐབས་འདིར་བཟླས་བརྗོད་ $count བསྐངས་ཟིན།';
+    return 'ཐུན་འདིར་ཁྱེད་ཀྱིས་བཟླས་བརྗོད་ $count གྲུབ་སོང་།';
   }
 
   @override
@@ -1913,7 +1915,7 @@ class AppLocalizationsBo extends AppLocalizations {
     String accumulation,
     String group,
   ) {
-    return 'ངས WeBuddhist ཐོག་ $group གི་བསགས་གྲངས་ $accumulation ནང་བཟླས་བརྗོད་ $count བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
+    return 'ངས་ WeBuddhist ཐོག་ $group ལ་ \"$accumulation\" གྲངས་གསོག་ནང་བཟླས་བརྗོད་ $count ཚར་སོང་། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
   }
 
   @override
@@ -1921,12 +1923,12 @@ class AppLocalizationsBo extends AppLocalizations {
     int count,
     String accumulation,
   ) {
-    return 'ངས WeBuddhist ཐོག་བསགས་གྲངས་ $accumulation ནང་བཟླས་བརྗོད་ $count བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
+    return 'ངས་ WeBuddhist ཐོག་ \"$accumulation\" གྲངས་གསོག་ནང་བཟླས་བརྗོད་ $count ཚར་སོང་། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
   }
 
   @override
   String get group_accumulator_session_share_error =>
-      'སྐབས་མཇུག་བགོས་མ་ཐུབ། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
+      'ཐུན་མཉམ་སྤྱོད་བྱེད་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་།';
 
   @override
   String get share_this_quote => 'ལེགས་བཤད་འདི་སྤེལ།';
@@ -1940,7 +1942,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get share_app_message =>
-      'ངས་ཉིན་རེའི་ནང་ཆོས་ཉམས་ལེན་གྱི་སྤྱོད་ལམ་སྦྱོང་བར་འཕྲིན་ཆས་འདི་བཀོལ་སྤྱོད་བྱེད་ཀྱི་ཡོད། ཁྱོད་ཀྱིས་ཀྱང་ལས་དེ་དགའ་བར་ངས་བསམ་གྱི་ཡོད།';
+      'ངས་ཉིན་རེའི་ནང་ཆོས་ཉམས་ལེན་རྒྱུད་ལ་འཇགས་པར་མཉེན་ཆས་འདི་བཀོལ་སྤྱོད་བྱེད་ཀྱི་ཡོད། ཁྱེད་རང་ཡང་འདི་ལ་དགའ་པོ་ཡོང་གི་རེད་བསམ་གྱི་འདུག';
 
   @override
   String get share_streak_message =>
@@ -2157,15 +2159,15 @@ class AppLocalizationsBo extends AppLocalizations {
   }
 
   @override
-  String get timer_notification_in_progress => 'Meditation in progress';
+  String get timer_notification_in_progress => 'སྒོམ་སྒྲུབ་མུ་མཐུད་བཞིན་པ།';
 
   @override
   String timer_notification_paused(String time) {
-    return 'Paused · $time left';
+    return 'བར་མཚམས། ལྷག་མ་ $time';
   }
 
   @override
-  String get timer_notification_complete => 'Your session is complete';
+  String get timer_notification_complete => 'ཁྱེད་ཀྱི་ཐུན་ཚང་སོང་།';
 
   @override
   String get ai_use_search_instead => 'དེའི་ཚབ་ཏུ་འཚོལ་བཤེར་སྤྱོད།';

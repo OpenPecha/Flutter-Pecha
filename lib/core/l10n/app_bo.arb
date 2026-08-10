@@ -383,11 +383,11 @@
   "ai_chat_deleted": "ཁ་བརྡ་བསུབ་ཟིན།",
   "ai_no_conversations": "ད་བར་ཁ་བརྡ་བྱུང་མེད།",
   "ai_start_new_chat": "འགོ་འཛུགས་བྱེད་པར་ཁ་བརྡ་གསར་པ་ཞིག་བཟོ་རོགས།",
-  "ai_delete_chat": "ཁ་བརྡ་བསུབ།",
+  "ai_delete_chat": "ཁ་བརྡ་སུབས།",
   "ai_delete_confirmation": "ཁྱེད་ཀྱིས་ཁ་བརྡ་འདི་བསུབ་རྒྱུ་གཏན་འཁེལ་ཡིན་ནམ།",
   "ai_delete_warning": "བྱ་བ་འདི་ཕྱིར་ལོག་བྱེད་མི་ཐུབ།",
   "ai_confirm": "གཏན་འཁེལ།",
-  "ai_delete": "བསུབ།",
+  "ai_delete": "སུབས།",
   "ai_greeting": "བཀྲ་ཤིས་བདེ་ལེགས། {name}",
   "ai_text_not_found": "ཡིག་ཆ་རྙེད་མ་སོང་།",
   "ai_text_not_found_message": "ད་བར་དུ་ང་ཚོའི་དཔེ་མཛོད་ནང་མཚན་བྱང་ \"{title}\" འདི་འདྲ་ཞིག་མི་འདུག མཚན་བྱང་གཞན་ཞིག་སྤྱད་དེ་འཚོལ་བ་འམ་ཡང་ན་ཐབས་ལམ་གཞན་ཞིག་སྤྱོད་རོགས།",
@@ -667,7 +667,7 @@
   "calendar_upcoming_events": "འབྱུང་འགྱུར་བྱེད་སྒོ།",
   "calendar_day_short": "ཚེས།",
   "calendar_day_label": "ཚེས།",
-  "calendar_day_month": "ཟླ་བ་{month} ཚེས་{day}",
+  "calendar_day_month": "ཟླ་བ་{month} ཚེས་{day} །",
   "@calendar_day_month": {
     "placeholders": {
       "day": {
@@ -725,7 +725,7 @@
   "group_followers": "རྗེས་འབྲང་པ།",
   "group_links_title": "འབྲེལ་ཐག",
   "group_about_description": "ངོ་སྤྲོད།",
-  "group_about_empty": "ད་ལྟའི་ཆར་ཆ་འཕྲིན་མེད།",
+  "group_about_empty": "ད་དུང་གནས་ཚུལ་གང་ཡང་མི་འདུག",
   "group_and_more_links": "དང་འབྲེལ་ཐག་གཞན་ {count}",
   "group_practice_with_us": "ང་ཚོ་མཉམ་དུ་ཉམས་ལེན་བྱེད།",
   "series_practicing_with_group": "{groupName} དང་མཉམ་དུ་ཉམས་ལེན་བྱེད",
@@ -737,22 +737,22 @@
   "group_accumulator_recited": "བཟླས་པ།",
   "group_accumulator_total": "ཁྱོན་བསྡོམས།",
   "group_accumulator_contributions_empty": "ཁྱེད་ཀྱི་བསགས་གྲངས་ལ་རྗེས་འདེད་བྱེད་ཆེད་གྲངས་གསོག་འདི་ལ་ཞུགས་རོགས།",
-  "group_accumulator_leaderboard_empty": "ད་ལྟ་བརྗོད་ཚད་མེད།",
+  "group_accumulator_leaderboard_empty": "ད་དུང་བཟླས་བརྗོད་མི་འདུག",
   "group_accumulator_recite_now": "ད་ལྟ་བཟླས་བརྗོད་གནང་།",
-  "group_accumulator_chant_again": "ཡང་བསྐྱར་བཟླས་བརྗོད།",
-  "group_accumulator_finish_session": "སྐབས་མཇུག་སྒྲིལ།",
-  "group_accumulator_offline_recitation": "དྲ་ཐོག་མིན་བཟླས་བརྗོད།",
-  "group_accumulator_add_offline_chants_title": "དྲ་ཐོག་མིན་བཟླས་བརྗོད་སྣོན།",
-  "group_accumulator_add_offline_chants_message": "Add the number of chants you did outside this app.",
-  "group_accumulator_session_complete": "སྐབས་འདི་ཚང་མ་བསྐངས་ཟིན།",
-  "group_accumulator_session_recitations": "ཁྱེད་ཀྱིས་སྐབས་འདིར་བཟླས་བརྗོད་ {count} བསྐངས་ཟིན།",
-  "group_accumulator_session_share_message": "ངས WeBuddhist ཐོག་ {group} གི་བསགས་གྲངས་ {accumulation} ནང་བཟླས་བརྗོད་ {count} བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།",
-  "group_accumulator_session_share_message_no_group": "ངས WeBuddhist ཐོག་བསགས་གྲངས་ {accumulation} ནང་བཟླས་བརྗོད་ {count} བསྐངས་ཟིན། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།",
-  "group_accumulator_session_share_error": "སྐབས་མཇུག་བགོས་མ་ཐུབ། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།",
+  "group_accumulator_chant_again": "ཡང་བསྐྱར་བཟླས།",
+  "group_accumulator_finish_session": "ཐུན་མཇུག་སྒྲིལ།",
+  "group_accumulator_offline_recitation": "དྲ་ཐོག་མིན་པའི་བཟླས་བརྗོད།",
+  "group_accumulator_add_offline_chants_title": "དྲ་ཐོག་མིན་པའི་བཟླས་གྲངས་སྣོན།",
+  "group_accumulator_add_offline_chants_message": "མཉེན་ཆས་འདིའི་ཕྱི་ལ་བཟླས་པའི་གྲངས་ཀ་སྣོན།",
+  "group_accumulator_session_complete": "ཐུན་ཚང་སོང་།",
+  "group_accumulator_session_recitations": "ཐུན་འདིར་ཁྱེད་ཀྱིས་བཟླས་བརྗོད་ {count} གྲུབ་སོང་།",
+  "group_accumulator_session_share_message": "ངས་ WeBuddhist ཐོག་ {group} ལ་ \"{accumulation}\" གྲངས་གསོག་ནང་བཟླས་བརྗོད་ {count} ཚར་སོང་། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།",
+  "group_accumulator_session_share_message_no_group": "ངས་ WeBuddhist ཐོག་ \"{accumulation}\" གྲངས་གསོག་ནང་བཟླས་བརྗོད་ {count} ཚར་སོང་། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།",
+  "group_accumulator_session_share_error": "ཐུན་མཉམ་སྤྱོད་བྱེད་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་།",
   "share_this_quote": "ལེགས་བཤད་འདི་སྤེལ།",
   "shared_from": "སྤེལ་ཁུངས།",
   "verse_share_error": "ལེགས་བཤད་སྤེལ་ཐུབ་མ་སོང་། བསྐྱར་དུ་ཚོད་ལྟ་བྱོས།",
-  "share_app_message": "ངས་ཉིན་རེའི་ནང་ཆོས་ཉམས་ལེན་གྱི་སྤྱོད་ལམ་སྦྱོང་བར་འཕྲིན་ཆས་འདི་བཀོལ་སྤྱོད་བྱེད་ཀྱི་ཡོད། ཁྱོད་ཀྱིས་ཀྱང་ལས་དེ་དགའ་བར་ངས་བསམ་གྱི་ཡོད།",
+  "share_app_message": "ངས་ཉིན་རེའི་ནང་ཆོས་ཉམས་ལེན་རྒྱུད་ལ་འཇགས་པར་མཉེན་ཆས་འདི་བཀོལ་སྤྱོད་བྱེད་ཀྱི་ཡོད། ཁྱེད་རང་ཡང་འདི་ལ་དགའ་པོ་ཡོང་གི་རེད་བསམ་གྱི་འདུག",
   "share_streak_message": "ངས་རང་ཉིད་ལ་ཉིན་རེའི་ཉམས་ལེན་གྱི་གོམས་གཤིས་ཤིག་ཆགས་པར་བྱས་ཡོད་པ་དེ་ཁྱེད་དང་མཉམ་དུ་མཉམ་སྤྱོད་བྱ་འདོད་ཡོད། ལས་གང་ཡང་རོགས་པ་ཞིག་དང་མཉམ་དུ་བྱས་ན་ལས་སླ་བ་ཡོད། WeBuddhist ཐོག་ལ་ང་དང་ལྷན་དུ་མཉམ་ཞུགས་གནང་དང་།",
   "share_chant_message": "ངས་མགུར་འདི་ཁྱོད་དང་མཉམ་བགྲོ་བར་འདོད། ཁྱོད་ཀྱིས་དེ་ཉམས་ལེན་བྱེད་ཐུབ་ཅིང་ WeBuddhist ཐོག་མགུར་གཞུང་ཆེན་པོའི་མཛོད་དུ་རྒྱུ་ཐུབ།",
   "share_quote_message": "WeBuddhist ཐོག་གི་གསུང་ཚིག་འདི་ངར་དགར་སོང་བས་ཁྱོད་དང་མཉམ་བགྲོ་བར་འདོད། WeBuddhist ཉེར་སྤྱོད་ཐོག་ལྟ་ཀློག་ཕྱི་བཀྲམ་གྱི་ཚིག་རྒྱུག་མང་པོ་དཔྱད།",
@@ -840,5 +840,75 @@
   "group_accumulator_share_message": "ང་ WeBuddhist ཐོག་ {group} གི་ {accumulation} གྲངས་གསོག་ནང་མཉམ་ཞུགས་བྱེད་བཞིན་ཡོད། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།",
   "group_accumulator_share_message_no_group": "ང་ WeBuddhist ཐོག་ {accumulation} གྲངས་གསོག་ནང་མཉམ་ཞུགས་བྱེད་བཞིན་ཡོད། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།",
   "group_change_practice_title": "ཉམས་ལེན་ཚོགས་པ་རྗེས།",
-  "group_change_practice_message": "ཁྱེད་རང་གིས་ཚོགས་པ་གཞན་ཞིག་དང་མཉམ་དུ་ཐུན་འཆར་འདི་ཉམས་ལེན་བྱེད་བཞིན་འདུག ཁྱེད་རང་གི་ཉམས་ལེན་ཚོགས་པ་བརྗེ་འདོད་དམ།"
+  "group_change_practice_message": "ཁྱེད་རང་གིས་ཚོགས་པ་གཞན་ཞིག་དང་མཉམ་དུ་ཐུན་འཆར་འདི་ཉམས་ལེན་བྱེད་བཞིན་འདུག ཁྱེད་རང་གི་ཉམས་ལེན་ཚོགས་པ་བརྗེ་འདོད་དམ།",
+  "connect_tab_feed": "གསར་འགྱུར།",
+  "connect_tab_events": "བྱེད་སྒོ།",
+  "connect_tab_posts": "སྤེལ་བ།",
+  "connect_tab_groups": "ཚོགས་པ།",
+  "connect_segment_my": "ངའི།",
+  "connect_segment_discover": "འཚོལ་སྙེག",
+  "connect_empty_discover_posts": "འཚོལ་རྒྱུའི་སྤེལ་བ་མི་འདུག",
+  "connect_empty_discover_events": "འཚོལ་རྒྱུའི་བྱེད་སྒོ་མི་འདུག",
+  "connect_empty_discover_feed": "འཚོལ་རྒྱུ་གང་ཡང་མི་འདུག",
+  "connect_empty_discover_groups": "འཚོལ་རྒྱུའི་ཚོགས་པ་མི་འདུག",
+  "connect_all_groups": "ཚོགས་པ་ཡོངས།",
+  "connect_my_empty_feed_title": "ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་ཁུ་སིམ་མེ་རེད་འདུག",
+  "connect_my_empty_events_title": "འབྱུང་འགྱུར་གྱི་བྱེད་སྒོ་མི་འདུག",
+  "connect_my_empty_posts_title": "ད་དུང་སྤེལ་བ་མི་འདུག",
+  "connect_my_empty_groups_title": "ད་དུང་ཚོགས་པ་མི་འདུག",
+  "connect_my_empty_feed_subtitle": "ཁྱེད་ཞུགས་པའི་ཚོགས་པ་ཁག་ལ་གསར་པ་གང་ཡང་མེད། ཚོགས་པ་གཞན་དག་གིས་དེ་རིང་སྤེལ་བཞིན་འདུག",
+  "connect_my_empty_events_subtitle": "ཁྱེད་ཀྱི་ཚོགས་པ་གང་གིས་ཀྱང་ལས་རིམ་བསྒྲིགས་མི་འདུག ཚོགས་པ་གཞན་ལ་མི་ཐམས་ཅད་ཞུགས་ཆོག་པའི་བྱེད་སྒོ་འདུག",
+  "connect_my_empty_posts_subtitle": "ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་གང་ཡང་སྤེལ་མི་འདུག ཚོགས་པ་གཞན་གྱིས་གང་སྤེལ་བཞིན་ཡོད་པར་གཟིགས།",
+  "connect_my_empty_groups_subtitle": "ཁྱེད་ད་དུང་ཚོགས་པ་གང་ལའང་ཞུགས་མི་འདུག མཉམ་དུ་ཉམས་ལེན་བྱེད་སའི་སྤྱི་ཚོགས་འཚོལ།",
+  "connect_my_empty_feed_browse": "ཚོགས་པ་གཞན་གྱིས་སྤེལ་བ་ལ་གཟིགས།",
+  "connect_my_empty_events_browse": "ཐམས་ཅད་ཞུགས་ཆོག་པའི་བྱེད་སྒོ་ལ་གཟིགས།",
+  "connect_my_empty_posts_browse": "སྤེལ་བ་གཞན་ལ་གཟིགས།",
+  "connect_comment_replying_to": "@{handle} ལ་ལན་འདེབས་བཞིན་པ།",
+  "@connect_comment_replying_to": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_comment_hint": "འདིའི་སྐོར་ལ་ཁྱེད་ཀྱི་བསམ་ཚུལ་ག་རེ་ཡིན།",
+  "connect_comment_reply_hint": "ལན་ཞིག་འབྲི་རོགས།...",
+  "connect_comment_reply": "ལན་འདེབས།",
+  "connect_comment_delete_title": "བསམ་ཚུལ་བསུབ་རྒྱུ་ཡིན་ནམ།",
+  "connect_comment_delete_message": "བསམ་ཚུལ་འདི་གཏན་དུ་བསུབ་འགྲོ།",
+  "connect_comment_delete_failed": "མཆན་བསུབ་ཐུབ་མ་སོང་།",
+  "connect_post_comments_count": "{count, plural, other {བསམ་ཚུལ་ {count}}}",
+  "@connect_post_comments_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect_post_comments_empty": "ད་དུང་བསམ་ཚུལ་མི་འདུག གླེང་མོལ་འགོ་བཙུགས།",
+  "connect_caption_more": "མང་བ།",
+  "connect_online": "དྲ་ཐོག",
+  "connect_open": "ཁ་ཕྱེ།",
+  "connect_event_fallback_title": "བྱེད་སྒོ།",
+  "connect_group_fallback_title": "ཚོགས་པ།",
+  "connect_event_attend": "ཞུགས།",
+  "connect_event_attending": "ཞུགས་ཟིན།",
+  "connect_event_participants_attending": "ཞུགས་མཁན་ {count}",
+  "@connect_event_participants_attending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timer_notification_in_progress": "སྒོམ་སྒྲུབ་མུ་མཐུད་བཞིན་པ།",
+  "timer_notification_paused": "བར་མཚམས། ལྷག་མ་ {time}",
+  "@timer_notification_paused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timer_notification_complete": "ཁྱེད་ཀྱི་ཐུན་ཚང་སོང་།"
 }

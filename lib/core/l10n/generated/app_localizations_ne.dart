@@ -712,138 +712,139 @@ class AppLocalizationsNe extends AppLocalizations {
       'बधाई छ, तपाईं हाम्रा सबै समूहहरूमा सामेल हुनुभयो! चाँडै फेरि हेर्नुहोस्। नयाँ समूहहरू चाँडै आउँदैछन्';
 
   @override
-  String get connect_tab_feed => 'Feed';
+  String get connect_tab_feed => 'फिड';
 
   @override
-  String get connect_tab_events => 'Events';
+  String get connect_tab_events => 'कार्यक्रम';
 
   @override
-  String get connect_tab_posts => 'Posts';
+  String get connect_tab_posts => 'पोस्ट';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => 'मेरो';
 
   @override
-  String get connect_segment_discover => 'Discover';
+  String get connect_segment_discover => 'अन्वेषण';
 
   @override
-  String get connect_empty_discover_posts => 'No posts to discover';
+  String get connect_empty_discover_posts => 'अन्वेषण गर्न कुनै पोस्ट छैन';
 
   @override
-  String get connect_empty_discover_events => 'No events to discover';
+  String get connect_empty_discover_events => 'अन्वेषण गर्न कुनै कार्यक्रम छैन';
 
   @override
-  String get connect_empty_discover_feed => 'Nothing to discover';
+  String get connect_empty_discover_feed => 'अन्वेषण गर्न केही छैन';
 
   @override
-  String get connect_empty_discover_groups => 'No groups to discover';
+  String get connect_empty_discover_groups => 'अन्वेषण गर्न कुनै समूह छैन';
 
   @override
-  String get connect_all_groups => 'All groups';
+  String get connect_all_groups => 'सबै समूह';
 
   @override
-  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+  String get connect_my_empty_feed_title => 'तपाईंका समूहहरू शान्त छन्';
 
   @override
-  String get connect_my_empty_events_title => 'No upcoming events';
+  String get connect_my_empty_events_title => 'कुनै आगामी कार्यक्रम छैन';
 
   @override
-  String get connect_my_empty_posts_title => 'No posts yet';
+  String get connect_my_empty_posts_title => 'अहिलेसम्म कुनै पोस्ट छैन';
 
   @override
-  String get connect_my_empty_groups_title => 'No groups yet';
+  String get connect_my_empty_groups_title => 'अहिलेसम्म कुनै समूह छैन';
 
   @override
   String get connect_my_empty_feed_subtitle =>
-      'Nothing new from the groups you have joined. Other groups are posting today.';
+      'तपाईं सामेल भएका समूहहरूबाट नयाँ केही छैन। अन्य समूहहरूले आज पोस्ट गरिरहेका छन्।';
 
   @override
   String get connect_my_empty_events_subtitle =>
-      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+      'तपाईंका कुनै पनि समूहले केही तालिका बनाएका छैनन्। अन्य समूहहरूमा सबैका लागि खुला कार्यक्रमहरू छन्।';
 
   @override
   String get connect_my_empty_posts_subtitle =>
-      'Your groups have not posted anything. See what other groups are sharing.';
+      'तपाईंका समूहहरूले केही पोस्ट गरेका छैनन्। अन्य समूहहरूले के साझा गरिरहेका छन् हेर्नुहोस्।';
 
   @override
   String get connect_my_empty_groups_subtitle =>
-      'You have not joined any groups yet. Discover communities to practice with.';
+      'तपाईं अहिलेसम्म कुनै समूहमा सामेल हुनुभएको छैन। सँगै अभ्यास गर्न समुदायहरू खोज्नुहोस्।';
 
   @override
-  String get connect_my_empty_feed_browse => 'See what other groups share';
+  String get connect_my_empty_feed_browse =>
+      'अन्य समूहहरूले के साझा गर्छन् हेर्नुहोस्';
 
   @override
-  String get connect_my_empty_events_browse => 'Browse open events';
+  String get connect_my_empty_events_browse => 'खुला कार्यक्रमहरू हेर्नुहोस्';
 
   @override
-  String get connect_my_empty_posts_browse => 'Browse other posts';
+  String get connect_my_empty_posts_browse => 'अन्य पोस्टहरू हेर्नुहोस्';
 
   @override
   String connect_comment_replying_to(String handle) {
-    return 'Replying to @$handle';
+    return '@$handle लाई जवाफ दिँदै';
   }
 
   @override
-  String get connect_comment_hint => 'What do you think of this?';
+  String get connect_comment_hint => 'तपाईंलाई यसबारे के लाग्छ?';
 
   @override
-  String get connect_comment_reply_hint => 'Write a reply...';
+  String get connect_comment_reply_hint => 'जवाफ लेख्नुहोस्...';
 
   @override
-  String get connect_comment_reply => 'Reply';
+  String get connect_comment_reply => 'जवाफ दिनुहोस्';
 
   @override
-  String get connect_comment_delete_title => 'Delete comment?';
+  String get connect_comment_delete_title => 'टिप्पणी मेट्ने?';
 
   @override
   String get connect_comment_delete_message =>
-      'This comment will be permanently removed.';
+      'यो टिप्पणी स्थायी रूपमा हटाइनेछ।';
 
   @override
-  String get connect_comment_delete_failed => 'Failed to delete comment';
+  String get connect_comment_delete_failed => 'टिप्पणी मेट्न असफल';
 
   @override
   String connect_post_comments_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count comments',
-      one: '1 comment',
+      other: '$count टिप्पणीहरू',
+      one: '1 टिप्पणी',
     );
     return '$_temp0';
   }
 
   @override
   String get connect_post_comments_empty =>
-      'No comments yet. Start the conversation.';
+      'अहिलेसम्म कुनै टिप्पणी छैन। कुराकानी सुरु गर्नुहोस्।';
 
   @override
-  String get connect_caption_more => 'more';
+  String get connect_caption_more => 'थप';
 
   @override
-  String get connect_online => 'Online';
+  String get connect_online => 'अनलाइन';
 
   @override
-  String get connect_open => 'Open';
+  String get connect_open => 'खोल्नुहोस्';
 
   @override
-  String get connect_event_fallback_title => 'Event';
+  String get connect_event_fallback_title => 'कार्यक्रम';
 
   @override
-  String get connect_group_fallback_title => 'Group';
+  String get connect_group_fallback_title => 'समूह';
 
   @override
-  String get connect_event_attend => 'Attend';
+  String get connect_event_attend => 'सहभागी हुनुहोस्';
 
   @override
-  String get connect_event_attending => 'Attending';
+  String get connect_event_attending => 'सहभागी';
 
   @override
   String connect_event_participants_attending(int count) {
-    return '$count attending';
+    return '$count सहभागी';
   }
 
   @override
@@ -1827,7 +1828,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_about_description => 'विवरण';
 
   @override
-  String get group_about_empty => 'हाल कुनै जानकारी उपलब्ध छैन';
+  String get group_about_empty => 'अहिलेसम्म कुनै जानकारी उपलब्ध छैन';
 
   @override
   String group_and_more_links(int count) {
@@ -1898,14 +1899,14 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get group_accumulator_add_offline_chants_message =>
-      'यो एप बाहिर गरेका जपको संख्या थप्नुहोस्।';
+      'यस एपबाहिर गर्नुभएको जपको संख्या थप्नुहोस्।';
 
   @override
   String get group_accumulator_session_complete => 'सत्र पूरा भयो!';
 
   @override
   String group_accumulator_session_recitations(int count) {
-    return 'तपाईंले यो सत्रमा $count जप पूरा गर्नुभयो';
+    return 'तपाईंले यस सत्रमा $count जप पूरा गर्नुभयो';
   }
 
   @override
@@ -1914,7 +1915,7 @@ class AppLocalizationsNe extends AppLocalizations {
     String accumulation,
     String group,
   ) {
-    return 'मैले WeBuddhist मा $group को सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!';
+    return 'मैले WeBuddhist मा $group को सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरें। तपाईं पनि मसँग सामेल हुनुहोस्!';
   }
 
   @override
@@ -1922,12 +1923,12 @@ class AppLocalizationsNe extends AppLocalizations {
     int count,
     String accumulation,
   ) {
-    return 'मैले WeBuddhist मा सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरेँ। तपाईं पनि मसँग सामेल हुनुहोस्!';
+    return 'मैले WeBuddhist मा सामूहिक संचय \"$accumulation\" मा $count जप पूरा गरें। तपाईं पनि मसँग सामेल हुनुहोस्!';
   }
 
   @override
   String get group_accumulator_session_share_error =>
-      'सत्र साझा गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्';
+      'सत्र साझा गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्';
 
   @override
   String get share_this_quote => 'यो उद्धरण साझा गर्नुहोस्';
@@ -2161,15 +2162,15 @@ class AppLocalizationsNe extends AppLocalizations {
   }
 
   @override
-  String get timer_notification_in_progress => 'Meditation in progress';
+  String get timer_notification_in_progress => 'ध्यान जारी छ';
 
   @override
   String timer_notification_paused(String time) {
-    return 'Paused · $time left';
+    return 'रोकिएको · $time बाँकी';
   }
 
   @override
-  String get timer_notification_complete => 'Your session is complete';
+  String get timer_notification_complete => 'तपाईंको सत्र पूरा भयो';
 
   @override
   String get ai_use_search_instead => 'बरु खोज प्रयोग गर्नुहोस्';

@@ -791,7 +791,7 @@
   "group_followers": "дагагчид",
   "group_links_title": "Холбоосууд",
   "group_about_description": "Тайлбар",
-  "group_about_empty": "Одоогоор мэдээлэл алга байна",
+  "group_about_empty": "Одоогоор мэдээлэл алга",
   "group_and_more_links": "болон дахиад {count} холбоос",
   "group_practice_with_us": "Бидэнтэй хамт дадлага хий",
   "series_practicing_with_group": "{groupName}-тай хамт дадлага хийж байна",
@@ -803,18 +803,18 @@
   "group_accumulator_recited": "Уншсан",
   "group_accumulator_total": "Нийт",
   "group_accumulator_contributions_empty": "Хувь нэмрээ хянахын тулд энэ хуримтлалд нэгдэнэ үү.",
-  "group_accumulator_leaderboard_empty": "Одоогоор уншлага байхгүй.",
+  "group_accumulator_leaderboard_empty": "Одоогоор уншлага алга.",
   "group_accumulator_recite_now": "Одоо уншина уу",
   "group_accumulator_chant_again": "Дахин унших",
-  "group_accumulator_finish_session": "Хичээл дуусгах",
+  "group_accumulator_finish_session": "Хуралдааныг дуусгах",
   "group_accumulator_offline_recitation": "Офлайн уншлага",
   "group_accumulator_add_offline_chants_title": "Офлайн уншлага нэмэх:",
-  "group_accumulator_add_offline_chants_message": "Энэ апп-аас гадуур хийсэн уншлагын тоог нэмнэ үү.",
-  "group_accumulator_session_complete": "Хичээл дууслаа!",
-  "group_accumulator_session_recitations": "Та энэ хичээлд {count} удаа уншлаа",
-  "group_accumulator_session_share_message": "Би WeBuddhist дээр {group} бүлгийн \"{accumulation}\" хуримтлалд {count} удаа уншлаа. Та ч бас надтай нэгдээрэй!",
-  "group_accumulator_session_share_message_no_group": "Би WeBuddhist дээр \"{accumulation}\" бүлгийн хуримтлалд {count} удаа уншлаа. Та ч бас надтай нэгдээрэй!",
-  "group_accumulator_session_share_error": "Хичээлийг хуваалцах боломжгүй байна. Дахин оролдоно уу",
+  "group_accumulator_add_offline_chants_message": "Энэ аппаас гадуур хийсэн уншлагынхаа тоог нэмнэ үү.",
+  "group_accumulator_session_complete": "Хуралдаан дууслаа!",
+  "group_accumulator_session_recitations": "Та энэ хуралдаанд {count} уншлага гүйцэтгэлээ",
+  "group_accumulator_session_share_message": "Би WeBuddhist дээр {group} бүлгийн \"{accumulation}\" хуримтлалд {count} уншлага гүйцэтгэлээ. Та ч бас надтай нэгдээрэй!",
+  "group_accumulator_session_share_message_no_group": "Би WeBuddhist дээр \"{accumulation}\" хуримтлалд {count} уншлага гүйцэтгэлээ. Та ч бас надтай нэгдээрэй!",
+  "group_accumulator_session_share_error": "Хуралдааныг хуваалцаж чадсангүй. Дахин оролдоно уу",
   "share_this_quote": "Энэ ишлэлийг хуваалцах",
   "shared_from": "Хуваалцсан:",
   "verse_share_error": "Ишлэлийг хуваалцах боломжгүй. Дахин оролдоно уу",
@@ -904,5 +904,75 @@
   "drag_to_resize": "Хэмжээг өөрчлөхийн тулд чирнэ үү",
   "day_completion_share_message": "Би WeBuddhist дээр өөрийн дадлагын нэг өдрийг дуусгалаа. Надтай нэгдэж, хамтдаа өдөр тутмын дадлагын зуршил бий болгоцгооё.",
   "group_accumulator_share_message": "Би WeBuddhist дээр {group} бүлгийн \"{accumulation}\" хуримтлалд оролцож байна. Та ч бас надтай нэгдээрэй!",
-  "group_accumulator_share_message_no_group": "Би WeBuddhist дээр \"{accumulation}\" бүлгийн хуримтлалд оролцож байна. Та ч бас надтай нэгдээрэй!"
+  "group_accumulator_share_message_no_group": "Би WeBuddhist дээр \"{accumulation}\" бүлгийн хуримтлалд оролцож байна. Та ч бас надтай нэгдээрэй!",
+  "connect_tab_feed": "Мэдээ",
+  "connect_tab_events": "Арга хэмжээ",
+  "connect_tab_posts": "Нийтлэл",
+  "connect_tab_groups": "Groups",
+  "connect_segment_my": "Миний",
+  "connect_segment_discover": "Судлах",
+  "connect_empty_discover_posts": "Судлах нийтлэл алга",
+  "connect_empty_discover_events": "Судлах арга хэмжээ алга",
+  "connect_empty_discover_feed": "Судлах зүйл алга",
+  "connect_empty_discover_groups": "Судлах бүлэг алга",
+  "connect_all_groups": "Бүх бүлэг",
+  "connect_my_empty_feed_title": "Таны бүлгүүд чимээгүй байна",
+  "connect_my_empty_events_title": "Товлосон арга хэмжээ алга",
+  "connect_my_empty_posts_title": "Одоогоор нийтлэл алга",
+  "connect_my_empty_groups_title": "Одоогоор бүлэг алга",
+  "connect_my_empty_feed_subtitle": "Таны нэгдсэн бүлгүүдээс шинэ зүйл алга. Бусад бүлгүүд өнөөдөр нийтэлж байна.",
+  "connect_my_empty_events_subtitle": "Таны аль ч бүлэг арга хэмжээ товлоогүй байна. Бусад бүлгүүдэд бүх нийтэд нээлттэй арга хэмжээ бий.",
+  "connect_my_empty_posts_subtitle": "Таны бүлгүүд юу ч нийтлээгүй байна. Бусад бүлгүүд юу хуваалцаж байгааг үзээрэй.",
+  "connect_my_empty_groups_subtitle": "Та одоогоор ямар ч бүлэгт нэгдээгүй байна. Хамтдаа дадлага хийх нийгэмлэгүүдийг судлаарай.",
+  "connect_my_empty_feed_browse": "Бусад бүлгийн хуваалцсныг үзэх",
+  "connect_my_empty_events_browse": "Нээлттэй арга хэмжээг үзэх",
+  "connect_my_empty_posts_browse": "Бусад нийтлэлийг үзэх",
+  "connect_comment_replying_to": "@{handle}-д хариулж байна",
+  "@connect_comment_replying_to": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_comment_hint": "Та үүнийг юу гэж бодож байна?",
+  "connect_comment_reply_hint": "Хариу бичих...",
+  "connect_comment_reply": "Хариулах",
+  "connect_comment_delete_title": "Сэтгэгдлийг устгах уу?",
+  "connect_comment_delete_message": "Энэ сэтгэгдэл бүрмөсөн устгагдана.",
+  "connect_comment_delete_failed": "Сэтгэгдлийг устгаж чадсангүй",
+  "connect_post_comments_count": "{count, plural, =1 {1 сэтгэгдэл} other {{count} сэтгэгдэл}}",
+  "@connect_post_comments_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect_post_comments_empty": "Одоогоор сэтгэгдэл алга. Яриаг эхлүүлээрэй.",
+  "connect_caption_more": "Илүү",
+  "connect_online": "Онлайн",
+  "connect_open": "Нээх",
+  "connect_event_fallback_title": "Арга хэмжээ",
+  "connect_group_fallback_title": "Бүлэг",
+  "connect_event_attend": "Оролцох",
+  "connect_event_attending": "Оролцож байна",
+  "connect_event_participants_attending": "{count} оролцогч",
+  "@connect_event_participants_attending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timer_notification_in_progress": "Бясалгал үргэлжилж байна",
+  "timer_notification_paused": "Түр зогссон · {time} үлдсэн",
+  "@timer_notification_paused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timer_notification_complete": "Таны хуралдаан дууслаа"
 }
