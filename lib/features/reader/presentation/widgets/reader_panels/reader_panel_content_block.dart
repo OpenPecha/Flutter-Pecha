@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/features/reader/presentation/widgets/reader_panels/reader_panel_constants.dart';
 import 'package:flutter_pecha/features/texts/presentation/segment_html_widget.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -55,17 +56,21 @@ class ReaderPanelContentBlock extends StatelessWidget {
             ? plainText.substring(0, ReaderPanelConstants.previewMaxLength)
             : plainText;
 
-    final bodyStyle = TextStyle(
-      fontFamily: fontFamily,
-      height: lineHeight,
-      fontSize: fontSize,
-      color: theme.colorScheme.onSurface,
+    final bodyStyle = AppFontConfig.applyTibetanMetrics(
+      language,
+      TextStyle(
+        fontFamily: fontFamily,
+        height: lineHeight,
+        fontSize: fontSize,
+        color: theme.colorScheme.onSurface,
+      ),
     );
-    final actionStyle = bodyStyle.copyWith(
+    final actionStyle = bodyStyle?.copyWith(
       color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
       fontWeight: FontWeight.w600,
       fontSize: fontSize * 0.85,
     );
+    final strutStyle = AppFontConfig.tibetanStrutStyle(language, fontSize);
     final htmlWidget = SegmentHtmlWidget(
       htmlContent: content,
       segmentIndex: segmentIndex,
@@ -86,6 +91,7 @@ class ReaderPanelContentBlock extends StatelessWidget {
             ),
           ],
         ),
+        strutStyle: strutStyle,
       );
     } else if (isExpanded && isToggleable) {
       contentWidget = Column(
