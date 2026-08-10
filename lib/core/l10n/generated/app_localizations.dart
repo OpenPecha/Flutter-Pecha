@@ -151,7 +151,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding_find_peace.
   ///
   /// In en, this message translates to:
-  /// **'Get Started'**
+  /// **'Get started'**
   String get onboarding_find_peace;
 
   /// No description provided for @onboarding_continue.
@@ -457,7 +457,7 @@ abstract class AppLocalizations {
   /// No description provided for @mala_rounds_count.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{0 rounds} =1{1 round} other{{count} rounds}}'**
+  /// **'{count, plural,\n=0 {0 rounds}\n=1 {1 round}\nother {{count} rounds}\n}'**
   String mala_rounds_count(int count);
 
   /// No description provided for @mala_counter_semantics.
@@ -973,7 +973,7 @@ abstract class AppLocalizations {
   /// No description provided for @notification_routine_subtitle_disabled.
   ///
   /// In en, this message translates to:
-  /// **'Plan reminders are paused. Tap to resume.'**
+  /// **'Plan reminders are paused. Tap to resume'**
   String get notification_routine_subtitle_disabled;
 
   /// No description provided for @notification_battery_title.
@@ -1009,7 +1009,7 @@ abstract class AppLocalizations {
   /// No description provided for @notification_recitation_subtitle_disabled.
   ///
   /// In en, this message translates to:
-  /// **'Chant reminders are paused. Tap to resume.'**
+  /// **'Chant reminders are paused. Tap to resume'**
   String get notification_recitation_subtitle_disabled;
 
   /// No description provided for @notification_practice_title.
@@ -2569,7 +2569,7 @@ abstract class AppLocalizations {
   /// No description provided for @missedDaysCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{0 missed days} =1{1 missed day} other{{count} missed days}}'**
+  /// **'{count, plural,\n=0 {0 missed days}\n=1 {1 missed day}\nother {{count} missed days}\n}'**
   String missedDaysCount(int count);
 
   /// No description provided for @plan_status_on_track.
@@ -2845,7 +2845,7 @@ abstract class AppLocalizations {
   /// No description provided for @username_available_label.
   ///
   /// In en, this message translates to:
-  /// **'Available: '**
+  /// **'Available:'**
   String get username_available_label;
 
   /// No description provided for @username_check_error.

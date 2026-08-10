@@ -403,7 +403,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get unenroll_confirmation =>
-      'क्या आप वाकई इससे नामांकन रद्द करना चाहते हैं ';
+      'क्या आप वाकई इससे नामांकन रद्द करना चाहते हैं';
 
   @override
   String get unenroll_message =>
@@ -472,15 +472,15 @@ class AppLocalizationsHi extends AppLocalizations {
       'रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
 
   @override
-  String get notification_routine_title => 'योजना रिमाइंडर';
+  String get notification_routine_title => 'रूटीन रिमाइंडर';
 
   @override
   String get notification_routine_subtitle_enabled =>
-      'आपकी योजनाओं के लिए दैनिक रिमाइंडर';
+      'आपके अभ्यास ब्लॉक के लिए दैनिक रिमाइंडर';
 
   @override
   String get notification_routine_subtitle_disabled =>
-      'योजना रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
+      'रूटीन रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
 
   @override
   String get notification_battery_title => 'बैकग्राउंड रिमाइंडर';
@@ -494,15 +494,15 @@ class AppLocalizationsHi extends AppLocalizations {
       'कुछ Android फ़ोन बैटरी बचाने के लिए बैकग्राउंड apps रोक देते हैं, जिससे आपके रिमाइंडर देर से आ सकते हैं या छूट सकते हैं। इन्हें चालू रखने के लिए टैप करें।';
 
   @override
-  String get notification_recitation_title => 'जप रिमाइंडर';
+  String get notification_recitation_title => 'पाठ रिमाइंडर';
 
   @override
   String get notification_recitation_subtitle_enabled =>
-      'आपके जप के लिए दैनिक रिमाइंडर';
+      'आपके पाठ के लिए दैनिक रिमाइंडर';
 
   @override
   String get notification_recitation_subtitle_disabled =>
-      'जप रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
+      'पाठ रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
 
   @override
   String get notification_practice_title => 'माला रिमाइंडर';
@@ -878,7 +878,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get home_no_tags_found => 'कोई टैग नहीं मिला';
 
   @override
-  String get home_celebrated_by => 'इनके द्वारा मनाया जाता है: ';
+  String get home_celebrated_by => 'इनके द्वारा मनाया जाता है:';
 
   @override
   String get reader_settings_tooltip => 'रीडर सेटिंग्स';
@@ -1484,7 +1484,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settings_section_account => 'अकाउंट';
 
   @override
-  String get settings_edit_profile => ' प्रोफ़ाइल एडिट करें';
+  String get settings_edit_profile => 'प्रोफ़ाइल एडिट करें';
 
   @override
   String get settings_theme => 'थीम';
@@ -1496,7 +1496,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settings_feedback_row => 'फ़ीडबैक';
 
   @override
-  String get edit_profile_title => ' प्रोफ़ाइल एडिट करें';
+  String get edit_profile_title => 'प्रोफ़ाइल एडिट करें';
 
   @override
   String get edit_profile_save => 'सेव करें';
@@ -1562,7 +1562,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get username_taken => 'यह नाम पहले से किसी ने ले लिया है';
 
   @override
-  String get username_available_label => 'उपलब्ध: ';
+  String get username_available_label => 'उपलब्ध:';
 
   @override
   String get username_check_error =>

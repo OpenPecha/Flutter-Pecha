@@ -473,15 +473,15 @@ class AppLocalizationsMn extends AppLocalizations {
       'Сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
-  String get notification_routine_title => 'Төлөвлөгөөний сануулга';
+  String get notification_routine_title => 'Дадлагын сануулга';
 
   @override
   String get notification_routine_subtitle_enabled =>
-      'Таны төлөвлөгөөний өдөр тутмын сануулга';
+      'Таны дадлагын цаг хугацааны өдөр тутмын сануулга';
 
   @override
   String get notification_routine_subtitle_disabled =>
-      'Төлөвлөгөөний сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
+      'Дадлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
   String get notification_battery_title => 'Дэвсгэр сануулга';
@@ -495,15 +495,15 @@ class AppLocalizationsMn extends AppLocalizations {
       'Зарим Android утас батерей хэмнэхийн тулд дэвсгэр аппуудыг түр зогсоодог нь таны сануулгыг хойшлуулах буюу алгасах магадлалтай. Үргэлжлүүлэн ажиллуулахын тулд дарна уу.';
 
   @override
-  String get notification_recitation_title => 'Магтаалын сануулга';
+  String get notification_recitation_title => 'Уншлагын сануулга';
 
   @override
   String get notification_recitation_subtitle_enabled =>
-      'Таны магтаалын өдөр тутмын сануулга';
+      'Таны уншлагын өдөр тутмын сануулга';
 
   @override
   String get notification_recitation_subtitle_disabled =>
-      'Магтаалын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
+      'Уншлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
   String get notification_practice_title => 'Эрхийн сануулга';
@@ -879,7 +879,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get home_no_tags_found => 'Шошго олдсонгүй';
 
   @override
-  String get home_celebrated_by => 'Тэмдэглэдэг: ';
+  String get home_celebrated_by => 'Тэмдэглэдэг:';
 
   @override
   String get reader_settings_tooltip => 'Уншигчийн тохиргоо';
@@ -1564,7 +1564,7 @@ class AppLocalizationsMn extends AppLocalizations {
       'Энэ нэрийг хэн нэгэн аль хэдийн ашигласан байна';
 
   @override
-  String get username_available_label => 'Боломжтой: ';
+  String get username_available_label => 'Боломжтой:';
 
   @override
   String get username_check_error =>

@@ -407,7 +407,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get search_for_plans => '搜尋計畫';
 
   @override
-  String get no_plans_found => '找不到相關計畫 ';
+  String get no_plans_found => '找不到相關計畫';
 
   @override
   String get no_days_available => '找不到相關天數';
@@ -455,13 +455,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notification_allow_subtitle_paused => '提醒已暫停。點此恢復。';
 
   @override
-  String get notification_routine_title => '計畫提醒';
+  String get notification_routine_title => '日常提醒';
 
   @override
-  String get notification_routine_subtitle_enabled => '您的修持計畫每日提醒';
+  String get notification_routine_subtitle_enabled => '您的每日修持時段提醒';
 
   @override
-  String get notification_routine_subtitle_disabled => '計畫提醒已暫停。點此恢復。';
+  String get notification_routine_subtitle_disabled => '日常提醒已暫停。點此恢復。';
 
   @override
   String get notification_battery_title => '背景提醒通知';
@@ -1038,7 +1038,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ai_greeting(String name) {
-    return ' $name，您好！';
+    return '$name，您好！';
   }
 
   @override

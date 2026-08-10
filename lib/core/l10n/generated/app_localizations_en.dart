@@ -32,7 +32,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Drop by drop the water pot is filled. Likewise, the wise person, gathering it little by little, fills themselves with good.';
 
   @override
-  String get onboarding_find_peace => 'Get Started';
+  String get onboarding_find_peace => 'Get started';
 
   @override
   String get onboarding_continue => 'Continue';
@@ -477,7 +477,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notification_routine_subtitle_disabled =>
-      'Plan reminders are paused. Tap to resume.';
+      'Plan reminders are paused. Tap to resume';
 
   @override
   String get notification_battery_title => 'Background reminders';
@@ -499,7 +499,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notification_recitation_subtitle_disabled =>
-      'Chant reminders are paused. Tap to resume.';
+      'Chant reminders are paused. Tap to resume';
 
   @override
   String get notification_practice_title => 'Mala reminders';
@@ -1552,7 +1552,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get username_taken => 'Someone already used this name';
 
   @override
-  String get username_available_label => 'Available: ';
+  String get username_available_label => 'Available:';
 
   @override
   String get username_check_error => 'Unable to check username. Try again';

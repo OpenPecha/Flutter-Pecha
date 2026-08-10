@@ -473,15 +473,15 @@ class AppLocalizationsNe extends AppLocalizations {
       'रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
-  String get notification_routine_title => 'योजना रिमाइन्डरहरू';
+  String get notification_routine_title => 'दिनचर्या रिमाइन्डरहरू';
 
   @override
   String get notification_routine_subtitle_enabled =>
-      'तपाईंका योजनाहरूका लागि दैनिक रिमाइन्डरहरू';
+      'तपाईंका अभ्यास ब्लकहरूका लागि दैनिक रिमाइन्डरहरू';
 
   @override
   String get notification_routine_subtitle_disabled =>
-      'योजना रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
+      'दिनचर्या रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
   String get notification_battery_title => 'पृष्ठभूमि रिमाइन्डरहरू';
@@ -495,15 +495,15 @@ class AppLocalizationsNe extends AppLocalizations {
       'केही एन्ड्रोइड फोनहरूले ब्याट्री बचाउन पृष्ठभूमि एपहरू रोक्छन्, जसले तपाईंका रिमाइन्डरहरू ढिलो गराउन वा छुटाउन सक्छ। चालु राख्न ट्याप गर्नुहोस्।';
 
   @override
-  String get notification_recitation_title => 'जप रिमाइन्डर';
+  String get notification_recitation_title => 'पाठ रिमाइन्डर';
 
   @override
   String get notification_recitation_subtitle_enabled =>
-      'तपाईंका जपका लागि दैनिक रिमाइन्डरहरू';
+      'तपाईंका पाठहरूका लागि दैनिक रिमाइन्डरहरू';
 
   @override
   String get notification_recitation_subtitle_disabled =>
-      'जप रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
+      'पाठ रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
   String get notification_practice_title => 'माला रिमाइन्डर';
@@ -885,7 +885,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get home_no_tags_found => 'कुनै ट्याग फेला परेन';
 
   @override
-  String get home_celebrated_by => 'मनाउनेहरू: ';
+  String get home_celebrated_by => 'मनाउनेहरू:';
 
   @override
   String get reader_settings_tooltip => 'रिडर सेटिङ';
@@ -1571,7 +1571,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get username_taken => 'यो नाम कसैले पहिले नै प्रयोग गरिसकेको छ';
 
   @override
-  String get username_available_label => 'उपलब्ध: ';
+  String get username_available_label => 'उपलब्ध:';
 
   @override
   String get username_check_error =>
