@@ -21,6 +21,9 @@ class _DiscoverGroupsScreenState extends ConsumerState<DiscoverGroupsScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(discoverGroupsProvider.notifier).ensureLoaded();
+    });
   }
 
   @override
@@ -106,7 +109,7 @@ class _DiscoverGroupsScreenState extends ConsumerState<DiscoverGroupsScreen> {
           );
         }
 
-        return DiscoverGroupCard(group: groups[index]);
+        return DiscoverGroupCard(group: groups[index], showJoinButton: true);
       },
     );
   }

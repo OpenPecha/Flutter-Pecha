@@ -134,7 +134,10 @@ class GroupEventModel {
     this.groupRecitationCollectionId,
   });
 
-  factory GroupEventModel.fromJson(Map<String, dynamic> json) {
+  factory GroupEventModel.fromJson(
+    Map<String, dynamic> json, {
+    String? language,
+  }) {
     final imageJson = json['image'] as Map<String, dynamic>?;
 
     return GroupEventModel(
@@ -144,7 +147,7 @@ class GroupEventModel {
       endDate: _parseDate(json['end_date']),
       isOneDay: json['is_one_day'] as bool? ?? false,
       featured: json['featured'] as bool? ?? false,
-      metadata: _parseMetadata(json['metadata']),
+      metadata: _parseMetadata(json['metadata'], language: language),
       image: imageJson != null ? ResponsiveImage.fromJson(imageJson) : null,
       participantCount: (json['participant_count'] as num?)?.toInt() ?? 0,
       isJoined: json['is_joined'] as bool? ?? false,
@@ -194,12 +197,24 @@ class GroupEventModel {
     return null;
   }
 
-  static GroupEventMetadataModel? _parseMetadata(Object? value) {
+  static GroupEventMetadataModel? _parseMetadata(
+    Object? value, {
+    String? language,
+  }) {
     if (value is Map<String, dynamic>) {
       return GroupEventMetadataModel.fromJson(value);
     }
     if (value is List<dynamic>) {
-      final metadataJson = value.whereType<Map<String, dynamic>>().firstOrNull;
+      final items = value.whereType<Map<String, dynamic>>().toList();
+      if (language != null && language.isNotEmpty) {
+        final match = items
+            .where((item) => item['language'] == language)
+            .firstOrNull;
+        if (match != null) {
+          return GroupEventMetadataModel.fromJson(match);
+        }
+      }
+      final metadataJson = items.firstOrNull;
       if (metadataJson != null) {
         return GroupEventMetadataModel.fromJson(metadataJson);
       }
@@ -221,12 +236,15 @@ class GroupEventsPageModel {
     this.limit = 20,
   });
 
-  factory GroupEventsPageModel.fromJson(Map<String, dynamic> json) {
+  factory GroupEventsPageModel.fromJson(
+    Map<String, dynamic> json, {
+    String? language,
+  }) {
     return GroupEventsPageModel(
       events:
           (json['events'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
-              .map(GroupEventModel.fromJson)
+              .map((item) => GroupEventModel.fromJson(item, language: language))
               .toList() ??
           const [],
       total: (json['total'] as num?)?.toInt() ?? 0,

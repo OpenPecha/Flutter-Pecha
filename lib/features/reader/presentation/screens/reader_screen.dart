@@ -93,6 +93,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
   bool _hasSeededInitialChantCount = false;
   bool _chantSessionFinished = false;
 
+  /// Absolute count already synced before this reader visit; UI shows the delta.
+  int _chantSessionBaseline = 0;
+
   NavigationContext? get _chantContext {
     final ctx = widget.navigationContext;
     if (ctx == null || !ctx.isGroupAccumulatorChant) return null;
@@ -144,6 +147,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
         groupAccumulatorId: sessionCount,
       });
       if (!mounted) return;
+      _chantSessionBaseline = countsNotifier.countFor(groupAccumulatorId);
       _seedInitialChantCountIfNeeded();
     });
   }
@@ -154,14 +158,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
 
     final ctx = _chantContext;
     if (ctx == null) return;
-
-    final presetId = ctx.presetAccumulatorId!;
-    final groupAccumulatorId = ctx.groupAccumulatorId!;
-    final countsNotifier = ref.read(
-      groupAccumulationCountsProvider(presetId).notifier,
-    );
-    final current = countsNotifier.countFor(groupAccumulatorId);
-    if (current > 0) return;
 
     _incrementGroupChantCount();
   }
@@ -234,11 +230,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     final groupAccumulatorId = ctx.groupAccumulatorId!;
     final notifier =
         ref.read(groupAccumulationCountsProvider(presetId).notifier);
-    if (counts != null) {
-      return counts[groupAccumulatorId] ??
-          notifier.countFor(groupAccumulatorId);
-    }
-    return notifier.countFor(groupAccumulatorId);
+    final absolute =
+        counts != null
+            ? counts[groupAccumulatorId] ??
+                notifier.countFor(groupAccumulatorId)
+            : notifier.countFor(groupAccumulatorId);
+    return (absolute - _chantSessionBaseline).clamp(0, absolute);
   }
 
   /// Create the audio controller when the reader was opened from a plan and the

@@ -113,6 +113,36 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
   }
 
   @override
+  Future<Either<Failure, GroupEventsPage>> getConnectEvents({
+    required bool includeUnfollowed,
+    required String language,
+    int skip = 0,
+    int limit = 20,
+  }) async {
+    try {
+      final model = await remote.fetchConnectEvents(
+        includeUnfollowed: includeUnfollowed,
+        language: language,
+        skip: skip,
+        limit: limit,
+      );
+      return Right(model.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load events: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, GroupEventsPage>> getGroupEvents(
     String groupId,
   ) async {
