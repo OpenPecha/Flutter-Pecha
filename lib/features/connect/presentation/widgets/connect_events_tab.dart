@@ -79,6 +79,7 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
+          hasLoaded: myState.hasLoaded,
           scrollController: scrollController,
           onRetry: () => ref.read(myConnectEventsProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
@@ -100,6 +101,7 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
+          hasLoaded: discoverState.hasLoaded,
           scrollController: scrollController,
           onRetry:
               () => ref.read(discoverConnectEventsProvider.notifier).retry(),

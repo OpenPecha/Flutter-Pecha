@@ -81,6 +81,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
+          hasLoaded: myState.hasLoaded,
           scrollController: scrollController,
           onRetry: () => ref.read(myConnectFeedProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
@@ -103,6 +104,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
+          hasLoaded: discoverState.hasLoaded,
           scrollController: scrollController,
           onRetry: () => ref.read(discoverConnectFeedProvider.notifier).retry(),
           emptyDiscoverMessage: context.l10n.connect_empty_discover_feed,
