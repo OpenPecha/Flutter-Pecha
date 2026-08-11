@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/constants/app_config.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/my_groups_screen.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:go_router/go_router.dart';
+
+bool _containsTibetan(String value) {
+  return RegExp(r'[\u0F00-\u0FFF]').hasMatch(value);
+}
 
 class MyGroupsSection extends StatelessWidget {
   const MyGroupsSection({super.key, required this.groups, required this.total});
@@ -88,11 +95,23 @@ class _MyGroupTile extends StatelessWidget {
   final GroupProfile group;
   final bool isDark;
 
+  static const double _titleFontSize = 12;
+
   @override
   Widget build(BuildContext context) {
     final tileColor = isDark ? AppColors.surfaceDark : AppColors.surfaceWhite;
     final subtitleColor =
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final hasTibetanTitle = _containsTibetan(group.title);
+    final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      fontSize: _titleFontSize,
+      color: subtitleColor,
+      fontWeight: FontWeight.w500,
+      height:
+          hasTibetanTitle ? AppFontConfig.tibetanCompactLineHeight : null,
+      leadingDistribution:
+          hasTibetanTitle ? AppFontConfig.tibetanLeadingDistribution : null,
+    );
 
     return SizedBox(
       width: 80,
@@ -116,11 +135,21 @@ class _MyGroupTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 12,
-                color: subtitleColor,
-                fontWeight: FontWeight.w500,
-              ),
+              style:
+                  hasTibetanTitle
+                      ? getContentTextStyle(
+                        AppConfig.tibetanLanguageCode,
+                        titleStyle,
+                      )
+                      : titleStyle,
+              strutStyle:
+                  hasTibetanTitle
+                      ? AppFontConfig.tibetanStrutStyle(
+                        AppConfig.tibetanLanguageCode,
+                        _titleFontSize,
+                        compact: true,
+                      )
+                      : null,
             ),
           ],
         ),

@@ -119,10 +119,7 @@ class _ConnectPostDetailScreenState
 
     final success = await ref
         .read(connectPostCommentsProvider(widget.postId).notifier)
-        .submitComment(
-          text: text,
-          parentCommentId: _replyTarget?.id,
-        );
+        .submitComment(text: text, parentCommentId: _replyTarget?.id);
 
     if (!mounted || !success) return;
 
@@ -168,9 +165,9 @@ class _ConnectPostDetailScreenState
 
     if (!result.isSuccess) {
       setState(() => _likeState.revert(wasLiked));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.errorMessage!)));
       return;
     }
 
@@ -205,7 +202,9 @@ class _ConnectPostDetailScreenState
     final isDark = theme.brightness == Brightness.dark;
     final commentsState = ref.watch(connectPostCommentsProvider(widget.postId));
     final isSubmittingComment = ref.watch(
-      connectPostCommentsProvider(widget.postId).select((state) => state.isSubmitting),
+      connectPostCommentsProvider(
+        widget.postId,
+      ).select((state) => state.isSubmitting),
     );
     final commentCount =
         commentsState.total > 0 ? commentsState.total : _post.commentCount;
@@ -404,17 +403,13 @@ class _ConnectPostDetailScreenState
                 onTap: () => _commentFocusNode.requestFocus(),
               ),
               const Spacer(),
-              _PostActionButton(
-                icon: AppAssets.readerShare,
-                onTap: _sharePost,
-              ),
+              _PostActionButton(icon: AppAssets.readerShare, onTap: _sharePost),
             ],
           ),
         ],
       ),
     );
   }
-
 }
 
 class _PostAuthorRow extends StatelessWidget {
@@ -430,7 +425,8 @@ class _PostAuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+    final displayName =
+        name.trim().isNotEmpty ? name.trim() : context.l10n.author;
 
     return Row(
       children: [

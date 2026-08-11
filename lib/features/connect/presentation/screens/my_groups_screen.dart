@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/constants/app_config.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+bool _containsTibetan(String value) {
+  return RegExp(r'[\u0F00-\u0FFF]').hasMatch(value);
+}
 
 class MyGroupsScreen extends ConsumerWidget {
   const MyGroupsScreen({super.key});
@@ -65,6 +72,9 @@ class _MyGroupListTile extends StatelessWidget {
   final GroupProfile group;
   final bool isDark;
 
+  static const double _titleFontSize = 15;
+  static const double _subtitleFontSize = 13;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -72,6 +82,35 @@ class _MyGroupListTile extends StatelessWidget {
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.cardBackgroundLight;
+    final subtitleText = _subtitle(context);
+    final hasTibetanTitle = _containsTibetan(group.title);
+    final hasTibetanSubtitle =
+        context.isTibetanLocale || _containsTibetan(subtitleText);
+    final hasTibetanText = hasTibetanTitle || hasTibetanSubtitle;
+    final titleStyle =
+        hasTibetanTitle
+            ? getContentTextStyle(
+              AppConfig.tibetanLanguageCode,
+              theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: _titleFontSize,
+                height: AppFontConfig.tibetanContentLineHeight,
+                leadingDistribution: AppFontConfig.tibetanLeadingDistribution,
+              ),
+            )
+            : theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: _titleFontSize,
+              height: 1.3,
+            );
+    final subtitleFontSize = hasTibetanSubtitle ? 14.0 : _subtitleFontSize;
+    final subtitleStyle = theme.textTheme.bodySmall?.copyWith(
+      color: subtitleColor,
+      fontSize: subtitleFontSize,
+      height: hasTibetanSubtitle ? AppFontConfig.tibetanUiLineHeight : null,
+      leadingDistribution:
+          hasTibetanSubtitle ? AppFontConfig.tibetanLeadingDistribution : null,
+    );
 
     return Material(
       color: Colors.transparent,
@@ -79,12 +118,13 @@ class _MyGroupListTile extends StatelessWidget {
         onTap: () => context.push('/home/group/${group.id}'),
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(hasTibetanText ? 14 : 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: cardColor,
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -114,26 +154,34 @@ class _MyGroupListTile extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       group.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        height: 1.3,
-                      ),
+                      style: titleStyle,
+                      strutStyle:
+                          hasTibetanTitle
+                              ? AppFontConfig.tibetanStrutStyle(
+                                AppConfig.tibetanLanguageCode,
+                                _titleFontSize,
+                              )
+                              : null,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: hasTibetanText ? 6 : 4),
                     Text(
-                      _subtitle(context),
+                      subtitleText,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: subtitleColor,
-                        fontSize: 13,
-                      ),
+                      style: subtitleStyle,
+                      strutStyle:
+                          hasTibetanSubtitle
+                              ? AppFontConfig.tibetanStrutStyle(
+                                AppConfig.tibetanLanguageCode,
+                                subtitleFontSize,
+                              )
+                              : null,
                     ),
                   ],
                 ),

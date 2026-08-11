@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/constants/app_config.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/my_groups_screen.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+bool _containsTibetan(String value) {
+  return RegExp(r'[\u0F00-\u0FFF]').hasMatch(value);
+}
 
 /// Horizontal row of followed groups shown above the Connect main tabs.
 class FollowedGroupsRow extends StatelessWidget {
@@ -20,6 +27,7 @@ class FollowedGroupsRow extends StatelessWidget {
   final bool isLoading;
 
   static const double _avatarSize = 56;
+  static const double _titleFontSize = 11;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +42,7 @@ class FollowedGroupsRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
-      height: 96,
+      height: 100,
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
         scrollDirection: Axis.horizontal,
@@ -61,6 +69,16 @@ class _FollowedGroupTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final subtitleColor =
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final hasTibetanTitle = _containsTibetan(group.title);
+    final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      fontSize: FollowedGroupsRow._titleFontSize,
+      color: subtitleColor,
+      fontWeight: FontWeight.w500,
+      height:
+          hasTibetanTitle ? AppFontConfig.tibetanCompactLineHeight : null,
+      leadingDistribution:
+          hasTibetanTitle ? AppFontConfig.tibetanLeadingDistribution : null,
+    );
 
     return SizedBox(
       width: 64,
@@ -76,12 +94,21 @@ class _FollowedGroupTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 11,
-                height: 1.2,
-                color: subtitleColor,
-                fontWeight: FontWeight.w500,
-              ),
+              style:
+                  hasTibetanTitle
+                      ? getContentTextStyle(
+                        AppConfig.tibetanLanguageCode,
+                        titleStyle,
+                      )
+                      : titleStyle,
+              strutStyle:
+                  hasTibetanTitle
+                      ? AppFontConfig.tibetanStrutStyle(
+                        AppConfig.tibetanLanguageCode,
+                        FollowedGroupsRow._titleFontSize,
+                        compact: true,
+                      )
+                      : null,
             ),
           ],
         ),
@@ -102,6 +129,18 @@ class _AllGroupsTile extends StatelessWidget {
     final backgroundColor =
         isDark ? AppColors.surfaceDark : AppColors.surfaceWhite;
     final borderColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
+    final label = context.l10n.search_all;
+    final hasTibetanLabel =
+        context.isTibetanLocale || _containsTibetan(label);
+    final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      fontSize: FollowedGroupsRow._titleFontSize,
+      color: subtitleColor,
+      fontWeight: FontWeight.w500,
+      height:
+          hasTibetanLabel ? AppFontConfig.tibetanCompactLineHeight : null,
+      leadingDistribution:
+          hasTibetanLabel ? AppFontConfig.tibetanLeadingDistribution : null,
+    );
 
     return SizedBox(
       width: 64,
@@ -130,16 +169,25 @@ class _AllGroupsTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              context.l10n.search_all,
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 11,
-                height: 1.2,
-                color: subtitleColor,
-                fontWeight: FontWeight.w500,
-              ),
+              style:
+                  hasTibetanLabel
+                      ? getContentTextStyle(
+                        AppConfig.tibetanLanguageCode,
+                        titleStyle,
+                      )
+                      : titleStyle,
+              strutStyle:
+                  hasTibetanLabel
+                      ? AppFontConfig.tibetanStrutStyle(
+                        AppConfig.tibetanLanguageCode,
+                        FollowedGroupsRow._titleFontSize,
+                        compact: true,
+                      )
+                      : null,
             ),
           ],
         ),
@@ -194,7 +242,7 @@ class _FollowedGroupsRowSkeleton extends StatelessWidget {
     return Skeletonizer(
       enabled: true,
       child: SizedBox(
-        height: 96,
+        height: 100,
         child: ListView.separated(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
           scrollDirection: Axis.horizontal,
