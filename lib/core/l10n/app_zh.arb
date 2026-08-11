@@ -72,7 +72,7 @@
   "mala_reset_count_confirm": "目前的計數將歸零，但您的累積仍會保留在終身總數中。",
   "mala_reset_confirm": "重設",
   "mala_action_coming_soon": "即將推出",
-  "mala_rounds_count": "{count, plural, =0{0 遍} =1{1 遍} other{{count} 遍}}",
+  "mala_rounds_count": "{count, plural,\n=0 {0 遍}\n=1 {1 遍}\nother {{count} 遍}\n}",
   "@mala_rounds_count": {
     "placeholders": {
       "count": {
@@ -174,7 +174,7 @@
   "practice_plan": "建立每日修持。探索適合您的內容",
   "search_plans": "搜尋計畫...",
   "search_for_plans": "搜尋計畫",
-  "no_plans_found": "找不到相關計畫 ",
+  "no_plans_found": "找不到相關計畫",
   "no_days_available": "找不到相關天數",
   "recitations_title": "唱頌",
   "recitations_my_recitations": "我的清單",
@@ -190,9 +190,9 @@
   "notification_allow_subtitle_enabled": "此應用程式已啟用通知",
   "notification_allow_subtitle_disabled": "需要權限。請點此前往「設定」授權。",
   "notification_allow_subtitle_paused": "提醒已暫停。點此恢復。",
-  "notification_routine_title": "計畫提醒",
-  "notification_routine_subtitle_enabled": "您的修持計畫每日提醒",
-  "notification_routine_subtitle_disabled": "計畫提醒已暫停。點此恢復。",
+  "notification_routine_title": "日常提醒",
+  "notification_routine_subtitle_enabled": "您的每日修持時段提醒",
+  "notification_routine_subtitle_disabled": "日常提醒已暫停。點此恢復。",
   "notification_battery_title": "背景提醒通知",
   "notification_battery_subtitle_enabled": "即使應用程式已關閉，您的提醒通知仍會準時發送。",
   "notification_battery_subtitle_disabled": "部分 Android 手機會暫停背景應用程式以節省電池使用量，這可能導致提醒通知延遲或遺漏。點此確保應用程式持續運行。",
@@ -388,7 +388,7 @@
   "ai_delete_warning": "此操作執行後將無法復原",
   "ai_confirm": "確認",
   "ai_delete": "刪除",
-  "ai_greeting": " {name}，您好！",
+  "ai_greeting": "{name}，您好！",
   "ai_text_not_found": "搜尋不到該文本",
   "ai_text_not_found_message": "搜尋不到標題為《{title}》的文本。\n\n請嘗試其他名稱或換一種方式搜尋。",
   "ai_sources": "來源",
@@ -534,7 +534,7 @@
       }
     }
   },
-  "missedDaysCount": "{count, plural, =0{未錯過天數} =1{錯過1天} other{錯過{count}天}}",
+  "missedDaysCount": "{count, plural,\n=0 {未錯過天數}\n=1 {錯過1天}\nother {錯過{count}天}\n}",
   "@missedDaysCount": {
     "placeholders": {
       "count": {
@@ -694,7 +694,6 @@
   "moon_phase_waning_gibbous": "亏凸月",
   "moon_phase_last_quarter": "下弦月",
   "moon_phase_waning_crescent": "残月",
-
   "join": "加入",
   "joined": "已加入",
   "group_member": "位成員",
@@ -726,7 +725,7 @@
   "group_followers": "位追蹤者",
   "group_links_title": "連結",
   "group_about_description": "簡介",
-  "group_about_empty": "暫無相關資訊",
+  "group_about_empty": "尚無可用資訊",
   "group_and_more_links": "及另外 {count} 個連結",
   "group_practice_with_us": "與我們一起修行",
   "series_practicing_with_group": "與 {groupName} 一起修行",
@@ -738,19 +737,18 @@
   "group_accumulator_recited": "已誦讀",
   "group_accumulator_total": "總數",
   "group_accumulator_contributions_empty": "加入此累積以追蹤您的貢獻。",
-  "group_accumulator_leaderboard_empty": "尚無誦讀記錄。",
+  "group_accumulator_leaderboard_empty": "尚無誦念紀錄。",
   "group_accumulator_recite_now": "立即誦念",
-  "group_accumulator_chant_again": "再誦一次",
-  "group_accumulator_finish_session": "結束課誦",
-  "group_accumulator_offline_recitation": "離線誦念",
-  "group_accumulator_add_offline_chants_title": "新增離線誦念：",
-  "group_accumulator_add_offline_chants_message": "新增您在此應用程式外完成的誦念次數。",
+  "group_accumulator_chant_again": "再次誦念",
+  "group_accumulator_finish_session": "結束此次課誦",
+  "group_accumulator_offline_recitation": "線下誦念",
+  "group_accumulator_add_offline_chants_title": "新增線下誦念：",
+  "group_accumulator_add_offline_chants_message": "新增你在此應用程式之外完成的誦念次數。",
   "group_accumulator_session_complete": "課誦完成！",
-  "group_accumulator_session_recitations": "您在本課誦中完成了 {count} 次誦讀",
-  "group_accumulator_session_share_message": "我在 WeBuddhist 上完成了 {group} 的累积活动「{accumulation}」中的 {count} 次誦讀，快来加入我吧！",
-  "group_accumulator_session_share_message_no_group": "我在 WeBuddhist 上完成了累积活动「{accumulation}」中的 {count} 次誦讀，快来加入我吧！",
+  "group_accumulator_session_recitations": "你在這次課誦中完成了 {count} 遍",
+  "group_accumulator_session_share_message": "我在 WeBuddhist 上 {group} 的累積活動「{accumulation}」中完成了 {count} 遍誦念，快來加入我吧！",
+  "group_accumulator_session_share_message_no_group": "我在 WeBuddhist 上的累積活動「{accumulation}」中完成了 {count} 遍誦念，快來加入我吧！",
   "group_accumulator_session_share_error": "無法分享課誦，請重試",
-
   "share_this_quote": "分享这句话",
   "shared_from": "分享自",
   "verse_share_error": "无法分享引文，请重试",
@@ -781,7 +779,6 @@
   "weekday_friday": "週五",
   "weekday_saturday": "週六",
   "weekday_sunday": "週日",
-
   "reader_search_failed": "搜尋失敗。\n請重試",
   "reader_swipe_up_for_more": "向上滑動查看更多",
   "reader_videos": "影片",
@@ -840,6 +837,76 @@
   "loading_more_pages": "正在載入更多……（{count} 頁）",
   "drag_to_resize": "拖動以調整大小",
   "day_completion_share_message": "我刚在 WeBuddhist 上完成了一天的修行练习。加入我，一起培养每日修行的好习惯。",
-  "group_accumulator_share_message": "我正在 WeBuddhist 上参加 {group} 的累积活动「{accumulation}」，快来加入我吧！",
-  "group_accumulator_share_message_no_group": "我正在 WeBuddhist 上参加累积活动「{accumulation}」，快来加入我吧！"
+  "group_accumulator_share_message": "我正在 WeBuddhist 上參加 {group} 的累積活動「{accumulation}」，快來加入我吧！",
+  "group_accumulator_share_message_no_group": "我正在 WeBuddhist 上參加累積活動「{accumulation}」，快來加入我吧！",
+  "connect_tab_feed": "動態",
+  "connect_tab_events": "活動",
+  "connect_tab_posts": "貼文",
+  "connect_tab_groups": "Groups",
+  "connect_segment_my": "我的",
+  "connect_segment_discover": "探索",
+  "connect_empty_discover_posts": "沒有可探索的貼文",
+  "connect_empty_discover_events": "沒有可探索的活動",
+  "connect_empty_discover_feed": "沒有可探索的內容",
+  "connect_empty_discover_groups": "沒有可探索的社群",
+  "connect_all_groups": "所有社群",
+  "connect_my_empty_feed_title": "你的社群最近很安靜",
+  "connect_my_empty_events_title": "沒有即將舉行的活動",
+  "connect_my_empty_posts_title": "尚無貼文",
+  "connect_my_empty_groups_title": "尚未加入社群",
+  "connect_my_empty_feed_subtitle": "你加入的社群沒有新動態。其他社群今天有發文。",
+  "connect_my_empty_events_subtitle": "你的社群都沒有安排活動。其他社群有開放給所有人的活動。",
+  "connect_my_empty_posts_subtitle": "你的社群還沒有發文。看看其他社群在分享什麼。",
+  "connect_my_empty_groups_subtitle": "你還沒有加入任何社群。探索可以一起修持的社群。",
+  "connect_my_empty_feed_browse": "看看其他社群分享什麼",
+  "connect_my_empty_events_browse": "瀏覽開放活動",
+  "connect_my_empty_posts_browse": "瀏覽其他貼文",
+  "connect_comment_replying_to": "回覆 @{handle}",
+  "@connect_comment_replying_to": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_comment_hint": "你對這則有什麼想法？",
+  "connect_comment_reply_hint": "撰寫回覆…",
+  "connect_comment_reply": "回覆",
+  "connect_comment_delete_title": "刪除留言？",
+  "connect_comment_delete_message": "這則留言將被永久刪除。",
+  "connect_comment_delete_failed": "刪除留言失敗",
+  "connect_post_comments_count": "{count, plural, other {{count} 則留言}}",
+  "@connect_post_comments_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect_post_comments_empty": "還沒有留言。開始討論吧。",
+  "connect_caption_more": "更多",
+  "connect_online": "線上",
+  "connect_open": "開啟",
+  "connect_event_fallback_title": "活動",
+  "connect_group_fallback_title": "社群",
+  "connect_event_attend": "參加",
+  "connect_event_attending": "已參加",
+  "connect_event_participants_attending": "{count} 人參加",
+  "@connect_event_participants_attending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timer_notification_in_progress": "禪修進行中",
+  "timer_notification_paused": "已暫停 · 剩餘 {time}",
+  "@timer_notification_paused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timer_notification_complete": "你的課程已完成"
 }

@@ -403,7 +403,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get unenroll_confirmation =>
-      'क्या आप वाकई इससे नामांकन रद्द करना चाहते हैं ';
+      'क्या आप वाकई इससे नामांकन रद्द करना चाहते हैं';
 
   @override
   String get unenroll_message =>
@@ -472,15 +472,15 @@ class AppLocalizationsHi extends AppLocalizations {
       'रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
 
   @override
-  String get notification_routine_title => 'योजना रिमाइंडर';
+  String get notification_routine_title => 'रूटीन रिमाइंडर';
 
   @override
   String get notification_routine_subtitle_enabled =>
-      'आपकी योजनाओं के लिए दैनिक रिमाइंडर';
+      'आपके अभ्यास ब्लॉक के लिए दैनिक रिमाइंडर';
 
   @override
   String get notification_routine_subtitle_disabled =>
-      'योजना रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
+      'रूटीन रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
 
   @override
   String get notification_battery_title => 'बैकग्राउंड रिमाइंडर';
@@ -494,15 +494,15 @@ class AppLocalizationsHi extends AppLocalizations {
       'कुछ Android फ़ोन बैटरी बचाने के लिए बैकग्राउंड apps रोक देते हैं, जिससे आपके रिमाइंडर देर से आ सकते हैं या छूट सकते हैं। इन्हें चालू रखने के लिए टैप करें।';
 
   @override
-  String get notification_recitation_title => 'जप रिमाइंडर';
+  String get notification_recitation_title => 'पाठ रिमाइंडर';
 
   @override
   String get notification_recitation_subtitle_enabled =>
-      'आपके जप के लिए दैनिक रिमाइंडर';
+      'आपके पाठ के लिए दैनिक रिमाइंडर';
 
   @override
   String get notification_recitation_subtitle_disabled =>
-      'जप रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
+      'पाठ रिमाइंडर रुके हुए हैं। फिर से शुरू करने के लिए टैप करें।';
 
   @override
   String get notification_practice_title => 'माला रिमाइंडर';
@@ -705,138 +705,139 @@ class AppLocalizationsHi extends AppLocalizations {
       'बधाई हो, आप हमारे सभी समूहों में शामिल हो चुके हैं! जल्द फिर देखें। नए समूह जल्द आ रहे हैं';
 
   @override
-  String get connect_tab_feed => 'Feed';
+  String get connect_tab_feed => 'फ़ीड';
 
   @override
-  String get connect_tab_events => 'Events';
+  String get connect_tab_events => 'कार्यक्रम';
 
   @override
-  String get connect_tab_posts => 'Posts';
+  String get connect_tab_posts => 'पोस्ट';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => 'मेरा';
 
   @override
-  String get connect_segment_discover => 'Discover';
+  String get connect_segment_discover => 'खोजें';
 
   @override
-  String get connect_empty_discover_posts => 'No posts to discover';
+  String get connect_empty_discover_posts => 'खोजने के लिए कोई पोस्ट नहीं';
 
   @override
-  String get connect_empty_discover_events => 'No events to discover';
+  String get connect_empty_discover_events => 'खोजने के लिए कोई कार्यक्रम नहीं';
 
   @override
-  String get connect_empty_discover_feed => 'Nothing to discover';
+  String get connect_empty_discover_feed => 'खोजने के लिए कुछ नहीं';
 
   @override
-  String get connect_empty_discover_groups => 'No groups to discover';
+  String get connect_empty_discover_groups => 'खोजने के लिए कोई समूह नहीं';
 
   @override
-  String get connect_all_groups => 'All groups';
+  String get connect_all_groups => 'सभी समूह';
 
   @override
-  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+  String get connect_my_empty_feed_title => 'आपके समूह शांत रहे हैं';
 
   @override
-  String get connect_my_empty_events_title => 'No upcoming events';
+  String get connect_my_empty_events_title => 'कोई आगामी कार्यक्रम नहीं';
 
   @override
-  String get connect_my_empty_posts_title => 'No posts yet';
+  String get connect_my_empty_posts_title => 'अभी कोई पोस्ट नहीं';
 
   @override
-  String get connect_my_empty_groups_title => 'No groups yet';
+  String get connect_my_empty_groups_title => 'अभी कोई समूह नहीं';
 
   @override
   String get connect_my_empty_feed_subtitle =>
-      'Nothing new from the groups you have joined. Other groups are posting today.';
+      'आपके शामिल समूहों से कुछ नया नहीं है। अन्य समूह आज पोस्ट कर रहे हैं।';
 
   @override
   String get connect_my_empty_events_subtitle =>
-      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+      'आपके किसी भी समूह ने कुछ निर्धारित नहीं किया है। अन्य समूहों में सभी के लिए खुले कार्यक्रम हैं।';
 
   @override
   String get connect_my_empty_posts_subtitle =>
-      'Your groups have not posted anything. See what other groups are sharing.';
+      'आपके समूहों ने कुछ भी पोस्ट नहीं किया है। देखें अन्य समूह क्या साझा कर रहे हैं।';
 
   @override
   String get connect_my_empty_groups_subtitle =>
-      'You have not joined any groups yet. Discover communities to practice with.';
+      'आपने अभी तक कोई समूह नहीं जोड़ा है। साथ अभ्यास करने के लिए समुदाय खोजें।';
 
   @override
-  String get connect_my_empty_feed_browse => 'See what other groups share';
+  String get connect_my_empty_feed_browse =>
+      'देखें अन्य समूह क्या साझा कर रहे हैं';
 
   @override
-  String get connect_my_empty_events_browse => 'Browse open events';
+  String get connect_my_empty_events_browse => 'खुले कार्यक्रम देखें';
 
   @override
-  String get connect_my_empty_posts_browse => 'Browse other posts';
+  String get connect_my_empty_posts_browse => 'अन्य पोस्ट देखें';
 
   @override
   String connect_comment_replying_to(String handle) {
-    return 'Replying to @$handle';
+    return '@$handle को उत्तर दे रहे हैं';
   }
 
   @override
-  String get connect_comment_hint => 'What do you think of this?';
+  String get connect_comment_hint => 'आप इस बारे में क्या सोचते हैं?';
 
   @override
-  String get connect_comment_reply_hint => 'Write a reply...';
+  String get connect_comment_reply_hint => 'उत्तर लिखें...';
 
   @override
-  String get connect_comment_reply => 'Reply';
+  String get connect_comment_reply => 'उत्तर दें';
 
   @override
-  String get connect_comment_delete_title => 'Delete comment?';
+  String get connect_comment_delete_title => 'टिप्पणी हटाएँ?';
 
   @override
   String get connect_comment_delete_message =>
-      'This comment will be permanently removed.';
+      'यह टिप्पणी स्थायी रूप से हटा दी जाएगी।';
 
   @override
-  String get connect_comment_delete_failed => 'Failed to delete comment';
+  String get connect_comment_delete_failed => 'टिप्पणी हटाने में विफल';
 
   @override
   String connect_post_comments_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count comments',
-      one: '1 comment',
+      other: '$count टिप्पणियाँ',
+      one: '1 टिप्पणी',
     );
     return '$_temp0';
   }
 
   @override
   String get connect_post_comments_empty =>
-      'No comments yet. Start the conversation.';
+      'अभी कोई टिप्पणी नहीं। बातचीत शुरू करें।';
 
   @override
-  String get connect_caption_more => 'more';
+  String get connect_caption_more => 'और';
 
   @override
-  String get connect_online => 'Online';
+  String get connect_online => 'ऑनलाइन';
 
   @override
-  String get connect_open => 'Open';
+  String get connect_open => 'खोलें';
 
   @override
-  String get connect_event_fallback_title => 'Event';
+  String get connect_event_fallback_title => 'कार्यक्रम';
 
   @override
-  String get connect_group_fallback_title => 'Group';
+  String get connect_group_fallback_title => 'समूह';
 
   @override
-  String get connect_event_attend => 'Attend';
+  String get connect_event_attend => 'शामिल हों';
 
   @override
-  String get connect_event_attending => 'Attending';
+  String get connect_event_attending => 'शामिल हैं';
 
   @override
   String connect_event_participants_attending(int count) {
-    return '$count attending';
+    return '$count शामिल';
   }
 
   @override
@@ -878,7 +879,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get home_no_tags_found => 'कोई टैग नहीं मिला';
 
   @override
-  String get home_celebrated_by => 'इनके द्वारा मनाया जाता है: ';
+  String get home_celebrated_by => 'इनके द्वारा मनाया जाता है:';
 
   @override
   String get reader_settings_tooltip => 'रीडर सेटिंग्स';
@@ -1484,7 +1485,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settings_section_account => 'अकाउंट';
 
   @override
-  String get settings_edit_profile => ' प्रोफ़ाइल एडिट करें';
+  String get settings_edit_profile => 'प्रोफ़ाइल एडिट करें';
 
   @override
   String get settings_theme => 'थीम';
@@ -1496,7 +1497,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settings_feedback_row => 'फ़ीडबैक';
 
   @override
-  String get edit_profile_title => ' प्रोफ़ाइल एडिट करें';
+  String get edit_profile_title => 'प्रोफ़ाइल एडिट करें';
 
   @override
   String get edit_profile_save => 'सेव करें';
@@ -1562,7 +1563,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get username_taken => 'यह नाम पहले से किसी ने ले लिया है';
 
   @override
-  String get username_available_label => 'उपलब्ध: ';
+  String get username_available_label => 'उपलब्ध:';
 
   @override
   String get username_check_error =>
@@ -1819,7 +1820,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_about_description => 'विवरण';
 
   @override
-  String get group_about_empty => 'अभी कोई जानकारी उपलब्ध नहीं है';
+  String get group_about_empty => 'अभी कोई जानकारी उपलब्ध नहीं';
 
   @override
   String group_and_more_links(int count) {
@@ -1870,7 +1871,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'अपने योगदान को ट्रैक करने के लिए इस संचय में शामिल हों।';
 
   @override
-  String get group_accumulator_leaderboard_empty => 'अभी तक कोई जाप नहीं।';
+  String get group_accumulator_leaderboard_empty => 'अभी कोई जाप नहीं।';
 
   @override
   String get group_accumulator_recite_now => 'अभी जाप करें';
@@ -1919,7 +1920,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_accumulator_session_share_error =>
-      'सत्र साझा नहीं हो सका। कृपया पुनः प्रयास करें';
+      'सत्र साझा नहीं कर सके। कृपया पुनः प्रयास करें';
 
   @override
   String get share_this_quote => 'यह उद्धरण शेयर करें';
@@ -2152,15 +2153,15 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get timer_notification_in_progress => 'Meditation in progress';
+  String get timer_notification_in_progress => 'ध्यान जारी है';
 
   @override
   String timer_notification_paused(String time) {
-    return 'Paused · $time left';
+    return 'रुका हुआ · $time शेष';
   }
 
   @override
-  String get timer_notification_complete => 'Your session is complete';
+  String get timer_notification_complete => 'आपका सत्र पूरा हुआ';
 
   @override
   String get ai_use_search_instead => 'इसके बजाय खोज का उपयोग करें';

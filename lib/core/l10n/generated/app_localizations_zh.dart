@@ -407,7 +407,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get search_for_plans => '搜尋計畫';
 
   @override
-  String get no_plans_found => '找不到相關計畫 ';
+  String get no_plans_found => '找不到相關計畫';
 
   @override
   String get no_days_available => '找不到相關天數';
@@ -455,13 +455,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notification_allow_subtitle_paused => '提醒已暫停。點此恢復。';
 
   @override
-  String get notification_routine_title => '計畫提醒';
+  String get notification_routine_title => '日常提醒';
 
   @override
-  String get notification_routine_subtitle_enabled => '您的修持計畫每日提醒';
+  String get notification_routine_subtitle_enabled => '您的每日修持時段提醒';
 
   @override
-  String get notification_routine_subtitle_disabled => '計畫提醒已暫停。點此恢復。';
+  String get notification_routine_subtitle_disabled => '日常提醒已暫停。點此恢復。';
 
   @override
   String get notification_battery_title => '背景提醒通知';
@@ -664,138 +664,131 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_groups_empty_subtitle => '恭喜，你已加入我們所有的社群！請稍後再來，更多社群即將推出';
 
   @override
-  String get connect_tab_feed => 'Feed';
+  String get connect_tab_feed => '動態';
 
   @override
-  String get connect_tab_events => 'Events';
+  String get connect_tab_events => '活動';
 
   @override
-  String get connect_tab_posts => 'Posts';
+  String get connect_tab_posts => '貼文';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => '我的';
 
   @override
-  String get connect_segment_discover => 'Discover';
+  String get connect_segment_discover => '探索';
 
   @override
-  String get connect_empty_discover_posts => 'No posts to discover';
+  String get connect_empty_discover_posts => '沒有可探索的貼文';
 
   @override
-  String get connect_empty_discover_events => 'No events to discover';
+  String get connect_empty_discover_events => '沒有可探索的活動';
 
   @override
-  String get connect_empty_discover_feed => 'Nothing to discover';
+  String get connect_empty_discover_feed => '沒有可探索的內容';
 
   @override
-  String get connect_empty_discover_groups => 'No groups to discover';
+  String get connect_empty_discover_groups => '沒有可探索的社群';
 
   @override
-  String get connect_all_groups => 'All groups';
+  String get connect_all_groups => '所有社群';
 
   @override
-  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+  String get connect_my_empty_feed_title => '你的社群最近很安靜';
 
   @override
-  String get connect_my_empty_events_title => 'No upcoming events';
+  String get connect_my_empty_events_title => '沒有即將舉行的活動';
 
   @override
-  String get connect_my_empty_posts_title => 'No posts yet';
+  String get connect_my_empty_posts_title => '尚無貼文';
 
   @override
-  String get connect_my_empty_groups_title => 'No groups yet';
+  String get connect_my_empty_groups_title => '尚未加入社群';
 
   @override
-  String get connect_my_empty_feed_subtitle =>
-      'Nothing new from the groups you have joined. Other groups are posting today.';
+  String get connect_my_empty_feed_subtitle => '你加入的社群沒有新動態。其他社群今天有發文。';
 
   @override
-  String get connect_my_empty_events_subtitle =>
-      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+  String get connect_my_empty_events_subtitle => '你的社群都沒有安排活動。其他社群有開放給所有人的活動。';
 
   @override
-  String get connect_my_empty_posts_subtitle =>
-      'Your groups have not posted anything. See what other groups are sharing.';
+  String get connect_my_empty_posts_subtitle => '你的社群還沒有發文。看看其他社群在分享什麼。';
 
   @override
-  String get connect_my_empty_groups_subtitle =>
-      'You have not joined any groups yet. Discover communities to practice with.';
+  String get connect_my_empty_groups_subtitle => '你還沒有加入任何社群。探索可以一起修持的社群。';
 
   @override
-  String get connect_my_empty_feed_browse => 'See what other groups share';
+  String get connect_my_empty_feed_browse => '看看其他社群分享什麼';
 
   @override
-  String get connect_my_empty_events_browse => 'Browse open events';
+  String get connect_my_empty_events_browse => '瀏覽開放活動';
 
   @override
-  String get connect_my_empty_posts_browse => 'Browse other posts';
+  String get connect_my_empty_posts_browse => '瀏覽其他貼文';
 
   @override
   String connect_comment_replying_to(String handle) {
-    return 'Replying to @$handle';
+    return '回覆 @$handle';
   }
 
   @override
-  String get connect_comment_hint => 'What do you think of this?';
+  String get connect_comment_hint => '你對這則有什麼想法？';
 
   @override
-  String get connect_comment_reply_hint => 'Write a reply...';
+  String get connect_comment_reply_hint => '撰寫回覆…';
 
   @override
-  String get connect_comment_reply => 'Reply';
+  String get connect_comment_reply => '回覆';
 
   @override
-  String get connect_comment_delete_title => 'Delete comment?';
+  String get connect_comment_delete_title => '刪除留言？';
 
   @override
-  String get connect_comment_delete_message =>
-      'This comment will be permanently removed.';
+  String get connect_comment_delete_message => '這則留言將被永久刪除。';
 
   @override
-  String get connect_comment_delete_failed => 'Failed to delete comment';
+  String get connect_comment_delete_failed => '刪除留言失敗';
 
   @override
   String connect_post_comments_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count comments',
-      one: '1 comment',
+      other: '$count 則留言',
     );
     return '$_temp0';
   }
 
   @override
-  String get connect_post_comments_empty =>
-      'No comments yet. Start the conversation.';
+  String get connect_post_comments_empty => '還沒有留言。開始討論吧。';
 
   @override
-  String get connect_caption_more => 'more';
+  String get connect_caption_more => '更多';
 
   @override
-  String get connect_online => 'Online';
+  String get connect_online => '線上';
 
   @override
-  String get connect_open => 'Open';
+  String get connect_open => '開啟';
 
   @override
-  String get connect_event_fallback_title => 'Event';
+  String get connect_event_fallback_title => '活動';
 
   @override
-  String get connect_group_fallback_title => 'Group';
+  String get connect_group_fallback_title => '社群';
 
   @override
-  String get connect_event_attend => 'Attend';
+  String get connect_event_attend => '參加';
 
   @override
-  String get connect_event_attending => 'Attending';
+  String get connect_event_attending => '已參加';
 
   @override
   String connect_event_participants_attending(int count) {
-    return '$count attending';
+    return '$count 人參加';
   }
 
   @override
@@ -1038,7 +1031,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ai_greeting(String name) {
-    return ' $name，您好！';
+    return '$name，您好！';
   }
 
   @override
@@ -1726,7 +1719,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_about_description => '簡介';
 
   @override
-  String get group_about_empty => '暫無相關資訊';
+  String get group_about_empty => '尚無可用資訊';
 
   @override
   String group_and_more_links(int count) {
@@ -1775,33 +1768,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_accumulator_contributions_empty => '加入此累積以追蹤您的貢獻。';
 
   @override
-  String get group_accumulator_leaderboard_empty => '尚無誦讀記錄。';
+  String get group_accumulator_leaderboard_empty => '尚無誦念紀錄。';
 
   @override
   String get group_accumulator_recite_now => '立即誦念';
 
   @override
-  String get group_accumulator_chant_again => '再誦一次';
+  String get group_accumulator_chant_again => '再次誦念';
 
   @override
-  String get group_accumulator_finish_session => '結束課誦';
+  String get group_accumulator_finish_session => '結束此次課誦';
 
   @override
-  String get group_accumulator_offline_recitation => '離線誦念';
+  String get group_accumulator_offline_recitation => '線下誦念';
 
   @override
-  String get group_accumulator_add_offline_chants_title => '新增離線誦念：';
+  String get group_accumulator_add_offline_chants_title => '新增線下誦念：';
 
   @override
   String get group_accumulator_add_offline_chants_message =>
-      '新增您在此應用程式外完成的誦念次數。';
+      '新增你在此應用程式之外完成的誦念次數。';
 
   @override
   String get group_accumulator_session_complete => '課誦完成！';
 
   @override
   String group_accumulator_session_recitations(int count) {
-    return '您在本課誦中完成了 $count 次誦讀';
+    return '你在這次課誦中完成了 $count 遍';
   }
 
   @override
@@ -1810,7 +1803,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String accumulation,
     String group,
   ) {
-    return '我在 WeBuddhist 上完成了 $group 的累积活动「$accumulation」中的 $count 次誦讀，快来加入我吧！';
+    return '我在 WeBuddhist 上 $group 的累積活動「$accumulation」中完成了 $count 遍誦念，快來加入我吧！';
   }
 
   @override
@@ -1818,7 +1811,7 @@ class AppLocalizationsZh extends AppLocalizations {
     int count,
     String accumulation,
   ) {
-    return '我在 WeBuddhist 上完成了累积活动「$accumulation」中的 $count 次誦讀，快来加入我吧！';
+    return '我在 WeBuddhist 上的累積活動「$accumulation」中完成了 $count 遍誦念，快來加入我吧！';
   }
 
   @override
@@ -2034,15 +2027,15 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get timer_notification_in_progress => 'Meditation in progress';
+  String get timer_notification_in_progress => '禪修進行中';
 
   @override
   String timer_notification_paused(String time) {
-    return 'Paused · $time left';
+    return '已暫停 · 剩餘 $time';
   }
 
   @override
-  String get timer_notification_complete => 'Your session is complete';
+  String get timer_notification_complete => '你的課程已完成';
 
   @override
   String get ai_use_search_instead => '改用搜尋';
@@ -2107,11 +2100,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String group_accumulator_share_message(String accumulation, String group) {
-    return '我正在 WeBuddhist 上参加 $group 的累积活动「$accumulation」，快来加入我吧！';
+    return '我正在 WeBuddhist 上參加 $group 的累積活動「$accumulation」，快來加入我吧！';
   }
 
   @override
   String group_accumulator_share_message_no_group(String accumulation) {
-    return '我正在 WeBuddhist 上参加累积活动「$accumulation」，快来加入我吧！';
+    return '我正在 WeBuddhist 上參加累積活動「$accumulation」，快來加入我吧！';
   }
 }

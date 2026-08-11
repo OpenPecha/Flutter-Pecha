@@ -205,6 +205,24 @@ Translations are fetched on app start and on language change. An edit in
 Tolgee reaches users on their next app launch; there is no live push. A cold
 start with no network shows the bundled ARB text.
 
+### ARB sync (manual and CI)
+
+Bundled ARB files stay the offline fallback; the Tolgee CDN is the OTA
+override. Sync uses a **second** key that must never live in `.env.*`:
+
+| Key | Where | Role |
+| --- | --- | --- |
+| `TOLGEE_API_KEY` | `.env.*` (ships in app) | Read-only runtime OTA |
+| `TOLGEE_SYNC_API_KEY` | shell env or GitHub Actions secret only | Local / CI ARB ↔ Tolgee sync (write) |
+
+You can sync manually with `dart run tool/tolgee_sync.dart ...`, or let the
+**Tolgee Sync** workflow do it on a schedule / via **Run workflow**. Keep both.
+CI opens a reviewable PR — it does not merge to `develop` by itself.
+
+Full command order, write-key creation (Tolgee → Project API Keys → + API Key),
+rotate-after-exposure guidance, and CI auto-update risks are in
+[Tolgee integration and sync](docs/tolgee.md).
+
 ## ⚙️ Project Structure
 
 This project follows **Clean Architecture** principles with clear separation of concerns across three main layers.
