@@ -1,3 +1,4 @@
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/onboarding/data/datasource/onboarding_remote_datasource.dart';
 import 'package:flutter_pecha/features/onboarding/data/models/tradition_models.dart';
@@ -17,12 +18,27 @@ class UserTraditionsNotifier extends AutoDisposeAsyncNotifier<List<UserTradition
   @override
   Future<List<UserTradition>> build() async {
     _remoteDatasource = ref.watch(onboardingRemoteDatasourceProvider);
-    return _remoteDatasource.fetchUserTraditions();
+    final language = ref.watch(
+      localeProvider.select((locale) => locale.languageCode),
+    );
+    _logger.info('Fetching user traditions with language: $language');
+    try {
+      return await _remoteDatasource.fetchUserTraditions(language: language);
+    } catch (e, stackTrace) {
+      _logger.error('Failed to fetch user traditions', e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_remoteDatasource.fetchUserTraditions);
+    final language = ref.read(localeProvider).languageCode;
+    state = await AsyncValue.guard(
+      () => _remoteDatasource.fetchUserTraditions(language: language),
+    );
+    if (state.hasError) {
+      _logger.error('Failed to refresh user traditions', state.error, state.stackTrace);
+    }
   }
 
   Future<bool> removeTradition(String userTraditionId) async {
@@ -79,7 +95,18 @@ class UserTraditionsNotifier extends AutoDisposeAsyncNotifier<List<UserTradition
       }
     }
 
-    state = await AsyncValue.guard(_remoteDatasource.fetchUserTraditions);
+    final language = ref.read(localeProvider).languageCode;
+    state = await AsyncValue.guard(
+      () => _remoteDatasource.fetchUserTraditions(language: language),
+    );
+
+    if (state.hasError) {
+      _logger.error(
+        'Failed to fetch traditions after sync',
+        state.error,
+        state.stackTrace,
+      );
+    }
 
     if (failedCodes.isNotEmpty) {
       _logger.error(

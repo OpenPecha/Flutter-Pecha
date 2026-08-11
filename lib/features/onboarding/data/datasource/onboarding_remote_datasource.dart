@@ -122,8 +122,13 @@ class OnboardingRemoteDatasource {
   /// Fetch the user's selected traditions.
   ///
   /// Endpoint: GET /users/me/traditions
-  Future<List<UserTradition>> fetchUserTraditions() async {
-    final response = await _dio.get('/users/me/traditions');
+  Future<List<UserTradition>> fetchUserTraditions({
+    required String language,
+  }) async {
+    final response = await _dio.get(
+      '/users/me/traditions',
+      queryParameters: {'language': language},
+    );
 
     final data = response.data;
     if (data is! Map<String, dynamic>) {
