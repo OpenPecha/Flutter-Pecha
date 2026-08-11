@@ -28,12 +28,22 @@ class AuthState {
   /// home; [AuthNotifier] retries the fetch in the background.
   final bool? hasCompletedOnboarding;
 
+  /// null  = not yet known (offline, fetch failed, or retry pending).
+  /// true  = first/last name are present (see [User.hasCompleteName]).
+  /// false = profile is missing a name — e.g. a brand-new phone/OTP signup —
+  ///         and the route guard should route to the complete-profile screen.
+  ///
+  /// Same fetched-once-at-login, fail-open-on-unknown pattern as
+  /// [hasCompletedOnboarding].
+  final bool? hasCompleteProfile;
+
   const AuthState({
     required this.isLoggedIn,
     this.isGuest = false,
     this.isLoading = false,
     this.errorMessage,
     this.hasCompletedOnboarding,
+    this.hasCompleteProfile,
   });
 
   AuthState copyWith({
@@ -44,6 +54,7 @@ class AuthState {
     // Use _kSentinel as default so passing null explicitly resets the field to
     // null rather than being treated as "no change".
     Object? hasCompletedOnboarding = _kSentinel,
+    Object? hasCompleteProfile = _kSentinel,
   }) => AuthState(
     isLoggedIn: isLoggedIn ?? this.isLoggedIn,
     isLoading: isLoading ?? this.isLoading,
@@ -52,6 +63,9 @@ class AuthState {
     hasCompletedOnboarding: identical(hasCompletedOnboarding, _kSentinel)
         ? this.hasCompletedOnboarding
         : hasCompletedOnboarding as bool?,
+    hasCompleteProfile: identical(hasCompleteProfile, _kSentinel)
+        ? this.hasCompleteProfile
+        : hasCompleteProfile as bool?,
   );
 
   AuthState clearError() => copyWith(errorMessage: '');
