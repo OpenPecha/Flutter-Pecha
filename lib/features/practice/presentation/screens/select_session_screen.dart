@@ -79,7 +79,10 @@ class _SelectSessionScreenState extends ConsumerState<SelectSessionScreen>
   void _onChantsScroll() {
     if (_chantsScrollController.position.pixels >=
         _chantsScrollController.position.maxScrollExtent - 200) {
-      ref.read(practiceRecitationsPaginatedProvider.notifier).loadMore();
+      final languageCode = ref.read(contentLanguageProvider);
+      ref
+          .read(practiceRecitationsPaginatedProvider(languageCode).notifier)
+          .loadMore();
     }
   }
 
@@ -380,10 +383,14 @@ class _ChantsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recitationsState = ref.watch(practiceRecitationsPaginatedProvider);
+    final languageCode = ref.watch(contentLanguageProvider);
+    final recitationsState = ref.watch(
+      practiceRecitationsPaginatedProvider(languageCode),
+    );
 
-    Future<void> onRefresh() =>
-        ref.read(practiceRecitationsPaginatedProvider.notifier).refresh();
+    Future<void> onRefresh() => ref
+        .read(practiceRecitationsPaginatedProvider(languageCode).notifier)
+        .refresh();
 
     if (recitationsState.isLoading && recitationsState.recitations.isEmpty) {
       return const RecitationListSkeleton(
