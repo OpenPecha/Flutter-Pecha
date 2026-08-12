@@ -44,6 +44,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
     final event = widget.event;
     final isAttending = _attendingOverride ?? event.isJoined;
+    final isPast = isGroupEventPast(event);
     final participantCount = _participantCount(event, isAttending);
     final title =
         event.title.trim().isNotEmpty
@@ -126,16 +127,18 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
                           groupNames: widget.groupNames,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => _toggleAttendance(event, isAttending),
-                        behavior: HitTestBehavior.opaque,
-                        child: _AttendButton(
-                          isAttending: isAttending,
-                          isSubmitting: _isSubmitting,
-                          isDark: isDark,
+                      if (!isPast) ...[
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => _toggleAttendance(event, isAttending),
+                          behavior: HitTestBehavior.opaque,
+                          child: _AttendButton(
+                            isAttending: isAttending,
+                            isSubmitting: _isSubmitting,
+                            isDark: isDark,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ],
@@ -201,7 +204,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
   }
 
   Future<void> _toggleAttendance(GroupEvent event, bool isAttending) async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || isGroupEventPast(event)) return;
 
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
