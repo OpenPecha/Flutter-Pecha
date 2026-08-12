@@ -20,6 +20,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/screens/group_
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_events_tab.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_members_tab.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
@@ -29,6 +30,7 @@ import 'package:flutter_pecha/features/plans/data/utils/plan_date_format.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GroupProfileBody extends ConsumerStatefulWidget {
   final GroupProfile profile;
@@ -499,9 +501,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
               isDark,
               lineHeight,
             ),
-          ] else if (orderedLinks.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _buildLinksEntryRow(profile, orderedLinks, isDark, lineHeight),
           ] else if (profile.subTitle != null &&
               profile.subTitle!.trim().isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -513,6 +512,10 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                 height: lineHeight,
               ),
             ),
+          ],
+          if (orderedLinks.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildLinksEntryRow(profile, orderedLinks, isDark, lineHeight),
           ],
         ],
       ),
@@ -571,20 +574,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           recognizer: _moreRecognizer,
         );
 
-        // Description fits within the collapsed height, but if there are
-        // links to show, keep a "more" affordance so users can still reach
-        // the About screen where those links live.
         if (!textPainter.didExceedMaxLines) {
-          if (orderedLinks.isEmpty) {
-            return Text.rich(textSpan);
-          }
-          return Text.rich(
-            TextSpan(
-              text: description,
-              style: style,
-              children: [const TextSpan(text: '  '), moreTapSpan],
-            ),
-          );
+          return Text.rich(textSpan);
         }
 
         final moreSpan = TextSpan(
@@ -651,12 +642,11 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder:
-                (_) => GroupAboutScreen(title: profile.title, links: links),
-          ),
-        );
+        if (moreCount > 0) {
+          GroupProfileLinksDrawer.show(context, links);
+        } else {
+          _launchUrl(primaryLink.url);
+        }
       },
       behavior: HitTestBehavior.opaque,
       child: Row(
@@ -1224,6 +1214,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
   }
 }
 
