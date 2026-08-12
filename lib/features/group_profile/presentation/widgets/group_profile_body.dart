@@ -117,7 +117,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ? _visibleTabs[previous.index]
             : null;
     var initialIndex = selectedTab == null ? -1 : tabs.indexOf(selectedTab);
-    if (initialIndex < 0) initialIndex = tabs.indexOf(_GroupProfileTab.practices);
+    if (initialIndex < 0)
+      initialIndex = tabs.indexOf(_GroupProfileTab.practices);
     if (initialIndex < 0) initialIndex = 0;
 
     final controller = TabController(
@@ -163,30 +164,30 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
     if (_practicesScrollController.position.pixels >=
         _practicesScrollController.position.maxScrollExtent - 200) {
-      ref
-          .read(groupPracticesProvider(widget.profile.id).notifier)
-          .loadMore();
+      ref.read(groupPracticesProvider(widget.profile.id).notifier).loadMore();
     }
   }
 
   void _syncPracticeEnrollmentFromList(List<GroupPractice> practices) {
-    final accumulators = practices
-        .where((practice) => practice.type == GroupPracticeType.accumulator)
-        .map((practice) => practice.accumulator)
-        .whereType<GroupAccumulator>()
-        .toList();
+    final accumulators =
+        practices
+            .where((practice) => practice.type == GroupPracticeType.accumulator)
+            .map((practice) => practice.accumulator)
+            .whereType<GroupAccumulator>()
+            .toList();
     ref
         .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
         .syncFromApi(accumulators);
 
-    final apiEnrolledIds = practices
-        .where(
-          (practice) =>
-              practice.series != null &&
-              practice.series!.isGroupEnrolled == true,
-        )
-        .map((practice) => practice.series!.id)
-        .toSet();
+    final apiEnrolledIds =
+        practices
+            .where(
+              (practice) =>
+                  practice.series != null &&
+                  practice.series!.isGroupEnrolled == true,
+            )
+            .map((practice) => practice.series!.id)
+            .toSet();
     final apiNotEnrolledIds = practices
         .where(
           (practice) =>
@@ -292,7 +293,9 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     // Keep the events tab when loading failed so its retry action stays
     // reachable.
     final hasEvents = eventsAsync.maybeWhen(
-      data: (either) => either.fold((_) => true, (page) => page.events.isNotEmpty),
+      data:
+          (either) =>
+              either.fold((_) => true, (page) => page.events.isNotEmpty),
       error: (_, _) => true,
       orElse: () => false,
     );
@@ -359,7 +362,11 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     double? lineHeight,
   ) {
     return switch (tab) {
-      _GroupProfileTab.posts => _buildEmptyTab('No posts yet', isDark, lineHeight),
+      _GroupProfileTab.posts => _buildEmptyTab(
+        'No posts yet',
+        isDark,
+        lineHeight,
+      ),
       _GroupProfileTab.events => GroupProfileEventsTab(
         groupId: profile.id,
         isDark: isDark,
@@ -743,7 +750,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
 
     final itemCount =
-        practicesState.practices.length + (practicesState.isLoadingMore ? 1 : 0);
+        practicesState.practices.length +
+        (practicesState.isLoadingMore ? 1 : 0);
 
     return ListView.builder(
       controller: _practicesScrollController,
@@ -764,12 +772,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
           child: switch (practice.type) {
             GroupPracticeType.series when practice.series != null =>
-              _buildSeriesCard(
-                profile,
-                practice.series!,
-                isDark,
-                lineHeight,
-              ),
+              _buildSeriesCard(profile, practice.series!, isDark, lineHeight),
             GroupPracticeType.accumulator when practice.accumulator != null =>
               _buildAccumulatorCard(
                 profile,
@@ -778,11 +781,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                 lineHeight,
               ),
             GroupPracticeType.collection when practice.collection != null =>
-              _buildCollectionCard(
-                practice.collection!,
-                isDark,
-                lineHeight,
-              ),
+              _buildCollectionCard(practice.collection!, isDark, lineHeight),
             _ => const SizedBox.shrink(),
           },
         );

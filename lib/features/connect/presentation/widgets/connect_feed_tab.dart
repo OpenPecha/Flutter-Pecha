@@ -4,7 +4,7 @@ import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
@@ -66,7 +66,10 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     final discoverState = ref.watch(discoverConnectFeedProvider);
     final groupLocations = _groupLocations(context);
 
-    return ConnectMyDiscoverTab(
+    return ConnectMyDiscoverTabGate(
+      myHasLoaded: myState.hasLoaded,
+      myIsEmpty: myState.items.isEmpty,
+      myHasError: myState.error != null,
       onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectFeedProvider.notifier).refresh(),
       onDiscoverRefresh:

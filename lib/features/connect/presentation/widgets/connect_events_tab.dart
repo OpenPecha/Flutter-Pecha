@@ -3,7 +3,7 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -64,7 +64,10 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     final discoverState = ref.watch(discoverConnectEventsProvider);
     final groupLocations = _groupLocations(context);
 
-    return ConnectMyDiscoverTab(
+    return ConnectMyDiscoverTabGate(
+      myHasLoaded: myState.hasLoaded,
+      myIsEmpty: myState.events.isEmpty,
+      myHasError: myState.error != null,
       onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
       onDiscoverRefresh:
