@@ -137,6 +137,46 @@ void main() {
     notifier.dispose();
   });
 
+  test('late seed detail after reset does not resurrect cleared count', () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
+    );
+    final gate = Completer<Either<Failure, MalaCount>>();
+    when(getDetail(any)).thenAnswer((_) => gate.future);
+    when(
+      sync.resetAccumulator(
+        any,
+        deleteAccumulator: anyNamed('deleteAccumulator'),
+      ),
+    ).thenAnswer((_) async {
+      await local.clearSession(userId, 'chenrezig');
+    });
+
+    final notifier = buildNotifier(
+      seedNetworkTimeout: const Duration(milliseconds: 40),
+    );
+    await Future.delayed(Duration.zero);
+    await Future.delayed(const Duration(milliseconds: 60));
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88);
+
+    final ok = await notifier.resetCount();
+    expect(ok, isTrue);
+    expect(notifier.state.total, 0);
+    expect(local.read(userId, 'chenrezig').accumulatorId, isNull);
+
+    // Pre-reset GET finally returns — must not overwrite the cleared session.
+    gate.complete(const Right(MalaCount(accumulatorId: 'acc-1', total: 88)));
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.total, 0);
+    expect(local.read(userId, 'chenrezig').total, 0);
+    expect(local.read(userId, 'chenrezig').accumulatorId, isNull);
+    notifier.dispose();
+  });
+
   test('seed falls back to local total when detail API fails', () async {
     await local.write(
       userId,

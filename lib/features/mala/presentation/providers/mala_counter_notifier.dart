@@ -125,6 +125,10 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
   /// can persist taps without re-resolving.
   String? _userId;
 
+  /// Bumped when a new seed starts or a reset succeeds so in-flight late detail
+  /// applies from a timed-out seed cannot resurrect a cleared session.
+  int _detailApplyGeneration = 0;
+
   String get _presetId => _mantra.presetId;
 
   /// Lifetime total for [GroupAccumulationsSheet]: API `total_counted` baseline
@@ -166,6 +170,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
       return;
     }
     _userId = userId;
+    final applyGeneration = ++_detailApplyGeneration;
 
     final localState = _local.read(userId, _presetId);
     final fallbackImageUrl = localState.beadImageUrl ?? _mantra.beadImageUrl;
@@ -209,6 +214,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
             userId: userId,
             result: lateResult,
             fallbackImageUrl: fallbackImageUrl,
+            applyGeneration: applyGeneration,
           );
           if (lateUrl != null) {
             unawaited(
@@ -229,6 +235,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
         userId: userId,
         result: raced,
         fallbackImageUrl: fallbackImageUrl,
+        applyGeneration: applyGeneration,
       );
     }
 
@@ -246,12 +253,16 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
 
   /// Applies a detail API result. Never sets [MalaCounterState.isSeeding] true.
   ///
-  /// Returns the detail bead image URL when present (for artwork refresh).
+  /// Returns the detail bead image URL when present (for artwork refresh), or
+  /// null when [applyGeneration] is stale (e.g. after reset) or on failure.
   String? _applyDetailResult({
     required String userId,
     required Either<Failure, MalaCount> result,
     required String? fallbackImageUrl,
+    required int applyGeneration,
   }) {
+    if (applyGeneration != _detailApplyGeneration) return null;
+
     String? detailBeadImageUrl;
     result.fold(
       (failure) {
@@ -468,6 +479,9 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
         deleteAccumulator: _deleteUserAccumulator,
       );
       if (!mounted) return false;
+      // Invalidate any in-flight late seed apply from a timed-out GET that still
+      // carries the pre-reset accumulator (would resurrect the old total).
+      _detailApplyGeneration++;
       final localState = _local.read(userId, _presetId);
       state = state.copyWith(
         total: 0,
