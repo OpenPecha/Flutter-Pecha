@@ -38,6 +38,9 @@ String _stableCacheKey(String url) => stableNetworkImageCacheKey(url);
     case BoxFit.cover:
       return autoWidth >= autoHeight ? (autoWidth, null) : (null, autoHeight);
     case BoxFit.contain:
+      // For contain, constrain by the larger dimension to prevent stretching
+      // while maintaining aspect ratio during decode
+      return autoWidth >= autoHeight ? (autoWidth, null) : (null, autoHeight);
     case BoxFit.fill:
     case BoxFit.none:
     case BoxFit.scaleDown:
