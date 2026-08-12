@@ -286,14 +286,16 @@ class _GroupNameText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Text(
       name,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: AppColors.primaryDark,
+        color: isDark ? AppColors.textPrimaryDark : AppColors.primaryDark,
       ),
     );
   }
