@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/analytics/analytics_providers.dart';
 import 'package:flutter_pecha/core/core.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/accumulator_group.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mala_accumulation_selection.dart';
@@ -333,7 +334,15 @@ class _CounterBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final roundsLabel = l10n.mala_rounds_count(rounds);
+    final useTibetan = context.isTibetanLocale;
+    final beadLabel =
+        useTibetan
+            ? '${toTibetanDigits(beadInRound)}/${toTibetanDigits(beadsPerRound)}'
+            : '$beadInRound/$beadsPerRound';
+    final roundsLabel =
+        useTibetan
+            ? toTibetanDigits(l10n.mala_rounds_count(rounds))
+            : l10n.mala_rounds_count(rounds);
     final color = theme.colorScheme.onSurface.withValues(
       alpha: dimmed ? 0.35 : 1.0,
     );
@@ -348,7 +357,7 @@ class _CounterBlock extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '$beadInRound/$beadsPerRound',
+            beadLabel,
             style: theme.textTheme.displaySmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: color,
