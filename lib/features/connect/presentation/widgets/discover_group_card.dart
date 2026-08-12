@@ -21,13 +21,11 @@ class DiscoverGroupCard extends ConsumerWidget {
     super.key,
     required this.group,
     this.showJoinButton = false,
-    this.showOpenButton = false,
     this.subtitleOverride,
   });
 
   final GroupProfile group;
   final bool showJoinButton;
-  final bool showOpenButton;
   final String? subtitleOverride;
 
   static const double _titleFontSize = 15;
@@ -79,8 +77,7 @@ class DiscoverGroupCard extends ConsumerWidget {
       leadingDistribution:
           hasTibetanSubtitle ? AppFontConfig.tibetanLeadingDistribution : null,
     );
-    final subtitleFontSize =
-        hasTibetanSubtitle ? 14.0 : _subtitleFontSize;
+    final subtitleFontSize = hasTibetanSubtitle ? 14.0 : _subtitleFontSize;
 
     return Material(
       color: Colors.transparent,
@@ -149,11 +146,7 @@ class DiscoverGroupCard extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               if (showJoinButton)
-                _JoinButton(group: group, isDark: isDark, followKey: followKey)
-              else if (showOpenButton)
-                _OpenButton(isDark: isDark)
-              else
-                Icon(AppAssets.caretRight, size: 16, color: subtitleColor),
+                _JoinButton(group: group, isDark: isDark, followKey: followKey),
             ],
           ),
         ),
@@ -237,35 +230,6 @@ class _GroupAvatar extends StatelessWidget {
                     color: isDark ? AppColors.grey500 : AppColors.grey600,
                   ),
                 ),
-      ),
-    );
-  }
-}
-
-class _OpenButton extends StatelessWidget {
-  const _OpenButton({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
-
-    return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        context.l10n.connect_open,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
       ),
     );
   }

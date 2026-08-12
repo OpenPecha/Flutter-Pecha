@@ -79,7 +79,6 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab>
           itemBuilder:
               (context, index) => DiscoverGroupCard(
                 group: widget.myGroups[index],
-                showOpenButton: true,
               ),
         );
       },
