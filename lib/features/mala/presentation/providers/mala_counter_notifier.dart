@@ -5,14 +5,17 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/analytics/analytics_events.dart';
 import 'package:flutter_pecha/core/analytics/analytics_service.dart';
+import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/core/utils/network_image_utils.dart';
 import 'package:flutter_pecha/features/mala/data/datasources/mala_local_datasource.dart';
+import 'package:flutter_pecha/features/mala/domain/entities/mala_count.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
 import 'package:flutter_pecha/features/mala/domain/usecases/mala_usecases.dart';
 import 'package:flutter_pecha/features/mala/presentation/providers/mala_sync_manager.dart';
 import 'package:flutter_pecha/features/mala/presentation/services/mala_sound_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 
 class MalaCounterState {
   const MalaCounterState({
@@ -37,7 +40,7 @@ class MalaCounterState {
   final String? beadImageUrl;
   final Uint8List? beadImageBytes;
 
-  /// True until local + network seed attempt finishes.
+  /// True until seed settles (detail API, failure, or seed network timeout).
   final bool isSeeding;
 
   /// User id could not be resolved; counting cannot be persisted safely.
@@ -87,6 +90,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
     required Future<String?> Function() currentUserId,
     AnalyticsService? analytics,
     MalaSoundPlayer? sound,
+    Duration? seedNetworkTimeout,
   }) : _mantra = mantra,
        _local = local,
        _getAccumulatorDetail = getAccumulatorDetail,
@@ -96,9 +100,13 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
        _currentUserId = currentUserId,
        _analytics = analytics,
        _sound = sound,
+       _seedNetworkTimeout =
+           seedNetworkTimeout ?? _defaultSeedNetworkTimeout,
        super(MalaCounterState(beadsPerRound: mantra.beadsPerRound)) {
     seed();
   }
+
+  static const _defaultSeedNetworkTimeout = Duration(seconds: 3);
 
   final Mantra _mantra;
   final MalaLocalDataSource _local;
@@ -109,6 +117,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
   final Future<String?> Function() _currentUserId;
   final AnalyticsService? _analytics;
   final MalaSoundPlayer? _sound;
+  final Duration _seedNetworkTimeout;
 
   final _logger = AppLogger('MalaCounterNotifier');
 
@@ -141,7 +150,11 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
 
   static Future<List<int>> _emptyImageDownload(String _) async => const [];
 
-  /// Seed from local Hive, then reconcile with the detail API before undimming.
+  /// Seed from local Hive, then briefly wait on the detail API before undimming.
+  ///
+  /// Races the network call against [_seedNetworkTimeout] so offline/slow
+  /// connections fall back to local counting quickly. A late detail response
+  /// still reconciles in the background without re-blocking taps.
   Future<void> seed() async {
     state = state.copyWith(isSeeding: true, seedFailed: false);
 
@@ -156,8 +169,8 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
 
     final localState = _local.read(userId, _presetId);
     final fallbackImageUrl = localState.beadImageUrl ?? _mantra.beadImageUrl;
-    // Keep isSeeding true until the detail API returns so the UI does not paint
-    // a stale local total (e.g. "88") before reconcile.
+    // Keep isSeeding true until detail returns, fails, or the seed timeout fires
+    // so the UI does not paint a stale local total before the first settle.
     state = state.copyWith(
       total: localState.total,
       totalCounted: localState.totalCounted,
@@ -167,20 +180,90 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
       beadImageBytes: localState.beadImageBytes,
     );
 
-    final result = await _getAccumulatorDetail(_presetId);
+    final detailFuture = _getAccumulatorDetail(_presetId);
+    final raced = await Future.any<Either<Failure, MalaCount>?>([
+      detailFuture.then<Either<Failure, MalaCount>?>((r) => r),
+      Future<Either<Failure, MalaCount>?>.delayed(
+        _seedNetworkTimeout,
+        () => null,
+      ),
+    ]);
     if (!mounted) return; // screen left mid-seed
 
+    String? detailBeadImageUrl;
+    if (raced == null) {
+      // Timeout: unblock local counting; reconcile when detail eventually lands.
+      final timedOutLocal = _local.read(userId, _presetId);
+      state = state.copyWith(
+        total: timedOutLocal.total,
+        totalCounted: timedOutLocal.totalCounted,
+        isSeeding: false,
+        seedFailed: false,
+        beadImageUrl: fallbackImageUrl,
+        beadImageBytes: timedOutLocal.beadImageBytes,
+      );
+      unawaited(
+        detailFuture.then((lateResult) {
+          if (!mounted) return;
+          final lateUrl = _applyDetailResult(
+            userId: userId,
+            result: lateResult,
+            fallbackImageUrl: fallbackImageUrl,
+          );
+          if (lateUrl != null) {
+            unawaited(
+              _refreshBeadImage(
+                userId,
+                urlCandidates: [
+                  lateUrl,
+                  if (fallbackImageUrl != null) fallbackImageUrl,
+                ],
+                refetchDetailOnFailure: false,
+              ),
+            );
+          }
+        }),
+      );
+    } else {
+      detailBeadImageUrl = _applyDetailResult(
+        userId: userId,
+        result: raced,
+        fallbackImageUrl: fallbackImageUrl,
+      );
+    }
+
+    unawaited(
+      _refreshBeadImage(
+        userId,
+        urlCandidates: [
+          if (detailBeadImageUrl != null) detailBeadImageUrl!,
+          if (fallbackImageUrl != null) fallbackImageUrl,
+        ],
+        refetchDetailOnFailure: detailBeadImageUrl == null,
+      ),
+    );
+  }
+
+  /// Applies a detail API result. Never sets [MalaCounterState.isSeeding] true.
+  ///
+  /// Returns the detail bead image URL when present (for artwork refresh).
+  String? _applyDetailResult({
+    required String userId,
+    required Either<Failure, MalaCount> result,
+    required String? fallbackImageUrl,
+  }) {
     String? detailBeadImageUrl;
     result.fold(
       (failure) {
         _logger.warning('Seed failed: ${failure.message}');
+        final localState = _local.read(userId, _presetId);
         // Offline / API error: fall back to local and enable counting.
         state = state.copyWith(
           total: localState.total,
           totalCounted: localState.totalCounted,
           isSeeding: false,
           seedFailed: false,
-          beadImageUrl: fallbackImageUrl,
+          beadImageUrl: fallbackImageUrl ?? localState.beadImageUrl,
           beadImageBytes: localState.beadImageBytes,
         );
         unawaited(_sync.flush(SyncReason.launch));
@@ -231,17 +314,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
         if (total > syncedTotal) unawaited(_sync.flush(SyncReason.launch));
       },
     );
-
-    unawaited(
-      _refreshBeadImage(
-        userId,
-        urlCandidates: [
-          if (detailBeadImageUrl != null) detailBeadImageUrl!,
-          if (fallbackImageUrl != null) fallbackImageUrl,
-        ],
-        refetchDetailOnFailure: detailBeadImageUrl == null,
-      ),
-    );
+    return detailBeadImageUrl;
   }
 
   /// Downloads bead artwork via [MalaRemoteDataSource.fetchImageBytes]

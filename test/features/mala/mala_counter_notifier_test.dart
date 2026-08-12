@@ -38,13 +38,15 @@ void main() {
     mantra: MantraText(id: 'm1', text: 'ༀ་མ་ཎི་པདྨེ་ཧཱུྃ', pronunciation: 'Om Mani Padme Hum'),
   );
 
-  MalaCounterNotifier buildNotifier() => MalaCounterNotifier(
+  MalaCounterNotifier buildNotifier({Duration? seedNetworkTimeout}) =>
+      MalaCounterNotifier(
         mantra: mantra,
         local: local,
         getAccumulatorDetail: getDetail,
         deleteUserAccumulator: delete,
         sync: sync,
         currentUserId: () async => userId,
+        seedNetworkTimeout: seedNetworkTimeout,
       );
 
   setUp(() async {
@@ -89,7 +91,10 @@ void main() {
     final gate = Completer<Either<Failure, MalaCount>>();
     when(getDetail(any)).thenAnswer((_) => gate.future);
 
-    final notifier = buildNotifier();
+    // Long timeout so the test observes API-first settle, not the race fallback.
+    final notifier = buildNotifier(
+      seedNetworkTimeout: const Duration(seconds: 30),
+    );
     await Future.delayed(Duration.zero);
 
     expect(notifier.state.isSeeding, isTrue);
@@ -100,6 +105,35 @@ void main() {
 
     expect(notifier.state.isSeeding, isFalse);
     expect(notifier.state.total, 88); // max(local, server)
+    notifier.dispose();
+  });
+
+  test('seed falls back to local after network timeout then late-reconciles',
+      () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
+    );
+    final gate = Completer<Either<Failure, MalaCount>>();
+    when(getDetail(any)).thenAnswer((_) => gate.future);
+
+    final notifier = buildNotifier(
+      seedNetworkTimeout: const Duration(milliseconds: 40),
+    );
+    await Future.delayed(Duration.zero);
+    expect(notifier.state.isSeeding, isTrue);
+
+    await Future.delayed(const Duration(milliseconds: 60));
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88);
+
+    // Late API is ahead of the timed-out local snapshot.
+    gate.complete(const Right(MalaCount(accumulatorId: 'acc-1', total: 120)));
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 120);
     notifier.dispose();
   });
 
