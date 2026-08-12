@@ -112,7 +112,6 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
                 ConnectPostsTab(isActive: activeTabIndex == 2),
                 ConnectGroupsTab(
                   myGroups: displayedMyGroups,
-                  myGroupsLoading: myGroupsLoading,
                   onRefresh: _onGroupsRefresh,
                   isActive: activeTabIndex == 3,
                 ),
