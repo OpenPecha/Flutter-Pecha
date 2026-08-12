@@ -114,6 +114,8 @@ class GroupEventModel {
   final String? mantraId;
   final String? timerId;
   final String? groupRecitationCollectionId;
+  final String? groupName;
+  final String? groupAvatarUrl;
 
   const GroupEventModel({
     required this.id,
@@ -132,6 +134,8 @@ class GroupEventModel {
     this.mantraId,
     this.timerId,
     this.groupRecitationCollectionId,
+    this.groupName,
+    this.groupAvatarUrl,
   });
 
   factory GroupEventModel.fromJson(
@@ -163,6 +167,8 @@ class GroupEventModel {
       timerId: json['timer_id'] as String?,
       groupRecitationCollectionId:
           json['group_recitation_collection_id'] as String?,
+      groupName: json['group_name'] as String?,
+      groupAvatarUrl: json['group_avatar_url'] as String?,
     );
   }
 
@@ -186,6 +192,8 @@ class GroupEventModel {
       mantraId: mantraId,
       timerId: timerId,
       groupRecitationCollectionId: groupRecitationCollectionId,
+      groupName: groupName,
+      groupAvatarUrl: groupAvatarUrl,
     );
   }
 

@@ -3,12 +3,12 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
-import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,12 +18,10 @@ class ConnectEventCard extends ConsumerStatefulWidget {
   const ConnectEventCard({
     super.key,
     required this.event,
-    this.groupNames = const {},
     this.groupLocations = const {},
   });
 
   final GroupEvent event;
-  final Map<String, String> groupNames;
   final Map<String, String> groupLocations;
 
   @override
@@ -122,10 +120,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: _EventGroupLabel(
-                          groupId: event.groupId,
-                          groupNames: widget.groupNames,
-                        ),
+                        child: _EventGroupLabel(event: event),
                       ),
                       if (!isPast) ...[
                         const SizedBox(width: 12),
@@ -238,65 +233,63 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
   }
 }
 
-class _EventGroupLabel extends ConsumerWidget {
-  const _EventGroupLabel({
-    required this.groupId,
-    required this.groupNames,
-  });
+class _EventGroupLabel extends StatelessWidget {
+  const _EventGroupLabel({required this.event});
 
-  final String groupId;
-  final Map<String, String> groupNames;
+  final GroupEvent event;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cachedName = groupNames[groupId];
-    if (cachedName != null && cachedName.isNotEmpty) {
-      return _GroupNameText(name: cachedName);
-    }
-
-    if (groupId.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final groupAsync = ref.watch(groupProfileProvider(groupId));
-    return groupAsync.when(
-      data:
-          (either) => either.fold(
-            (_) => const SizedBox.shrink(),
-            (profile) => _GroupNameText(
-              name: _groupLabel(profile, context),
-            ),
-          ),
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  String _groupLabel(GroupProfile profile, BuildContext context) {
-    return profile.title.trim().isNotEmpty
-        ? profile.title.trim()
-        : context.l10n.connect_group_fallback_title;
-  }
-}
-
-class _GroupNameText extends StatelessWidget {
-  const _GroupNameText({required this.name});
-
-  final String name;
+  static const double _avatarSize = 24;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final name = event.groupName?.trim();
+    if (name == null || name.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    return Text(
-      name,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: isDark ? AppColors.textPrimaryDark : AppColors.primaryDark,
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final avatarUrl = event.groupAvatarUrl?.trim();
+    final placeholderColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
+
+    return Row(
+      children: [
+        ClipOval(
+          child: SizedBox(
+            width: _avatarSize,
+            height: _avatarSize,
+            child:
+                avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImageWidget(
+                      imageUrl: avatarUrl,
+                      fit: BoxFit.cover,
+                      width: _avatarSize,
+                      height: _avatarSize,
+                    )
+                    : ColoredBox(
+                      color: placeholderColor,
+                      child: Icon(
+                        AppAssets.usersThree,
+                        size: 14,
+                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+                      ),
+                    ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.primaryDark,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

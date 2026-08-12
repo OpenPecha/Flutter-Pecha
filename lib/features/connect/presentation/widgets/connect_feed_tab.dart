@@ -28,10 +28,6 @@ class ConnectFeedTab extends ConsumerStatefulWidget {
 
 class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     with ConnectLazyMyDiscoverTabMixin<ConnectFeedTab> {
-  Map<String, String> get _groupNames => {
-    for (final group in widget.myGroups) group.id: group.title,
-  };
-
   String _locationForGroup(GroupProfile group, BuildContext context) {
     if (group.tags.isNotEmpty) return group.tags.first;
     final subtitle = group.subTitle?.trim();
@@ -129,11 +125,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     required bool includeUnfollowed,
     required Map<String, String> groupLocations,
   }) {
-    final groupNames = {
-      ..._groupNames,
-      if (item.groupName.isNotEmpty) item.groupId: item.groupName,
-    };
-
     if (item.type == ConnectFeedItemType.post && item.post != null) {
       return ConnectPostCard(
         post: item.post!,
@@ -145,7 +136,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     if (item.type == ConnectFeedItemType.event && item.event != null) {
       return ConnectEventCard(
         event: item.event!,
-        groupNames: groupNames,
         groupLocations: groupLocations,
       );
     }

@@ -59,6 +59,8 @@ class GroupEvent {
   final String? mantraId;
   final String? timerId;
   final String? groupRecitationCollectionId;
+  final String? groupName;
+  final String? groupAvatarUrl;
 
   const GroupEvent({
     required this.id,
@@ -79,6 +81,8 @@ class GroupEvent {
     this.mantraId,
     this.timerId,
     this.groupRecitationCollectionId,
+    this.groupName,
+    this.groupAvatarUrl,
   });
 }
 

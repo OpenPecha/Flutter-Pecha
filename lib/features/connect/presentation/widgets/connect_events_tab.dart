@@ -26,10 +26,6 @@ class ConnectEventsTab extends ConsumerStatefulWidget {
 
 class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     with ConnectLazyMyDiscoverTabMixin<ConnectEventsTab> {
-  Map<String, String> get _groupNames => {
-    for (final group in widget.myGroups) group.id: group.title,
-  };
-
   Map<String, String> _groupLocations(BuildContext context) => {
     for (final group in widget.myGroups)
       group.id: _locationForGroup(group, context),
@@ -92,7 +88,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           itemBuilder:
               (context, index) => ConnectEventCard(
                 event: myState.events[index],
-                groupNames: _groupNames,
                 groupLocations: groupLocations,
               ),
         );
@@ -112,7 +107,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           itemBuilder:
               (context, index) => ConnectEventCard(
                 event: discoverState.events[index],
-                groupNames: _groupNames,
                 groupLocations: groupLocations,
               ),
         );
