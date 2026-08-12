@@ -119,10 +119,7 @@ class _ConnectPostDetailScreenState
 
     final success = await ref
         .read(connectPostCommentsProvider(widget.postId).notifier)
-        .submitComment(
-          text: text,
-          parentCommentId: _replyTarget?.id,
-        );
+        .submitComment(text: text, parentCommentId: _replyTarget?.id);
 
     if (!mounted || !success) return;
 
@@ -168,9 +165,9 @@ class _ConnectPostDetailScreenState
 
     if (!result.isSuccess) {
       setState(() => _likeState.revert(wasLiked));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.errorMessage!)));
       return;
     }
 
@@ -205,7 +202,9 @@ class _ConnectPostDetailScreenState
     final isDark = theme.brightness == Brightness.dark;
     final commentsState = ref.watch(connectPostCommentsProvider(widget.postId));
     final isSubmittingComment = ref.watch(
-      connectPostCommentsProvider(widget.postId).select((state) => state.isSubmitting),
+      connectPostCommentsProvider(
+        widget.postId,
+      ).select((state) => state.isSubmitting),
     );
     final commentCount =
         commentsState.total > 0 ? commentsState.total : _post.commentCount;
@@ -404,17 +403,13 @@ class _ConnectPostDetailScreenState
                 onTap: () => _commentFocusNode.requestFocus(),
               ),
               const Spacer(),
-              _PostActionButton(
-                icon: AppAssets.readerShare,
-                onTap: _sharePost,
-              ),
+              _PostActionButton(icon: AppAssets.readerShare, onTap: _sharePost),
             ],
           ),
         ],
       ),
     );
   }
-
 }
 
 class _PostAuthorRow extends StatelessWidget {
@@ -430,7 +425,8 @@ class _PostAuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+    final displayName =
+        name.trim().isNotEmpty ? name.trim() : context.l10n.author;
 
     return Row(
       children: [
@@ -477,7 +473,7 @@ class _PostMediaGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (media.length == 1) {
-      return _PostMediaTile(url: media.first.url, isDark: isDark);
+      return _PostMediaTile(media: media.first, isDark: isDark);
     }
 
     final visibleMedia = media.take(2).toList();
@@ -486,7 +482,11 @@ class _PostMediaGallery extends StatelessWidget {
         for (var i = 0; i < visibleMedia.length; i++) ...[
           if (i > 0) const SizedBox(width: 8),
           Expanded(
-            child: _PostMediaTile(url: visibleMedia[i].url, isDark: isDark),
+            child: _PostMediaTile(
+              media: visibleMedia[i],
+              isDark: isDark,
+              compact: true,
+            ),
           ),
         ],
       ],
@@ -495,28 +495,63 @@ class _PostMediaGallery extends StatelessWidget {
 }
 
 class _PostMediaTile extends StatelessWidget {
-  const _PostMediaTile({required this.url, required this.isDark});
+  const _PostMediaTile({
+    required this.media,
+    required this.isDark,
+    this.compact = false,
+  });
 
-  final String url;
+  final ConnectPostMedia media;
   final bool isDark;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: CachedNetworkImageWidget(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          errorWidget: ColoredBox(
-            color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-            child: Icon(
-              AppAssets.photoLibrary,
-              color: isDark ? AppColors.grey500 : AppColors.grey600,
-            ),
+    final errorWidget = ColoredBox(
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+      child: Icon(
+        AppAssets.photoLibrary,
+        color: isDark ? AppColors.grey500 : AppColors.grey600,
+      ),
+    );
+
+    if (compact) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: CachedNetworkImageWidget(
+            imageUrl: media.url,
+            fit: BoxFit.cover,
+            errorWidget: errorWidget,
           ),
         ),
+      );
+    }
+
+    final width = media.width;
+    final height = media.height;
+    if (width != null && height != null && width > 0 && height > 0) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: width / height,
+          child: CachedNetworkImageWidget(
+            imageUrl: media.url,
+            fit: BoxFit.cover,
+            errorWidget: errorWidget,
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: CachedNetworkImageWidget(
+        imageUrl: media.url,
+        width: double.infinity,
+        fit: BoxFit.fitWidth,
+        errorWidget: errorWidget,
       ),
     );
   }

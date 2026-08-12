@@ -13,6 +13,10 @@ class ConnectFeedState {
   final bool hasMore;
   final int skip;
 
+  /// False until the first load settles, so the UI can tell "not fetched yet"
+  /// apart from "fetched and genuinely empty".
+  final bool hasLoaded;
+
   const ConnectFeedState({
     this.items = const [],
     this.isLoading = false,
@@ -20,6 +24,7 @@ class ConnectFeedState {
     this.error,
     this.hasMore = true,
     this.skip = 0,
+    this.hasLoaded = false,
   });
 
   ConnectFeedState copyWith({
@@ -29,6 +34,7 @@ class ConnectFeedState {
     String? error,
     bool? hasMore,
     int? skip,
+    bool? hasLoaded,
     bool clearError = false,
   }) {
     return ConnectFeedState(
@@ -38,6 +44,7 @@ class ConnectFeedState {
       error: clearError ? null : error ?? this.error,
       hasMore: hasMore ?? this.hasMore,
       skip: skip ?? this.skip,
+      hasLoaded: hasLoaded ?? this.hasLoaded,
     );
   }
 }
@@ -66,7 +73,7 @@ class ConnectFeedNotifier extends StateNotifier<ConnectFeedState> {
 
     final authState = ref.read(authProvider);
     if (!includeUnfollowed && (authState.isGuest || !authState.isLoggedIn)) {
-      state = const ConnectFeedState(hasMore: false);
+      state = const ConnectFeedState(hasMore: false, hasLoaded: true);
       return;
     }
 
@@ -83,7 +90,11 @@ class ConnectFeedNotifier extends StateNotifier<ConnectFeedState> {
 
     result.fold(
       (failure) {
-        state = state.copyWith(isLoading: false, error: failure.message);
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+          hasLoaded: true,
+        );
       },
       (page) {
         state = state.copyWith(
@@ -91,6 +102,7 @@ class ConnectFeedNotifier extends StateNotifier<ConnectFeedState> {
           isLoading: false,
           hasMore: page.hasMore,
           skip: page.items.length,
+          hasLoaded: true,
           clearError: true,
         );
       },

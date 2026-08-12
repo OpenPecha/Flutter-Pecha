@@ -21,6 +21,7 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
     this.myEmptyState,
     this.leadingItemCount = 0,
     this.leadingItemBuilder,
+    this.hasLoaded = true,
   });
 
   final List<T> items;
@@ -38,9 +39,14 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
   final int leadingItemCount;
   final WidgetBuilder? leadingItemBuilder;
 
+  /// Whether the first fetch has settled. While false the loader is shown
+  /// instead of an empty state, so switching tabs never flashes "no content"
+  /// before the request that was scheduled for the next frame starts.
+  final bool hasLoaded;
+
   @override
   Widget build(BuildContext context) {
-    if (isLoading && items.isEmpty) {
+    if ((isLoading || !hasLoaded) && items.isEmpty) {
       return _scrollableState(
         const Center(child: CircularProgressIndicator()),
       );
@@ -52,7 +58,7 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
       );
     }
 
-    if (items.isEmpty && !isLoading) {
+    if (items.isEmpty) {
       if (myEmptyState != null) {
         return _scrollableState(myEmptyState!, hasScrollBody: false);
       }

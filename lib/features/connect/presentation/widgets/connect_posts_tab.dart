@@ -59,6 +59,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
+          hasLoaded: myState.hasLoaded,
           scrollController: scrollController,
           onRetry: () => ref.read(myConnectPostsProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
@@ -79,6 +80,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
+          hasLoaded: discoverState.hasLoaded,
           scrollController: scrollController,
           onRetry:
               () => ref.read(discoverConnectPostsProvider.notifier).retry(),

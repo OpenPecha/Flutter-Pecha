@@ -30,7 +30,8 @@ class ConnectPostCommentTile extends ConsumerStatefulWidget {
       _ConnectPostCommentTileState();
 }
 
-class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile> {
+class _ConnectPostCommentTileState
+    extends ConsumerState<ConnectPostCommentTile> {
   final ConnectOptimisticLikeState _likeState = ConnectOptimisticLikeState();
 
   bool get _isLiked => _likeState.isLiked(widget.comment.likedByMe);
@@ -55,7 +56,7 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
     final indent = comment.isReply ? 44.0 : 0.0;
 
     return Padding(
-      padding: EdgeInsets.only(left: indent, bottom: 20),
+      padding: EdgeInsets.only(left: indent, bottom: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -112,9 +113,9 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 _CommentText(text: comment.text, isDark: isDark),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     TextButton(
@@ -208,10 +209,7 @@ class _ConnectPostCommentTileState extends ConsumerState<ConnectPostCommentTile>
 }
 
 class _CommentActionMenu extends StatelessWidget {
-  const _CommentActionMenu({
-    required this.isDark,
-    required this.onDelete,
-  });
+  const _CommentActionMenu({required this.isDark, required this.onDelete});
 
   final bool isDark;
   final VoidCallback onDelete;
@@ -222,8 +220,7 @@ class _CommentActionMenu extends StatelessWidget {
       icon: Icon(
         AppAssets.dotsThreeVertical,
         size: 18,
-        color:
-            isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
+        color: isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
       ),
       padding: EdgeInsets.zero,
       offset: const Offset(0, 28),
@@ -233,9 +230,7 @@ class _CommentActionMenu extends StatelessWidget {
       color: isDark ? AppColors.surfaceDark : AppColors.surfaceWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isDark ? AppColors.grey800 : AppColors.grey300,
-        ),
+        side: BorderSide(color: isDark ? AppColors.grey800 : AppColors.grey300),
       ),
       onSelected: (value) {
         if (value == 'delete') onDelete();
@@ -248,11 +243,7 @@ class _CommentActionMenu extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(
                 children: [
-                  Icon(
-                    AppAssets.trash,
-                    size: 18,
-                    color: AppColors.error,
-                  ),
+                  Icon(AppAssets.trash, size: 18, color: AppColors.error),
                   const SizedBox(width: 10),
                   Text(
                     context.l10n.delete,
@@ -283,15 +274,14 @@ class _CommentAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial =
-        name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
     final hasAvatar = avatarUrl != null && avatarUrl!.trim().isNotEmpty;
 
     return CircleAvatar(
       radius: 16,
-      backgroundColor: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-      backgroundImage:
-          hasAvatar ? avatarUrl!.cachedNetworkImageProvider : null,
+      backgroundColor:
+          isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+      backgroundImage: hasAvatar ? avatarUrl!.cachedNetworkImageProvider : null,
       child:
           hasAvatar
               ? null

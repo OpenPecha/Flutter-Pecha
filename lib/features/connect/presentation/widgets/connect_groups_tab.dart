@@ -90,6 +90,7 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab>
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
+          hasLoaded: discoverState.hasLoaded,
           scrollController: scrollController,
           onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
           emptyDiscoverMessage: context.l10n.connect_empty_discover_groups,
