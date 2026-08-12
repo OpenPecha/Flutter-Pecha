@@ -7,7 +7,6 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/accumulator_group.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
-import 'package:flutter_pecha/features/mala/domain/entities/mala_accumulation_selection.dart';
 import 'package:flutter_pecha/features/mala/presentation/providers/accumulator_groups_provider.dart';
 import 'package:flutter_pecha/features/mala/presentation/providers/group_accumulation_counts_provider.dart';
 import 'package:flutter_pecha/features/mala/presentation/providers/mala_accumulation_selection_provider.dart';
@@ -173,12 +172,15 @@ class _MalaScreenState extends ConsumerState<MalaScreen> {
       next.whenData(groupCountsNotifier.mergeFromServerCounts);
     });
 
-    final displayTotal = _displayTotal(
-      selection: selection,
-      personalTotal: counter.total,
-      groups: groups,
-      groupCountsNotifier: groupCountsNotifier,
-    );
+    final groupId = selection.groupAccumulatorId;
+    final showCountSkeleton = counter.isSeeding && !counter.seedFailed;
+    // While seeding, keep beads at 0 so a stale Hive total does not light the arc.
+    final displayTotal =
+        showCountSkeleton
+            ? 0
+            : groupId == null
+            ? counter.total
+            : groupCountsNotifier.countFor(groupId);
     final beadsPerRound = counter.beadsPerRound;
     final displayBeadInRound = displayTotal % beadsPerRound;
     final displayRounds = displayTotal ~/ beadsPerRound;
@@ -195,10 +197,10 @@ class _MalaScreenState extends ConsumerState<MalaScreen> {
         );
         return;
       }
-      final groupId = selection.groupAccumulatorId;
-      if (groupId == null || groups.isEmpty) return;
+      final selectedGroupId = selection.groupAccumulatorId;
+      if (selectedGroupId == null || groups.isEmpty) return;
       groupCountsNotifier.increment(
-        groupAccumulatorId: groupId,
+        groupAccumulatorId: selectedGroupId,
         groups: groups,
         soundEnabled: settings.soundEnabled,
         vibrationEnabled: settings.vibrationEnabled,
@@ -241,12 +243,14 @@ class _MalaScreenState extends ConsumerState<MalaScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _CounterBlock(
-                  beadInRound: displayBeadInRound,
-                  beadsPerRound: beadsPerRound,
-                  rounds: displayRounds,
-                  dimmed: counter.isSeeding,
-                ),
+                if (showCountSkeleton)
+                  const MalaCountSkeleton()
+                else
+                  _CounterBlock(
+                    beadInRound: displayBeadInRound,
+                    beadsPerRound: beadsPerRound,
+                    rounds: displayRounds,
+                  ),
                 const SizedBox(height: 8),
                 Expanded(
                   flex: 42,
@@ -260,7 +264,8 @@ class _MalaScreenState extends ConsumerState<MalaScreen> {
                           child:
                               counter.seedFailed
                                   ? _ErrorView(
-                                    message: context.l10n.mala_count_load_error,
+                                    message:
+                                        context.l10n.mala_count_load_error,
                                     onRetry: notifier.seed,
                                   )
                                   : MalaBeads(
@@ -305,16 +310,6 @@ class _MalaScreenState extends ConsumerState<MalaScreen> {
         .applyNavigationIntent(groupId);
   }
 
-  int _displayTotal({
-    required MalaAccumulationSelection selection,
-    required int personalTotal,
-    required List<AccumulatorGroup> groups,
-    required GroupAccumulationCountsNotifier groupCountsNotifier,
-  }) {
-    final groupId = selection.groupAccumulatorId;
-    if (groupId == null || groups.isEmpty) return personalTotal;
-    return groupCountsNotifier.countFor(groupId, groups);
-  }
 }
 
 class _CounterBlock extends StatelessWidget {
@@ -322,13 +317,11 @@ class _CounterBlock extends StatelessWidget {
     required this.beadInRound,
     required this.beadsPerRound,
     required this.rounds,
-    required this.dimmed,
   });
 
   final int beadInRound;
   final int beadsPerRound;
   final int rounds;
-  final bool dimmed;
 
   @override
   Widget build(BuildContext context) {
@@ -343,9 +336,7 @@ class _CounterBlock extends StatelessWidget {
         useTibetan
             ? toTibetanDigits(l10n.mala_rounds_count(rounds))
             : l10n.mala_rounds_count(rounds);
-    final color = theme.colorScheme.onSurface.withValues(
-      alpha: dimmed ? 0.35 : 1.0,
-    );
+    final color = theme.colorScheme.onSurface;
     return Semantics(
       label: l10n.mala_counter_semantics(
         beadInRound,
@@ -367,7 +358,7 @@ class _CounterBlock extends StatelessWidget {
           Text(
             roundsLabel,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: color.withValues(alpha: dimmed ? 0.35 : 0.7),
+              color: color.withValues(alpha: 0.7),
             ),
           ),
         ],

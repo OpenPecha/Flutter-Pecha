@@ -37,7 +37,7 @@ class MalaCounterState {
   final String? beadImageUrl;
   final Uint8List? beadImageBytes;
 
-  /// True until local seed finishes. Network seed continues in the background.
+  /// True until local + network seed attempt finishes.
   final bool isSeeding;
 
   /// User id could not be resolved; counting cannot be persisted safely.
@@ -141,7 +141,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
 
   static Future<List<int>> _emptyImageDownload(String _) async => const [];
 
-  /// Seed local state first, then reconcile remote state when available.
+  /// Seed from local Hive, then reconcile with the detail API before undimming.
   Future<void> seed() async {
     state = state.copyWith(isSeeding: true, seedFailed: false);
 
@@ -156,10 +156,12 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
 
     final localState = _local.read(userId, _presetId);
     final fallbackImageUrl = localState.beadImageUrl ?? _mantra.beadImageUrl;
+    // Keep isSeeding true until the detail API returns so the UI does not paint
+    // a stale local total (e.g. "88") before reconcile.
     state = state.copyWith(
       total: localState.total,
       totalCounted: localState.totalCounted,
-      isSeeding: false,
+      isSeeding: true,
       seedFailed: false,
       beadImageUrl: fallbackImageUrl,
       beadImageBytes: localState.beadImageBytes,
@@ -172,7 +174,15 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
     result.fold(
       (failure) {
         _logger.warning('Seed failed: ${failure.message}');
-        // Local counting stays enabled; dirty counts retry via sync manager.
+        // Offline / API error: fall back to local and enable counting.
+        state = state.copyWith(
+          total: localState.total,
+          totalCounted: localState.totalCounted,
+          isSeeding: false,
+          seedFailed: false,
+          beadImageUrl: fallbackImageUrl,
+          beadImageBytes: localState.beadImageBytes,
+        );
         unawaited(_sync.flush(SyncReason.launch));
       },
       (detail) {
@@ -184,26 +194,26 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
         final serverTotal = detail.total;
         final serverAccId = detail.accumulatorId;
 
-        final localState = _local.read(userId, _presetId);
+        final latestLocal = _local.read(userId, _presetId);
         // Reconcile with the server only when an active accumulator exists.
         // Without one, ignore a stale current_count so a post-reset re-entry
         // cannot resurrect the old on-screen tally.
         final total =
             serverAccId != null
-                ? max(localState.total, serverTotal)
-                : localState.total;
+                ? max(latestLocal.total, serverTotal)
+                : latestLocal.total;
         final syncedTotal = serverAccId != null ? serverTotal : 0;
 
-        final beadImageUrl = detail.beadImageUrl ?? localState.beadImageUrl;
-        final totalCounted = max(detail.totalCounted, localState.totalCounted);
+        final beadImageUrl = detail.beadImageUrl ?? latestLocal.beadImageUrl;
+        final totalCounted = max(detail.totalCounted, latestLocal.totalCounted);
         _local.write(
           userId,
           _presetId,
-          localState.copyWith(
+          latestLocal.copyWith(
             total: total,
             syncedTotal: syncedTotal,
             totalCounted: totalCounted,
-            accumulatorId: serverAccId ?? localState.accumulatorId,
+            accumulatorId: serverAccId ?? latestLocal.accumulatorId,
             beadImageUrl: beadImageUrl,
           ),
         );
@@ -214,7 +224,7 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
           isSeeding: false,
           seedFailed: false,
           beadImageUrl: beadImageUrl,
-          beadImageBytes: localState.beadImageBytes,
+          beadImageBytes: latestLocal.beadImageBytes,
         );
 
         // Push any offline tail captured before this seed.

@@ -80,6 +80,48 @@ void main() {
     notifier.dispose();
   });
 
+  test('seed keeps isSeeding true until detail API completes', () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
+    );
+    final gate = Completer<Either<Failure, MalaCount>>();
+    when(getDetail(any)).thenAnswer((_) => gate.future);
+
+    final notifier = buildNotifier();
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isTrue);
+    expect(notifier.state.total, 88);
+
+    gate.complete(const Right(MalaCount(accumulatorId: 'acc-1', total: 12)));
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88); // max(local, server)
+    notifier.dispose();
+  });
+
+  test('seed falls back to local total when detail API fails', () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 80, accumulatorId: 'acc-1'),
+    );
+    when(getDetail(any)).thenAnswer(
+      (_) async => const Left(UnknownFailure('network')),
+    );
+
+    final notifier = buildNotifier();
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88);
+    verify(sync.flush(SyncReason.launch)).called(1);
+    notifier.dispose();
+  });
+
   test('seed preserves local offline taps and pushes them', () async {
     // Local is ahead of the server (offline taps captured earlier).
     await local.write(
