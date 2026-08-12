@@ -28,18 +28,6 @@ class ConnectFeedTab extends ConsumerStatefulWidget {
 
 class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     with ConnectLazyMyDiscoverTabMixin<ConnectFeedTab> {
-  String _locationForGroup(GroupProfile group, BuildContext context) {
-    if (group.tags.isNotEmpty) return group.tags.first;
-    final subtitle = group.subTitle?.trim();
-    if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-    return context.l10n.connect_online;
-  }
-
-  Map<String, String> _groupLocations(BuildContext context) => {
-    for (final group in widget.myGroups)
-      group.id: _locationForGroup(group, context),
-  };
-
   @override
   bool readTabActive(ConnectFeedTab widget) => widget.isActive;
 
@@ -60,7 +48,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     // when to actually fetch.
     final myState = ref.watch(myConnectFeedProvider);
     final discoverState = ref.watch(discoverConnectFeedProvider);
-    final groupLocations = _groupLocations(context);
 
     return ConnectMyDiscoverTabGate(
       myHasLoaded: myState.hasLoaded,
@@ -92,7 +79,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
                 context,
                 myState.items[index],
                 includeUnfollowed: false,
-                groupLocations: groupLocations,
               ),
         );
       },
@@ -112,7 +98,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
                 context,
                 discoverState.items[index],
                 includeUnfollowed: true,
-                groupLocations: groupLocations,
               ),
         );
       },
@@ -123,7 +108,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     BuildContext context,
     ConnectFeedItem item, {
     required bool includeUnfollowed,
-    required Map<String, String> groupLocations,
   }) {
     if (item.type == ConnectFeedItemType.post && item.post != null) {
       return ConnectPostCard(
@@ -134,10 +118,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
     }
 
     if (item.type == ConnectFeedItemType.event && item.event != null) {
-      return ConnectEventCard(
-        event: item.event!,
-        groupLocations: groupLocations,
-      );
+      return ConnectEventCard(event: item.event!);
     }
 
     return const SizedBox.shrink();

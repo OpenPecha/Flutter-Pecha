@@ -40,6 +40,22 @@ class GroupEventParticipant {
   }
 }
 
+class GroupEventLocation {
+  final String id;
+  final String groupId;
+  final String name;
+  final double? latitude;
+  final double? longitude;
+
+  const GroupEventLocation({
+    required this.id,
+    required this.groupId,
+    required this.name,
+    this.latitude,
+    this.longitude,
+  });
+}
+
 class GroupEvent {
   final String id;
   final String groupId;
@@ -61,6 +77,8 @@ class GroupEvent {
   final String? groupRecitationCollectionId;
   final String? groupName;
   final String? groupAvatarUrl;
+  final String? locationId;
+  final GroupEventLocation? location;
 
   const GroupEvent({
     required this.id,
@@ -83,6 +101,8 @@ class GroupEvent {
     this.groupRecitationCollectionId,
     this.groupName,
     this.groupAvatarUrl,
+    this.locationId,
+    this.location,
   });
 }
 

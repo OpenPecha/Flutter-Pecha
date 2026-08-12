@@ -15,14 +15,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class ConnectEventCard extends ConsumerStatefulWidget {
-  const ConnectEventCard({
-    super.key,
-    required this.event,
-    this.groupLocations = const {},
-  });
+  const ConnectEventCard({super.key, required this.event});
 
   final GroupEvent event;
-  final Map<String, String> groupLocations;
 
   @override
   ConsumerState<ConnectEventCard> createState() => _ConnectEventCardState();
@@ -48,12 +43,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
         event.title.trim().isNotEmpty
             ? event.title.trim()
             : context.l10n.connect_event_fallback_title;
-    final detailsLine = _formatDetailsLine(
-      context,
-      event,
-      participantCount,
-      ref,
-    );
+    final detailsLine = _formatDetailsLine(context, event, participantCount);
 
     return Material(
       color: cardColor,
@@ -119,9 +109,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: _EventGroupLabel(event: event),
-                      ),
+                      Expanded(child: _EventGroupLabel(event: event)),
                       if (!isPast) ...[
                         const SizedBox(width: 12),
                         GestureDetector(
@@ -156,7 +144,6 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     BuildContext context,
     GroupEvent event,
     int participantCount,
-    WidgetRef ref,
   ) {
     final parts = <String>[];
 
@@ -166,10 +153,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    final location = _resolveLocation(event.groupId, ref, context);
-    if (location != null && location.isNotEmpty) {
-      parts.add(location);
-    }
+    parts.add(_eventLocationLabel(context, event));
 
     if (participantCount > 0) {
       parts.add(
@@ -181,21 +165,13 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     return parts.join(' · ');
   }
 
-  String? _resolveLocation(String groupId, WidgetRef ref, BuildContext context) {
-    final cached = widget.groupLocations[groupId];
-    if (cached != null && cached.isNotEmpty) return cached;
-    if (groupId.isEmpty) return null;
-
-    final groupEither = ref.watch(groupProfileProvider(groupId)).valueOrNull;
-    return groupEither?.fold(
-      (_) => null,
-      (profile) {
-        if (profile.tags.isNotEmpty) return profile.tags.first;
-        final subtitle = profile.subTitle?.trim();
-        if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-        return context.l10n.connect_online;
-      },
-    );
+  String _eventLocationLabel(BuildContext context, GroupEvent event) {
+    final locationId = event.locationId?.trim();
+    if (locationId != null && locationId.isNotEmpty) {
+      final name = event.location?.name.trim();
+      if (name != null && name.isNotEmpty) return name;
+    }
+    return context.l10n.connect_online;
   }
 
   Future<void> _toggleAttendance(GroupEvent event, bool isAttending) async {
@@ -212,7 +188,10 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     final result =
         isAttending
             ? await repository.leaveGroupEvent(event.id)
-            : await joinGroupEventEnsuringGroupMembership(ref: ref, event: event);
+            : await joinGroupEventEnsuringGroupMembership(
+              ref: ref,
+              event: event,
+            );
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
@@ -251,8 +230,9 @@ class _EventGroupLabel extends StatelessWidget {
     final avatarUrl = event.groupAvatarUrl?.trim();
     final placeholderColor =
         isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
+    final groupId = event.groupId.trim();
 
-    return Row(
+    final content = Row(
       children: [
         ClipOval(
           child: SizedBox(
@@ -291,6 +271,14 @@ class _EventGroupLabel extends StatelessWidget {
         ),
       ],
     );
+
+    if (groupId.isEmpty) return content;
+
+    return GestureDetector(
+      onTap: () => context.push('/home/group/$groupId'),
+      behavior: HitTestBehavior.opaque,
+      child: content,
+    );
   }
 }
 
@@ -308,66 +296,63 @@ class _AttendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color:
-                isAttending
-                    ? (isDark ? AppColors.surfaceVariantDark : AppColors.grey100)
-                    : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isAttending) ...[
-                Icon(
-                  AppAssets.check,
-                  size: 14,
-                  color:
-                      isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimary,
-                ),
-                const SizedBox(width: 4),
-              ],
-              if (isSubmitting)
-                SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color:
-                        isAttending
-                            ? (isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimary)
-                            : (isDark
-                                ? AppColors.textPrimary
-                                : AppColors.surfaceWhite),
-                  ),
-                )
-              else
-                Text(
-                  isAttending
-                      ? context.l10n.connect_event_attending
-                      : context.l10n.connect_event_attend,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color:
-                        isAttending
-                            ? (isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimary)
-                            : (isDark
-                                ? AppColors.textPrimary
-                                : AppColors.surfaceWhite),
-                  ),
-                ),
-            ],
-          ),
+      duration: const Duration(milliseconds: 150),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color:
+            isAttending
+                ? (isDark ? AppColors.surfaceVariantDark : AppColors.grey100)
+                : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isAttending) ...[
+            Icon(
+              AppAssets.check,
+              size: 14,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+            const SizedBox(width: 4),
+          ],
+          if (isSubmitting)
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color:
+                    isAttending
+                        ? (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary)
+                        : (isDark
+                            ? AppColors.textPrimary
+                            : AppColors.surfaceWhite),
+              ),
+            )
+          else
+            Text(
+              isAttending
+                  ? context.l10n.connect_event_attending
+                  : context.l10n.connect_event_attend,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color:
+                    isAttending
+                        ? (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary)
+                        : (isDark
+                            ? AppColors.textPrimary
+                            : AppColors.surfaceWhite),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

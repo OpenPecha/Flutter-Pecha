@@ -97,6 +97,42 @@ class GroupEventParticipantModel {
   }
 }
 
+class GroupEventLocationModel {
+  final String id;
+  final String groupId;
+  final String name;
+  final double? latitude;
+  final double? longitude;
+
+  const GroupEventLocationModel({
+    required this.id,
+    required this.groupId,
+    required this.name,
+    this.latitude,
+    this.longitude,
+  });
+
+  factory GroupEventLocationModel.fromJson(Map<String, dynamic> json) {
+    return GroupEventLocationModel(
+      id: json['id'] as String? ?? '',
+      groupId: json['group_id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+    );
+  }
+
+  GroupEventLocation toEntity() {
+    return GroupEventLocation(
+      id: id,
+      groupId: groupId,
+      name: name,
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
+}
+
 class GroupEventModel {
   final String id;
   final String groupId;
@@ -116,6 +152,8 @@ class GroupEventModel {
   final String? groupRecitationCollectionId;
   final String? groupName;
   final String? groupAvatarUrl;
+  final String? locationId;
+  final GroupEventLocationModel? location;
 
   const GroupEventModel({
     required this.id,
@@ -136,6 +174,8 @@ class GroupEventModel {
     this.groupRecitationCollectionId,
     this.groupName,
     this.groupAvatarUrl,
+    this.locationId,
+    this.location,
   });
 
   factory GroupEventModel.fromJson(
@@ -143,6 +183,7 @@ class GroupEventModel {
     String? language,
   }) {
     final imageJson = json['image'] as Map<String, dynamic>?;
+    final locationJson = json['location'] as Map<String, dynamic>?;
 
     return GroupEventModel(
       id: json['id'] as String? ?? '',
@@ -169,6 +210,11 @@ class GroupEventModel {
           json['group_recitation_collection_id'] as String?,
       groupName: json['group_name'] as String?,
       groupAvatarUrl: json['group_avatar_url'] as String?,
+      locationId: json['location_id'] as String?,
+      location:
+          locationJson != null
+              ? GroupEventLocationModel.fromJson(locationJson)
+              : null,
     );
   }
 
@@ -194,6 +240,8 @@ class GroupEventModel {
       groupRecitationCollectionId: groupRecitationCollectionId,
       groupName: groupName,
       groupAvatarUrl: groupAvatarUrl,
+      locationId: locationId,
+      location: location?.toEntity(),
     );
   }
 

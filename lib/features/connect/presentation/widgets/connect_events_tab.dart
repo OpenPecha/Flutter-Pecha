@@ -26,11 +26,6 @@ class ConnectEventsTab extends ConsumerStatefulWidget {
 
 class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     with ConnectLazyMyDiscoverTabMixin<ConnectEventsTab> {
-  Map<String, String> _groupLocations(BuildContext context) => {
-    for (final group in widget.myGroups)
-      group.id: _locationForGroup(group, context),
-  };
-
   @override
   bool readTabActive(ConnectEventsTab widget) => widget.isActive;
 
@@ -44,13 +39,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     }
   }
 
-  String _locationForGroup(GroupProfile group, BuildContext context) {
-    if (group.tags.isNotEmpty) return group.tags.first;
-    final subtitle = group.subTitle?.trim();
-    if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-    return context.l10n.connect_online;
-  }
-
   @override
   Widget build(BuildContext context) {
     // Watch both providers unconditionally so they stay alive across
@@ -58,7 +46,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     // when to actually fetch.
     final myState = ref.watch(myConnectEventsProvider);
     final discoverState = ref.watch(discoverConnectEventsProvider);
-    final groupLocations = _groupLocations(context);
 
     return ConnectMyDiscoverTabGate(
       myHasLoaded: myState.hasLoaded,
@@ -88,7 +75,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           itemBuilder:
               (context, index) => ConnectEventCard(
                 event: myState.events[index],
-                groupLocations: groupLocations,
               ),
         );
       },
@@ -107,7 +93,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           itemBuilder:
               (context, index) => ConnectEventCard(
                 event: discoverState.events[index],
-                groupLocations: groupLocations,
               ),
         );
       },
