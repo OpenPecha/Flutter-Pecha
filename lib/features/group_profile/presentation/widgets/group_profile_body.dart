@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
@@ -45,12 +46,12 @@ class GroupProfileBody extends ConsumerStatefulWidget {
   ConsumerState<GroupProfileBody> createState() => _GroupProfileBodyState();
 }
 
-class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
-    with SingleTickerProviderStateMixin {
-  static const int _practicesTabIndex = 2;
-  static const int _membersTabIndex = 3;
+enum _GroupProfileTab { posts, events, practices, members }
 
+class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
+    with TickerProviderStateMixin {
   TabController? _tabController;
+  List<_GroupProfileTab> _visibleTabs = const [];
   final ScrollController _practicesScrollController = ScrollController();
   String? _enrollingSeriesId;
   String? _joiningAccumulatorId;
@@ -60,6 +61,9 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   late final TapGestureRecognizer _moreRecognizer;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
+
+  /// Posts have no data source yet, so the tab never has content to show.
+  bool get _hasPosts => false;
 
   bool _hasBanner(GroupProfile profile) =>
       profile.bannerUrl != null && profile.bannerUrl!.isNotEmpty;
@@ -83,12 +87,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     super.initState();
     _moreRecognizer = TapGestureRecognizer();
     if (_isCommunityGroup(widget.profile)) {
-      _tabController = TabController(
-        length: 4,
-        initialIndex: _practicesTabIndex,
-        vsync: this,
-      );
-      _tabController!.addListener(_onTabChanged);
+      // The tab set depends on which sections actually have content, so the
+      // controller is created in build() once that data is known.
       _practicesScrollController.addListener(_onPracticesScroll);
 
       final groupId = widget.profile.id;
@@ -106,12 +106,46 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
   }
 
+  /// Rebuilds the tab controller whenever the visible tab set changes, keeping
+  /// the currently selected tab selected when it is still present.
+  void _syncTabController(List<_GroupProfileTab> tabs) {
+    final previous = _tabController;
+    if (previous != null && listEquals(_visibleTabs, tabs)) return;
+
+    final selectedTab =
+        previous != null && previous.index < _visibleTabs.length
+            ? _visibleTabs[previous.index]
+            : null;
+    var initialIndex = selectedTab == null ? -1 : tabs.indexOf(selectedTab);
+    if (initialIndex < 0) initialIndex = tabs.indexOf(_GroupProfileTab.practices);
+    if (initialIndex < 0) initialIndex = 0;
+
+    final controller = TabController(
+      length: tabs.length,
+      initialIndex: initialIndex,
+      vsync: this,
+    );
+    controller.addListener(_onTabChanged);
+
+    _visibleTabs = tabs;
+    _tabController = controller;
+
+    if (previous != null) {
+      previous.removeListener(_onTabChanged);
+      // The old TabBar/TabBarView still reference it for the current frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
+  }
+
   void _onTabChanged() {
-    if (_tabController == null || _tabController!.indexIsChanging) return;
+    final controller = _tabController;
+    if (controller == null || controller.indexIsChanging) return;
     if (!mounted) return;
 
     final groupId = widget.profile.id;
-    final isMembersTab = _tabController!.index == _membersTabIndex;
+    final isMembersTab =
+        controller.index < _visibleTabs.length &&
+        _visibleTabs[controller.index] == _GroupProfileTab.members;
     ref.read(groupMembersTabActiveProvider(groupId).notifier).state =
         isMembersTab;
 
@@ -246,6 +280,37 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     double? lineHeight,
     List<GroupProfileSocialLink> orderedLinks,
   ) {
+    final (hasPractices, isPracticesLoading) = ref.watch(
+      groupPracticesProvider(profile.id).select(
+        (state) => (
+          state.practices.isNotEmpty,
+          state.isLoading && state.practices.isEmpty,
+        ),
+      ),
+    );
+    final eventsAsync = ref.watch(groupEventsProvider(profile.id));
+    // Keep the events tab when loading failed so its retry action stays
+    // reachable.
+    final hasEvents = eventsAsync.maybeWhen(
+      data: (either) => either.fold((_) => true, (page) => page.events.isNotEmpty),
+      error: (_, _) => true,
+      orElse: () => false,
+    );
+    final isEventsLoading =
+        eventsAsync.isLoading && !eventsAsync.hasValue && !eventsAsync.hasError;
+
+    // Wait for both sections before laying out the tabs, otherwise tabs would
+    // pop in and out as each request settles.
+    final isTabDataLoading = isPracticesLoading || isEventsLoading;
+    final tabs = <_GroupProfileTab>[
+      if (_hasPosts) _GroupProfileTab.posts,
+      if (hasEvents) _GroupProfileTab.events,
+      if (hasPractices) _GroupProfileTab.practices,
+      _GroupProfileTab.members,
+    ];
+    if (!isTabDataLoading) _syncTabController(tabs);
+    final controller = _tabController;
+
     return NestedScrollView(
       headerSliverBuilder:
           (context, _) => [
@@ -269,30 +334,49 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                   const SizedBox(height: 20),
                   _GroupFollowButton(profile: profile, isDark: isDark),
                   const SizedBox(height: 24),
-                  _buildTabBar(isDark, profile),
+                  if (controller != null) _buildTabBar(isDark, profile),
                 ],
               ),
             ),
           ],
-      body: TabBarView(
-        controller: _tabController!,
-        children: [
-          _buildEmptyTab('No posts yet', isDark, lineHeight),
-          GroupProfileEventsTab(
-            groupId: profile.id,
-            isDark: isDark,
-            lineHeight: lineHeight,
-          ),
-          _buildPracticesTab(profile, isDark, lineHeight),
-          GroupProfileMembersTab(
-            groupId: profile.id,
-            groupType: profile.groupType,
-            isDark: isDark,
-            lineHeight: lineHeight,
-          ),
-        ],
-      ),
+      body:
+          controller == null
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                controller: controller,
+                children: [
+                  for (final tab in _visibleTabs)
+                    _buildTabContent(tab, profile, isDark, lineHeight),
+                ],
+              ),
     );
+  }
+
+  Widget _buildTabContent(
+    _GroupProfileTab tab,
+    GroupProfile profile,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    return switch (tab) {
+      _GroupProfileTab.posts => _buildEmptyTab('No posts yet', isDark, lineHeight),
+      _GroupProfileTab.events => GroupProfileEventsTab(
+        groupId: profile.id,
+        isDark: isDark,
+        lineHeight: lineHeight,
+      ),
+      _GroupProfileTab.practices => _buildPracticesTab(
+        profile,
+        isDark,
+        lineHeight,
+      ),
+      _GroupProfileTab.members => GroupProfileMembersTab(
+        groupId: profile.id,
+        groupType: profile.groupType,
+        isDark: isDark,
+        lineHeight: lineHeight,
+      ),
+    };
   }
 
   GroupProfile _resolveProfile() {
@@ -605,10 +689,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final labelColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
-    final membersTabLabel =
-        profile.groupType.isPage
-            ? context.l10n.group_tab_followers
-            : context.l10n.group_tab_members;
 
     return Column(
       children: [
@@ -627,15 +707,24 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             fontWeight: FontWeight.w500,
           ),
           tabs: [
-            const Tab(text: 'Post'),
-            const Tab(text: 'Events'),
-            Tab(text: context.l10n.tab_practices),
-            Tab(text: membersTabLabel),
+            for (final tab in _visibleTabs) Tab(text: _tabLabel(tab, profile)),
           ],
         ),
         Divider(height: 1, thickness: 1, color: dividerColor),
       ],
     );
+  }
+
+  String _tabLabel(_GroupProfileTab tab, GroupProfile profile) {
+    return switch (tab) {
+      _GroupProfileTab.posts => 'Post',
+      _GroupProfileTab.events => 'Events',
+      _GroupProfileTab.practices => context.l10n.tab_practices,
+      _GroupProfileTab.members =>
+        profile.groupType.isPage
+            ? context.l10n.group_tab_followers
+            : context.l10n.group_tab_members,
+    };
   }
 
   Widget _buildPracticesTab(
