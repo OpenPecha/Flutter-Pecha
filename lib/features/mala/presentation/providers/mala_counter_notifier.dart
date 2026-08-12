@@ -473,15 +473,15 @@ class MalaCounterNotifier extends StateNotifier<MalaCounterState> {
     if (userId == null || userId.isEmpty) return false;
 
     state = state.copyWith(isResetting: true);
+    // Invalidate before await: clearSession runs inside resetAccumulator, and a
+    // late timed-out GET must not rewrite Hive between clear and return.
+    _detailApplyGeneration++;
     try {
       await _sync.resetAccumulator(
         _presetId,
         deleteAccumulator: _deleteUserAccumulator,
       );
       if (!mounted) return false;
-      // Invalidate any in-flight late seed apply from a timed-out GET that still
-      // carries the pre-reset accumulator (would resurrect the old total).
-      _detailApplyGeneration++;
       final localState = _local.read(userId, _presetId);
       state = state.copyWith(
         total: 0,

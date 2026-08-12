@@ -143,15 +143,23 @@ void main() {
       'chenrezig',
       const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
     );
-    final gate = Completer<Either<Failure, MalaCount>>();
-    when(getDetail(any)).thenAnswer((_) => gate.future);
+    final detailGate = Completer<Either<Failure, MalaCount>>();
+    final resetContinue = Completer<void>();
+    when(getDetail(any)).thenAnswer((_) => detailGate.future);
     when(
       sync.resetAccumulator(
         any,
         deleteAccumulator: anyNamed('deleteAccumulator'),
       ),
     ).thenAnswer((_) async {
+      // clearSession happens before resetAccumulator returns (real sync path).
       await local.clearSession(userId, 'chenrezig');
+      // Late pre-reset GET lands in this window — must not rewrite Hive.
+      detailGate.complete(
+        const Right(MalaCount(accumulatorId: 'acc-1', total: 88)),
+      );
+      await Future.delayed(Duration.zero);
+      await resetContinue.future;
     });
 
     final notifier = buildNotifier(
@@ -162,15 +170,14 @@ void main() {
     expect(notifier.state.isSeeding, isFalse);
     expect(notifier.state.total, 88);
 
-    final ok = await notifier.resetCount();
-    expect(ok, isTrue);
-    expect(notifier.state.total, 0);
+    final resetFuture = notifier.resetCount();
+    await Future.delayed(Duration.zero);
+    expect(local.read(userId, 'chenrezig').total, 0);
     expect(local.read(userId, 'chenrezig').accumulatorId, isNull);
 
-    // Pre-reset GET finally returns — must not overwrite the cleared session.
-    gate.complete(const Right(MalaCount(accumulatorId: 'acc-1', total: 88)));
-    await Future.delayed(Duration.zero);
-
+    resetContinue.complete();
+    final ok = await resetFuture;
+    expect(ok, isTrue);
     expect(notifier.state.total, 0);
     expect(local.read(userId, 'chenrezig').total, 0);
     expect(local.read(userId, 'chenrezig').accumulatorId, isNull);
