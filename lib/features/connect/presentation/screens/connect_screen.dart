@@ -148,15 +148,14 @@ class _ConnectMainTabBar extends StatelessWidget {
       ),
       child: TabBar(
         controller: controller,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
+        tabAlignment: TabAlignment.fill,
         labelColor: labelColor,
         unselectedLabelColor: unselectedColor,
         indicatorColor: labelColor,
         indicatorWeight: 2,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
         labelStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w700,
