@@ -39,46 +39,48 @@ class _VerseOfDayCardState extends ConsumerState<VerseOfDayCard> {
     final typography = VerseOfDayTypography.forCard(languageCode);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Material(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(_borderRadius),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => showVerseShareSheet(context, widget.verseOfDay),
-          borderRadius: BorderRadius.circular(_borderRadius),
-          child: VerseOfDayContent(
-            verseOfDay: widget.verseOfDay,
-            typography: typography,
-            useContentFontForAttribution: typography.useContentFontForAttribution,
-            verseColor: colorScheme.onSurface,
-            attributionColor: colorScheme.onSurfaceVariant,
-            footerAction: GestureDetector(
-              key: _shareIconKey,
-              onTap: _isSharing ? null : _onShareTap,
-              behavior: HitTestBehavior.opaque,
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child:
-                    _isSharing
-                        ? Center(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+    final borderRadius = BorderRadius.only(
+      bottomLeft: Radius.circular(_borderRadius),
+      bottomRight: Radius.circular(_borderRadius),
+    );
+
+    return Material(
+      color: colorScheme.surface,
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => showVerseShareSheet(context, widget.verseOfDay),
+        borderRadius: borderRadius,
+        child: VerseOfDayContent(
+          verseOfDay: widget.verseOfDay,
+          typography: typography,
+          useContentFontForAttribution: typography.useContentFontForAttribution,
+          verseColor: colorScheme.onSurface,
+          attributionColor: colorScheme.onSurfaceVariant,
+          footerAction: GestureDetector(
+            key: _shareIconKey,
+            onTap: _isSharing ? null : _onShareTap,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child:
+                  _isSharing
+                      ? Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorScheme.onSurfaceVariant,
                           ),
-                        )
-                        : Icon(
-                          AppAssets.readerShare,
-                          color: colorScheme.onSurfaceVariant,
-                          size: 22,
                         ),
-              ),
+                      )
+                      : Icon(
+                        AppAssets.readerShare,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 22,
+                      ),
             ),
           ),
         ),
