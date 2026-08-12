@@ -345,8 +345,8 @@ class _ConnectPostDetailScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _PostAuthorRow(
-            name: _post.creatorName,
-            avatarUrl: _post.creatorImageUrl,
+            name: _post.groupName,
+            avatarUrl: _post.groupAvatarUrl,
             isDark: isDark,
           ),
           if (caption.isNotEmpty) ...[
@@ -426,7 +426,7 @@ class _PostAuthorRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayName =
-        name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+        name.trim().isNotEmpty ? name.trim() : context.l10n.connect_group_fallback_title;
 
     return Row(
       children: [

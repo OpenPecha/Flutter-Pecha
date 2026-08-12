@@ -71,8 +71,8 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _AuthorRow(
-                  name: post.creatorName,
-                  avatarUrl: post.creatorImageUrl,
+                  name: post.groupName,
+                  avatarUrl: post.groupAvatarUrl,
                   isDark: isDark,
                 ),
                 if (caption.isNotEmpty) ...[
@@ -204,7 +204,8 @@ class _AuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+    final displayName =
+        name.trim().isNotEmpty ? name.trim() : context.l10n.connect_group_fallback_title;
 
     return Row(
       children: [

@@ -39,10 +39,19 @@ class ConnectFeedItemModel {
 
     ConnectPost? post;
     if (json['post'] is Map<String, dynamic>) {
-      post =
-          ConnectPostModel.fromJson(
-            json['post'] as Map<String, dynamic>,
-          ).toEntity();
+      final postJson = Map<String, dynamic>.from(
+        json['post'] as Map<String, dynamic>,
+      );
+      final wrapperGroupName = json['group_name'] as String?;
+      if ((postJson['group_name'] as String?)?.isEmpty ?? true) {
+        if (wrapperGroupName != null && wrapperGroupName.isNotEmpty) {
+          postJson['group_name'] = wrapperGroupName;
+        }
+      }
+      if (postJson['group_avatar_url'] == null) {
+        postJson['group_avatar_url'] = json['group_avatar_url'];
+      }
+      post = ConnectPostModel.fromJson(postJson).toEntity();
     }
 
     GroupEvent? event;
