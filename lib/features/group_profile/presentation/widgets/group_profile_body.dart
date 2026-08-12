@@ -51,6 +51,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   static const int _membersTabIndex = 3;
 
   TabController? _tabController;
+  final ScrollController _practicesScrollController = ScrollController();
   String? _enrollingSeriesId;
   String? _joiningAccumulatorId;
   final Set<String> _localGroupEnrolledSeriesIds = {};
@@ -88,6 +89,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         vsync: this,
       );
       _tabController!.addListener(_onTabChanged);
+      _practicesScrollController.addListener(_onPracticesScroll);
 
       final groupId = widget.profile.id;
       // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
@@ -122,10 +124,54 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
   }
 
+  void _onPracticesScroll() {
+    if (!_practicesScrollController.hasClients) return;
+
+    if (_practicesScrollController.position.pixels >=
+        _practicesScrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(groupPracticesProvider(widget.profile.id).notifier)
+          .loadMore();
+    }
+  }
+
+  void _syncPracticeEnrollmentFromList(List<GroupPractice> practices) {
+    final accumulators = practices
+        .where((practice) => practice.type == GroupPracticeType.accumulator)
+        .map((practice) => practice.accumulator)
+        .whereType<GroupAccumulator>()
+        .toList();
+    ref
+        .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
+        .syncFromApi(accumulators);
+
+    final apiEnrolledIds = practices
+        .where(
+          (practice) =>
+              practice.series != null &&
+              practice.series!.isGroupEnrolled == true,
+        )
+        .map((practice) => practice.series!.id)
+        .toSet();
+    final apiNotEnrolledIds = practices
+        .where(
+          (practice) =>
+              practice.series != null &&
+              practice.series!.isGroupEnrolled == null,
+        )
+        .map((practice) => practice.series!.id);
+    setState(() {
+      _localGroupEnrolledSeriesIds.addAll(apiEnrolledIds);
+      _localGroupEnrolledSeriesIds.removeAll(apiNotEnrolledIds);
+    });
+  }
+
   @override
   void dispose() {
     _membersTabActiveSub?.close();
     _membersNeedsRefreshSub?.close();
+    _practicesScrollController.removeListener(_onPracticesScroll);
+    _practicesScrollController.dispose();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     _moreRecognizer.dispose();
@@ -144,44 +190,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         ref
             .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
             .clear();
-        ref.invalidate(groupPracticesProvider(widget.profile.id));
+        refreshGroupPractices(ref, widget.profile.id);
       }
     });
     ref.listen(groupPracticesProvider(widget.profile.id), (previous, next) {
-      next.whenData((either) {
-        either.fold((_) {}, (page) {
-          final accumulators = page.practices
-              .where((practice) => practice.type == GroupPracticeType.accumulator)
-              .map((practice) => practice.accumulator)
-              .whereType<GroupAccumulator>()
-              .toList();
-          ref
-              .read(
-                groupAccumulatorJoinCacheProvider(widget.profile.id).notifier,
-              )
-              .syncFromApi(accumulators);
-
-          final apiEnrolledIds = page.practices
-              .where(
-                (practice) =>
-                    practice.series != null &&
-                    practice.series!.isGroupEnrolled == true,
-              )
-              .map((practice) => practice.series!.id)
-              .toSet();
-          final apiNotEnrolledIds = page.practices
-              .where(
-                (practice) =>
-                    practice.series != null &&
-                    practice.series!.isGroupEnrolled == null,
-              )
-              .map((practice) => practice.series!.id);
-          setState(() {
-            _localGroupEnrolledSeriesIds.addAll(apiEnrolledIds);
-            _localGroupEnrolledSeriesIds.removeAll(apiNotEnrolledIds);
-          });
-        });
-      });
+      if (next.isLoading && next.practices.isEmpty) return;
+      _syncPracticeEnrollmentFromList(next.practices);
     });
 
     final enrollingId = _enrollingSeriesId;
@@ -629,51 +643,135 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     bool isDark,
     double? lineHeight,
   ) {
-    final practicesAsync = ref.watch(groupPracticesProvider(profile.id));
+    final practicesState = ref.watch(groupPracticesProvider(profile.id));
 
-    return practicesAsync.when(
-      data: (either) {
-        final practices = either.fold(
-          (_) => <GroupPractice>[],
-          (page) => page.practices,
-        );
+    if (practicesState.isLoading && practicesState.practices.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (practices.isEmpty) {
-          return const SizedBox.shrink();
+    if (practicesState.practices.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final itemCount =
+        practicesState.practices.length + (practicesState.isLoadingMore ? 1 : 0);
+
+    return ListView.builder(
+      controller: _practicesScrollController,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        if (index >= practicesState.practices.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: practices.length,
-          itemBuilder: (context, index) {
-            final practice = practices[index];
-            final isLast = index == practices.length - 1;
+        final practice = practicesState.practices[index];
+        final isLast = index == practicesState.practices.length - 1;
 
-            return Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-              child: switch (practice.type) {
-                GroupPracticeType.series when practice.series != null =>
-                  _buildSeriesCard(
-                    profile,
-                    practice.series!,
-                    isDark,
-                    lineHeight,
-                  ),
-                GroupPracticeType.accumulator when practice.accumulator != null =>
-                  _buildAccumulatorCard(
-                    profile,
-                    practice.accumulator!,
-                    isDark,
-                    lineHeight,
-                  ),
-                _ => const SizedBox.shrink(),
-              },
-            );
+        return Padding(
+          padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+          child: switch (practice.type) {
+            GroupPracticeType.series when practice.series != null =>
+              _buildSeriesCard(
+                profile,
+                practice.series!,
+                isDark,
+                lineHeight,
+              ),
+            GroupPracticeType.accumulator when practice.accumulator != null =>
+              _buildAccumulatorCard(
+                profile,
+                practice.accumulator!,
+                isDark,
+                lineHeight,
+              ),
+            GroupPracticeType.collection when practice.collection != null =>
+              _buildCollectionCard(
+                practice.collection!,
+                isDark,
+                lineHeight,
+              ),
+            _ => const SizedBox.shrink(),
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildCollectionCard(
+    GroupPracticeCollection collection,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+
+    return Material(
+      color: cardColor,
+      elevation: isDark ? 0 : 1,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 140,
+            width: double.infinity,
+            child:
+                collection.imageUrl != null && collection.imageUrl!.isNotEmpty
+                    ? CachedNetworkImageWidget(
+                      imageUrl: collection.imageUrl!,
+                      fit: BoxFit.cover,
+                    )
+                    : ColoredBox(
+                      color:
+                          isDark
+                              ? AppColors.surfaceVariantDark
+                              : AppColors.grey100,
+                      child: Icon(
+                        AppAssets.bookOpenText,
+                        size: 40,
+                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+                      ),
+                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  collection.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: lineHeight,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (collection.itemCount > 0) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    context.l10n.home_recitation_count(collection.itemCount),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: secondaryColor,
+                      height: lineHeight,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

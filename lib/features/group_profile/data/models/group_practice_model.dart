@@ -4,15 +4,57 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_pract
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/shared/domain/value_objects/responsive_image.dart';
 
+class GroupPracticeCollectionModel {
+  final String id;
+  final String groupId;
+  final String name;
+  final String? imageUrl;
+  final int itemCount;
+  final DateTime? createdAt;
+
+  GroupPracticeCollectionModel({
+    required this.id,
+    required this.groupId,
+    required this.name,
+    this.imageUrl,
+    this.itemCount = 0,
+    this.createdAt,
+  });
+
+  factory GroupPracticeCollectionModel.fromJson(Map<String, dynamic> json) {
+    return GroupPracticeCollectionModel(
+      id: json['id'] as String? ?? '',
+      groupId: json['group_id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      imageUrl: json['img_url'] as String?,
+      itemCount: (json['item_count'] as num?)?.toInt() ?? 0,
+      createdAt: GroupProfileModel.parseDate(json['created_at']),
+    );
+  }
+
+  GroupPracticeCollection toEntity() {
+    return GroupPracticeCollection(
+      id: id,
+      groupId: groupId,
+      name: name,
+      imageUrl: imageUrl,
+      itemCount: itemCount,
+      createdAt: createdAt,
+    );
+  }
+}
+
 class GroupPracticeModel {
   final GroupPracticeType type;
   final Map<String, dynamic>? seriesJson;
   final Map<String, dynamic>? accumulatorJson;
+  final Map<String, dynamic>? collectionJson;
 
   GroupPracticeModel({
     required this.type,
     this.seriesJson,
     this.accumulatorJson,
+    this.collectionJson,
   });
 
   factory GroupPracticeModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +69,7 @@ class GroupPracticeModel {
       type: type,
       seriesJson: json['series'] as Map<String, dynamic>?,
       accumulatorJson: json['accumulator'] as Map<String, dynamic>?,
+      collectionJson: json['collection'] as Map<String, dynamic>?,
     );
   }
 
@@ -38,6 +81,10 @@ class GroupPracticeModel {
       accumulator:
           accumulatorJson != null
               ? GroupAccumulatorModel.fromJson(accumulatorJson!).toEntity()
+              : null,
+      collection:
+          collectionJson != null
+              ? GroupPracticeCollectionModel.fromJson(collectionJson!).toEntity()
               : null,
     );
   }

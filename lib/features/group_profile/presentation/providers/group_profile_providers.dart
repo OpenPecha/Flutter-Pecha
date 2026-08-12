@@ -49,18 +49,158 @@ final groupProfileProvider = FutureProvider.autoDispose
   );
 });
 
-final groupPracticesProvider = FutureProvider.autoDispose
-    .family<Either<Failure, GroupPracticesPage>, String>((ref, groupId) async {
+class GroupPracticesState {
+  final List<GroupPractice> practices;
+  final int total;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final String? error;
+  final bool hasMore;
+  final int skip;
+
+  const GroupPracticesState({
+    this.practices = const [],
+    this.total = 0,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.error,
+    this.hasMore = true,
+    this.skip = 0,
+  });
+
+  GroupPracticesState copyWith({
+    List<GroupPractice>? practices,
+    int? total,
+    bool? isLoading,
+    bool? isLoadingMore,
+    String? error,
+    bool? hasMore,
+    int? skip,
+    bool clearError = false,
+  }) {
+    return GroupPracticesState(
+      practices: practices ?? this.practices,
+      total: total ?? this.total,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      error: clearError ? null : error ?? this.error,
+      hasMore: hasMore ?? this.hasMore,
+      skip: skip ?? this.skip,
+    );
+  }
+}
+
+class GroupPracticesNotifier extends StateNotifier<GroupPracticesState> {
+  GroupPracticesNotifier({
+    required GroupProfileRepositoryInterface repository,
+    required Ref ref,
+    required String groupId,
+  }) : _repository = repository,
+       _ref = ref,
+       _groupId = groupId,
+       super(const GroupPracticesState());
+
+  final GroupProfileRepositoryInterface _repository;
+  final Ref _ref;
+  final String _groupId;
+  static const int _limit = 20;
+  int _requestGeneration = 0;
+
+  Future<void> loadInitial() async {
+    if (state.isLoading || state.isLoadingMore) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _repository.getGroupPractices(
+      _groupId,
+      language: _ref.read(contentLanguageProvider),
+      skip: 0,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          practices: page.practices,
+          total: page.total,
+          isLoading: false,
+          hasMore: page.hasMore,
+          skip: page.practices.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+
+    final generation = _requestGeneration;
+    state = state.copyWith(isLoadingMore: true, clearError: true);
+
+    final result = await _repository.getGroupPractices(
+      _groupId,
+      language: _ref.read(contentLanguageProvider),
+      skip: state.skip,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoadingMore: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          practices: [...state.practices, ...page.practices],
+          total: page.total,
+          isLoadingMore: false,
+          hasMore: page.hasMore,
+          skip: state.skip + page.practices.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  void retry() {
+    if (state.practices.isEmpty) {
+      loadInitial();
+    } else {
+      loadMore();
+    }
+  }
+}
+
+final groupPracticesProvider = StateNotifierProvider.autoDispose
+    .family<GroupPracticesNotifier, GroupPracticesState, String>((ref, groupId) {
   ref.watch(authProvider);
-  final language = ref.watch(contentLanguageProvider);
-  final repository = ref.watch(groupProfileRepositoryProvider);
-  return repository.getGroupPractices(
-    groupId,
-    language: language,
-    skip: 0,
-    limit: 20,
+  ref.watch(contentLanguageProvider);
+  final notifier = GroupPracticesNotifier(
+    repository: ref.watch(groupProfileRepositoryProvider),
+    ref: ref,
+    groupId: groupId,
   );
+  notifier.loadInitial();
+  return notifier;
 });
+
+void refreshGroupPractices(WidgetRef ref, String groupId) {
+  if (!ref.exists(groupPracticesProvider(groupId))) return;
+  ref.read(groupPracticesProvider(groupId).notifier).loadInitial();
+}
+
+void refreshGroupPracticesFromRef(Ref ref, String groupId) {
+  if (!ref.exists(groupPracticesProvider(groupId))) return;
+  ref.read(groupPracticesProvider(groupId).notifier).loadInitial();
+}
 
 @immutable
 class GroupFollowKey {
@@ -141,7 +281,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
 
   void _invalidateGroupProfile() {
     _ref.invalidate(groupProfileProvider(_key.groupId));
-    _ref.invalidate(groupPracticesProvider(_key.groupId));
+    refreshGroupPracticesFromRef(_ref, _key.groupId);
   }
 
   void _refreshGroupMembers() {
@@ -421,7 +561,7 @@ Future<bool> enrollSeriesThroughGroup({
         .markAutoJoinedFromPracticeEnrollment(group: profile),
   );
   ref.invalidate(groupProfileProvider(groupId));
-  ref.invalidate(groupPracticesProvider(groupId));
+  refreshGroupPractices(ref, groupId);
   return true;
 }
 
@@ -440,7 +580,7 @@ Future<void> completeGroupPracticeEnrollmentFlow({
         .syncJoinStatusFromServer(connectGroup: profile),
   );
   ref.invalidate(groupProfileProvider(groupId));
-  ref.invalidate(groupPracticesProvider(groupId));
+  refreshGroupPractices(ref, groupId);
 }
 
 class GroupMembersState {
