@@ -103,7 +103,7 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
             ref.invalidate(
               groupAccumulatorDetailProvider(widget.accumulatorId),
             );
-            ref.invalidate(groupAccumulatorsProvider(resolvedDetail.groupId));
+            refreshGroupPractices(ref, resolvedDetail.groupId);
           }
         },
       );

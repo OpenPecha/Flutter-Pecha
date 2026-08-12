@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_event_model.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_member_model.dart';
+import 'package:flutter_pecha/features/group_profile/data/models/group_practice_model.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_profile_model.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 
@@ -87,6 +88,42 @@ class GroupProfileRemoteDatasource {
             ? 'Failed to check follow status'
             : 'Failed to check join status',
       );
+    }
+  }
+
+  Future<GroupPracticesPageModel> fetchGroupPractices(
+    String groupId, {
+    required String language,
+    required int skip,
+    required int limit,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/author/groups/$groupId/practices',
+        queryParameters: {
+          'language': language,
+          'skip': skip,
+          'limit': limit,
+        },
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupPracticesPageModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+
+      _logger.error(
+        'Failed to load group practices $groupId: ${response.statusCode}',
+      );
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load group practices',
+      );
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchGroupPractices', e);
+      throw _dioToException(e, 'Failed to load group practices');
     }
   }
 

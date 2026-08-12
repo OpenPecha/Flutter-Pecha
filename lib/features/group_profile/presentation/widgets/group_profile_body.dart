@@ -11,6 +11,7 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
@@ -50,6 +51,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   static const int _membersTabIndex = 3;
 
   TabController? _tabController;
+  final ScrollController _practicesScrollController = ScrollController();
   String? _enrollingSeriesId;
   String? _joiningAccumulatorId;
   final Set<String> _localGroupEnrolledSeriesIds = {};
@@ -87,6 +89,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         vsync: this,
       );
       _tabController!.addListener(_onTabChanged);
+      _practicesScrollController.addListener(_onPracticesScroll);
 
       final groupId = widget.profile.id;
       // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
@@ -121,10 +124,54 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
   }
 
+  void _onPracticesScroll() {
+    if (!_practicesScrollController.hasClients) return;
+
+    if (_practicesScrollController.position.pixels >=
+        _practicesScrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(groupPracticesProvider(widget.profile.id).notifier)
+          .loadMore();
+    }
+  }
+
+  void _syncPracticeEnrollmentFromList(List<GroupPractice> practices) {
+    final accumulators = practices
+        .where((practice) => practice.type == GroupPracticeType.accumulator)
+        .map((practice) => practice.accumulator)
+        .whereType<GroupAccumulator>()
+        .toList();
+    ref
+        .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
+        .syncFromApi(accumulators);
+
+    final apiEnrolledIds = practices
+        .where(
+          (practice) =>
+              practice.series != null &&
+              practice.series!.isGroupEnrolled == true,
+        )
+        .map((practice) => practice.series!.id)
+        .toSet();
+    final apiNotEnrolledIds = practices
+        .where(
+          (practice) =>
+              practice.series != null &&
+              practice.series!.isGroupEnrolled == null,
+        )
+        .map((practice) => practice.series!.id);
+    setState(() {
+      _localGroupEnrolledSeriesIds.addAll(apiEnrolledIds);
+      _localGroupEnrolledSeriesIds.removeAll(apiNotEnrolledIds);
+    });
+  }
+
   @override
   void dispose() {
     _membersTabActiveSub?.close();
     _membersNeedsRefreshSub?.close();
+    _practicesScrollController.removeListener(_onPracticesScroll);
+    _practicesScrollController.dispose();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     _moreRecognizer.dispose();
@@ -143,37 +190,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         ref
             .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
             .clear();
-        ref.invalidate(groupAccumulatorsProvider(widget.profile.id));
+        refreshGroupPractices(ref, widget.profile.id);
       }
     });
-    ref.listen(groupAccumulatorsProvider(widget.profile.id), (previous, next) {
-      next.whenData((either) {
-        either.fold((_) {}, (page) {
-          ref
-              .read(
-                groupAccumulatorJoinCacheProvider(widget.profile.id).notifier,
-              )
-              .syncFromApi(page.accumulators);
-        });
-      });
-    });
-    ref.listen(groupProfileProvider(widget.profile.id), (previous, next) {
-      next.whenData((either) {
-        either.fold((_) {}, (profile) {
-          final apiEnrolledIds =
-              profile.series
-                  .where((series) => series.isGroupEnrolled == true)
-                  .map((series) => series.id)
-                  .toSet();
-          final apiNotEnrolledIds = profile.series
-              .where((series) => series.isGroupEnrolled == null)
-              .map((series) => series.id);
-          setState(() {
-            _localGroupEnrolledSeriesIds.addAll(apiEnrolledIds);
-            _localGroupEnrolledSeriesIds.removeAll(apiNotEnrolledIds);
-          });
-        });
-      });
+    ref.listen(groupPracticesProvider(widget.profile.id), (previous, next) {
+      if (next.isLoading && next.practices.isEmpty) return;
+      _syncPracticeEnrollmentFromList(next.practices);
     });
 
     final enrollingId = _enrollingSeriesId;
@@ -238,7 +260,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                     ),
                     const SizedBox(height: 14),
                   ],
-                  _buildProfileHeader(profile, isDark, lineHeight, orderedLinks),
+                  _buildProfileHeader(
+                    profile,
+                    isDark,
+                    lineHeight,
+                    orderedLinks,
+                  ),
                   const SizedBox(height: 20),
                   _GroupFollowButton(profile: profile, isDark: isDark),
                   const SizedBox(height: 24),
@@ -432,11 +459,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         void openAboutScreen() {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => GroupAboutScreen(
-                title: profile.title,
-                description: description,
-                links: orderedLinks,
-              ),
+              builder:
+                  (_) => GroupAboutScreen(
+                    title: profile.title,
+                    description: description,
+                    links: orderedLinks,
+                  ),
             ),
           );
         }
@@ -502,11 +530,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         final truncatedText = description.substring(0, validLength).trimRight();
 
         return Text.rich(
-          TextSpan(
-            text: truncatedText,
-            style: style,
-            children: [moreSpan],
-          ),
+          TextSpan(text: truncatedText, style: style, children: [moreSpan]),
         );
       },
     );
@@ -538,10 +562,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => GroupAboutScreen(
-              title: profile.title,
-              links: links,
-            ),
+            builder:
+                (_) => GroupAboutScreen(title: profile.title, links: links),
           ),
         );
       },
@@ -565,8 +587,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                   TextSpan(text: primaryLink.url),
                   if (moreCount > 0)
                     TextSpan(
-                      text:
-                          ' ${context.l10n.group_and_more_links(moreCount)}',
+                      text: ' ${context.l10n.group_and_more_links(moreCount)}',
                       style: TextStyle(color: secondaryColor),
                     ),
                 ],
@@ -622,107 +643,159 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     bool isDark,
     double? lineHeight,
   ) {
-    final accumulatorsAsync = ref.watch(groupAccumulatorsProvider(profile.id));
-    final series = profile.series;
+    final practicesState = ref.watch(groupPracticesProvider(profile.id));
 
-    return accumulatorsAsync.when(
-      data: (either) {
-        final accumulators = either.fold(
-          (_) => <GroupAccumulator>[],
-          (page) => page.accumulators,
-        );
+    if (practicesState.isLoading && practicesState.practices.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (series.isEmpty && accumulators.isEmpty) {
-          return const SizedBox.shrink();
+    if (practicesState.practices.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final itemCount =
+        practicesState.practices.length + (practicesState.isLoadingMore ? 1 : 0);
+
+    return ListView.builder(
+      controller: _practicesScrollController,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        if (index >= practicesState.practices.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
-        final itemCount = series.length + accumulators.length;
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: itemCount,
-          itemBuilder: (context, index) {
-            final isLast = index == itemCount - 1;
-            if (index < series.length) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-                child: _buildSeriesCard(
-                  profile,
-                  series[index],
-                  isDark,
-                  lineHeight,
+        final practice = practicesState.practices[index];
+        final isLast = index == practicesState.practices.length - 1;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+          child: switch (practice.type) {
+            GroupPracticeType.series when practice.series != null =>
+              _buildSeriesCard(
+                profile,
+                practice.series!,
+                isDark,
+                lineHeight,
+              ),
+            GroupPracticeType.accumulator when practice.accumulator != null =>
+              _buildAccumulatorCard(
+                profile,
+                practice.accumulator!,
+                isDark,
+                lineHeight,
+              ),
+            GroupPracticeType.collection when practice.collection != null =>
+              _buildCollectionCard(
+                practice.collection!,
+                isDark,
+                lineHeight,
+              ),
+            _ => const SizedBox.shrink(),
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCollectionCard(
+    GroupPracticeCollection collection,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+
+    return Material(
+      color: cardColor,
+      elevation: isDark ? 0 : 1,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 140,
+            width: double.infinity,
+            child:
+                collection.imageUrl != null && collection.imageUrl!.isNotEmpty
+                    ? CachedNetworkImageWidget(
+                      imageUrl: collection.imageUrl!,
+                      fit: BoxFit.cover,
+                    )
+                    : ColoredBox(
+                      color:
+                          isDark
+                              ? AppColors.surfaceVariantDark
+                              : AppColors.grey100,
+                      child: Icon(
+                        AppAssets.bookOpenText,
+                        size: 40,
+                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+                      ),
+                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  collection.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: lineHeight,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              );
-            }
+                if (collection.itemCount > 0) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    context.l10n.home_recitation_count(collection.itemCount),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: secondaryColor,
+                      height: lineHeight,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            final accumulator = accumulators[index - series.length];
-            final localJoinedIds = ref.watch(
-              groupAccumulatorJoinCacheProvider(profile.id),
-            );
-            final hasJoined = accumulatorHasJoined(
-              accumulator,
-              localJoinedIds: localJoinedIds,
-            );
-            return Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-              child: GroupAccumulatorCard(
-                accumulator: accumulator,
-                hasJoined: hasJoined,
-                isDark: isDark,
-                lineHeight: lineHeight,
-                isJoining: _joiningAccumulatorId == accumulator.id,
-                onTap: () => _navigateToAccumulatorDetail(accumulator.id),
-                onJoinTap: () => _onJoinAccumulatorTap(profile, accumulator),
-              ),
-            );
-          },
-        );
-      },
-      loading: () {
-        if (series.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: series.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: index == series.length - 1 ? 0 : 16,
-              ),
-              child: _buildSeriesCard(
-                profile,
-                series[index],
-                isDark,
-                lineHeight,
-              ),
-            );
-          },
-        );
-      },
-      error: (_, __) {
-        if (series.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: series.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: index == series.length - 1 ? 0 : 16,
-              ),
-              child: _buildSeriesCard(
-                profile,
-                series[index],
-                isDark,
-                lineHeight,
-              ),
-            );
-          },
-        );
-      },
+  Widget _buildAccumulatorCard(
+    GroupProfile profile,
+    GroupAccumulator accumulator,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final localJoinedIds = ref.watch(
+      groupAccumulatorJoinCacheProvider(profile.id),
+    );
+    final hasJoined = accumulatorHasJoined(
+      accumulator,
+      localJoinedIds: localJoinedIds,
+    );
+    return GroupAccumulatorCard(
+      accumulator: accumulator,
+      hasJoined: hasJoined,
+      isDark: isDark,
+      lineHeight: lineHeight,
+      isJoining: _joiningAccumulatorId == accumulator.id,
+      onTap: () => _navigateToAccumulatorDetail(accumulator.id),
+      onJoinTap: () => _onJoinAccumulatorTap(profile, accumulator),
     );
   }
 
@@ -813,10 +886,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-      child: PlanInlineMarkdownView(
-        content: content,
-        fontSize: bodyFontSize,
-      ),
+      child: PlanInlineMarkdownView(content: content, fontSize: bodyFontSize),
     );
   }
 
@@ -1067,7 +1137,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
-
 }
 
 class _GroupFollowButton extends ConsumerWidget {

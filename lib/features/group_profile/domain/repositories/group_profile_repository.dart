@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_events_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_members_page.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 
 abstract class GroupProfileRepositoryInterface {
@@ -25,6 +26,13 @@ abstract class GroupProfileRepositoryInterface {
     String groupId,
     GroupType groupType,
   );
+
+  Future<Either<Failure, GroupPracticesPage>> getGroupPractices(
+    String groupId, {
+    required String language,
+    required int skip,
+    required int limit,
+  });
 
   Future<Either<Failure, GroupMembersPage>> getGroupMembers(
     String groupId, {
