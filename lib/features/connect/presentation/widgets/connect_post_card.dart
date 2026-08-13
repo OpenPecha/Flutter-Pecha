@@ -8,9 +8,9 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_like_actions.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_detail_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ConnectPostCard extends ConsumerStatefulWidget {
@@ -127,12 +127,11 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
   }
 
   void _openDetail() {
-    context.push(
-      '/home/posts/${widget.post.id}',
-      extra: {
-        'post': widget.post,
-        'includeUnfollowed': widget.includeUnfollowed,
-      },
+    ConnectPostDetailDrawer.show(
+      context,
+      postId: widget.post.id,
+      initialPost: widget.post,
+      includeUnfollowed: widget.includeUnfollowed,
     );
   }
 

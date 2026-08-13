@@ -19,7 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ConnectPostDetailScreen extends ConsumerStatefulWidget {
+class ConnectPostDetailScreen extends ConsumerWidget {
   const ConnectPostDetailScreen({
     super.key,
     required this.postId,
@@ -32,31 +32,75 @@ class ConnectPostDetailScreen extends ConsumerStatefulWidget {
   final bool includeUnfollowed;
 
   @override
-  ConsumerState<ConnectPostDetailScreen> createState() =>
-      _ConnectPostDetailScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor:
+          isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
+      body: SafeArea(
+        bottom: false,
+        child: ConnectPostDetailPanel(
+          postId: postId,
+          initialPost: initialPost,
+          includeUnfollowed: includeUnfollowed,
+          showTopBar: true,
+        ),
+      ),
+    );
+  }
 }
 
-class _ConnectPostDetailScreenState
-    extends ConsumerState<ConnectPostDetailScreen> {
+class ConnectPostDetailPanel extends ConsumerStatefulWidget {
+  const ConnectPostDetailPanel({
+    super.key,
+    required this.postId,
+    this.initialPost,
+    this.includeUnfollowed = false,
+    this.scrollController,
+    this.showTopBar = false,
+    this.showPostPreview = true,
+  });
+
+  final String postId;
+  final ConnectPost? initialPost;
+  final bool includeUnfollowed;
+  final ScrollController? scrollController;
+  final bool showTopBar;
+  final bool showPostPreview;
+
+  @override
+  ConsumerState<ConnectPostDetailPanel> createState() =>
+      _ConnectPostDetailPanelState();
+}
+
+class _ConnectPostDetailPanelState extends ConsumerState<ConnectPostDetailPanel> {
+  late final ScrollController _scrollController;
+  late final bool _ownsScrollController;
   late ConnectPost _post;
   final ConnectOptimisticLikeState _likeState = ConnectOptimisticLikeState();
   bool _captionExpanded = false;
   ConnectPostComment? _replyTarget;
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _post = widget.initialPost ?? _emptyPost(widget.postId);
+    _ownsScrollController = widget.scrollController == null;
+    _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    if (_ownsScrollController) {
+      _scrollController.dispose();
+    }
     _commentController.dispose();
     _commentFocusNode.dispose();
     super.dispose();
@@ -209,37 +253,29 @@ class _ConnectPostDetailScreenState
     final commentCount =
         commentsState.total > 0 ? commentsState.total : _post.commentCount;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor:
-          isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _buildTopBar(context, isDark),
-            Expanded(
-              child: MediaQuery.removeViewInsets(
-                context: context,
-                removeBottom: true,
-                child: _buildBody(context, isDark, commentsState, commentCount),
-              ),
-            ),
-            ConnectCommentComposer(
-              controller: _commentController,
-              focusNode: _commentFocusNode,
-              isSubmitting: isSubmittingComment,
-              onSubmit: _submitComment,
-              replyHandle: _replyTarget?.user.mentionHandle,
-              onClearReply: _clearReply,
-            ),
-          ],
+    return Column(
+      children: [
+        if (widget.showTopBar) _buildTopBar(context),
+        Expanded(
+          child: MediaQuery.removeViewInsets(
+            context: context,
+            removeBottom: true,
+            child: _buildBody(context, isDark, commentsState, commentCount),
+          ),
         ),
-      ),
+        ConnectCommentComposer(
+          controller: _commentController,
+          focusNode: _commentFocusNode,
+          isSubmitting: isSubmittingComment,
+          onSubmit: _submitComment,
+          replyHandle: _replyTarget?.user.mentionHandle,
+          onClearReply: _clearReply,
+        ),
+      ],
     );
   }
 
-  Widget _buildTopBar(BuildContext context, bool isDark) {
+  Widget _buildTopBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
       child: Row(
@@ -283,10 +319,17 @@ class _ConnectPostDetailScreenState
 
     return ListView(
       controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        widget.showPostPreview ? 0 : 8,
+        20,
+        16,
+      ),
       children: [
-        _buildPostCard(context, isDark, commentCount),
-        const SizedBox(height: 24),
+        if (widget.showPostPreview) ...[
+          _buildPostCard(context, isDark, commentCount),
+          const SizedBox(height: 24),
+        ],
         Text(
           context.l10n.connect_post_comments_count(commentCount),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
