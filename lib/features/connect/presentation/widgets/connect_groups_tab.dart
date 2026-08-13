@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
-import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/discover_group_card.dart';
@@ -95,19 +94,7 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
         onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
         emptyDiscoverMessage: context.l10n.connect_empty_discover_groups,
         separatorHeight: 12,
-        leadingItemCount: 1,
-        leadingItemBuilder:
-            (context) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                context.l10n.connect_all_groups,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  height: AppFontConfig.tibetanCompactLineHeight,
-                ),
-              ),
-            ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         itemBuilder:
             (context, index) => DiscoverGroupCard(
               group: discoverGroups[index],
