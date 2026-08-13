@@ -6,7 +6,8 @@ import 'package:fpdart/fpdart.dart';
 
 /// Login use case.
 ///
-/// Handles both Google and Apple login based on the connection parameter.
+/// Handles Google, Apple and phone (passwordless SMS) login based on the
+/// connection parameter.
 class LoginUseCase extends UseCase<AuthCredentials, LoginParams> {
   final AuthRepository _repository;
 
@@ -19,6 +20,8 @@ class LoginUseCase extends UseCase<AuthCredentials, LoginParams> {
         return await _repository.loginWithGoogle();
       case 'apple':
         return await _repository.loginWithApple();
+      case 'sms':
+        return await _repository.loginWithPhone();
       default:
         return const Left(AuthenticationFailure('Unsupported login method'));
     }

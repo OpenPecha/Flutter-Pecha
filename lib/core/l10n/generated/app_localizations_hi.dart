@@ -1272,6 +1272,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get continueWithApple => 'Apple के साथ जारी रखें';
 
   @override
+  String get continueWithPhone => 'फ़ोन नंबर के साथ जारी रखें';
+
+  @override
   String get continueAsGuest => 'अतिथि के रूप में जारी रखें';
 
   @override

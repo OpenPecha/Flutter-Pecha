@@ -1279,6 +1279,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get continueWithApple => 'Apple सँग जारी राख्नुहोस्';
 
   @override
+  String get continueWithPhone => 'फोन नम्बरसँग जारी राख्नुहोस्';
+
+  @override
   String get continueAsGuest => 'अतिथिको रूपमा जारी राख्नुहोस्';
 
   @override

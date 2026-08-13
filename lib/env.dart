@@ -65,6 +65,14 @@ class Env {
     return apiKey != null && apiKey.isNotEmpty;
   }
 
+  /// Whether phone (SMS OTP) login is offered on this build.
+  ///
+  /// Defaults to false: the button must stay hidden until the Auth0 tenant for
+  /// this flavor has the passwordless SMS connection enabled, otherwise tapping
+  /// it fails with an Auth0 configuration error.
+  static bool get phoneLoginEnabled =>
+      dotenv.env['PHONE_LOGIN_ENABLED']?.toLowerCase() == 'true';
+
   /// Tolgee API base URL, used to list the project's languages on startup.
   static String get tolgeeApiUrl =>
       dotenv.env['TOLGEE_API_URL'] ?? 'https://app.tolgee.io/v2';

@@ -2470,6 +2470,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get continueWithPhone => TolgeeBridge.get(
+    localeName,
+    'continueWithPhone',
+    () => _fallback.continueWithPhone,
+  );
+
+  @override
   String get continueAsGuest => TolgeeBridge.get(
     localeName,
     'continueAsGuest',
