@@ -45,7 +45,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
     final isDark = theme.brightness == Brightness.dark;
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
-    final borderColor = isDark ? AppColors.grey800 : AppColors.grey300;
     final post = widget.post;
     final caption = post.caption.trim();
     final imageMedia =
@@ -62,7 +61,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
           ),
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -164,9 +162,9 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
 
     if (!result.isSuccess) {
       setState(() => _likeState.revert(wasLiked));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.errorMessage!)));
       return;
     }
 
@@ -205,7 +203,9 @@ class _AuthorRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayName =
-        name.trim().isNotEmpty ? name.trim() : context.l10n.connect_group_fallback_title;
+        name.trim().isNotEmpty
+            ? name.trim()
+            : context.l10n.connect_group_fallback_title;
 
     return Row(
       children: [
