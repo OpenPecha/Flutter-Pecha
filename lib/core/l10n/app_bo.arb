@@ -135,7 +135,7 @@
   "less": "ཉུང་བ།",
   "no_content": "ནང་དོན་རྙེད་མ་སོང་།",
   "no_commentary": "འགྲེལ་བ་རྙེད་མ་སོང་།",
-  "commentary_not_available_for_language": "{language} ཡི་འགྲེལ་བ་མི་འདུག",
+  "commentary_not_available_for_language": "{language}་གི་འགྲེལ་བ་མི་འདུག",
   "@commentary_not_available_for_language": {
     "placeholders": {
       "language": {
