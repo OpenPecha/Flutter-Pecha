@@ -715,6 +715,9 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_tab_posts => 'Нийтлэл';
 
   @override
+  String get connect_tab_practices => 'Practices';
+
+  @override
   String get connect_tab_groups => 'Groups';
 
   @override
@@ -734,6 +737,9 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_empty_discover_groups => 'Судлах бүлэг алга';
+
+  @override
+  String get connect_empty_discover_practices => 'Судлах дадлага алга';
 
   @override
   String get connect_all_groups => 'Бүх бүлэг';
@@ -774,6 +780,16 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_my_empty_posts_browse => 'Бусад нийтлэлийг үзэх';
+
+  @override
+  String get connect_my_empty_practices_title => 'Одоогоор дадлага алга';
+
+  @override
+  String get connect_my_empty_practices_subtitle =>
+      'Таны бүлгүүд ямар ч дадлага эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.';
+
+  @override
+  String get connect_my_empty_practices_browse => 'Бусад дадлагыг үзэх';
 
   @override
   String connect_comment_replying_to(String handle) {

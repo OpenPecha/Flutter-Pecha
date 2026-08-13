@@ -709,6 +709,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_tab_posts => 'Posts';
 
   @override
+  String get connect_tab_practices => 'Practices';
+
+  @override
   String get connect_tab_groups => 'Groups';
 
   @override
@@ -728,6 +731,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connect_empty_discover_groups => 'No groups to discover';
+
+  @override
+  String get connect_empty_discover_practices => 'No practices to discover';
 
   @override
   String get connect_all_groups => 'All groups';
@@ -768,6 +774,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connect_my_empty_posts_browse => 'Browse other posts';
+
+  @override
+  String get connect_my_empty_practices_title => 'No practices yet';
+
+  @override
+  String get connect_my_empty_practices_subtitle =>
+      'Your groups have not started any practices. See what other groups are offering.';
+
+  @override
+  String get connect_my_empty_practices_browse => 'Browse other practices';
 
   @override
   String connect_comment_replying_to(String handle) {

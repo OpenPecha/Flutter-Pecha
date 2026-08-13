@@ -772,6 +772,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
               ),
             GroupPracticeType.collection when practice.collection != null =>
               _buildCollectionCard(practice.collection!, isDark, lineHeight),
+            GroupPracticeType.plan when practice.plan != null =>
+              _buildPlanCard(profile, practice.plan!, isDark, lineHeight),
             _ => const SizedBox.shrink(),
           },
         );
@@ -849,6 +851,99 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlanCard(
+    GroupProfile profile,
+    GroupPracticePlan plan,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+    final dateRange = PlanDateFormat.formatRangeOrNull(plan.startDate, null);
+
+    return Material(
+      color: cardColor,
+      elevation: isDark ? 0 : 1,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          context.push(
+            '/practice/plans/preview',
+            extra: {
+              'plan': plan.toPlan(),
+              if (plan.seriesId != null) 'seriesId': plan.seriesId,
+            },
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 140,
+              width: double.infinity,
+              child:
+                  plan.imageUrl != null && plan.imageUrl!.isNotEmpty
+                      ? CachedNetworkImageWidget(
+                        imageUrl: plan.imageUrl!,
+                        fit: BoxFit.cover,
+                      )
+                      : ColoredBox(
+                        color:
+                            isDark
+                                ? AppColors.surfaceVariantDark
+                                : AppColors.grey100,
+                        child: Icon(
+                          AppAssets.bookOpenText,
+                          size: 40,
+                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+                        ),
+                      ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plan.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: lineHeight,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (dateRange != null || plan.totalDays > 0) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        if (dateRange != null) dateRange,
+                        if (plan.totalDays > 0)
+                          context.l10n.days_count(plan.totalDays),
+                      ].join(' · '),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: secondaryColor,
+                        height: lineHeight,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

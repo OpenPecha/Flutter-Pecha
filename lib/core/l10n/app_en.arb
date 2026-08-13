@@ -271,6 +271,7 @@
   "connect_tab_feed": "Feed",
   "connect_tab_events": "Events",
   "connect_tab_posts": "Posts",
+  "connect_tab_practices": "Practices",
   "connect_tab_groups": "Groups",
   "connect_segment_my": "My",
   "connect_segment_discover": "Discover",
@@ -278,6 +279,7 @@
   "connect_empty_discover_events": "No events to discover",
   "connect_empty_discover_feed": "Nothing to discover",
   "connect_empty_discover_groups": "No groups to discover",
+  "connect_empty_discover_practices": "No practices to discover",
   "connect_all_groups": "All groups",
   "connect_my_empty_feed_title": "Your groups have been quiet",
   "connect_my_empty_events_title": "No upcoming events",
@@ -290,6 +292,9 @@
   "connect_my_empty_feed_browse": "See what other groups share",
   "connect_my_empty_events_browse": "Browse open events",
   "connect_my_empty_posts_browse": "Browse other posts",
+  "connect_my_empty_practices_title": "No practices yet",
+  "connect_my_empty_practices_subtitle": "Your groups have not started any practices. See what other groups are offering.",
+  "connect_my_empty_practices_browse": "Browse other practices",
   "connect_comment_replying_to": "Replying to @{handle}",
   "@connect_comment_replying_to": {
     "placeholders": {

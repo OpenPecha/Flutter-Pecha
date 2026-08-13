@@ -91,20 +91,29 @@ class GroupProfileRemoteDatasource {
     }
   }
 
-  Future<GroupPracticesPageModel> fetchGroupPractices(
-    String groupId, {
+  Future<GroupPracticesPageModel> fetchPractices({
+    String? groupId,
+    required bool includeUnfollowed,
     required String language,
     required int skip,
     required int limit,
   }) async {
     try {
+      final queryParameters = <String, dynamic>{
+        'language': language,
+        'skip': skip,
+        'limit': limit,
+      };
+      if (groupId != null) {
+        queryParameters['group_id'] = groupId;
+      }
+      if (includeUnfollowed) {
+        queryParameters['include_unfollowed'] = true;
+      }
+
       final response = await dio.get(
-        '/author/groups/$groupId/practices',
-        queryParameters: {
-          'language': language,
-          'skip': skip,
-          'limit': limit,
-        },
+        '/author/groups/practices',
+        queryParameters: queryParameters,
         options: Options(extra: {'no_cache': true}),
       );
 
@@ -115,14 +124,14 @@ class GroupProfileRemoteDatasource {
       }
 
       _logger.error(
-        'Failed to load group practices $groupId: ${response.statusCode}',
+        'Failed to load practices${groupId != null ? ' for $groupId' : ''}: ${response.statusCode}',
       );
       throw _statusToException(
         response.statusCode,
         'Failed to load group practices',
       );
     } on DioException catch (e) {
-      _logger.error('Dio error in fetchGroupPractices', e);
+      _logger.error('Dio error in fetchPractices', e);
       throw _dioToException(e, 'Failed to load group practices');
     }
   }

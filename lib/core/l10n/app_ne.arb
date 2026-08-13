@@ -908,6 +908,7 @@
   "connect_tab_feed": "फिड",
   "connect_tab_events": "कार्यक्रम",
   "connect_tab_posts": "पोस्ट",
+  "connect_tab_practices": "Practices",
   "connect_tab_groups": "Groups",
   "connect_segment_my": "मेरो",
   "connect_segment_discover": "अन्वेषण",
@@ -915,6 +916,7 @@
   "connect_empty_discover_events": "अन्वेषण गर्न कुनै कार्यक्रम छैन",
   "connect_empty_discover_feed": "अन्वेषण गर्न केही छैन",
   "connect_empty_discover_groups": "अन्वेषण गर्न कुनै समूह छैन",
+  "connect_empty_discover_practices": "अन्वेषण गर्न कुनै अभ्यास छैन",
   "connect_all_groups": "सबै समूह",
   "connect_my_empty_feed_title": "तपाईंका समूहहरू शान्त छन्",
   "connect_my_empty_events_title": "कुनै आगामी कार्यक्रम छैन",
@@ -927,6 +929,9 @@
   "connect_my_empty_feed_browse": "अन्य समूहहरूले के साझा गर्छन् हेर्नुहोस्",
   "connect_my_empty_events_browse": "खुला कार्यक्रमहरू हेर्नुहोस्",
   "connect_my_empty_posts_browse": "अन्य पोस्टहरू हेर्नुहोस्",
+  "connect_my_empty_practices_title": "अहिलेसम्म कुनै अभ्यास छैन",
+  "connect_my_empty_practices_subtitle": "तपाईंका समूहहरूले कुनै अभ्यास सुरु गरेका छैनन्। अन्य समूहहरूले के प्रस्ताव गरिरहेका छन् हेर्नुहोस्।",
+  "connect_my_empty_practices_browse": "अन्य अभ्यासहरू हेर्नुहोस्",
   "connect_comment_replying_to": "@{handle} लाई जवाफ दिँदै",
   "@connect_comment_replying_to": {
     "placeholders": {
