@@ -8,7 +8,6 @@ import 'package:flutter_pecha/features/ai/presentation/screens/ai_mode_screen.da
 import 'package:flutter_pecha/features/ai/presentation/screens/search_results_screen.dart';
 import 'package:flutter_pecha/core/config/router/pending_route_provider.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
-import 'package:flutter_pecha/features/auth/presentation/screens/complete_profile_screen.dart';
 import 'package:flutter_pecha/features/auth/presentation/screens/login_page.dart';
 import 'package:flutter_pecha/features/auth/presentation/screens/splash_screen.dart';
 import 'package:flutter_pecha/features/calendar/presentation/screens/tibetan_calendar_screen.dart';
@@ -104,7 +103,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     // debounced background retry is kicked off here (never awaited).
     redirect: (context, state) {
       ref.read(authProvider.notifier).refreshOnboardingStatusIfNeeded();
-      ref.read(authProvider.notifier).refreshProfileCompletionIfNeeded();
       return RouteGuard.redirect(
         context,
         state,
@@ -176,12 +174,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: "onboarding",
         builder: (context, state) => const OnboardingWrapper(),
       ),
-      GoRoute(
-        path: AppRoutes.completeProfile,
-        name: "complete-profile",
-        builder: (context, state) => const CompleteProfileScreen(),
-      ),
-
       ShellRoute(
         navigatorKey: shellNavigatorKey,
         builder: (context, state, child) {

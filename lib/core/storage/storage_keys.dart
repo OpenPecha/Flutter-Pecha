@@ -30,11 +30,6 @@ class StorageKeys {
   /// ID of the currently logged-in user, written before the router fires
   /// so feature code can resolve the active account.
   static const String currentUserId = 'current_user_id';
-  /// Whether the current session's most recent login used the phone/OTP
-  /// (Auth0 "sms") connection. Drives the complete-profile gate — see
-  /// [AuthNotifier._fetchProfileCompletionSafe] — since only phone signups
-  /// can lack a name; social logins always carry one from the provider.
-  static const String isPhoneLoginAccount = 'is_phone_login_account';
   /// Current onboarding step
   static const String onboardingStep = 'onboarding_step';
   /// Onboarding data JSON

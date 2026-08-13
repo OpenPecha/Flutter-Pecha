@@ -12,9 +12,6 @@ class AppRoutes {
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
-  /// Shown right after login when the account has no first/last name yet
-  /// (e.g. a brand-new phone/OTP signup). See [RouteGuard].
-  static const String completeProfile = '/complete-profile';
   static const String getApp = '/get-app';
   static const String open = '/open';
 

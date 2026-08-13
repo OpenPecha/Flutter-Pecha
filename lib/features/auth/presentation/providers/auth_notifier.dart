@@ -68,14 +68,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   static const _onboardingRetryDebounce = Duration(seconds: 5);
 
-  /// Prevents overlapping background profile-completion refetches.
-  bool _profileFetchInFlight = false;
-
-  /// Debounces navigation-triggered profile-completion retries.
-  DateTime? _lastProfileRetryAt;
-
-  static const _profileRetryDebounce = Duration(seconds: 5);
-
   AuthNotifier({
     required LoginUseCase loginUseCase,
     required InitializeAuthUseCase initializeAuthUseCase,
@@ -244,25 +236,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
         if (!_isAuthEpochCurrent(epoch)) return;
       }
 
-      // Prefetch onboarding status and profile completeness while the token
-      // is fresh. Emitting auth state once with the complete picture means
-      // the route guard's redirect fires synchronously — no second
-      // navigation or per-nav network call. This also populates userProvider,
-      // so no separate initializeUser() call is needed afterward.
+      // Prefetch onboarding status while the token is fresh. Emitting auth
+      // state once with the complete picture means the route guard's
+      // redirect fires synchronously — no second navigation or per-nav
+      // network call. This also populates userProvider (via
+      // _fetchOnboardingStatusSafe's caller chain), so no separate
+      // initializeUser() call is needed afterward.
       final onboardingStatus = await _fetchOnboardingStatusSafe();
       if (!_isAuthEpochCurrent(epoch)) return;
-      final hasCompleteProfile = await _fetchProfileCompletionSafe();
+      await ref.read(userProvider.notifier).initializeUser();
       _applyAuthenticatedLoginState(
         epoch: epoch,
         onboardingStatus: onboardingStatus,
-        hasCompleteProfile: hasCompleteProfile,
         logMessage: 'Login state restored',
       );
       if (onboardingStatus == null) {
         unawaited(_refreshOnboardingStatus(skipDebounce: true));
-      }
-      if (hasCompleteProfile == null) {
-        unawaited(_refreshProfileCompletion(skipDebounce: true));
       }
       return;
     }
@@ -293,11 +282,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _applyAuthenticatedLoginState(
       epoch: epoch,
       onboardingStatus: null,
-      hasCompleteProfile: null,
       logMessage: 'Offline session kept — onboarding status pending',
     );
     unawaited(_refreshOnboardingStatus(skipDebounce: true));
-    unawaited(_refreshProfileCompletion(skipDebounce: true));
 
     if (storedUserId != null && storedUserId.isNotEmpty) {
       unawaited(
@@ -410,17 +397,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _clearGuestMode();
     if (!_isAuthEpochCurrent(epoch)) return;
 
-    // 1b. Remember whether this login used the phone/OTP connection — the
-    // complete-profile gate (§3 below) only applies to that connection, since
-    // social logins always carry a name from the provider. Persisted (not
-    // just in-memory) so it survives an app restart before the name is set.
-    if (connection != null) {
-      await ref
-          .read(localStorageServiceProvider)
-          .set(StorageKeys.isPhoneLoginAccount, connection == 'sms');
-      if (!_isAuthEpochCurrent(epoch)) return;
-    }
-
     // 2. Persist the user's ID before updating auth state.
     //    The router refreshes the moment auth state changes.
     final userId = _extractUserIdFromToken(credentials.idToken);
@@ -437,26 +413,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _trackAuthLoginSucceeded(connection: connection);
     if (!_isAuthEpochCurrent(epoch)) return;
 
-    // 3. Prefetch onboarding status and full user profile concurrently so the
-    //    route guard can decide both instantly (profile fetch also populates
-    //    userProvider, so there is no separate fetch afterward).
+    // 3. Prefetch onboarding status and full user profile so the route guard
+    //    can decide instantly.
     ref.read(cacheInterceptorProvider).clearUserScoped();
     final onboardingStatus = await _fetchOnboardingStatusSafe();
     if (!_isAuthEpochCurrent(epoch)) return;
-    final hasCompleteProfile = await _fetchProfileCompletionSafe();
+    await ref.read(userProvider.notifier).initializeUser();
 
     // 4. Update auth state — triggers the router refresh.
     _applyAuthenticatedLoginState(
       epoch: epoch,
       onboardingStatus: onboardingStatus,
-      hasCompleteProfile: hasCompleteProfile,
       logMessage: 'User authenticated',
     );
     if (onboardingStatus == null) {
       unawaited(_refreshOnboardingStatus(skipDebounce: true));
-    }
-    if (hasCompleteProfile == null) {
-      unawaited(_refreshProfileCompletion(skipDebounce: true));
     }
   }
 
@@ -546,9 +517,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await ref
         .read(localStorageServiceProvider)
         .remove(StorageKeys.currentUserId);
-    await ref
-        .read(localStorageServiceProvider)
-        .remove(StorageKeys.isPhoneLoginAccount);
 
     // Clear any pending deep-link route so a stale destination doesn't survive logout.
     ref.read(pendingRouteProvider.notifier).state = null;
@@ -650,7 +618,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       isLoading: false,
       isGuest: false,
       hasCompletedOnboarding: null,
-      hasCompleteProfile: null,
     );
   }
 
@@ -659,7 +626,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _applyAuthenticatedLoginState({
     required int epoch,
     required bool? onboardingStatus,
-    required bool? hasCompleteProfile,
     required String logMessage,
   }) {
     if (!_isAuthEpochCurrent(epoch)) {
@@ -671,7 +637,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       isLoading: false,
       isGuest: false,
       hasCompletedOnboarding: onboardingStatus,
-      hasCompleteProfile: hasCompleteProfile,
       errorMessage: null,
     );
     _logger.info(logMessage);
@@ -728,77 +693,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// change without a network round-trip.
   void markOnboardingCompleted() {
     state = state.copyWith(hasCompletedOnboarding: true);
-  }
-
-  /// Schedules a background profile-completion fetch when status is still
-  /// unknown. Called synchronously from the router redirect (fire-and-forget)
-  /// so endpoint failures retry on later navigations without blocking
-  /// transitions. Mirrors [refreshOnboardingStatusIfNeeded].
-  void refreshProfileCompletionIfNeeded() {
-    if (!state.isLoggedIn || state.isGuest) return;
-    if (state.hasCompleteProfile != null) return;
-    unawaited(_refreshProfileCompletion());
-  }
-
-  Future<void> _refreshProfileCompletion({bool skipDebounce = false}) async {
-    if (!state.isLoggedIn || state.isGuest) return;
-    if (state.hasCompleteProfile != null) return;
-    if (_profileFetchInFlight) return;
-
-    if (!skipDebounce &&
-        _lastProfileRetryAt != null &&
-        DateTime.now().difference(_lastProfileRetryAt!) <
-            _profileRetryDebounce) {
-      return;
-    }
-
-    _profileFetchInFlight = true;
-    _lastProfileRetryAt = DateTime.now();
-    final epoch = _authEpoch;
-
-    try {
-      final status = await _fetchProfileCompletionSafe();
-      if (!_isAuthEpochCurrent(epoch)) return;
-      if (!state.isLoggedIn || state.isGuest) return;
-      if (status != null) {
-        state = state.copyWith(hasCompleteProfile: status);
-      }
-    } finally {
-      _profileFetchInFlight = false;
-    }
-  }
-
-  /// Fetches the current user profile (populating [userProvider] as a side
-  /// effect) and returns whether it has a complete name, or null on any
-  /// error so callers can retry rather than treating failure as "complete".
-  ///
-  /// The complete-profile screen only applies to phone/OTP accounts — social
-  /// logins always carry a name from the provider, so a name-less social
-  /// profile (unexpected, but possible if the backend record is incomplete)
-  /// must not be sent through a screen built for the phone signup case.
-  Future<bool?> _fetchProfileCompletionSafe() async {
-    try {
-      await ref.read(userProvider.notifier).initializeUser();
-      final isPhoneAccount =
-          await ref
-              .read(localStorageServiceProvider)
-              .get<bool>(StorageKeys.isPhoneLoginAccount) ??
-          false;
-      if (!isPhoneAccount) return true;
-      final user = ref.read(userProvider).user;
-      if (user == null) return null;
-      return user.hasCompleteName;
-    } catch (e) {
-      _logger.warning('Could not prefetch profile completion status: $e');
-      return null;
-    }
-  }
-
-  /// Called after the complete-profile screen successfully saves a name.
-  /// Updates the in-state flag so the route guard reflects the change
-  /// without a network round-trip. Mirrors [markOnboardingCompleted].
-  void markProfileComplete() {
-    state = state.copyWith(hasCompleteProfile: true);
   }
 
   AnalyticsService get _analytics => ref.read(analyticsServiceProvider);

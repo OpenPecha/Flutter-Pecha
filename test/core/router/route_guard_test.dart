@@ -28,10 +28,6 @@ void main() {
         ),
         GoRoute(path: '/splash', builder: (_, __) => const Text('splash')),
         GoRoute(path: '/login', builder: (_, __) => const Text('login')),
-        GoRoute(
-          path: '/complete-profile',
-          builder: (_, __) => const Text('complete-profile'),
-        ),
       ],
     );
   }
@@ -110,97 +106,4 @@ void main() {
 
     expect(find.text('splash'), findsOneWidget);
   });
-
-  testWidgets(
-    'redirects to /complete-profile when profile is incomplete (phone signup)',
-    (tester) async {
-      final router = _buildRouter(
-        const AuthState(
-          isLoggedIn: true,
-          hasCompletedOnboarding: true,
-          hasCompleteProfile: false,
-        ),
-      );
-
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-
-      expect(find.text('complete-profile'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'profile completion is checked before onboarding — lands on /complete-profile, not /onboarding',
-    (tester) async {
-      final router = _buildRouter(
-        const AuthState(
-          isLoggedIn: true,
-          hasCompletedOnboarding: false,
-          hasCompleteProfile: false,
-        ),
-      );
-
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-
-      expect(find.text('complete-profile'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'does not enforce complete-profile when status is null (e.g. social login, not gated)',
-    (tester) async {
-      final router = _buildRouter(
-        const AuthState(
-          isLoggedIn: true,
-          hasCompletedOnboarding: true,
-          hasCompleteProfile: null,
-        ),
-      );
-
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-
-      // null = not a phone account / unknown — skip enforcement, stay on /home
-      expect(find.text('home'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'redirects authenticated user away from /complete-profile once profile is complete',
-    (tester) async {
-      final router = _buildRouter(
-        const AuthState(
-          isLoggedIn: true,
-          hasCompletedOnboarding: true,
-          hasCompleteProfile: true,
-        ),
-        initialLocation: '/complete-profile',
-      );
-
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-
-      expect(find.text('home'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'a phone user who just completed their profile falls through to onboarding next, not straight home',
-    (tester) async {
-      final router = _buildRouter(
-        const AuthState(
-          isLoggedIn: true,
-          hasCompletedOnboarding: false,
-          hasCompleteProfile: true,
-        ),
-        initialLocation: '/complete-profile',
-      );
-
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-
-      expect(find.text('onboarding'), findsOneWidget);
-    },
-  );
 }

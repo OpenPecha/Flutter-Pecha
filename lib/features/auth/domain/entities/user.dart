@@ -105,14 +105,6 @@ class User extends Equatable {
     return username ?? fullName;
   }
 
-  /// Whether both first and last name are present and non-blank.
-  ///
-  /// Used to gate the post-login "complete your profile" screen for accounts
-  /// created without a name (e.g. a brand-new phone/OTP signup).
-  bool get hasCompleteName =>
-      (firstName?.trim().isNotEmpty ?? false) &&
-      (lastName?.trim().isNotEmpty ?? false);
-
   @override
   List<Object?> get props => [id];
 

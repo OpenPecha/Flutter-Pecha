@@ -45,7 +45,6 @@ class RouteGuard {
       return _handleAuthenticated(
         currentPath,
         authState.hasCompletedOnboarding,
-        authState.hasCompleteProfile,
         getPendingRoute,
         setPendingRoute,
       );
@@ -60,30 +59,16 @@ class RouteGuard {
   static String? _handleAuthenticated(
     String path,
     bool? hasOnboarded,
-    bool? hasCompleteProfile,
     String? Function() getPendingRoute,
     void Function(String?) setPendingRoute,
   ) {
-    // Force the name-completion screen before onboarding — a brand-new
-    // signup (e.g. phone/OTP) needs an identity before anything else.
-    // Same fail-open-on-unknown semantics as the onboarding check below.
-    if (hasCompleteProfile == false &&
-        path != AppRoutes.completeProfile &&
-        path != AppRoutes.login) {
-      return AppRoutes.completeProfile;
-    }
-    if (hasCompleteProfile != false && path == AppRoutes.completeProfile) {
-      return AppRoutes.home;
-    }
-
     // Force onboarding only when status was fetched and is not completed.
     // null = unknown (offline, or fetch failed and retry pending) — fail-open
     // for now; AuthNotifier retries in the background and the router will
     // re-evaluate once a definitive true/false arrives.
     if (hasOnboarded == false &&
         path != AppRoutes.onboarding &&
-        path != AppRoutes.login &&
-        path != AppRoutes.completeProfile) {
+        path != AppRoutes.login) {
       return AppRoutes.onboarding;
     }
 
