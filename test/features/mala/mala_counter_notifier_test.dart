@@ -38,13 +38,15 @@ void main() {
     mantra: MantraText(id: 'm1', text: 'ༀ་མ་ཎི་པདྨེ་ཧཱུྃ', pronunciation: 'Om Mani Padme Hum'),
   );
 
-  MalaCounterNotifier buildNotifier() => MalaCounterNotifier(
+  MalaCounterNotifier buildNotifier({Duration? seedNetworkTimeout}) =>
+      MalaCounterNotifier(
         mantra: mantra,
         local: local,
         getAccumulatorDetail: getDetail,
         deleteUserAccumulator: delete,
         sync: sync,
         currentUserId: () async => userId,
+        seedNetworkTimeout: seedNetworkTimeout,
       );
 
   setUp(() async {
@@ -77,6 +79,127 @@ void main() {
     final s = local.read(userId, 'chenrezig');
     expect(s.syncedTotal, 4212);
     expect(s.accumulatorId, 'acc-1');
+    notifier.dispose();
+  });
+
+  test('seed keeps isSeeding true until detail API completes', () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
+    );
+    final gate = Completer<Either<Failure, MalaCount>>();
+    when(getDetail(any)).thenAnswer((_) => gate.future);
+
+    // Long timeout so the test observes API-first settle, not the race fallback.
+    final notifier = buildNotifier(
+      seedNetworkTimeout: const Duration(seconds: 30),
+    );
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isTrue);
+    expect(notifier.state.total, 88);
+
+    gate.complete(const Right(MalaCount(accumulatorId: 'acc-1', total: 12)));
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88); // max(local, server)
+    notifier.dispose();
+  });
+
+  test('seed falls back to local after network timeout then late-reconciles',
+      () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
+    );
+    final gate = Completer<Either<Failure, MalaCount>>();
+    when(getDetail(any)).thenAnswer((_) => gate.future);
+
+    final notifier = buildNotifier(
+      seedNetworkTimeout: const Duration(milliseconds: 40),
+    );
+    await Future.delayed(Duration.zero);
+    expect(notifier.state.isSeeding, isTrue);
+
+    await Future.delayed(const Duration(milliseconds: 60));
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88);
+
+    // Late API is ahead of the timed-out local snapshot.
+    gate.complete(const Right(MalaCount(accumulatorId: 'acc-1', total: 120)));
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 120);
+    notifier.dispose();
+  });
+
+  test('late seed detail after reset does not resurrect cleared count', () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 88, accumulatorId: 'acc-1'),
+    );
+    final detailGate = Completer<Either<Failure, MalaCount>>();
+    final resetContinue = Completer<void>();
+    when(getDetail(any)).thenAnswer((_) => detailGate.future);
+    when(
+      sync.resetAccumulator(
+        any,
+        deleteAccumulator: anyNamed('deleteAccumulator'),
+      ),
+    ).thenAnswer((_) async {
+      // clearSession happens before resetAccumulator returns (real sync path).
+      await local.clearSession(userId, 'chenrezig');
+      // Late pre-reset GET lands in this window — must not rewrite Hive.
+      detailGate.complete(
+        const Right(MalaCount(accumulatorId: 'acc-1', total: 88)),
+      );
+      await Future.delayed(Duration.zero);
+      await resetContinue.future;
+    });
+
+    final notifier = buildNotifier(
+      seedNetworkTimeout: const Duration(milliseconds: 40),
+    );
+    await Future.delayed(Duration.zero);
+    await Future.delayed(const Duration(milliseconds: 60));
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88);
+
+    final resetFuture = notifier.resetCount();
+    await Future.delayed(Duration.zero);
+    expect(local.read(userId, 'chenrezig').total, 0);
+    expect(local.read(userId, 'chenrezig').accumulatorId, isNull);
+
+    resetContinue.complete();
+    final ok = await resetFuture;
+    expect(ok, isTrue);
+    expect(notifier.state.total, 0);
+    expect(local.read(userId, 'chenrezig').total, 0);
+    expect(local.read(userId, 'chenrezig').accumulatorId, isNull);
+    notifier.dispose();
+  });
+
+  test('seed falls back to local total when detail API fails', () async {
+    await local.write(
+      userId,
+      'chenrezig',
+      const LocalMalaState(total: 88, syncedTotal: 80, accumulatorId: 'acc-1'),
+    );
+    when(getDetail(any)).thenAnswer(
+      (_) async => const Left(UnknownFailure('network')),
+    );
+
+    final notifier = buildNotifier();
+    await Future.delayed(Duration.zero);
+
+    expect(notifier.state.isSeeding, isFalse);
+    expect(notifier.state.total, 88);
+    verify(sync.flush(SyncReason.launch)).called(1);
     notifier.dispose();
   });
 
