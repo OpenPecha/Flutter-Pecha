@@ -9,9 +9,7 @@ final traditionSelectionProvider =
       TraditionSelectionNotifier,
       TraditionSelectionState
     >((ref) {
-      final language = ref.watch(
-        localeProvider.select((locale) => locale.languageCode),
-      );
+      final language = ref.watch(contentLanguageProvider);
       return TraditionSelectionNotifier(
         remoteDatasource: ref.watch(onboardingRemoteDatasourceProvider),
         language: language,

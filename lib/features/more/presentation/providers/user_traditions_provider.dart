@@ -18,9 +18,7 @@ class UserTraditionsNotifier extends AutoDisposeAsyncNotifier<List<UserTradition
   @override
   Future<List<UserTradition>> build() async {
     _remoteDatasource = ref.watch(onboardingRemoteDatasourceProvider);
-    final language = ref.watch(
-      localeProvider.select((locale) => locale.languageCode),
-    );
+    final language = ref.watch(contentLanguageProvider);
     _logger.info('Fetching user traditions with language: $language');
     try {
       return await _remoteDatasource.fetchUserTraditions(language: language);
@@ -32,7 +30,7 @@ class UserTraditionsNotifier extends AutoDisposeAsyncNotifier<List<UserTradition
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    final language = ref.read(localeProvider).languageCode;
+    final language = ref.read(contentLanguageProvider);
     state = await AsyncValue.guard(
       () => _remoteDatasource.fetchUserTraditions(language: language),
     );
@@ -95,7 +93,7 @@ class UserTraditionsNotifier extends AutoDisposeAsyncNotifier<List<UserTradition
       }
     }
 
-    final language = ref.read(localeProvider).languageCode;
+    final language = ref.read(contentLanguageProvider);
     state = await AsyncValue.guard(
       () => _remoteDatasource.fetchUserTraditions(language: language),
     );

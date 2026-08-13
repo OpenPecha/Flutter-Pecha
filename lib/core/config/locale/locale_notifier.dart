@@ -1,3 +1,16 @@
+/// UI locale vs content language.
+///
+/// The app keeps two independent language axes. Use [localeProvider] for
+/// chrome strings (`context.l10n`, Material, Tolgee). Use
+/// [contentLanguageProvider] as the `language` query param on backend content
+/// APIs (traditions, series, texts, plans, …). They diverge when the user
+/// picks a content language the app has no ARB for — UI falls back to English
+/// while content stays on the selected code.
+///
+/// See this folder's `README.md` for the full split, storage keys, and
+/// which provider to watch.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/l10n/l10n.dart';
