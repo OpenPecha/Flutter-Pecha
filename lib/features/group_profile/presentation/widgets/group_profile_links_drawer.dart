@@ -17,6 +17,7 @@ class GroupProfileLinksDrawer extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
@@ -44,52 +45,62 @@ class GroupProfileLinksDrawer extends StatelessWidget {
         color: isDark ? AppColors.cardDark : AppColors.surfaceWhite,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildDragHandle(context),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                context.l10n.group_links_title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      child: SafeArea(
+        top: false,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.6,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDragHandle(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    context.l10n.group_links_title,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: ordered.length,
-            separatorBuilder:
-                (_, __) => Divider(
-                  height: 1,
-                  color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+              ),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: ordered.length,
+                  separatorBuilder:
+                      (_, __) => Divider(
+                        height: 1,
+                        color:
+                            isDark ? AppColors.cardBorderDark : AppColors.grey100,
+                      ),
+                  itemBuilder: (context, index) {
+                    final link = ordered[index];
+                    return _LinkTile(
+                      icon: GroupProfileLinkUtils.iconForPlatform(link.platform),
+                      title: GroupProfileLinkUtils.labelForPlatform(
+                        link.platform,
+                        context,
+                      ),
+                      subtitle: link.url,
+                      isDark: isDark,
+                      onTap: () => _launchUrl(link.url),
+                    );
+                  },
                 ),
-            itemBuilder: (context, index) {
-              final link = ordered[index];
-              return _LinkTile(
-                icon: GroupProfileLinkUtils.iconForPlatform(link.platform),
-                title: GroupProfileLinkUtils.labelForPlatform(
-                  link.platform,
-                  context,
-                ),
-                subtitle: link.url,
-                isDark: isDark,
-                onTap: () => _launchUrl(link.url),
-              );
-            },
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
-          const SizedBox(height: 8),
-        ],
+        ),
       ),
     );
   }
