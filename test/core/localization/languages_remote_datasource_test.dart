@@ -204,4 +204,46 @@ void main() {
       );
     });
   });
+
+  group('LanguagesRemoteDatasource.updateLanguage', () {
+    test('PUTs uppercase language code', () async {
+      RequestOptions? captured;
+      final ds = _datasource((options) async {
+        captured = options;
+        return _jsonBody({});
+      });
+
+      await ds.updateLanguage('bo');
+
+      expect(captured?.method, 'PUT');
+      expect(captured?.path, '/users/me/language');
+      expect(captured?.data, {'language': 'BO'});
+    });
+
+    test('skips empty language code', () async {
+      var called = false;
+      final ds = _datasource((options) async {
+        called = true;
+        return _jsonBody({});
+      });
+
+      await ds.updateLanguage('   ');
+
+      expect(called, isFalse);
+    });
+
+    test('maps connection errors to NetworkException', () async {
+      final ds = _datasource(
+        (_) async => throw DioException(
+          requestOptions: RequestOptions(path: '/users/me/language'),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+
+      await expectLater(
+        ds.updateLanguage('en'),
+        throwsA(isA<NetworkException>()),
+      );
+    });
+  });
 }
