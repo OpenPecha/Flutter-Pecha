@@ -320,7 +320,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String commentary_not_available_for_language(String language) {
-    return '$language ཡི་འགྲེལ་བ་མི་འདུག';
+    return '$language་གི་འགྲེལ་བ་མི་འདུག';
   }
 
   @override
