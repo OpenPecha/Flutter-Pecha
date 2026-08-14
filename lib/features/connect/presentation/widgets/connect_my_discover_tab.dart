@@ -14,6 +14,7 @@ typedef ConnectSegmentChildBuilder =
 class ConnectMyDiscoverTab extends StatefulWidget {
   const ConnectMyDiscoverTab({
     super.key,
+    this.initialSegment = 0,
     required this.myBuilder,
     required this.discoverBuilder,
     this.onMyRefresh,
@@ -23,6 +24,7 @@ class ConnectMyDiscoverTab extends StatefulWidget {
     this.onSegmentChanged,
   });
 
+  final int initialSegment;
   final ConnectSegmentChildBuilder myBuilder;
   final ConnectSegmentChildBuilder discoverBuilder;
   final Future<void> Function()? onMyRefresh;
@@ -38,13 +40,14 @@ class ConnectMyDiscoverTab extends StatefulWidget {
 class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
   static const _paginationThreshold = 200.0;
 
-  int _selectedSegment = 0;
+  late int _selectedSegment;
   final ScrollController _myScrollController = ScrollController();
   final ScrollController _discoverScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _selectedSegment = widget.initialSegment.clamp(0, 1);
     if (widget.onMyLoadMore != null) {
       _myScrollController.addListener(_onMyScroll);
     }
@@ -52,6 +55,7 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
       _discoverScrollController.addListener(_onDiscoverScroll);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       widget.onSegmentChanged?.call(_selectedSegment);
     });
   }

@@ -673,6 +673,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_tab_posts => '貼文';
 
   @override
+  String get connect_tab_practices => '修持';
+
+  @override
   String get connect_tab_groups => 'Groups';
 
   @override
@@ -692,6 +695,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connect_empty_discover_groups => '沒有可探索的社群';
+
+  @override
+  String get connect_empty_discover_practices => '沒有可探索的修持';
 
   @override
   String get connect_all_groups => '所有社群';
@@ -728,6 +734,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connect_my_empty_posts_browse => '瀏覽其他貼文';
+
+  @override
+  String get connect_my_empty_practices_title => '尚無修持';
+
+  @override
+  String get connect_my_empty_practices_subtitle => '你的社群還沒有開始任何修持。看看其他社群提供什麼。';
+
+  @override
+  String get connect_my_empty_practices_browse => '瀏覽其他修持';
 
   @override
   String connect_comment_replying_to(String handle) {

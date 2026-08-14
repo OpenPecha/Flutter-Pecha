@@ -87,6 +87,8 @@ class ConnectPostLinkModel {
 class ConnectPostModel {
   final String id;
   final String groupId;
+  final String groupName;
+  final String? groupAvatarUrl;
   final String caption;
   final String status;
   final DateTime? publishedAt;
@@ -103,6 +105,8 @@ class ConnectPostModel {
   const ConnectPostModel({
     required this.id,
     required this.groupId,
+    this.groupName = '',
+    this.groupAvatarUrl,
     required this.caption,
     required this.status,
     this.publishedAt,
@@ -124,6 +128,8 @@ class ConnectPostModel {
     return ConnectPostModel(
       id: json['id'] as String? ?? '',
       groupId: json['group_id'] as String? ?? '',
+      groupName: json['group_name'] as String? ?? '',
+      groupAvatarUrl: json['group_avatar_url'] as String?,
       caption: json['caption'] as String? ?? '',
       status: json['status'] as String? ?? '',
       publishedAt: _parseDateTime(json['published_at']),
@@ -153,6 +159,8 @@ class ConnectPostModel {
     return ConnectPost(
       id: id,
       groupId: groupId,
+      groupName: groupName,
+      groupAvatarUrl: groupAvatarUrl,
       caption: caption,
       status: status,
       publishedAt: publishedAt,

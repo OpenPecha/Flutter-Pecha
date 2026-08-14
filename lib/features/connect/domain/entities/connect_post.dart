@@ -41,6 +41,8 @@ class ConnectPostLink {
 class ConnectPost {
   final String id;
   final String groupId;
+  final String groupName;
+  final String? groupAvatarUrl;
   final String caption;
   final String status;
   final DateTime? publishedAt;
@@ -57,6 +59,8 @@ class ConnectPost {
   const ConnectPost({
     required this.id,
     required this.groupId,
+    this.groupName = '',
+    this.groupAvatarUrl,
     required this.caption,
     required this.status,
     this.publishedAt,
@@ -79,6 +83,8 @@ class ConnectPost {
     return ConnectPost(
       id: id,
       groupId: groupId,
+      groupName: groupName,
+      groupAvatarUrl: groupAvatarUrl,
       caption: caption,
       status: status,
       publishedAt: publishedAt,

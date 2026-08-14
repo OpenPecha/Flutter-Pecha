@@ -909,6 +909,7 @@
   "connect_tab_feed": "Мэдээ",
   "connect_tab_events": "Арга хэмжээ",
   "connect_tab_posts": "Нийтлэл",
+  "connect_tab_practices": "Practices",
   "connect_tab_groups": "Groups",
   "connect_segment_my": "Миний",
   "connect_segment_discover": "Судлах",
@@ -916,6 +917,7 @@
   "connect_empty_discover_events": "Судлах арга хэмжээ алга",
   "connect_empty_discover_feed": "Судлах зүйл алга",
   "connect_empty_discover_groups": "Судлах бүлэг алга",
+  "connect_empty_discover_practices": "Судлах дадлага алга",
   "connect_all_groups": "Бүх бүлэг",
   "connect_my_empty_feed_title": "Таны бүлгүүд чимээгүй байна",
   "connect_my_empty_events_title": "Товлосон арга хэмжээ алга",
@@ -928,6 +930,9 @@
   "connect_my_empty_feed_browse": "Бусад бүлгийн хуваалцсныг үзэх",
   "connect_my_empty_events_browse": "Нээлттэй арга хэмжээг үзэх",
   "connect_my_empty_posts_browse": "Бусад нийтлэлийг үзэх",
+  "connect_my_empty_practices_title": "Одоогоор дадлага алга",
+  "connect_my_empty_practices_subtitle": "Таны бүлгүүд ямар ч дадлага эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.",
+  "connect_my_empty_practices_browse": "Бусад дадлагыг үзэх",
   "connect_comment_replying_to": "@{handle}-д хариулж байна",
   "@connect_comment_replying_to": {
     "placeholders": {

@@ -34,6 +34,13 @@ abstract class GroupProfileRepositoryInterface {
     required int limit,
   });
 
+  Future<Either<Failure, GroupPracticesPage>> getConnectPractices({
+    required bool includeUnfollowed,
+    required String language,
+    required int skip,
+    required int limit,
+  });
+
   Future<Either<Failure, GroupMembersPage>> getGroupMembers(
     String groupId, {
     required int skip,

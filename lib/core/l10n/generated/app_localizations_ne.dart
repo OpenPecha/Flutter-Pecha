@@ -721,6 +721,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get connect_tab_posts => 'पोस्ट';
 
   @override
+  String get connect_tab_practices => 'Practices';
+
+  @override
   String get connect_tab_groups => 'Groups';
 
   @override
@@ -740,6 +743,9 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get connect_empty_discover_groups => 'अन्वेषण गर्न कुनै समूह छैन';
+
+  @override
+  String get connect_empty_discover_practices => 'अन्वेषण गर्न कुनै अभ्यास छैन';
 
   @override
   String get connect_all_groups => 'सबै समूह';
@@ -781,6 +787,16 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get connect_my_empty_posts_browse => 'अन्य पोस्टहरू हेर्नुहोस्';
+
+  @override
+  String get connect_my_empty_practices_title => 'अहिलेसम्म कुनै अभ्यास छैन';
+
+  @override
+  String get connect_my_empty_practices_subtitle =>
+      'तपाईंका समूहहरूले कुनै अभ्यास सुरु गरेका छैनन्। अन्य समूहहरूले के प्रस्ताव गरिरहेका छन् हेर्नुहोस्।';
+
+  @override
+  String get connect_my_empty_practices_browse => 'अन्य अभ्यासहरू हेर्नुहोस्';
 
   @override
   String connect_comment_replying_to(String handle) {

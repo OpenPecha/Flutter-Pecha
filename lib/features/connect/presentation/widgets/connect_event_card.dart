@@ -3,28 +3,21 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
-import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class ConnectEventCard extends ConsumerStatefulWidget {
-  const ConnectEventCard({
-    super.key,
-    required this.event,
-    this.groupNames = const {},
-    this.groupLocations = const {},
-  });
+  const ConnectEventCard({super.key, required this.event});
 
   final GroupEvent event;
-  final Map<String, String> groupNames;
-  final Map<String, String> groupLocations;
 
   @override
   ConsumerState<ConnectEventCard> createState() => _ConnectEventCardState();
@@ -44,17 +37,13 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
     final event = widget.event;
     final isAttending = _attendingOverride ?? event.isJoined;
+    final isPast = isGroupEventPast(event);
     final participantCount = _participantCount(event, isAttending);
     final title =
         event.title.trim().isNotEmpty
             ? event.title.trim()
             : context.l10n.connect_event_fallback_title;
-    final detailsLine = _formatDetailsLine(
-      context,
-      event,
-      participantCount,
-      ref,
-    );
+    final detailsLine = _formatDetailsLine(context, event, participantCount);
 
     return Material(
       color: cardColor,
@@ -120,22 +109,19 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: _EventGroupLabel(
-                          groupId: event.groupId,
-                          groupNames: widget.groupNames,
+                      Expanded(child: _EventGroupLabel(event: event)),
+                      if (!isPast) ...[
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => _toggleAttendance(event, isAttending),
+                          behavior: HitTestBehavior.opaque,
+                          child: _AttendButton(
+                            isAttending: isAttending,
+                            isSubmitting: _isSubmitting,
+                            isDark: isDark,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => _toggleAttendance(event, isAttending),
-                        behavior: HitTestBehavior.opaque,
-                        child: _AttendButton(
-                          isAttending: isAttending,
-                          isSubmitting: _isSubmitting,
-                          isDark: isDark,
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 ],
@@ -158,7 +144,6 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     BuildContext context,
     GroupEvent event,
     int participantCount,
-    WidgetRef ref,
   ) {
     final parts = <String>[];
 
@@ -168,10 +153,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    final location = _resolveLocation(event.groupId, ref, context);
-    if (location != null && location.isNotEmpty) {
-      parts.add(location);
-    }
+    parts.add(_eventLocationLabel(context, event));
 
     if (participantCount > 0) {
       parts.add(
@@ -183,25 +165,17 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     return parts.join(' · ');
   }
 
-  String? _resolveLocation(String groupId, WidgetRef ref, BuildContext context) {
-    final cached = widget.groupLocations[groupId];
-    if (cached != null && cached.isNotEmpty) return cached;
-    if (groupId.isEmpty) return null;
-
-    final groupEither = ref.watch(groupProfileProvider(groupId)).valueOrNull;
-    return groupEither?.fold(
-      (_) => null,
-      (profile) {
-        if (profile.tags.isNotEmpty) return profile.tags.first;
-        final subtitle = profile.subTitle?.trim();
-        if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-        return context.l10n.connect_online;
-      },
-    );
+  String _eventLocationLabel(BuildContext context, GroupEvent event) {
+    final locationId = event.locationId?.trim();
+    if (locationId != null && locationId.isNotEmpty) {
+      final name = event.location?.name.trim();
+      if (name != null && name.isNotEmpty) return name;
+    }
+    return context.l10n.connect_online;
   }
 
   Future<void> _toggleAttendance(GroupEvent event, bool isAttending) async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || isGroupEventPast(event)) return;
 
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
@@ -214,7 +188,10 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     final result =
         isAttending
             ? await repository.leaveGroupEvent(event.id)
-            : await joinGroupEventEnsuringGroupMembership(ref: ref, event: event);
+            : await joinGroupEventEnsuringGroupMembership(
+              ref: ref,
+              event: event,
+            );
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
@@ -235,63 +212,72 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
   }
 }
 
-class _EventGroupLabel extends ConsumerWidget {
-  const _EventGroupLabel({
-    required this.groupId,
-    required this.groupNames,
-  });
+class _EventGroupLabel extends StatelessWidget {
+  const _EventGroupLabel({required this.event});
 
-  final String groupId;
-  final Map<String, String> groupNames;
+  final GroupEvent event;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cachedName = groupNames[groupId];
-    if (cachedName != null && cachedName.isNotEmpty) {
-      return _GroupNameText(name: cachedName);
-    }
-
-    if (groupId.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final groupAsync = ref.watch(groupProfileProvider(groupId));
-    return groupAsync.when(
-      data:
-          (either) => either.fold(
-            (_) => const SizedBox.shrink(),
-            (profile) => _GroupNameText(
-              name: _groupLabel(profile, context),
-            ),
-          ),
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  String _groupLabel(GroupProfile profile, BuildContext context) {
-    return profile.title.trim().isNotEmpty
-        ? profile.title.trim()
-        : context.l10n.connect_group_fallback_title;
-  }
-}
-
-class _GroupNameText extends StatelessWidget {
-  const _GroupNameText({required this.name});
-
-  final String name;
+  static const double _avatarSize = 24;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      name,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: AppColors.primaryDark,
-      ),
+    final name = event.groupName?.trim();
+    if (name == null || name.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final avatarUrl = event.groupAvatarUrl?.trim();
+    final placeholderColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
+    final groupId = event.groupId.trim();
+
+    final content = Row(
+      children: [
+        ClipOval(
+          child: SizedBox(
+            width: _avatarSize,
+            height: _avatarSize,
+            child:
+                avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImageWidget(
+                      imageUrl: avatarUrl,
+                      fit: BoxFit.cover,
+                      width: _avatarSize,
+                      height: _avatarSize,
+                    )
+                    : ColoredBox(
+                      color: placeholderColor,
+                      child: Icon(
+                        AppAssets.usersThree,
+                        size: 14,
+                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+                      ),
+                    ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.primaryDark,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (groupId.isEmpty) return content;
+
+    return GestureDetector(
+      onTap: () => context.push('/home/group/$groupId'),
+      behavior: HitTestBehavior.opaque,
+      child: content,
     );
   }
 }
@@ -310,66 +296,63 @@ class _AttendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color:
-                isAttending
-                    ? (isDark ? AppColors.surfaceVariantDark : AppColors.grey100)
-                    : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isAttending) ...[
-                Icon(
-                  AppAssets.check,
-                  size: 14,
-                  color:
-                      isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimary,
-                ),
-                const SizedBox(width: 4),
-              ],
-              if (isSubmitting)
-                SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color:
-                        isAttending
-                            ? (isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimary)
-                            : (isDark
-                                ? AppColors.textPrimary
-                                : AppColors.surfaceWhite),
-                  ),
-                )
-              else
-                Text(
-                  isAttending
-                      ? context.l10n.connect_event_attending
-                      : context.l10n.connect_event_attend,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color:
-                        isAttending
-                            ? (isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimary)
-                            : (isDark
-                                ? AppColors.textPrimary
-                                : AppColors.surfaceWhite),
-                  ),
-                ),
-            ],
-          ),
+      duration: const Duration(milliseconds: 150),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color:
+            isAttending
+                ? (isDark ? AppColors.surfaceVariantDark : AppColors.grey100)
+                : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isAttending) ...[
+            Icon(
+              AppAssets.check,
+              size: 14,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+            const SizedBox(width: 4),
+          ],
+          if (isSubmitting)
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color:
+                    isAttending
+                        ? (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary)
+                        : (isDark
+                            ? AppColors.textPrimary
+                            : AppColors.surfaceWhite),
+              ),
+            )
+          else
+            Text(
+              isAttending
+                  ? context.l10n.connect_event_attending
+                  : context.l10n.connect_event_attend,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color:
+                    isAttending
+                        ? (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary)
+                        : (isDark
+                            ? AppColors.textPrimary
+                            : AppColors.surfaceWhite),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

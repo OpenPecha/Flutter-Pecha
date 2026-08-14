@@ -3,7 +3,7 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -26,15 +26,6 @@ class ConnectEventsTab extends ConsumerStatefulWidget {
 
 class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     with ConnectLazyMyDiscoverTabMixin<ConnectEventsTab> {
-  Map<String, String> get _groupNames => {
-    for (final group in widget.myGroups) group.id: group.title,
-  };
-
-  Map<String, String> _groupLocations(BuildContext context) => {
-    for (final group in widget.myGroups)
-      group.id: _locationForGroup(group, context),
-  };
-
   @override
   bool readTabActive(ConnectEventsTab widget) => widget.isActive;
 
@@ -48,13 +39,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     }
   }
 
-  String _locationForGroup(GroupProfile group, BuildContext context) {
-    if (group.tags.isNotEmpty) return group.tags.first;
-    final subtitle = group.subTitle?.trim();
-    if (subtitle != null && subtitle.isNotEmpty) return subtitle;
-    return context.l10n.connect_online;
-  }
-
   @override
   Widget build(BuildContext context) {
     // Watch both providers unconditionally so they stay alive across
@@ -62,9 +46,11 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     // when to actually fetch.
     final myState = ref.watch(myConnectEventsProvider);
     final discoverState = ref.watch(discoverConnectEventsProvider);
-    final groupLocations = _groupLocations(context);
 
-    return ConnectMyDiscoverTab(
+    return ConnectMyDiscoverTabGate(
+      myHasLoaded: myState.hasLoaded,
+      myIsEmpty: myState.events.isEmpty,
+      myHasError: myState.error != null,
       onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
       onDiscoverRefresh:
@@ -89,8 +75,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           itemBuilder:
               (context, index) => ConnectEventCard(
                 event: myState.events[index],
-                groupNames: _groupNames,
-                groupLocations: groupLocations,
               ),
         );
       },
@@ -109,8 +93,6 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           itemBuilder:
               (context, index) => ConnectEventCard(
                 event: discoverState.events[index],
-                groupNames: _groupNames,
-                groupLocations: groupLocations,
               ),
         );
       },

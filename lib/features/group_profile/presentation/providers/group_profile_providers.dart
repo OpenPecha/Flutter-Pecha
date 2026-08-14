@@ -298,7 +298,15 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
 
   void _invalidateConnectProviders() {
     _ref.invalidate(myGroupsProvider);
-    _ref.invalidate(discoverGroupsProvider);
+  }
+
+  void _refreshDiscoverGroupsIfLoaded() {
+    if (!_ref.exists(discoverGroupsProvider)) return;
+
+    final discoverState = _ref.read(discoverGroupsProvider);
+    if (!discoverState.hasLoaded) return;
+
+    _ref.read(discoverGroupsProvider.notifier).refresh();
   }
 
   void _addPendingJoinedGroup(GroupProfile group) {
@@ -453,6 +461,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
         if (connectGroup != null) {
           _removePendingJoinedGroup(connectGroup.id);
           _markPendingUnjoined(connectGroup.id);
+          _refreshDiscoverGroupsIfLoaded();
         }
         return true;
       },

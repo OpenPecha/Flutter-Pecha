@@ -92,9 +92,41 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
     required int skip,
     required int limit,
   }) async {
+    return _loadPractices(
+      groupId: groupId,
+      includeUnfollowed: true,
+      language: language,
+      skip: skip,
+      limit: limit,
+    );
+  }
+
+  @override
+  Future<Either<Failure, GroupPracticesPage>> getConnectPractices({
+    required bool includeUnfollowed,
+    required String language,
+    required int skip,
+    required int limit,
+  }) async {
+    return _loadPractices(
+      includeUnfollowed: includeUnfollowed,
+      language: language,
+      skip: skip,
+      limit: limit,
+    );
+  }
+
+  Future<Either<Failure, GroupPracticesPage>> _loadPractices({
+    String? groupId,
+    required bool includeUnfollowed,
+    required String language,
+    required int skip,
+    required int limit,
+  }) async {
     try {
-      final model = await remote.fetchGroupPractices(
-        groupId,
+      final model = await remote.fetchPractices(
+        groupId: groupId,
+        includeUnfollowed: includeUnfollowed,
         language: language,
         skip: skip,
         limit: limit,

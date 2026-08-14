@@ -8,6 +8,7 @@ import 'package:flutter_pecha/features/connect/presentation/widgets/connect_even
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_groups_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_posts_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_practices_tab.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/followed_groups_row.dart';
 import 'package:flutter_pecha/shared/widgets/main_tab_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +27,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(_onTabChanged);
   }
 
@@ -110,11 +111,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
                   isActive: activeTabIndex == 1,
                 ),
                 ConnectPostsTab(isActive: activeTabIndex == 2),
+                ConnectPracticesTab(isActive: activeTabIndex == 3),
                 ConnectGroupsTab(
                   myGroups: displayedMyGroups,
-                  myGroupsLoading: myGroupsLoading,
                   onRefresh: _onGroupsRefresh,
-                  isActive: activeTabIndex == 3,
+                  isActive: activeTabIndex == 4,
                 ),
               ],
             ),
@@ -148,15 +149,14 @@ class _ConnectMainTabBar extends StatelessWidget {
       ),
       child: TabBar(
         controller: controller,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
+        tabAlignment: TabAlignment.fill,
         labelColor: labelColor,
         unselectedLabelColor: unselectedColor,
         indicatorColor: labelColor,
         indicatorWeight: 2,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
         labelStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w700,
@@ -169,6 +169,7 @@ class _ConnectMainTabBar extends StatelessWidget {
           Tab(text: context.l10n.connect_tab_feed),
           Tab(text: context.l10n.connect_tab_events),
           Tab(text: context.l10n.connect_tab_posts),
+          Tab(text: context.l10n.connect_tab_practices),
           Tab(text: context.l10n.connect_tab_groups),
         ],
       ),

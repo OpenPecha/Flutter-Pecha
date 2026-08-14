@@ -8,9 +8,9 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_like_actions.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_detail_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ConnectPostCard extends ConsumerStatefulWidget {
@@ -45,7 +45,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
     final isDark = theme.brightness == Brightness.dark;
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
-    final borderColor = isDark ? AppColors.grey800 : AppColors.grey300;
     final post = widget.post;
     final caption = post.caption.trim();
     final imageMedia =
@@ -62,7 +61,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
           ),
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -71,8 +69,8 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _AuthorRow(
-                  name: post.creatorName,
-                  avatarUrl: post.creatorImageUrl,
+                  name: post.groupName,
+                  avatarUrl: post.groupAvatarUrl,
                   isDark: isDark,
                 ),
                 if (caption.isNotEmpty) ...[
@@ -129,12 +127,11 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
   }
 
   void _openDetail() {
-    context.push(
-      '/home/posts/${widget.post.id}',
-      extra: {
-        'post': widget.post,
-        'includeUnfollowed': widget.includeUnfollowed,
-      },
+    ConnectPostDetailDrawer.show(
+      context,
+      postId: widget.post.id,
+      initialPost: widget.post,
+      includeUnfollowed: widget.includeUnfollowed,
     );
   }
 
@@ -164,9 +161,9 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
 
     if (!result.isSuccess) {
       setState(() => _likeState.revert(wasLiked));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.errorMessage!)));
       return;
     }
 
@@ -204,7 +201,10 @@ class _AuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+    final displayName =
+        name.trim().isNotEmpty
+            ? name.trim()
+            : context.l10n.connect_group_fallback_title;
 
     return Row(
       children: [

@@ -845,6 +845,7 @@
   "connect_tab_feed": "གསར་འགྱུར།",
   "connect_tab_events": "བྱེད་སྒོ།",
   "connect_tab_posts": "སྤེལ་བ།",
+  "connect_tab_practices": "ཉམས་ལེན།",
   "connect_tab_groups": "ཚོགས་པ།",
   "connect_segment_my": "ངའི།",
   "connect_segment_discover": "འཚོལ་སྙེག",
@@ -852,6 +853,7 @@
   "connect_empty_discover_events": "འཚོལ་རྒྱུའི་བྱེད་སྒོ་མི་འདུག",
   "connect_empty_discover_feed": "འཚོལ་རྒྱུ་གང་ཡང་མི་འདུག",
   "connect_empty_discover_groups": "འཚོལ་རྒྱུའི་ཚོགས་པ་མི་འདུག",
+  "connect_empty_discover_practices": "འཚོལ་རྒྱུའི་ཉམས་ལེན་མི་འདུག",
   "connect_all_groups": "ཚོགས་པ་ཡོངས།",
   "connect_my_empty_feed_title": "ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་ཁུ་སིམ་མེ་རེད་འདུག",
   "connect_my_empty_events_title": "འབྱུང་འགྱུར་གྱི་བྱེད་སྒོ་མི་འདུག",
@@ -864,6 +866,9 @@
   "connect_my_empty_feed_browse": "ཚོགས་པ་གཞན་གྱིས་སྤེལ་བ་ལ་གཟིགས།",
   "connect_my_empty_events_browse": "ཐམས་ཅད་ཞུགས་ཆོག་པའི་བྱེད་སྒོ་ལ་གཟིགས།",
   "connect_my_empty_posts_browse": "སྤེལ་བ་གཞན་ལ་གཟིགས།",
+  "connect_my_empty_practices_title": "ད་དུང་ཉམས་ལེན་མི་འདུག",
+  "connect_my_empty_practices_subtitle": "ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་ཉམས་ལེན་གང་ཡང་མ་བྱས་འདུག ཚོགས་པ་གཞན་གྱིས་གང་འདོན་བཞིན་པར་གཟིགས།",
+  "connect_my_empty_practices_browse": "ཉམས་ལེན་གཞན་ལ་གཟིགས།",
   "connect_comment_replying_to": "@{handle} ལ་ལན་འདེབས་བཞིན་པ།",
   "@connect_comment_replying_to": {
     "placeholders": {

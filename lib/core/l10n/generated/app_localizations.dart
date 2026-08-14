@@ -1384,6 +1384,12 @@ abstract class AppLocalizations {
   /// **'Posts'**
   String get connect_tab_posts;
 
+  /// No description provided for @connect_tab_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'Practices'**
+  String get connect_tab_practices;
+
   /// No description provided for @connect_tab_groups.
   ///
   /// In en, this message translates to:
@@ -1425,6 +1431,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No groups to discover'**
   String get connect_empty_discover_groups;
+
+  /// No description provided for @connect_empty_discover_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'No practices to discover'**
+  String get connect_empty_discover_practices;
 
   /// No description provided for @connect_all_groups.
   ///
@@ -1497,6 +1509,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Browse other posts'**
   String get connect_my_empty_posts_browse;
+
+  /// No description provided for @connect_my_empty_practices_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No practices yet'**
+  String get connect_my_empty_practices_title;
+
+  /// No description provided for @connect_my_empty_practices_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your groups have not started any practices. See what other groups are offering.'**
+  String get connect_my_empty_practices_subtitle;
+
+  /// No description provided for @connect_my_empty_practices_browse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse other practices'**
+  String get connect_my_empty_practices_browse;
 
   /// No description provided for @connect_comment_replying_to.
   ///

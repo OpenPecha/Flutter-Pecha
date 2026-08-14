@@ -719,6 +719,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get connect_tab_posts => 'སྤེལ་བ།';
 
   @override
+  String get connect_tab_practices => 'ཉམས་ལེན།';
+
+  @override
   String get connect_tab_groups => 'ཚོགས་པ།';
 
   @override
@@ -738,6 +741,9 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get connect_empty_discover_groups => 'འཚོལ་རྒྱུའི་ཚོགས་པ་མི་འདུག';
+
+  @override
+  String get connect_empty_discover_practices => 'འཚོལ་རྒྱུའི་ཉམས་ལེན་མི་འདུག';
 
   @override
   String get connect_all_groups => 'ཚོགས་པ་ཡོངས།';
@@ -781,6 +787,16 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get connect_my_empty_posts_browse => 'སྤེལ་བ་གཞན་ལ་གཟིགས།';
+
+  @override
+  String get connect_my_empty_practices_title => 'ད་དུང་ཉམས་ལེན་མི་འདུག';
+
+  @override
+  String get connect_my_empty_practices_subtitle =>
+      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་ཉམས་ལེན་གང་ཡང་མ་བྱས་འདུག ཚོགས་པ་གཞན་གྱིས་གང་འདོན་བཞིན་པར་གཟིགས།';
+
+  @override
+  String get connect_my_empty_practices_browse => 'ཉམས་ལེན་གཞན་ལ་གཟིགས།';
 
   @override
   String connect_comment_replying_to(String handle) {
