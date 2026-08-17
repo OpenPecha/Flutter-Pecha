@@ -111,6 +111,14 @@ class MainNavigationBottomBar extends ConsumerWidget {
 /// Shell scaffold used by the [ShellRoute] in the router.
 /// Provides a persistent bottom navigation bar that stays fixed across
 /// route transitions — the Flutter equivalent of React's layout.tsx.
+///
+/// On Android, intercepts the system back gesture so that:
+///   1. Any pushed shell route (Settings, Calendar, …) is popped first.
+///   2. If no route to pop and the current tab is not Home, return to Home.
+///   3. Only when already on the Home tab with nothing to pop is the Activity
+///      allowed to finish.
+/// iOS is left untouched — there is no system back button and intercepting the
+/// swipe-back gesture here would conflict with the native horizontal swipe.
 class HomeShellScaffold extends ConsumerWidget {
   const HomeShellScaffold({super.key, required this.child});
 
@@ -121,7 +129,21 @@ class HomeShellScaffold extends ConsumerWidget {
     final location = GoRouterState.of(context).uri.toString();
     final hideBottomNav = location.startsWith('/home/timers');
 
-    return Scaffold(
+    final bool isAndroid =
+        Theme.of(context).platform == TargetPlatform.android;
+    final int selectedIndex = ref.watch(mainNavigationIndexProvider);
+    final bool isHomeTab = selectedIndex == MainTab.home.index;
+    final bool routerCanPop = GoRouter.of(context).canPop();
+    final bool shellCanPop =
+        shellNavigatorKey.currentState?.canPop() ?? false;
+    final bool hasRouteToPop = routerCanPop || shellCanPop;
+
+    // On Android: block exit when there are nested routes to pop OR when we are
+    // not yet on the Home tab. On iOS (and other platforms): never block — the
+    // platform handles back gestures natively.
+    final bool allowPop = !isAndroid || (!hasRouteToPop && isHomeTab);
+
+    final scaffold = Scaffold(
       body: child,
       bottomNavigationBar:
           hideBottomNav
@@ -137,6 +159,34 @@ class HomeShellScaffold extends ConsumerWidget {
                   }
                 },
               ),
+    );
+
+    if (!isAndroid) return scaffold;
+
+    return PopScope(
+      canPop: allowPop,
+      onPopInvokedWithResult: (bool didPop, _) {
+        if (didPop) return;
+        // Pop a GoRouter-managed shell page first (e.g. /home/settings).
+        if (GoRouter.of(context).canPop()) {
+          GoRouter.of(context).pop();
+          return;
+        }
+        // Pop an imperatively-pushed Navigator page on the shell stack.
+        final NavigatorState? shell = shellNavigatorKey.currentState;
+        if (shell != null && shell.canPop()) {
+          shell.pop();
+          return;
+        }
+        // At a non-Home tab root: return to Home tab.
+        if (ref.read(mainNavigationIndexProvider) != MainTab.home.index) {
+          ref.read(mainNavigationIndexProvider.notifier).state =
+              MainTab.home.index;
+        }
+        // If already on Home tab with nothing to pop, allowPop is true so
+        // Android handles the exit automatically.
+      },
+      child: scaffold,
     );
   }
 }
