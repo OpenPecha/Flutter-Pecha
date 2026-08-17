@@ -267,6 +267,7 @@ class _PlaceholderActionBar extends StatelessWidget {
       (AppAssets.speakerSimpleHigh, 'Audio'),
       (AppAssets.plus, 'Practice'),
       (AppAssets.bookmarkSimple, context.l10n.bookmark),
+      (AppAssets.readerShare, context.l10n.share),
     ];
 
     return SingleChildScrollView(
