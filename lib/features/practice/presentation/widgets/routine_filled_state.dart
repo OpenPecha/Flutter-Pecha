@@ -242,8 +242,10 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
               ),
               itemCount: widget.routineData.blocks.length,
               itemBuilder: (context, index) {
+                final block = widget.routineData.blocks[index];
                 return _RoutineBlockSection(
-                  block: widget.routineData.blocks[index],
+                  key: ValueKey(block.id),
+                  block: block,
                 );
               },
             ),
@@ -318,7 +320,7 @@ class _EditLink extends StatelessWidget {
 class _RoutineBlockSection extends ConsumerStatefulWidget {
   final RoutineBlock block;
 
-  const _RoutineBlockSection({required this.block});
+  const _RoutineBlockSection({super.key, required this.block});
 
   @override
   ConsumerState<_RoutineBlockSection> createState() =>
