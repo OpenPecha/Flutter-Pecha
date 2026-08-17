@@ -107,11 +107,7 @@ class _CollectionAppBar extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          IconButton(
-            icon: const Icon(AppAssets.dotsThreeVertical),
-            onPressed: () {},
-            iconSize: 22,
-          ),
+          const SizedBox(width: 48),
         ],
       ),
     );
