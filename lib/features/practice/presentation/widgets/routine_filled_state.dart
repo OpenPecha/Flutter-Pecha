@@ -469,13 +469,16 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
                   ),
                 ),
                 if (hasItems)
-                  Icon(
-                    _expanded ? AppAssets.caretUp : AppAssets.caretDown,
-                    size: 18,
-                    color:
-                        isDark
-                            ? AppColors.textTertiaryDark
-                            : AppColors.textSecondary,
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      _expanded ? AppAssets.caretUp : AppAssets.caretDown,
+                      size: 18,
+                      color:
+                          isDark
+                              ? AppColors.textTertiaryDark
+                              : AppColors.textSecondary,
+                    ),
                   ),
               ],
             ),
