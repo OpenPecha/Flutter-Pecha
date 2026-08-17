@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
+import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
@@ -119,9 +120,10 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
       // found or lost its durationMs on a server round-trip.
       final durationMs = item?.durationMs ?? pendingNav.durationMs;
       if (durationMs != null && durationMs > 0) {
-        final name = (item != null && item.title.isNotEmpty)
-            ? item.title
-            : '${durationMs ~/ 60000} min session';
+        final name =
+            (item != null && item.title.isNotEmpty)
+                ? item.title
+                : '${durationMs ~/ 60000} min session';
         context.push(
           '/home/timers/active',
           extra: PresetTimer(
@@ -177,13 +179,14 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
     final startDate = userPlan.effectiveStartDate;
     // Use the specific day embedded in the deep link when available; otherwise
     // fall back to computing today's day from the plan start date.
-    final selectedDay = pendingNav.dayNumber != null
-        ? pendingNav.dayNumber!.clamp(1, userPlan.totalDays)
-        : PlanUtils.dayNumberFor(
-            startDate,
-            DateTime.now(),
-            userPlan.totalDays,
-          ).clamp(1, userPlan.totalDays);
+    final selectedDay =
+        pendingNav.dayNumber != null
+            ? pendingNav.dayNumber!.clamp(1, userPlan.totalDays)
+            : PlanUtils.dayNumberFor(
+              startDate,
+              DateTime.now(),
+              userPlan.totalDays,
+            ).clamp(1, userPlan.totalDays);
     _logger.info(
       '[ENROLL-NAV] notification open ${userPlan.id} '
       'seriesId=${pendingNav.itemId} selectedDay=$selectedDay/${userPlan.totalDays}',
@@ -312,10 +315,20 @@ class _EditLink extends StatelessWidget {
   }
 }
 
-class _RoutineBlockSection extends ConsumerWidget {
+class _RoutineBlockSection extends ConsumerStatefulWidget {
   final RoutineBlock block;
 
   const _RoutineBlockSection({required this.block});
+
+  @override
+  ConsumerState<_RoutineBlockSection> createState() =>
+      _RoutineBlockSectionState();
+}
+
+class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
+  bool _expanded = true;
+
+  RoutineBlock get block => widget.block;
 
   Future<void> _onItemTap(
     BuildContext context,
@@ -422,31 +435,74 @@ class _RoutineBlockSection extends ConsumerWidget {
     );
   }
 
+  void _toggleExpanded() {
+    if (block.items.isEmpty) return;
+    setState(() => _expanded = !_expanded);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasItems = block.items.isNotEmpty;
+    final labelColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text(
-          block.formattedTime,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+        InkWell(
+          onTap: hasItems ? _toggleExpanded : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    block.formattedTime,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: labelColor,
+                    ),
+                  ),
+                ),
+                if (hasItems)
+                  Icon(
+                    _expanded ? AppAssets.caretUp : AppAssets.caretDown,
+                    size: 18,
+                    color:
+                        isDark
+                            ? AppColors.textTertiaryDark
+                            : AppColors.textSecondary,
+                  ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        for (int i = 0; i < block.items.length; i++) ...[
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: i < block.items.length - 1 ? 8.0 : 0,
-            ),
-            child: _buildItemCard(context, ref, block.items[i]),
-          ),
-        ],
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child:
+              _expanded && hasItems
+                  ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      for (int i = 0; i < block.items.length; i++) ...[
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: i < block.items.length - 1 ? 8.0 : 0,
+                          ),
+                          child: _buildItemCard(context, ref, block.items[i]),
+                        ),
+                      ],
+                    ],
+                  )
+                  : const SizedBox.shrink(),
+        ),
         const SizedBox(height: 8),
       ],
     );
@@ -465,9 +521,10 @@ class _RoutineBlockSection extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.cardBackgroundDark
-            : AppColors.cardBackgroundLight,
+        color:
+            isDark
+                ? AppColors.cardBackgroundDark
+                : AppColors.cardBackgroundLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
