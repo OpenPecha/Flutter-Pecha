@@ -11,6 +11,10 @@ class ConnectPostsState {
   final bool hasMore;
   final int skip;
 
+  /// False until the first load settles, so the UI can tell "not fetched yet"
+  /// apart from "fetched and genuinely empty".
+  final bool hasLoaded;
+
   const ConnectPostsState({
     this.posts = const [],
     this.isLoading = false,
@@ -18,6 +22,7 @@ class ConnectPostsState {
     this.error,
     this.hasMore = true,
     this.skip = 0,
+    this.hasLoaded = false,
   });
 
   ConnectPostsState copyWith({
@@ -27,6 +32,7 @@ class ConnectPostsState {
     String? error,
     bool? hasMore,
     int? skip,
+    bool? hasLoaded,
     bool clearError = false,
   }) {
     return ConnectPostsState(
@@ -36,6 +42,7 @@ class ConnectPostsState {
       error: clearError ? null : error ?? this.error,
       hasMore: hasMore ?? this.hasMore,
       skip: skip ?? this.skip,
+      hasLoaded: hasLoaded ?? this.hasLoaded,
     );
   }
 }
@@ -62,7 +69,7 @@ class ConnectPostsNotifier extends StateNotifier<ConnectPostsState> {
 
     final authState = ref.read(authProvider);
     if (!includeUnfollowed && (authState.isGuest || !authState.isLoggedIn)) {
-      state = const ConnectPostsState(hasMore: false);
+      state = const ConnectPostsState(hasMore: false, hasLoaded: true);
       return;
     }
 
@@ -78,7 +85,11 @@ class ConnectPostsNotifier extends StateNotifier<ConnectPostsState> {
 
     result.fold(
       (failure) {
-        state = state.copyWith(isLoading: false, error: failure.message);
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+          hasLoaded: true,
+        );
       },
       (page) {
         state = state.copyWith(
@@ -86,6 +97,7 @@ class ConnectPostsNotifier extends StateNotifier<ConnectPostsState> {
           isLoading: false,
           hasMore: page.hasMore,
           skip: page.posts.length,
+          hasLoaded: true,
           clearError: true,
         );
       },

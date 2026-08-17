@@ -134,6 +134,7 @@ class _GroupEventDetailScreenState
     final isAttending = _attendingOverride ?? event.isJoined;
     final totalAttending = _attendeeCount(event, isAttending);
     final hasVideos = _hasVideos(event);
+    final isPast = isGroupEventPast(event);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(14, 8, 14, 32),
@@ -147,8 +148,10 @@ class _GroupEventDetailScreenState
             totalAttending: totalAttending,
             isDark: isDark,
           ),
-          const SizedBox(height: 14),
-          _buildActionRow(event, isAttending, isDark),
+          if (!isPast) ...[
+            const SizedBox(height: 14),
+            _buildActionRow(event, isAttending, isDark),
+          ],
           const SizedBox(height: 16),
           _EventInfoCard(event: event, isDark: isDark),
           const SizedBox(height: 16),
@@ -257,6 +260,8 @@ class _GroupEventDetailScreenState
   }
 
   Future<void> _attendEvent(GroupEvent event) async {
+    if (isGroupEventPast(event)) return;
+
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
       LoginDrawer.show(context, ref);
@@ -278,6 +283,8 @@ class _GroupEventDetailScreenState
   }
 
   Future<void> _leaveEvent(GroupEvent event) async {
+    if (isGroupEventPast(event)) return;
+
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
       LoginDrawer.show(context, ref);
@@ -567,14 +574,6 @@ class _EventInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'WHEN',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primaryDark,
-            ),
-          ),
           const SizedBox(height: 7),
           if (dateText != null)
             Row(

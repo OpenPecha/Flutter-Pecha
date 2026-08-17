@@ -1,7 +1,24 @@
+/// UI locale vs content language.
+///
+/// The app keeps two independent language axes. Use [localeProvider] for
+/// chrome strings (`context.l10n`, Material, Tolgee). Use
+/// [contentLanguageProvider] as the `language` query param on backend content
+/// APIs (traditions, series, texts, plans, …). They diverge when the user
+/// picks a content language the app has no ARB for — UI falls back to English
+/// while content stays on the selected code.
+///
+/// See this folder's `README.md` for the full split, storage keys, and
+/// which provider to watch.
+library;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/di/core_providers.dart';
+import 'package:flutter_pecha/core/localization/data/languages_remote_datasource.dart';
 import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/l10n/l10n.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/core/utils/local_storage_service.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_pecha/core/constants/app_config.dart';
 
@@ -233,7 +250,29 @@ final contentLanguageProvider =
 /// the backend (verbatim) and the UI locale (English when no translation
 /// exists). This is the "one choice, split under the hood" entry point used by
 /// the language picker and onboarding.
+///
+/// When the user is authenticated (not a guest), awaits
+/// `PUT /users/me/language` first. Local prefs update only on success; on
+/// failure the previous language is kept. Guests update locally only.
 Future<void> selectAppLanguage(WidgetRef ref, String code) async {
+  final auth = ref.read(authProvider);
+  if (auth.isLoggedIn && !auth.isGuest) {
+    try {
+      // Constructed here (not via languagesRemoteDatasourceProvider) to avoid
+      // a locale_notifier ↔ languages_providers import cycle.
+      await LanguagesRemoteDatasource(
+        dio: ref.read(dioProvider),
+      ).updateLanguage(code);
+    } catch (e, st) {
+      AppLogger('selectAppLanguage').warning(
+        'Failed to sync language to backend; keeping previous language',
+        e,
+        st,
+      );
+      return;
+    }
+  }
+
   await ref.read(contentLanguageProvider.notifier).setContentLanguage(code);
   await ref.read(localeProvider.notifier).applyUiLocaleForContent(code);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/theme/font_config.dart';
 import 'package:flutter_pecha/features/reader/presentation/widgets/reader_panels/reader_panel_constants.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
@@ -30,12 +31,21 @@ class ReaderPanelMetadataTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
     final titleFontSize = getLocalizedFontSize(AppTextSize.label);
-    final titleStyle = TextStyle(
-      fontFamily: fontFamily,
-      fontSize: titleFontSize,
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-      fontWeight: FontWeight.w500,
+    final titleStyle = AppFontConfig.applyTibetanMetrics(
+      language,
+      TextStyle(
+        fontFamily: fontFamily,
+        height: lineHeight,
+        fontSize: titleFontSize,
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+        fontWeight: FontWeight.w500,
+      ),
+    );
+    final titleStrutStyle = AppFontConfig.tibetanStrutStyle(
+      language,
+      titleFontSize,
     );
 
     return Column(
@@ -48,8 +58,9 @@ class ReaderPanelMetadataTile extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AnimatedRotation(
                   duration: const Duration(milliseconds: 150),
@@ -65,6 +76,7 @@ class ReaderPanelMetadataTile extends StatelessWidget {
                   child: Text(
                     title,
                     style: titleStyle,
+                    strutStyle: titleStrutStyle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -115,7 +127,22 @@ class _MetadataCard extends StatelessWidget {
             ? Colors.white.withValues(alpha: 0.06)
             : Colors.black.withValues(alpha: 0.04);
     final fontFamily = getFontFamily(language);
+    final lineHeight = getLineHeight(language);
     final titleFontSize = getLocalizedFontSize(AppTextSize.label);
+    final titleStyle = AppFontConfig.applyTibetanMetrics(
+      language,
+      TextStyle(
+        fontFamily: fontFamily,
+        height: lineHeight,
+        fontSize: titleFontSize,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
+      ),
+    );
+    final titleStrutStyle = AppFontConfig.tibetanStrutStyle(
+      language,
+      titleFontSize,
+    );
 
     final hasSource = source != null && source!.trim().isNotEmpty;
     final hasLicense = license != null && license!.trim().isNotEmpty;
@@ -133,12 +160,8 @@ class _MetadataCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontFamily: fontFamily,
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
+            style: titleStyle,
+            strutStyle: titleStrutStyle,
           ),
           if (hasSource) ...[
             const SizedBox(height: 6),

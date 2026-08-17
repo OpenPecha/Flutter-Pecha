@@ -174,7 +174,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: "onboarding",
         builder: (context, state) => const OnboardingWrapper(),
       ),
-
       ShellRoute(
         navigatorKey: shellNavigatorKey,
         builder: (context, state, child) {

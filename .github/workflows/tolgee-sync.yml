@@ -1,0 +1,100 @@
+name: 🌍 Tolgee Sync
+
+on:
+  schedule:
+    # Monday 10:00 AM IST (04:30 UTC)
+    - cron: "30 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: tolgee-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync Tolgee and ARB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TOLGEE_SYNC_API_KEY: ${{ secrets.TOLGEE_SYNC_API_KEY }}
+
+    steps:
+      - name: 📂 Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          persist-credentials: false
+
+      - name: 🐦 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 📝 Create placeholder .env files
+        run: |
+          for e in dev staging prod; do
+            printf 'BASE_API_URL=\nAI_URL=\nAUTH0_SCHEME=\nAUTH0_AUDIENCE=\nENVIRONMENT=%s\n' "$e" > ".env.$e"
+          done
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: ⬆️ Create missing Tolgee keys
+        run: dart run tool/tolgee_sync.dart push
+
+      - name: ⬇️ Pull Tolgee translations
+        run: dart run tool/tolgee_sync.dart pull
+
+      - name: 🧩 Regenerate localizations
+        run: |
+          flutter gen-l10n
+          dart run tool/generate_tolgee_bridge.dart
+
+      - name: 🎨 Format generated Dart
+        run: |
+          dart format tool/tolgee_sync.dart
+          dart format test/core/l10n/tolgee_sync_tags_test.dart
+          dart format lib/core/l10n/tolgee/tolgee_app_localizations.g.dart
+
+      - name: 🩺 Write remote health report
+        shell: bash
+        run: |
+          set +e
+          report="$(dart run tool/tolgee_sync.dart doctor --remote 2>&1)"
+          status=$?
+          {
+            echo "## Tolgee sync health"
+            echo '```text'
+            echo "$report"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
+      - name: 🧪 Verify generated sync result
+        run: |
+          dart run tool/generate_tolgee_bridge.dart --check
+          flutter test test/core/l10n
+
+      - name: 🔀 Open translation sync PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          base: develop
+          branch: automation/tolgee-sync
+          delete-branch: true
+          commit-message: "chore(l10n): sync translations from Tolgee"
+          title: "chore(l10n): sync translations from Tolgee"
+          body: |
+            ## Summary
+            - creates Tolgee keys newly added to `app_en.arb`
+            - refreshes bundled ARB fallback translations from Tolgee
+            - regenerates Flutter localizations and the Tolgee bridge
+
+            ## Verification
+            - ARB doctor (offline and remote)
+            - Tolgee bridge freshness check
+            - localization tests

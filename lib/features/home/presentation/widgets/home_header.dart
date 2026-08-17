@@ -106,7 +106,7 @@ class HomeEventBanner extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
       child: TodayEventBadge(label: todayEventName),
     );
   }

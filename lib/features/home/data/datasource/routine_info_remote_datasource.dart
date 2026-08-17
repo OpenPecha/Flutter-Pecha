@@ -20,9 +20,32 @@ class RoutineInfoRemoteDatasource {
       _logger.error('Failed to load routine info: ${response.statusCode}');
       throw _statusToException(response.statusCode, 'Failed to load routine info');
     } on DioException catch (e) {
+      // Backend returns 400 (not 404) when the user has never created a
+      // routine yet — same business rule as /users/me/routine, see
+      // RoutineRemoteDatasource.getUserRoutine. Treat it as zero counts
+      // rather than a hard error.
+      if (e.response?.statusCode == 400) {
+        final msg = _extractMessage(e)?.toLowerCase() ?? '';
+        if (msg.contains('no routine')) {
+          _logger.info('No routine for user – treating info as empty');
+          return const RoutineInfoModel(seriesCount: 0, recitationCount: 0);
+        }
+      }
       _logger.error('Dio error in fetchRoutineInfo', e);
       throw _dioToException(e, 'Failed to load routine info');
     }
+  }
+
+  String? _extractMessage(DioException e) {
+    final data = e.response?.data;
+    if (data is Map<String, dynamic>) {
+      final detail = data['detail'];
+      if (detail is Map<String, dynamic>) {
+        return detail['message'] as String?;
+      }
+      return (data['message'] ?? data['error']) as String?;
+    }
+    return null;
   }
 
   Exception _statusToException(int? statusCode, String label) {

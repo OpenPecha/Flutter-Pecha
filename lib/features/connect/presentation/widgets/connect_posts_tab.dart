@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
@@ -44,7 +44,10 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
     final myState = ref.watch(myConnectPostsProvider);
     final discoverState = ref.watch(discoverConnectPostsProvider);
 
-    return ConnectMyDiscoverTab(
+    return ConnectMyDiscoverTabGate(
+      myHasLoaded: myState.hasLoaded,
+      myIsEmpty: myState.posts.isEmpty,
+      myHasError: myState.error != null,
       onSegmentChanged: handleSegmentChanged,
       onMyRefresh: () => ref.read(myConnectPostsProvider.notifier).refresh(),
       onDiscoverRefresh:
@@ -59,6 +62,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
+          hasLoaded: myState.hasLoaded,
           scrollController: scrollController,
           onRetry: () => ref.read(myConnectPostsProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
@@ -79,6 +83,7 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
+          hasLoaded: discoverState.hasLoaded,
           scrollController: scrollController,
           onRetry:
               () => ref.read(discoverConnectPostsProvider.notifier).retry(),

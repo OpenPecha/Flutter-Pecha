@@ -28,6 +28,10 @@ class DiscoverGroupsState {
   final bool hasMore;
   final int skip;
 
+  /// False until the first load settles, so the UI can tell "not fetched yet"
+  /// apart from "fetched and genuinely empty".
+  final bool hasLoaded;
+
   const DiscoverGroupsState({
     this.groups = const [],
     this.isLoading = false,
@@ -35,6 +39,7 @@ class DiscoverGroupsState {
     this.error,
     this.hasMore = true,
     this.skip = 0,
+    this.hasLoaded = false,
   });
 
   DiscoverGroupsState copyWith({
@@ -44,6 +49,7 @@ class DiscoverGroupsState {
     String? error,
     bool? hasMore,
     int? skip,
+    bool? hasLoaded,
     bool clearError = false,
   }) {
     return DiscoverGroupsState(
@@ -53,6 +59,7 @@ class DiscoverGroupsState {
       error: clearError ? null : error ?? this.error,
       hasMore: hasMore ?? this.hasMore,
       skip: skip ?? this.skip,
+      hasLoaded: hasLoaded ?? this.hasLoaded,
     );
   }
 }
@@ -89,7 +96,11 @@ class DiscoverGroupsNotifier extends StateNotifier<DiscoverGroupsState> {
 
     result.fold(
       (failure) {
-        state = state.copyWith(isLoading: false, error: failure.message);
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+          hasLoaded: true,
+        );
       },
       (page) {
         state = state.copyWith(
@@ -97,6 +108,7 @@ class DiscoverGroupsNotifier extends StateNotifier<DiscoverGroupsState> {
           isLoading: false,
           hasMore: page.hasMore,
           skip: page.groups.length,
+          hasLoaded: true,
           clearError: true,
         );
       },

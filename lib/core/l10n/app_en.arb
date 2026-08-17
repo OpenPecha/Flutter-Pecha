@@ -7,7 +7,7 @@
   "onboarding_setup_subtitle": "Let's get you set up, It'll only take a minute",
   "onboarding_tagline": "Learn, practice, and connect. Daily.",
   "onboarding_quote": "Drop by drop the water pot is filled. Likewise, the wise person, gathering it little by little, fills themselves with good.",
-  "onboarding_find_peace": "Get Started",
+  "onboarding_find_peace": "Get started",
   "onboarding_continue": "Continue",
   "onboarding_first_question": "Choose your language:",
   "onboarding_choose_option": "Choose at least one:",
@@ -72,7 +72,7 @@
   "mala_reset_count_confirm": "Your current count will go back to zero, but your accumulations will stay in your lifetime total.",
   "mala_reset_confirm": "Reset",
   "mala_action_coming_soon": "Coming soon",
-  "mala_rounds_count": "{count, plural, =0{0 rounds} =1{1 round} other{{count} rounds}}",
+  "mala_rounds_count": "{count, plural,\n=0 {0 rounds}\n=1 {1 round}\nother {{count} rounds}\n}",
   "@mala_rounds_count": {
     "placeholders": {
       "count": {
@@ -192,13 +192,13 @@
   "notification_allow_subtitle_paused": "Reminders are paused. Tap to resume.",
   "notification_routine_title": "Plan reminders",
   "notification_routine_subtitle_enabled": "Daily reminders for your plans",
-  "notification_routine_subtitle_disabled": "Plan reminders are paused. Tap to resume.",
+  "notification_routine_subtitle_disabled": "Plan reminders are paused. Tap to resume",
   "notification_battery_title": "Background reminders",
   "notification_battery_subtitle_enabled": "Your reminders are sent on time, even when the app is closed.",
   "notification_battery_subtitle_disabled": "Some Android phones pause background apps to save battery, which can delay or skip your reminders. Tap to keep yours running.",
   "notification_recitation_title": "Chant reminders",
   "notification_recitation_subtitle_enabled": "Daily reminders for your chants",
-  "notification_recitation_subtitle_disabled": "Chant reminders are paused. Tap to resume.",
+  "notification_recitation_subtitle_disabled": "Chant reminders are paused. Tap to resume",
   "notification_practice_title": "Mala reminders",
   "notification_practice_subtitle_enabled": "Daily reminders for your mala practice",
   "notification_practice_subtitle_disabled": "Mala reminders are paused. Tap to resume.",
@@ -271,6 +271,7 @@
   "connect_tab_feed": "Feed",
   "connect_tab_events": "Events",
   "connect_tab_posts": "Posts",
+  "connect_tab_practices": "Practices",
   "connect_tab_groups": "Groups",
   "connect_segment_my": "My",
   "connect_segment_discover": "Discover",
@@ -278,6 +279,7 @@
   "connect_empty_discover_events": "No events to discover",
   "connect_empty_discover_feed": "Nothing to discover",
   "connect_empty_discover_groups": "No groups to discover",
+  "connect_empty_discover_practices": "No practices to discover",
   "connect_all_groups": "All groups",
   "connect_my_empty_feed_title": "Your groups have been quiet",
   "connect_my_empty_events_title": "No upcoming events",
@@ -290,6 +292,9 @@
   "connect_my_empty_feed_browse": "See what other groups share",
   "connect_my_empty_events_browse": "Browse open events",
   "connect_my_empty_posts_browse": "Browse other posts",
+  "connect_my_empty_practices_title": "No practices yet",
+  "connect_my_empty_practices_subtitle": "Your groups have not started any practices. See what other groups are offering.",
+  "connect_my_empty_practices_browse": "Browse other practices",
   "connect_comment_replying_to": "Replying to @{handle}",
   "@connect_comment_replying_to": {
     "placeholders": {
@@ -313,7 +318,7 @@
     }
   },
   "connect_post_comments_empty": "No comments yet. Start the conversation.",
-  "connect_caption_more": "more",
+  "connect_caption_more": "More",
   "connect_online": "Online",
   "connect_open": "Open",
   "connect_event_fallback_title": "Event",
@@ -587,6 +592,7 @@
   "routine_add_block_label": "Time block",
   "continueWithGoogle": "Continue with Google",
   "continueWithApple": "Continue with Apple",
+  "continueWithPhone": "Continue with phone",
   "continueAsGuest": "Continue as guest",
   "exploreAsGuest": "Explore as a Guest",
   "signIn": "Sign In",
@@ -660,7 +666,7 @@
       }
     }
   },
-  "missedDaysCount": "{count, plural, =0{0 missed days} =1{1 missed day} other{{count} missed days}}",
+  "missedDaysCount": "{count, plural,\n=0 {0 missed days}\n=1 {1 missed day}\nother {{count} missed days}\n}",
   "@missedDaysCount": {
     "placeholders": {
       "count": {
@@ -723,7 +729,7 @@
   "edit_profile_tradition_save_failed": "Couldn't save traditions. Please try again",
   "username_label": "Username",
   "username_taken": "Someone already used this name",
-  "username_available_label": "Available: ",
+  "username_available_label": "Available:",
   "username_check_error": "Unable to check username. Try again",
   "username_invalid_format": "Invalid username format",
   "username_min_length": "Username must be at least 3 characters",
@@ -830,7 +836,6 @@
   "moon_phase_waning_gibbous": "Waning gibbous",
   "moon_phase_last_quarter": "Last quarter",
   "moon_phase_waning_crescent": "Waning crescent",
-
   "join": "Join",
   "joined": "Joined",
   "group_member": "member",
@@ -939,7 +944,6 @@
       }
     }
   },
-
   "share_this_quote": "Share this quote",
   "shared_from": "Shared from",
   "verse_share_error": "Unable to share quote. Please try again",
@@ -960,7 +964,6 @@
   "weekday_friday": "FRI",
   "weekday_saturday": "SAT",
   "weekday_sunday": "SUN",
-
   "reader_search_failed": "Search failed.\nPlease try again",
   "reader_swipe_up_for_more": "Swipe up for more",
   "reader_videos": "Videos",

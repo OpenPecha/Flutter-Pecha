@@ -1390,6 +1390,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_tab_practices => TolgeeBridge.get(
+    localeName,
+    'connect_tab_practices',
+    () => _fallback.connect_tab_practices,
+  );
+
+  @override
   String get connect_tab_groups => TolgeeBridge.get(
     localeName,
     'connect_tab_groups',
@@ -1439,6 +1446,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_empty_discover_practices => TolgeeBridge.get(
+    localeName,
+    'connect_empty_discover_practices',
+    () => _fallback.connect_empty_discover_practices,
+  );
+
+  @override
   String get connect_all_groups => TolgeeBridge.get(
     localeName,
     'connect_all_groups',
@@ -1464,6 +1478,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_my_empty_posts_title',
     () => _fallback.connect_my_empty_posts_title,
+  );
+
+  @override
+  String get connect_my_empty_practices_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_title',
+    () => _fallback.connect_my_empty_practices_title,
   );
 
   @override
@@ -1495,6 +1516,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_my_empty_practices_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_subtitle',
+    () => _fallback.connect_my_empty_practices_subtitle,
+  );
+
+  @override
   String get connect_my_empty_groups_subtitle => TolgeeBridge.get(
     localeName,
     'connect_my_empty_groups_subtitle',
@@ -1520,6 +1548,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_my_empty_posts_browse',
     () => _fallback.connect_my_empty_posts_browse,
+  );
+
+  @override
+  String get connect_my_empty_practices_browse => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_browse',
+    () => _fallback.connect_my_empty_practices_browse,
   );
 
   @override
@@ -2467,6 +2502,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'continueWithApple',
     () => _fallback.continueWithApple,
+  );
+
+  @override
+  String get continueWithPhone => TolgeeBridge.get(
+    localeName,
+    'continueWithPhone',
+    () => _fallback.continueWithPhone,
   );
 
   @override

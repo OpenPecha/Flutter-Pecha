@@ -130,6 +130,18 @@ class AuthService {
     return _loginWithConnection('apple');
   }
 
+  /// Login with a phone number via Auth0's passwordless SMS connection.
+  ///
+  /// Runs through Universal Login rather than the embedded
+  /// `api.startPasswordlessWithPhoneNumber` / `api.loginWithSmsCode` pair, so
+  /// phone entry, OTP entry, resend throttling and bot detection are all
+  /// handled by the hosted page — and, critically, this path already requests
+  /// the API `audience` and persists to the credentials manager. The embedded
+  /// API does neither by default.
+  Future<Credentials?> loginWithPhone() async {
+    return _loginWithConnection('sms');
+  }
+
   // Local logout - clears credentials from device only
   Future<void> localLogout() async {
     try {

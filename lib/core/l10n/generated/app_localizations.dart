@@ -151,7 +151,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding_find_peace.
   ///
   /// In en, this message translates to:
-  /// **'Get Started'**
+  /// **'Get started'**
   String get onboarding_find_peace;
 
   /// No description provided for @onboarding_continue.
@@ -457,7 +457,7 @@ abstract class AppLocalizations {
   /// No description provided for @mala_rounds_count.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{0 rounds} =1{1 round} other{{count} rounds}}'**
+  /// **'{count, plural,\n=0 {0 rounds}\n=1 {1 round}\nother {{count} rounds}\n}'**
   String mala_rounds_count(int count);
 
   /// No description provided for @mala_counter_semantics.
@@ -973,7 +973,7 @@ abstract class AppLocalizations {
   /// No description provided for @notification_routine_subtitle_disabled.
   ///
   /// In en, this message translates to:
-  /// **'Plan reminders are paused. Tap to resume.'**
+  /// **'Plan reminders are paused. Tap to resume'**
   String get notification_routine_subtitle_disabled;
 
   /// No description provided for @notification_battery_title.
@@ -1009,7 +1009,7 @@ abstract class AppLocalizations {
   /// No description provided for @notification_recitation_subtitle_disabled.
   ///
   /// In en, this message translates to:
-  /// **'Chant reminders are paused. Tap to resume.'**
+  /// **'Chant reminders are paused. Tap to resume'**
   String get notification_recitation_subtitle_disabled;
 
   /// No description provided for @notification_practice_title.
@@ -1384,6 +1384,12 @@ abstract class AppLocalizations {
   /// **'Posts'**
   String get connect_tab_posts;
 
+  /// No description provided for @connect_tab_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'Practices'**
+  String get connect_tab_practices;
+
   /// No description provided for @connect_tab_groups.
   ///
   /// In en, this message translates to:
@@ -1425,6 +1431,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No groups to discover'**
   String get connect_empty_discover_groups;
+
+  /// No description provided for @connect_empty_discover_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'No practices to discover'**
+  String get connect_empty_discover_practices;
 
   /// No description provided for @connect_all_groups.
   ///
@@ -1498,6 +1510,24 @@ abstract class AppLocalizations {
   /// **'Browse other posts'**
   String get connect_my_empty_posts_browse;
 
+  /// No description provided for @connect_my_empty_practices_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No practices yet'**
+  String get connect_my_empty_practices_title;
+
+  /// No description provided for @connect_my_empty_practices_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your groups have not started any practices. See what other groups are offering.'**
+  String get connect_my_empty_practices_subtitle;
+
+  /// No description provided for @connect_my_empty_practices_browse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse other practices'**
+  String get connect_my_empty_practices_browse;
+
   /// No description provided for @connect_comment_replying_to.
   ///
   /// In en, this message translates to:
@@ -1555,7 +1585,7 @@ abstract class AppLocalizations {
   /// No description provided for @connect_caption_more.
   ///
   /// In en, this message translates to:
-  /// **'more'**
+  /// **'More'**
   String get connect_caption_more;
 
   /// No description provided for @connect_online.
@@ -2338,6 +2368,12 @@ abstract class AppLocalizations {
   /// **'Continue with Apple'**
   String get continueWithApple;
 
+  /// No description provided for @continueWithPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with phone'**
+  String get continueWithPhone;
+
   /// No description provided for @continueAsGuest.
   ///
   /// In en, this message translates to:
@@ -2569,7 +2605,7 @@ abstract class AppLocalizations {
   /// No description provided for @missedDaysCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{0 missed days} =1{1 missed day} other{{count} missed days}}'**
+  /// **'{count, plural,\n=0 {0 missed days}\n=1 {1 missed day}\nother {{count} missed days}\n}'**
   String missedDaysCount(int count);
 
   /// No description provided for @plan_status_on_track.
@@ -2845,7 +2881,7 @@ abstract class AppLocalizations {
   /// No description provided for @username_available_label.
   ///
   /// In en, this message translates to:
-  /// **'Available: '**
+  /// **'Available:'**
   String get username_available_label;
 
   /// No description provided for @username_check_error.

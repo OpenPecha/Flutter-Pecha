@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/screens/group_
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_events_tab.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_members_tab.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
@@ -27,6 +30,7 @@ import 'package:flutter_pecha/features/plans/data/utils/plan_date_format.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GroupProfileBody extends ConsumerStatefulWidget {
   final GroupProfile profile;
@@ -44,12 +48,13 @@ class GroupProfileBody extends ConsumerStatefulWidget {
   ConsumerState<GroupProfileBody> createState() => _GroupProfileBodyState();
 }
 
-class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
-    with SingleTickerProviderStateMixin {
-  static const int _practicesTabIndex = 2;
-  static const int _membersTabIndex = 3;
+enum _GroupProfileTab { posts, events, practices, members }
 
+class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
+    with TickerProviderStateMixin {
   TabController? _tabController;
+  List<_GroupProfileTab> _visibleTabs = const [];
+  final ScrollController _practicesScrollController = ScrollController();
   String? _enrollingSeriesId;
   String? _joiningAccumulatorId;
   final Set<String> _localGroupEnrolledSeriesIds = {};
@@ -58,6 +63,9 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   late final TapGestureRecognizer _moreRecognizer;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
+
+  /// Posts have no data source yet, so the tab never has content to show.
+  bool get _hasPosts => false;
 
   bool _hasBanner(GroupProfile profile) =>
       profile.bannerUrl != null && profile.bannerUrl!.isNotEmpty;
@@ -81,12 +89,9 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     super.initState();
     _moreRecognizer = TapGestureRecognizer();
     if (_isCommunityGroup(widget.profile)) {
-      _tabController = TabController(
-        length: 4,
-        initialIndex: _practicesTabIndex,
-        vsync: this,
-      );
-      _tabController!.addListener(_onTabChanged);
+      // The tab set depends on which sections actually have content, so the
+      // controller is created in build() once that data is known.
+      _practicesScrollController.addListener(_onPracticesScroll);
 
       final groupId = widget.profile.id;
       // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
@@ -103,12 +108,47 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
   }
 
+  /// Rebuilds the tab controller whenever the visible tab set changes, keeping
+  /// the currently selected tab selected when it is still present.
+  void _syncTabController(List<_GroupProfileTab> tabs) {
+    final previous = _tabController;
+    if (previous != null && listEquals(_visibleTabs, tabs)) return;
+
+    final selectedTab =
+        previous != null && previous.index < _visibleTabs.length
+            ? _visibleTabs[previous.index]
+            : null;
+    var initialIndex = selectedTab == null ? -1 : tabs.indexOf(selectedTab);
+    if (initialIndex < 0)
+      initialIndex = tabs.indexOf(_GroupProfileTab.practices);
+    if (initialIndex < 0) initialIndex = 0;
+
+    final controller = TabController(
+      length: tabs.length,
+      initialIndex: initialIndex,
+      vsync: this,
+    );
+    controller.addListener(_onTabChanged);
+
+    _visibleTabs = tabs;
+    _tabController = controller;
+
+    if (previous != null) {
+      previous.removeListener(_onTabChanged);
+      // The old TabBar/TabBarView still reference it for the current frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
+  }
+
   void _onTabChanged() {
-    if (_tabController == null || _tabController!.indexIsChanging) return;
+    final controller = _tabController;
+    if (controller == null || controller.indexIsChanging) return;
     if (!mounted) return;
 
     final groupId = widget.profile.id;
-    final isMembersTab = _tabController!.index == _membersTabIndex;
+    final isMembersTab =
+        controller.index < _visibleTabs.length &&
+        _visibleTabs[controller.index] == _GroupProfileTab.members;
     ref.read(groupMembersTabActiveProvider(groupId).notifier).state =
         isMembersTab;
 
@@ -121,10 +161,54 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
   }
 
+  void _onPracticesScroll() {
+    if (!_practicesScrollController.hasClients) return;
+
+    if (_practicesScrollController.position.pixels >=
+        _practicesScrollController.position.maxScrollExtent - 200) {
+      ref.read(groupPracticesProvider(widget.profile.id).notifier).loadMore();
+    }
+  }
+
+  void _syncPracticeEnrollmentFromList(List<GroupPractice> practices) {
+    final accumulators =
+        practices
+            .where((practice) => practice.type == GroupPracticeType.accumulator)
+            .map((practice) => practice.accumulator)
+            .whereType<GroupAccumulator>()
+            .toList();
+    ref
+        .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
+        .syncFromApi(accumulators);
+
+    final apiEnrolledIds =
+        practices
+            .where(
+              (practice) =>
+                  practice.series != null &&
+                  practice.series!.isGroupEnrolled == true,
+            )
+            .map((practice) => practice.series!.id)
+            .toSet();
+    final apiNotEnrolledIds = practices
+        .where(
+          (practice) =>
+              practice.series != null &&
+              practice.series!.isGroupEnrolled == null,
+        )
+        .map((practice) => practice.series!.id);
+    setState(() {
+      _localGroupEnrolledSeriesIds.addAll(apiEnrolledIds);
+      _localGroupEnrolledSeriesIds.removeAll(apiNotEnrolledIds);
+    });
+  }
+
   @override
   void dispose() {
     _membersTabActiveSub?.close();
     _membersNeedsRefreshSub?.close();
+    _practicesScrollController.removeListener(_onPracticesScroll);
+    _practicesScrollController.dispose();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     _moreRecognizer.dispose();
@@ -143,37 +227,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         ref
             .read(groupAccumulatorJoinCacheProvider(widget.profile.id).notifier)
             .clear();
-        ref.invalidate(groupAccumulatorsProvider(widget.profile.id));
+        refreshGroupPractices(ref, widget.profile.id);
       }
     });
-    ref.listen(groupAccumulatorsProvider(widget.profile.id), (previous, next) {
-      next.whenData((either) {
-        either.fold((_) {}, (page) {
-          ref
-              .read(
-                groupAccumulatorJoinCacheProvider(widget.profile.id).notifier,
-              )
-              .syncFromApi(page.accumulators);
-        });
-      });
-    });
-    ref.listen(groupProfileProvider(widget.profile.id), (previous, next) {
-      next.whenData((either) {
-        either.fold((_) {}, (profile) {
-          final apiEnrolledIds =
-              profile.series
-                  .where((series) => series.isGroupEnrolled == true)
-                  .map((series) => series.id)
-                  .toSet();
-          final apiNotEnrolledIds = profile.series
-              .where((series) => series.isGroupEnrolled == null)
-              .map((series) => series.id);
-          setState(() {
-            _localGroupEnrolledSeriesIds.addAll(apiEnrolledIds);
-            _localGroupEnrolledSeriesIds.removeAll(apiNotEnrolledIds);
-          });
-        });
-      });
+    ref.listen(groupPracticesProvider(widget.profile.id), (previous, next) {
+      if (next.isLoading && next.practices.isEmpty) return;
+      _syncPracticeEnrollmentFromList(next.practices);
     });
 
     final enrollingId = _enrollingSeriesId;
@@ -224,6 +283,39 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     double? lineHeight,
     List<GroupProfileSocialLink> orderedLinks,
   ) {
+    final (hasPractices, isPracticesLoading) = ref.watch(
+      groupPracticesProvider(profile.id).select(
+        (state) => (
+          state.practices.isNotEmpty,
+          state.isLoading && state.practices.isEmpty,
+        ),
+      ),
+    );
+    final eventsAsync = ref.watch(groupEventsProvider(profile.id));
+    // Keep the events tab when loading failed so its retry action stays
+    // reachable.
+    final hasEvents = eventsAsync.maybeWhen(
+      data:
+          (either) =>
+              either.fold((_) => true, (page) => page.events.isNotEmpty),
+      error: (_, _) => true,
+      orElse: () => false,
+    );
+    final isEventsLoading =
+        eventsAsync.isLoading && !eventsAsync.hasValue && !eventsAsync.hasError;
+
+    // Wait for both sections before laying out the tabs, otherwise tabs would
+    // pop in and out as each request settles.
+    final isTabDataLoading = isPracticesLoading || isEventsLoading;
+    final tabs = <_GroupProfileTab>[
+      if (_hasPosts) _GroupProfileTab.posts,
+      if (hasEvents) _GroupProfileTab.events,
+      if (hasPractices) _GroupProfileTab.practices,
+      _GroupProfileTab.members,
+    ];
+    if (!isTabDataLoading) _syncTabController(tabs);
+    final controller = _tabController;
+
     return NestedScrollView(
       headerSliverBuilder:
           (context, _) => [
@@ -238,34 +330,62 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                     ),
                     const SizedBox(height: 14),
                   ],
-                  _buildProfileHeader(profile, isDark, lineHeight, orderedLinks),
+                  _buildProfileHeader(
+                    profile,
+                    isDark,
+                    lineHeight,
+                    orderedLinks,
+                  ),
                   const SizedBox(height: 20),
                   _GroupFollowButton(profile: profile, isDark: isDark),
                   const SizedBox(height: 24),
-                  _buildTabBar(isDark, profile),
+                  if (controller != null) _buildTabBar(isDark, profile),
                 ],
               ),
             ),
           ],
-      body: TabBarView(
-        controller: _tabController!,
-        children: [
-          _buildEmptyTab('No posts yet', isDark, lineHeight),
-          GroupProfileEventsTab(
-            groupId: profile.id,
-            isDark: isDark,
-            lineHeight: lineHeight,
-          ),
-          _buildPracticesTab(profile, isDark, lineHeight),
-          GroupProfileMembersTab(
-            groupId: profile.id,
-            groupType: profile.groupType,
-            isDark: isDark,
-            lineHeight: lineHeight,
-          ),
-        ],
-      ),
+      body:
+          controller == null
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                controller: controller,
+                children: [
+                  for (final tab in _visibleTabs)
+                    _buildTabContent(tab, profile, isDark, lineHeight),
+                ],
+              ),
     );
+  }
+
+  Widget _buildTabContent(
+    _GroupProfileTab tab,
+    GroupProfile profile,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    return switch (tab) {
+      _GroupProfileTab.posts => _buildEmptyTab(
+        'No posts yet',
+        isDark,
+        lineHeight,
+      ),
+      _GroupProfileTab.events => GroupProfileEventsTab(
+        groupId: profile.id,
+        isDark: isDark,
+        lineHeight: lineHeight,
+      ),
+      _GroupProfileTab.practices => _buildPracticesTab(
+        profile,
+        isDark,
+        lineHeight,
+      ),
+      _GroupProfileTab.members => GroupProfileMembersTab(
+        groupId: profile.id,
+        groupType: profile.groupType,
+        isDark: isDark,
+        lineHeight: lineHeight,
+      ),
+    };
   }
 
   GroupProfile _resolveProfile() {
@@ -381,9 +501,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
               isDark,
               lineHeight,
             ),
-          ] else if (orderedLinks.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _buildLinksEntryRow(profile, orderedLinks, isDark, lineHeight),
           ] else if (profile.subTitle != null &&
               profile.subTitle!.trim().isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -395,6 +512,10 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                 height: lineHeight,
               ),
             ),
+          ],
+          if (orderedLinks.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildLinksEntryRow(profile, orderedLinks, isDark, lineHeight),
           ],
         ],
       ),
@@ -432,11 +553,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         void openAboutScreen() {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => GroupAboutScreen(
-                title: profile.title,
-                description: description,
-                links: orderedLinks,
-              ),
+              builder:
+                  (_) => GroupAboutScreen(
+                    title: profile.title,
+                    description: description,
+                    links: orderedLinks,
+                  ),
             ),
           );
         }
@@ -452,20 +574,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           recognizer: _moreRecognizer,
         );
 
-        // Description fits within the collapsed height, but if there are
-        // links to show, keep a "more" affordance so users can still reach
-        // the About screen where those links live.
         if (!textPainter.didExceedMaxLines) {
-          if (orderedLinks.isEmpty) {
-            return Text.rich(textSpan);
-          }
-          return Text.rich(
-            TextSpan(
-              text: description,
-              style: style,
-              children: [const TextSpan(text: '  '), moreTapSpan],
-            ),
-          );
+          return Text.rich(textSpan);
         }
 
         final moreSpan = TextSpan(
@@ -502,11 +612,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         final truncatedText = description.substring(0, validLength).trimRight();
 
         return Text.rich(
-          TextSpan(
-            text: truncatedText,
-            style: style,
-            children: [moreSpan],
-          ),
+          TextSpan(text: truncatedText, style: style, children: [moreSpan]),
         );
       },
     );
@@ -536,14 +642,11 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => GroupAboutScreen(
-              title: profile.title,
-              links: links,
-            ),
-          ),
-        );
+        if (moreCount > 0) {
+          GroupProfileLinksDrawer.show(context, links);
+        } else {
+          _launchUrl(primaryLink.url);
+        }
       },
       behavior: HitTestBehavior.opaque,
       child: Row(
@@ -565,8 +668,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                   TextSpan(text: primaryLink.url),
                   if (moreCount > 0)
                     TextSpan(
-                      text:
-                          ' ${context.l10n.group_and_more_links(moreCount)}',
+                      text: ' ${context.l10n.group_and_more_links(moreCount)}',
                       style: TextStyle(color: secondaryColor),
                     ),
                 ],
@@ -584,10 +686,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final labelColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
-    final membersTabLabel =
-        profile.groupType.isPage
-            ? context.l10n.group_tab_followers
-            : context.l10n.group_tab_members;
 
     return Column(
       children: [
@@ -606,10 +704,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             fontWeight: FontWeight.w500,
           ),
           tabs: [
-            const Tab(text: 'Post'),
-            const Tab(text: 'Events'),
-            Tab(text: context.l10n.tab_practices),
-            Tab(text: membersTabLabel),
+            for (final tab in _visibleTabs) Tab(text: _tabLabel(tab, profile)),
           ],
         ),
         Divider(height: 1, thickness: 1, color: dividerColor),
@@ -617,112 +712,263 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
+  String _tabLabel(_GroupProfileTab tab, GroupProfile profile) {
+    return switch (tab) {
+      _GroupProfileTab.posts => 'Post',
+      _GroupProfileTab.events => 'Events',
+      _GroupProfileTab.practices => context.l10n.tab_practices,
+      _GroupProfileTab.members =>
+        profile.groupType.isPage
+            ? context.l10n.group_tab_followers
+            : context.l10n.group_tab_members,
+    };
+  }
+
   Widget _buildPracticesTab(
     GroupProfile profile,
     bool isDark,
     double? lineHeight,
   ) {
-    final accumulatorsAsync = ref.watch(groupAccumulatorsProvider(profile.id));
-    final series = profile.series;
+    final practicesState = ref.watch(groupPracticesProvider(profile.id));
 
-    return accumulatorsAsync.when(
-      data: (either) {
-        final accumulators = either.fold(
-          (_) => <GroupAccumulator>[],
-          (page) => page.accumulators,
-        );
+    if (practicesState.isLoading && practicesState.practices.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (series.isEmpty && accumulators.isEmpty) {
-          return const SizedBox.shrink();
+    if (practicesState.practices.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final itemCount =
+        practicesState.practices.length +
+        (practicesState.isLoadingMore ? 1 : 0);
+
+    return ListView.builder(
+      controller: _practicesScrollController,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        if (index >= practicesState.practices.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
-        final itemCount = series.length + accumulators.length;
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: itemCount,
-          itemBuilder: (context, index) {
-            final isLast = index == itemCount - 1;
-            if (index < series.length) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-                child: _buildSeriesCard(
-                  profile,
-                  series[index],
-                  isDark,
-                  lineHeight,
+        final practice = practicesState.practices[index];
+        final isLast = index == practicesState.practices.length - 1;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+          child: switch (practice.type) {
+            GroupPracticeType.series when practice.series != null =>
+              _buildSeriesCard(profile, practice.series!, isDark, lineHeight),
+            GroupPracticeType.accumulator when practice.accumulator != null =>
+              _buildAccumulatorCard(
+                profile,
+                practice.accumulator!,
+                isDark,
+                lineHeight,
+              ),
+            GroupPracticeType.collection when practice.collection != null =>
+              _buildCollectionCard(practice.collection!, isDark, lineHeight),
+            GroupPracticeType.plan when practice.plan != null =>
+              _buildPlanCard(profile, practice.plan!, isDark, lineHeight),
+            _ => const SizedBox.shrink(),
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCollectionCard(
+    GroupPracticeCollection collection,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+
+    return Material(
+      color: cardColor,
+      elevation: isDark ? 0 : 1,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 140,
+            width: double.infinity,
+            child:
+                collection.imageUrl != null && collection.imageUrl!.isNotEmpty
+                    ? CachedNetworkImageWidget(
+                      imageUrl: collection.imageUrl!,
+                      fit: BoxFit.cover,
+                    )
+                    : ColoredBox(
+                      color:
+                          isDark
+                              ? AppColors.surfaceVariantDark
+                              : AppColors.grey100,
+                      child: Icon(
+                        AppAssets.bookOpenText,
+                        size: 40,
+                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+                      ),
+                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  collection.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: lineHeight,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              );
-            }
+                if (collection.itemCount > 0) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    context.l10n.home_recitation_count(collection.itemCount),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: secondaryColor,
+                      height: lineHeight,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            final accumulator = accumulators[index - series.length];
-            final localJoinedIds = ref.watch(
-              groupAccumulatorJoinCacheProvider(profile.id),
-            );
-            final hasJoined = accumulatorHasJoined(
-              accumulator,
-              localJoinedIds: localJoinedIds,
-            );
-            return Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-              child: GroupAccumulatorCard(
-                accumulator: accumulator,
-                hasJoined: hasJoined,
-                isDark: isDark,
-                lineHeight: lineHeight,
-                isJoining: _joiningAccumulatorId == accumulator.id,
-                onTap: () => _navigateToAccumulatorDetail(accumulator.id),
-                onJoinTap: () => _onJoinAccumulatorTap(profile, accumulator),
-              ),
-            );
-          },
-        );
-      },
-      loading: () {
-        if (series.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget _buildPlanCard(
+    GroupProfile profile,
+    GroupPracticePlan plan,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+    final dateRange = PlanDateFormat.formatRangeOrNull(plan.startDate, null);
 
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: series.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: index == series.length - 1 ? 0 : 16,
+    return Material(
+      color: cardColor,
+      elevation: isDark ? 0 : 1,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          context.push(
+            '/practice/plans/preview',
+            extra: {
+              'plan': plan.toPlan(),
+              if (plan.seriesId != null) 'seriesId': plan.seriesId,
+            },
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 140,
+              width: double.infinity,
+              child:
+                  plan.imageUrl != null && plan.imageUrl!.isNotEmpty
+                      ? CachedNetworkImageWidget(
+                        imageUrl: plan.imageUrl!,
+                        fit: BoxFit.cover,
+                      )
+                      : ColoredBox(
+                        color:
+                            isDark
+                                ? AppColors.surfaceVariantDark
+                                : AppColors.grey100,
+                        child: Icon(
+                          AppAssets.bookOpenText,
+                          size: 40,
+                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+                        ),
+                      ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plan.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: lineHeight,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (dateRange != null || plan.totalDays > 0) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        if (dateRange != null) dateRange,
+                        if (plan.totalDays > 0)
+                          context.l10n.days_count(plan.totalDays),
+                      ].join(' · '),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: secondaryColor,
+                        height: lineHeight,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
-              child: _buildSeriesCard(
-                profile,
-                series[index],
-                isDark,
-                lineHeight,
-              ),
-            );
-          },
-        );
-      },
-      error: (_, __) {
-        if (series.isEmpty) {
-          return const SizedBox.shrink();
-        }
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: series.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: index == series.length - 1 ? 0 : 16,
-              ),
-              child: _buildSeriesCard(
-                profile,
-                series[index],
-                isDark,
-                lineHeight,
-              ),
-            );
-          },
-        );
-      },
+  Widget _buildAccumulatorCard(
+    GroupProfile profile,
+    GroupAccumulator accumulator,
+    bool isDark,
+    double? lineHeight,
+  ) {
+    final localJoinedIds = ref.watch(
+      groupAccumulatorJoinCacheProvider(profile.id),
+    );
+    final hasJoined = accumulatorHasJoined(
+      accumulator,
+      localJoinedIds: localJoinedIds,
+    );
+    return GroupAccumulatorCard(
+      accumulator: accumulator,
+      hasJoined: hasJoined,
+      isDark: isDark,
+      lineHeight: lineHeight,
+      isJoining: _joiningAccumulatorId == accumulator.id,
+      onTap: () => _navigateToAccumulatorDetail(accumulator.id),
+      onJoinTap: () => _onJoinAccumulatorTap(profile, accumulator),
     );
   }
 
@@ -813,10 +1059,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-      child: PlanInlineMarkdownView(
-        content: content,
-        fontSize: bodyFontSize,
-      ),
+      child: PlanInlineMarkdownView(content: content, fontSize: bodyFontSize),
     );
   }
 
@@ -1068,6 +1311,14 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
+  Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+  }
 }
 
 class _GroupFollowButton extends ConsumerWidget {

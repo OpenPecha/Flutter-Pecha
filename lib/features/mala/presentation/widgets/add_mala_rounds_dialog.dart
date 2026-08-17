@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 
 /// Dialog for adding mala rounds completed outside the app.
 ///
@@ -99,7 +100,9 @@ class _AddMalaRoundsDialogState extends State<_AddMalaRoundsDialog> {
                     ),
                   ),
                   child: Text(
-                    '$_rounds',
+                    context.isTibetanLocale
+                        ? toTibetanDigits(_rounds)
+                        : '$_rounds',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

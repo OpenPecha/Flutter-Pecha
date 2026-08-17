@@ -3,6 +3,8 @@ import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/recitation/data/datasource/recitations_remote_datasource.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
+import 'package:flutter_pecha/features/recitation/presentation/providers/recitation_search_provider.dart';
+import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _logger = AppLogger('PracticeRecitationsNotifier');
@@ -135,13 +137,43 @@ class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState
   }
 }
 
-final practiceRecitationsPaginatedProvider = StateNotifierProvider.autoDispose<
-  PracticeRecitationsNotifier,
-  PracticeRecitationsState
+class PracticeRecitationsLanguageNotifier extends StateNotifier<String> {
+  PracticeRecitationsLanguageNotifier(String initialLanguage)
+    : super(initialLanguage);
+
+  void setLanguage(String languageCode) {
+    state = languageCode;
+  }
+}
+
+/// Chant list language for [AllRecitationsScreen]. Does not change app locale.
+final practiceRecitationsLanguageProvider = StateNotifierProvider.autoDispose<
+  PracticeRecitationsLanguageNotifier,
+  String
 >((ref) {
-  final languageCode = ref.watch(contentLanguageProvider);
-  return PracticeRecitationsNotifier(
-    datasource: RecitationsRemoteDatasource(dio: ref.watch(dioProvider)),
-    languageCode: languageCode,
+  return PracticeRecitationsLanguageNotifier(
+    ref.watch(contentLanguageProvider),
   );
 });
+
+final practiceRecitationsPaginatedProvider = StateNotifierProvider.autoDispose
+    .family<PracticeRecitationsNotifier, PracticeRecitationsState, String>((
+      ref,
+      languageCode,
+    ) {
+      return PracticeRecitationsNotifier(
+        datasource: RecitationsRemoteDatasource(dio: ref.watch(dioProvider)),
+        languageCode: languageCode,
+      );
+    });
+
+final practiceRecitationSearchProvider = StateNotifierProvider.autoDispose
+    .family<RecitationSearchNotifier, RecitationSearchState, String>((
+      ref,
+      languageCode,
+    ) {
+      return RecitationSearchNotifier(
+        repository: ref.watch(recitationsRepositoryProvider),
+        languageCode: languageCode,
+      );
+    });

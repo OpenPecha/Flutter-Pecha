@@ -73,7 +73,7 @@ class _DiscoverGroupsScreenState extends ConsumerState<DiscoverGroupsScreen> {
     DiscoverGroupsState groupsState,
     List<GroupProfile> groups,
   ) {
-    if (groupsState.isLoading && groups.isEmpty) {
+    if ((groupsState.isLoading || !groupsState.hasLoaded) && groups.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -87,7 +87,7 @@ class _DiscoverGroupsScreenState extends ConsumerState<DiscoverGroupsScreen> {
       );
     }
 
-    if (groups.isEmpty && !groupsState.isLoading) {
+    if (groups.isEmpty) {
       return Center(child: Text(context.l10n.connect_groups_empty_title));
     }
 

@@ -6,6 +6,15 @@ import 'package:flutter_pecha/features/group_profile/presentation/providers/grou
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
+/// Returns true when the event has already ended (or its start is in the past
+/// when no end date is available). Events without dates are treated as upcoming.
+bool isGroupEventPast(GroupEvent event, {DateTime? now}) {
+  final current = now ?? DateTime.now();
+  final reference = event.endDate ?? event.startDate;
+  if (reference == null) return false;
+  return reference.toLocal().isBefore(current);
+}
+
 bool isUserInGroup(WidgetRef ref, String groupId) {
   if (groupId.isEmpty) return true;
 

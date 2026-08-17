@@ -5,6 +5,7 @@ import 'package:flutter_pecha/features/group_profile/data/datasource/group_profi
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_events_page.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_members_page.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/domain/repositories/group_profile_repository.dart';
 
@@ -81,6 +82,68 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
               : 'Failed to join group: $e',
         ),
       );
+    }
+  }
+
+  @override
+  Future<Either<Failure, GroupPracticesPage>> getGroupPractices(
+    String groupId, {
+    required String language,
+    required int skip,
+    required int limit,
+  }) async {
+    return _loadPractices(
+      groupId: groupId,
+      includeUnfollowed: true,
+      language: language,
+      skip: skip,
+      limit: limit,
+    );
+  }
+
+  @override
+  Future<Either<Failure, GroupPracticesPage>> getConnectPractices({
+    required bool includeUnfollowed,
+    required String language,
+    required int skip,
+    required int limit,
+  }) async {
+    return _loadPractices(
+      includeUnfollowed: includeUnfollowed,
+      language: language,
+      skip: skip,
+      limit: limit,
+    );
+  }
+
+  Future<Either<Failure, GroupPracticesPage>> _loadPractices({
+    String? groupId,
+    required bool includeUnfollowed,
+    required String language,
+    required int skip,
+    required int limit,
+  }) async {
+    try {
+      final model = await remote.fetchPractices(
+        groupId: groupId,
+        includeUnfollowed: includeUnfollowed,
+        language: language,
+        skip: skip,
+        limit: limit,
+      );
+      return Right(model.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load group practices: $e'));
     }
   }
 

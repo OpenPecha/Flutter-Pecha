@@ -473,15 +473,15 @@ class AppLocalizationsMn extends AppLocalizations {
       'Сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
-  String get notification_routine_title => 'Төлөвлөгөөний сануулга';
+  String get notification_routine_title => 'Дадлагын сануулга';
 
   @override
   String get notification_routine_subtitle_enabled =>
-      'Таны төлөвлөгөөний өдөр тутмын сануулга';
+      'Таны дадлагын цаг хугацааны өдөр тутмын сануулга';
 
   @override
   String get notification_routine_subtitle_disabled =>
-      'Төлөвлөгөөний сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
+      'Дадлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
   String get notification_battery_title => 'Дэвсгэр сануулга';
@@ -495,15 +495,15 @@ class AppLocalizationsMn extends AppLocalizations {
       'Зарим Android утас батерей хэмнэхийн тулд дэвсгэр аппуудыг түр зогсоодог нь таны сануулгыг хойшлуулах буюу алгасах магадлалтай. Үргэлжлүүлэн ажиллуулахын тулд дарна уу.';
 
   @override
-  String get notification_recitation_title => 'Магтаалын сануулга';
+  String get notification_recitation_title => 'Уншлагын сануулга';
 
   @override
   String get notification_recitation_subtitle_enabled =>
-      'Таны магтаалын өдөр тутмын сануулга';
+      'Таны уншлагын өдөр тутмын сануулга';
 
   @override
   String get notification_recitation_subtitle_disabled =>
-      'Магтаалын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
+      'Уншлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
   String get notification_practice_title => 'Эрхийн сануулга';
@@ -706,138 +706,154 @@ class AppLocalizationsMn extends AppLocalizations {
       'Баяр хүргэе, та манай бүх бүлэгт нэгдсэн байна! Удахгүй дахин шалгаарай. Шинэ бүлгүүд удахгүй нэмэгдэнэ';
 
   @override
-  String get connect_tab_feed => 'Feed';
+  String get connect_tab_feed => 'Мэдээ';
 
   @override
-  String get connect_tab_events => 'Events';
+  String get connect_tab_events => 'Арга хэмжээ';
 
   @override
-  String get connect_tab_posts => 'Posts';
+  String get connect_tab_posts => 'Нийтлэл';
+
+  @override
+  String get connect_tab_practices => 'Practices';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => 'Миний';
 
   @override
-  String get connect_segment_discover => 'Discover';
+  String get connect_segment_discover => 'Судлах';
 
   @override
-  String get connect_empty_discover_posts => 'No posts to discover';
+  String get connect_empty_discover_posts => 'Судлах нийтлэл алга';
 
   @override
-  String get connect_empty_discover_events => 'No events to discover';
+  String get connect_empty_discover_events => 'Судлах арга хэмжээ алга';
 
   @override
-  String get connect_empty_discover_feed => 'Nothing to discover';
+  String get connect_empty_discover_feed => 'Судлах зүйл алга';
 
   @override
-  String get connect_empty_discover_groups => 'No groups to discover';
+  String get connect_empty_discover_groups => 'Судлах бүлэг алга';
 
   @override
-  String get connect_all_groups => 'All groups';
+  String get connect_empty_discover_practices => 'Судлах дадлага алга';
 
   @override
-  String get connect_my_empty_feed_title => 'Your groups have been quiet';
+  String get connect_all_groups => 'Бүх бүлэг';
 
   @override
-  String get connect_my_empty_events_title => 'No upcoming events';
+  String get connect_my_empty_feed_title => 'Таны бүлгүүд чимээгүй байна';
 
   @override
-  String get connect_my_empty_posts_title => 'No posts yet';
+  String get connect_my_empty_events_title => 'Товлосон арга хэмжээ алга';
 
   @override
-  String get connect_my_empty_groups_title => 'No groups yet';
+  String get connect_my_empty_posts_title => 'Одоогоор нийтлэл алга';
+
+  @override
+  String get connect_my_empty_groups_title => 'Одоогоор бүлэг алга';
 
   @override
   String get connect_my_empty_feed_subtitle =>
-      'Nothing new from the groups you have joined. Other groups are posting today.';
+      'Таны нэгдсэн бүлгүүдээс шинэ зүйл алга. Бусад бүлгүүд өнөөдөр нийтэлж байна.';
 
   @override
   String get connect_my_empty_events_subtitle =>
-      'None of your groups have anything scheduled. Other groups have events open to everyone.';
+      'Таны аль ч бүлэг арга хэмжээ товлоогүй байна. Бусад бүлгүүдэд бүх нийтэд нээлттэй арга хэмжээ бий.';
 
   @override
   String get connect_my_empty_posts_subtitle =>
-      'Your groups have not posted anything. See what other groups are sharing.';
+      'Таны бүлгүүд юу ч нийтлээгүй байна. Бусад бүлгүүд юу хуваалцаж байгааг үзээрэй.';
 
   @override
   String get connect_my_empty_groups_subtitle =>
-      'You have not joined any groups yet. Discover communities to practice with.';
+      'Та одоогоор ямар ч бүлэгт нэгдээгүй байна. Хамтдаа дадлага хийх нийгэмлэгүүдийг судлаарай.';
 
   @override
-  String get connect_my_empty_feed_browse => 'See what other groups share';
+  String get connect_my_empty_feed_browse => 'Бусад бүлгийн хуваалцсныг үзэх';
 
   @override
-  String get connect_my_empty_events_browse => 'Browse open events';
+  String get connect_my_empty_events_browse => 'Нээлттэй арга хэмжээг үзэх';
 
   @override
-  String get connect_my_empty_posts_browse => 'Browse other posts';
+  String get connect_my_empty_posts_browse => 'Бусад нийтлэлийг үзэх';
+
+  @override
+  String get connect_my_empty_practices_title => 'Одоогоор дадлага алга';
+
+  @override
+  String get connect_my_empty_practices_subtitle =>
+      'Таны бүлгүүд ямар ч дадлага эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.';
+
+  @override
+  String get connect_my_empty_practices_browse => 'Бусад дадлагыг үзэх';
 
   @override
   String connect_comment_replying_to(String handle) {
-    return 'Replying to @$handle';
+    return '@$handle-д хариулж байна';
   }
 
   @override
-  String get connect_comment_hint => 'What do you think of this?';
+  String get connect_comment_hint => 'Та үүнийг юу гэж бодож байна?';
 
   @override
-  String get connect_comment_reply_hint => 'Write a reply...';
+  String get connect_comment_reply_hint => 'Хариу бичих...';
 
   @override
-  String get connect_comment_reply => 'Reply';
+  String get connect_comment_reply => 'Хариулах';
 
   @override
-  String get connect_comment_delete_title => 'Delete comment?';
+  String get connect_comment_delete_title => 'Сэтгэгдлийг устгах уу?';
 
   @override
   String get connect_comment_delete_message =>
-      'This comment will be permanently removed.';
+      'Энэ сэтгэгдэл бүрмөсөн устгагдана.';
 
   @override
-  String get connect_comment_delete_failed => 'Failed to delete comment';
+  String get connect_comment_delete_failed => 'Сэтгэгдлийг устгаж чадсангүй';
 
   @override
   String connect_post_comments_count(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count comments',
-      one: '1 comment',
+      other: '$count сэтгэгдэл',
+      one: '1 сэтгэгдэл',
     );
     return '$_temp0';
   }
 
   @override
   String get connect_post_comments_empty =>
-      'No comments yet. Start the conversation.';
+      'Одоогоор сэтгэгдэл алга. Яриаг эхлүүлээрэй.';
 
   @override
-  String get connect_caption_more => 'more';
+  String get connect_caption_more => 'Илүү';
 
   @override
-  String get connect_online => 'Online';
+  String get connect_online => 'Онлайн';
 
   @override
-  String get connect_open => 'Open';
+  String get connect_open => 'Нээх';
 
   @override
-  String get connect_event_fallback_title => 'Event';
+  String get connect_event_fallback_title => 'Арга хэмжээ';
 
   @override
-  String get connect_group_fallback_title => 'Group';
+  String get connect_group_fallback_title => 'Бүлэг';
 
   @override
-  String get connect_event_attend => 'Attend';
+  String get connect_event_attend => 'Оролцох';
 
   @override
-  String get connect_event_attending => 'Attending';
+  String get connect_event_attending => 'Оролцож байна';
 
   @override
   String connect_event_participants_attending(int count) {
-    return '$count attending';
+    return '$count оролцогч';
   }
 
   @override
@@ -879,7 +895,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get home_no_tags_found => 'Шошго олдсонгүй';
 
   @override
-  String get home_celebrated_by => 'Тэмдэглэдэг: ';
+  String get home_celebrated_by => 'Тэмдэглэдэг:';
 
   @override
   String get reader_settings_tooltip => 'Уншигчийн тохиргоо';
@@ -1271,6 +1287,9 @@ class AppLocalizationsMn extends AppLocalizations {
   String get continueWithApple => 'Apple-ээр үргэлжлүүлэх';
 
   @override
+  String get continueWithPhone => 'Утасны дугаараар үргэлжлүүлэх';
+
+  @override
   String get continueAsGuest => 'Зочноор үргэлжлүүлэх';
 
   @override
@@ -1564,7 +1583,7 @@ class AppLocalizationsMn extends AppLocalizations {
       'Энэ нэрийг хэн нэгэн аль хэдийн ашигласан байна';
 
   @override
-  String get username_available_label => 'Боломжтой: ';
+  String get username_available_label => 'Боломжтой:';
 
   @override
   String get username_check_error =>
@@ -1823,7 +1842,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_about_description => 'Тайлбар';
 
   @override
-  String get group_about_empty => 'Одоогоор мэдээлэл алга байна';
+  String get group_about_empty => 'Одоогоор мэдээлэл алга';
 
   @override
   String group_and_more_links(int count) {
@@ -1874,7 +1893,7 @@ class AppLocalizationsMn extends AppLocalizations {
       'Хувь нэмрээ хянахын тулд энэ хуримтлалд нэгдэнэ үү.';
 
   @override
-  String get group_accumulator_leaderboard_empty => 'Одоогоор уншлага байхгүй.';
+  String get group_accumulator_leaderboard_empty => 'Одоогоор уншлага алга.';
 
   @override
   String get group_accumulator_recite_now => 'Одоо уншина уу';
@@ -1883,7 +1902,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_accumulator_chant_again => 'Дахин унших';
 
   @override
-  String get group_accumulator_finish_session => 'Хичээл дуусгах';
+  String get group_accumulator_finish_session => 'Хуралдааныг дуусгах';
 
   @override
   String get group_accumulator_offline_recitation => 'Офлайн уншлага';
@@ -1894,14 +1913,14 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_accumulator_add_offline_chants_message =>
-      'Энэ апп-аас гадуур хийсэн уншлагын тоог нэмнэ үү.';
+      'Энэ аппаас гадуур хийсэн уншлагынхаа тоог нэмнэ үү.';
 
   @override
-  String get group_accumulator_session_complete => 'Хичээл дууслаа!';
+  String get group_accumulator_session_complete => 'Хуралдаан дууслаа!';
 
   @override
   String group_accumulator_session_recitations(int count) {
-    return 'Та энэ хичээлд $count удаа уншлаа';
+    return 'Та энэ хуралдаанд $count уншлага гүйцэтгэлээ';
   }
 
   @override
@@ -1910,7 +1929,7 @@ class AppLocalizationsMn extends AppLocalizations {
     String accumulation,
     String group,
   ) {
-    return 'Би WeBuddhist дээр $group бүлгийн \"$accumulation\" хуримтлалд $count удаа уншлаа. Та ч бас надтай нэгдээрэй!';
+    return 'Би WeBuddhist дээр $group бүлгийн \"$accumulation\" хуримтлалд $count уншлага гүйцэтгэлээ. Та ч бас надтай нэгдээрэй!';
   }
 
   @override
@@ -1918,12 +1937,12 @@ class AppLocalizationsMn extends AppLocalizations {
     int count,
     String accumulation,
   ) {
-    return 'Би WeBuddhist дээр \"$accumulation\" бүлгийн хуримтлалд $count удаа уншлаа. Та ч бас надтай нэгдээрэй!';
+    return 'Би WeBuddhist дээр \"$accumulation\" хуримтлалд $count уншлага гүйцэтгэлээ. Та ч бас надтай нэгдээрэй!';
   }
 
   @override
   String get group_accumulator_session_share_error =>
-      'Хичээлийг хуваалцах боломжгүй байна. Дахин оролдоно уу';
+      'Хуралдааныг хуваалцаж чадсангүй. Дахин оролдоно уу';
 
   @override
   String get share_this_quote => 'Энэ ишлэлийг хуваалцах';
@@ -2157,15 +2176,15 @@ class AppLocalizationsMn extends AppLocalizations {
   }
 
   @override
-  String get timer_notification_in_progress => 'Meditation in progress';
+  String get timer_notification_in_progress => 'Бясалгал үргэлжилж байна';
 
   @override
   String timer_notification_paused(String time) {
-    return 'Paused · $time left';
+    return 'Түр зогссон · $time үлдсэн';
   }
 
   @override
-  String get timer_notification_complete => 'Your session is complete';
+  String get timer_notification_complete => 'Таны хуралдаан дууслаа';
 
   @override
   String get ai_use_search_instead => 'Оронд нь хайлт ашиглах';

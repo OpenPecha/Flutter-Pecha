@@ -19,7 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ConnectPostDetailScreen extends ConsumerStatefulWidget {
+class ConnectPostDetailScreen extends ConsumerWidget {
   const ConnectPostDetailScreen({
     super.key,
     required this.postId,
@@ -32,31 +32,75 @@ class ConnectPostDetailScreen extends ConsumerStatefulWidget {
   final bool includeUnfollowed;
 
   @override
-  ConsumerState<ConnectPostDetailScreen> createState() =>
-      _ConnectPostDetailScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor:
+          isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
+      body: SafeArea(
+        bottom: false,
+        child: ConnectPostDetailPanel(
+          postId: postId,
+          initialPost: initialPost,
+          includeUnfollowed: includeUnfollowed,
+          showTopBar: true,
+        ),
+      ),
+    );
+  }
 }
 
-class _ConnectPostDetailScreenState
-    extends ConsumerState<ConnectPostDetailScreen> {
+class ConnectPostDetailPanel extends ConsumerStatefulWidget {
+  const ConnectPostDetailPanel({
+    super.key,
+    required this.postId,
+    this.initialPost,
+    this.includeUnfollowed = false,
+    this.scrollController,
+    this.showTopBar = false,
+    this.showPostPreview = true,
+  });
+
+  final String postId;
+  final ConnectPost? initialPost;
+  final bool includeUnfollowed;
+  final ScrollController? scrollController;
+  final bool showTopBar;
+  final bool showPostPreview;
+
+  @override
+  ConsumerState<ConnectPostDetailPanel> createState() =>
+      _ConnectPostDetailPanelState();
+}
+
+class _ConnectPostDetailPanelState extends ConsumerState<ConnectPostDetailPanel> {
+  late final ScrollController _scrollController;
+  late final bool _ownsScrollController;
   late ConnectPost _post;
   final ConnectOptimisticLikeState _likeState = ConnectOptimisticLikeState();
   bool _captionExpanded = false;
   ConnectPostComment? _replyTarget;
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _post = widget.initialPost ?? _emptyPost(widget.postId);
+    _ownsScrollController = widget.scrollController == null;
+    _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    if (_ownsScrollController) {
+      _scrollController.dispose();
+    }
     _commentController.dispose();
     _commentFocusNode.dispose();
     super.dispose();
@@ -119,10 +163,7 @@ class _ConnectPostDetailScreenState
 
     final success = await ref
         .read(connectPostCommentsProvider(widget.postId).notifier)
-        .submitComment(
-          text: text,
-          parentCommentId: _replyTarget?.id,
-        );
+        .submitComment(text: text, parentCommentId: _replyTarget?.id);
 
     if (!mounted || !success) return;
 
@@ -168,9 +209,9 @@ class _ConnectPostDetailScreenState
 
     if (!result.isSuccess) {
       setState(() => _likeState.revert(wasLiked));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.errorMessage!)));
       return;
     }
 
@@ -205,42 +246,36 @@ class _ConnectPostDetailScreenState
     final isDark = theme.brightness == Brightness.dark;
     final commentsState = ref.watch(connectPostCommentsProvider(widget.postId));
     final isSubmittingComment = ref.watch(
-      connectPostCommentsProvider(widget.postId).select((state) => state.isSubmitting),
+      connectPostCommentsProvider(
+        widget.postId,
+      ).select((state) => state.isSubmitting),
     );
     final commentCount =
         commentsState.total > 0 ? commentsState.total : _post.commentCount;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor:
-          isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _buildTopBar(context, isDark),
-            Expanded(
-              child: MediaQuery.removeViewInsets(
-                context: context,
-                removeBottom: true,
-                child: _buildBody(context, isDark, commentsState, commentCount),
-              ),
-            ),
-            ConnectCommentComposer(
-              controller: _commentController,
-              focusNode: _commentFocusNode,
-              isSubmitting: isSubmittingComment,
-              onSubmit: _submitComment,
-              replyHandle: _replyTarget?.user.mentionHandle,
-              onClearReply: _clearReply,
-            ),
-          ],
+    return Column(
+      children: [
+        if (widget.showTopBar) _buildTopBar(context),
+        Expanded(
+          child: MediaQuery.removeViewInsets(
+            context: context,
+            removeBottom: true,
+            child: _buildBody(context, isDark, commentsState, commentCount),
+          ),
         ),
-      ),
+        ConnectCommentComposer(
+          controller: _commentController,
+          focusNode: _commentFocusNode,
+          isSubmitting: isSubmittingComment,
+          onSubmit: _submitComment,
+          replyHandle: _replyTarget?.user.mentionHandle,
+          onClearReply: _clearReply,
+        ),
+      ],
     );
   }
 
-  Widget _buildTopBar(BuildContext context, bool isDark) {
+  Widget _buildTopBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
       child: Row(
@@ -284,10 +319,17 @@ class _ConnectPostDetailScreenState
 
     return ListView(
       controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        widget.showPostPreview ? 0 : 8,
+        20,
+        16,
+      ),
       children: [
-        _buildPostCard(context, isDark, commentCount),
-        const SizedBox(height: 24),
+        if (widget.showPostPreview) ...[
+          _buildPostCard(context, isDark, commentCount),
+          const SizedBox(height: 24),
+        ],
         Text(
           context.l10n.connect_post_comments_count(commentCount),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
@@ -346,8 +388,8 @@ class _ConnectPostDetailScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _PostAuthorRow(
-            name: _post.creatorName,
-            avatarUrl: _post.creatorImageUrl,
+            name: _post.groupName,
+            avatarUrl: _post.groupAvatarUrl,
             isDark: isDark,
           ),
           if (caption.isNotEmpty) ...[
@@ -404,17 +446,13 @@ class _ConnectPostDetailScreenState
                 onTap: () => _commentFocusNode.requestFocus(),
               ),
               const Spacer(),
-              _PostActionButton(
-                icon: AppAssets.readerShare,
-                onTap: _sharePost,
-              ),
+              _PostActionButton(icon: AppAssets.readerShare, onTap: _sharePost),
             ],
           ),
         ],
       ),
     );
   }
-
 }
 
 class _PostAuthorRow extends StatelessWidget {
@@ -430,7 +468,8 @@ class _PostAuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+    final displayName =
+        name.trim().isNotEmpty ? name.trim() : context.l10n.connect_group_fallback_title;
 
     return Row(
       children: [
@@ -477,7 +516,7 @@ class _PostMediaGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (media.length == 1) {
-      return _PostMediaTile(url: media.first.url, isDark: isDark);
+      return _PostMediaTile(media: media.first, isDark: isDark);
     }
 
     final visibleMedia = media.take(2).toList();
@@ -486,7 +525,11 @@ class _PostMediaGallery extends StatelessWidget {
         for (var i = 0; i < visibleMedia.length; i++) ...[
           if (i > 0) const SizedBox(width: 8),
           Expanded(
-            child: _PostMediaTile(url: visibleMedia[i].url, isDark: isDark),
+            child: _PostMediaTile(
+              media: visibleMedia[i],
+              isDark: isDark,
+              compact: true,
+            ),
           ),
         ],
       ],
@@ -495,28 +538,63 @@ class _PostMediaGallery extends StatelessWidget {
 }
 
 class _PostMediaTile extends StatelessWidget {
-  const _PostMediaTile({required this.url, required this.isDark});
+  const _PostMediaTile({
+    required this.media,
+    required this.isDark,
+    this.compact = false,
+  });
 
-  final String url;
+  final ConnectPostMedia media;
   final bool isDark;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: CachedNetworkImageWidget(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          errorWidget: ColoredBox(
-            color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-            child: Icon(
-              AppAssets.photoLibrary,
-              color: isDark ? AppColors.grey500 : AppColors.grey600,
-            ),
+    final errorWidget = ColoredBox(
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+      child: Icon(
+        AppAssets.photoLibrary,
+        color: isDark ? AppColors.grey500 : AppColors.grey600,
+      ),
+    );
+
+    if (compact) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: CachedNetworkImageWidget(
+            imageUrl: media.url,
+            fit: BoxFit.cover,
+            errorWidget: errorWidget,
           ),
         ),
+      );
+    }
+
+    final width = media.width;
+    final height = media.height;
+    if (width != null && height != null && width > 0 && height > 0) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: width / height,
+          child: CachedNetworkImageWidget(
+            imageUrl: media.url,
+            fit: BoxFit.cover,
+            errorWidget: errorWidget,
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: CachedNetworkImageWidget(
+        imageUrl: media.url,
+        width: double.infinity,
+        fit: BoxFit.fitWidth,
+        errorWidget: errorWidget,
       ),
     );
   }

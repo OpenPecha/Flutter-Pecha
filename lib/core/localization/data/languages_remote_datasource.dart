@@ -54,4 +54,33 @@ class LanguagesRemoteDatasource {
       throw const NetworkException('Network error');
     }
   }
+
+  /// Upserts the authenticated user's language for notification targeting.
+  ///
+  /// Endpoint: PUT /users/me/language
+  /// Body: `{ "language": "BO" }` (uppercase LanguageCodeEnum).
+  /// Local codes are lowercase (`bo`); the API expects uppercase (`BO`).
+  Future<void> updateLanguage(String languageCode) async {
+    final apiCode = languageCode.trim().toUpperCase();
+    if (apiCode.isEmpty) return;
+
+    try {
+      await dio.put('/users/me/language', data: {'language': apiCode});
+      _logger.info('User language synced: $apiCode');
+    } on DioException catch (e) {
+      _logger.error('Dio error in updateLanguage', e);
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw const NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw const NetworkException('No internet connection');
+      } else if (e.response?.statusCode != null) {
+        throw ServerException(
+          'Failed to update language: ${e.response!.statusCode}',
+        );
+      }
+      throw const NetworkException('Network error');
+    }
+  }
 }

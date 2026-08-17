@@ -152,7 +152,8 @@ class _DiscoverGroupTile extends StatelessWidget {
                       : titleStyle,
               strutStyle:
                   hasTibetanTitle
-                      ? context.tibetanStrutStyle(
+                      ? AppFontConfig.tibetanStrutStyle(
+                        AppConfig.tibetanLanguageCode,
                         _titleFontSize,
                         compact: true,
                       )

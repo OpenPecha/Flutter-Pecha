@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/practice_chant_list_tile.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitation_search_provider.dart';
-import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_list_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RecitationsSearchScreen extends ConsumerStatefulWidget {
-  const RecitationsSearchScreen({super.key});
+  const RecitationsSearchScreen({super.key, required this.languageCode});
+
+  final String languageCode;
 
   @override
   ConsumerState<RecitationsSearchScreen> createState() =>
@@ -20,6 +22,9 @@ class _RecitationsSearchScreenState
     extends ConsumerState<RecitationsSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  RecitationSearchNotifier _searchNotifier(String languageCode) =>
+      ref.read(practiceRecitationSearchProvider(languageCode).notifier);
 
   @override
   void initState() {
@@ -39,22 +44,22 @@ class _RecitationsSearchScreenState
     _searchController.removeListener(_onSearchTextChanged);
     _searchController.dispose();
     _focusNode.dispose();
-    ref.read(recitationSearchProvider.notifier).clear();
+    _searchNotifier(widget.languageCode).clear();
     super.dispose();
   }
 
-  void _onQueryChanged(String query) {
-    ref.read(recitationSearchProvider.notifier).search(query);
+  void _onQueryChanged(String query, String languageCode) {
+    _searchNotifier(languageCode).search(query);
   }
 
-  void _onClear() {
+  void _onClear(String languageCode) {
     _searchController.clear();
-    ref.read(recitationSearchProvider.notifier).clear();
+    _searchNotifier(languageCode).clear();
     _focusNode.requestFocus();
   }
 
-  void _onBack() {
-    ref.read(recitationSearchProvider.notifier).clear();
+  void _onBack(String languageCode) {
+    _searchNotifier(languageCode).clear();
     Navigator.of(context).pop();
   }
 
@@ -62,7 +67,10 @@ class _RecitationsSearchScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final searchState = ref.watch(recitationSearchProvider);
+    final languageCode = widget.languageCode;
+    final searchState = ref.watch(
+      practiceRecitationSearchProvider(languageCode),
+    );
     final borderColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
     final subtitleColor =
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
@@ -78,14 +86,14 @@ class _RecitationsSearchScreenState
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: _onBack,
+                    onPressed: () => _onBack(languageCode),
                     icon: const Icon(Icons.arrow_back_ios_new, size: 20),
                   ),
                   Expanded(
                     child: TextField(
                       controller: _searchController,
                       focusNode: _focusNode,
-                      onChanged: _onQueryChanged,
+                      onChanged: (query) => _onQueryChanged(query, languageCode),
                       textInputAction: TextInputAction.search,
                       style: theme.textTheme.bodyMedium?.copyWith(fontSize: 15),
                       decoration: InputDecoration(
@@ -102,7 +110,7 @@ class _RecitationsSearchScreenState
                         suffixIcon:
                             _searchController.text.isNotEmpty
                                 ? IconButton(
-                                  onPressed: _onClear,
+                                  onPressed: () => _onClear(languageCode),
                                   icon: Icon(
                                     Icons.clear,
                                     size: 20,
@@ -137,7 +145,14 @@ class _RecitationsSearchScreenState
                 ],
               ),
             ),
-            Expanded(child: _buildBody(context, searchState, subtitleColor)),
+            Expanded(
+              child: _buildBody(
+                context,
+                searchState,
+                subtitleColor,
+                languageCode,
+              ),
+            ),
           ],
         ),
       ),
@@ -148,6 +163,7 @@ class _RecitationsSearchScreenState
     BuildContext context,
     RecitationSearchState searchState,
     Color subtitleColor,
+    String languageCode,
   ) {
     final l10n = context.l10n;
 
@@ -178,7 +194,7 @@ class _RecitationsSearchScreenState
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed:
-                    () => ref.read(recitationSearchProvider.notifier).retry(),
+                    () => _searchNotifier(languageCode).retry(),
                 child: Text(l10n.retry),
               ),
             ],

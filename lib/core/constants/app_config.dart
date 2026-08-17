@@ -40,8 +40,11 @@ class AppConfig {
     'ne',
   ];
 
-  /// Maps a UI locale to the language code sent to content APIs.
-  /// Returns the locale when it is a supported app language; otherwise English.
+  /// Maps a language [localeCode] onto a bundled UI locale.
+  ///
+  /// Returns [localeCode] when the app ships an ARB for it; otherwise English.
+  /// Used by `applyUiLocaleForContent` so chrome can fall back when the user
+  /// picks a content language the UI cannot render.
   static String resolveContentLanguage(String localeCode) {
     final code = localeCode.toLowerCase();
     if (supportedLanguages.contains(code)) return code;

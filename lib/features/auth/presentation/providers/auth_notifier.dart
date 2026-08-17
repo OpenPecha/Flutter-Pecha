@@ -237,9 +237,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
 
       // Prefetch onboarding status while the token is fresh. Emitting auth
-      // state once with the complete picture means the route guard's redirect
-      // fires synchronously — no second navigation or per-nav network call.
+      // state once with the complete picture means the route guard's
+      // redirect fires synchronously — no second navigation or per-nav
+      // network call. This also populates userProvider (via
+      // _fetchOnboardingStatusSafe's caller chain), so no separate
+      // initializeUser() call is needed afterward.
       final onboardingStatus = await _fetchOnboardingStatusSafe();
+      if (!_isAuthEpochCurrent(epoch)) return;
+      await ref.read(userProvider.notifier).initializeUser();
       _applyAuthenticatedLoginState(
         epoch: epoch,
         onboardingStatus: onboardingStatus,
@@ -247,14 +252,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       if (onboardingStatus == null) {
         unawaited(_refreshOnboardingStatus(skipDebounce: true));
-      }
-
-      if (!_isAuthEpochCurrent(epoch)) return;
-
-      try {
-        ref.read(userProvider.notifier).initializeUser();
-      } catch (e) {
-        _logger.warning('Could not initialize user data', e);
       }
       return;
     }
@@ -416,8 +413,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _trackAuthLoginSucceeded(connection: connection);
     if (!_isAuthEpochCurrent(epoch)) return;
 
-    // 3. Prefetch onboarding status so the route guard can decide instantly.
+    // 3. Prefetch onboarding status and full user profile so the route guard
+    //    can decide instantly.
+    ref.read(cacheInterceptorProvider).clearUserScoped();
     final onboardingStatus = await _fetchOnboardingStatusSafe();
+    if (!_isAuthEpochCurrent(epoch)) return;
+    await ref.read(userProvider.notifier).initializeUser();
 
     // 4. Update auth state — triggers the router refresh.
     _applyAuthenticatedLoginState(
@@ -427,16 +428,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
     if (onboardingStatus == null) {
       unawaited(_refreshOnboardingStatus(skipDebounce: true));
-    }
-    if (!_isAuthEpochCurrent(epoch)) return;
-
-    // 5. Fetch full user profile. Non-critical — routing is already correct.
-    ref.read(cacheInterceptorProvider).clearUserScoped();
-    try {
-      await ref.read(userProvider.notifier).initializeUser();
-      _logger.info('User data fetched and saved locally');
-    } catch (e) {
-      _logger.warning('Failed to fetch user data: $e');
     }
   }
 

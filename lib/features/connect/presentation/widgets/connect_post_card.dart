@@ -8,9 +8,9 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_like_actions.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_detail_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ConnectPostCard extends ConsumerStatefulWidget {
@@ -45,7 +45,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
     final isDark = theme.brightness == Brightness.dark;
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
-    final borderColor = isDark ? AppColors.grey800 : AppColors.grey300;
     final post = widget.post;
     final caption = post.caption.trim();
     final imageMedia =
@@ -62,7 +61,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
           ),
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -71,8 +69,8 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _AuthorRow(
-                  name: post.creatorName,
-                  avatarUrl: post.creatorImageUrl,
+                  name: post.groupName,
+                  avatarUrl: post.groupAvatarUrl,
                   isDark: isDark,
                 ),
                 if (caption.isNotEmpty) ...[
@@ -129,12 +127,11 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
   }
 
   void _openDetail() {
-    context.push(
-      '/home/posts/${widget.post.id}',
-      extra: {
-        'post': widget.post,
-        'includeUnfollowed': widget.includeUnfollowed,
-      },
+    ConnectPostDetailDrawer.show(
+      context,
+      postId: widget.post.id,
+      initialPost: widget.post,
+      includeUnfollowed: widget.includeUnfollowed,
     );
   }
 
@@ -164,9 +161,9 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
 
     if (!result.isSuccess) {
       setState(() => _likeState.revert(wasLiked));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.errorMessage!)));
       return;
     }
 
@@ -204,7 +201,10 @@ class _AuthorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = name.trim().isNotEmpty ? name.trim() : context.l10n.author;
+    final displayName =
+        name.trim().isNotEmpty
+            ? name.trim()
+            : context.l10n.connect_group_fallback_title;
 
     return Row(
       children: [
@@ -251,7 +251,7 @@ class _PostMediaGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (media.length == 1) {
-      return _PostMediaTile(url: media.first.url, isDark: isDark);
+      return _PostMediaTile(media: media.first, isDark: isDark);
     }
 
     final visibleMedia = media.take(2).toList();
@@ -260,7 +260,11 @@ class _PostMediaGallery extends StatelessWidget {
         for (var i = 0; i < visibleMedia.length; i++) ...[
           if (i > 0) const SizedBox(width: 8),
           Expanded(
-            child: _PostMediaTile(url: visibleMedia[i].url, isDark: isDark),
+            child: _PostMediaTile(
+              media: visibleMedia[i],
+              isDark: isDark,
+              compact: true,
+            ),
           ),
         ],
       ],
@@ -269,28 +273,63 @@ class _PostMediaGallery extends StatelessWidget {
 }
 
 class _PostMediaTile extends StatelessWidget {
-  const _PostMediaTile({required this.url, required this.isDark});
+  const _PostMediaTile({
+    required this.media,
+    required this.isDark,
+    this.compact = false,
+  });
 
-  final String url;
+  final ConnectPostMedia media;
   final bool isDark;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: CachedNetworkImageWidget(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          errorWidget: ColoredBox(
-            color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-            child: Icon(
-              AppAssets.photoLibrary,
-              color: isDark ? AppColors.grey500 : AppColors.grey600,
-            ),
+    final errorWidget = ColoredBox(
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+      child: Icon(
+        AppAssets.photoLibrary,
+        color: isDark ? AppColors.grey500 : AppColors.grey600,
+      ),
+    );
+
+    if (compact) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: CachedNetworkImageWidget(
+            imageUrl: media.url,
+            fit: BoxFit.cover,
+            errorWidget: errorWidget,
           ),
         ),
+      );
+    }
+
+    final width = media.width;
+    final height = media.height;
+    if (width != null && height != null && width > 0 && height > 0) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: width / height,
+          child: CachedNetworkImageWidget(
+            imageUrl: media.url,
+            fit: BoxFit.cover,
+            errorWidget: errorWidget,
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: CachedNetworkImageWidget(
+        imageUrl: media.url,
+        width: double.infinity,
+        fit: BoxFit.fitWidth,
+        errorWidget: errorWidget,
       ),
     );
   }

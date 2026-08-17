@@ -106,14 +106,14 @@ class GroupProfileModel {
       featured: json['featured'] as bool? ?? false,
       planCount: (json['plan_count'] as num?)?.toInt() ?? 0,
       totalDays: (json['total_days'] as num?)?.toInt() ?? 0,
-      startDate: _parseDate(json['start_date']),
-      endDate: _parseDate(json['end_date']),
+      startDate: parseDate(json['start_date']),
+      endDate: parseDate(json['end_date']),
       enrolledCount: (json['enrolled_count'] as num?)?.toInt() ?? 0,
-      isGroupEnrolled: _parseNullableBool(json['is_group_enrolled']),
+      isGroupEnrolled: parseNullableBool(json['is_group_enrolled']),
     );
   }
 
-  DateTime? _parseDate(Object? value) {
+  static DateTime? parseDate(Object? value) {
     if (value == null) return null;
     if (value is String && value.isNotEmpty) {
       return DateTime.tryParse(value);
@@ -121,7 +121,7 @@ class GroupProfileModel {
     return null;
   }
 
-  bool? _parseNullableBool(Object? value) {
+  static bool? parseNullableBool(Object? value) {
     if (value == null) return null;
     if (value is bool) return value;
     if (value is num) return value != 0;

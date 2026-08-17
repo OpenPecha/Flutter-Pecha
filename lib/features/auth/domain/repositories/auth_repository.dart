@@ -24,6 +24,9 @@ abstract class AuthRepository {
   /// Login with Apple
   Future<Either<Failure, AuthCredentials>> loginWithApple();
 
+  /// Login with a phone number (Auth0 passwordless SMS)
+  Future<Either<Failure, AuthCredentials>> loginWithPhone();
+
   /// Logout (local - clears credentials from device)
   Future<Either<Failure, void>> localLogout();
 
