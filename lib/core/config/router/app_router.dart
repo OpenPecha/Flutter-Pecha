@@ -17,6 +17,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_profi
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_profile_screen.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/screens/group_recitation_collection_screen.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/main_navigation_screen.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/plan_list_screen.dart';
@@ -245,6 +246,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 ],
               ),
               GoRoute(
+                path: "group/:groupId/recitation-collections/:collectionId",
+                name: "home-group-recitation-collection",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final groupId = state.pathParameters['groupId'] ?? '';
+                  final collectionId =
+                      state.pathParameters['collectionId'] ?? '';
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return GroupRecitationCollectionScreen(
+                    groupId: groupId,
+                    collectionId: collectionId,
+                    initialTitle: extra?['title'] as String?,
+                  );
+                },
+              ),
+              GoRoute(
                 path: "group/:groupId",
                 name: "home-group-profile",
                 parentNavigatorKey: rootNavigatorKey,
@@ -408,8 +425,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           return MalaScreen(
             initialPresetId: extra?['presetId'] as String?,
-            initialGroupAccumulatorId:
-                extra?['groupAccumulatorId'] as String?,
+            initialGroupAccumulatorId: extra?['groupAccumulatorId'] as String?,
           );
         },
       ),

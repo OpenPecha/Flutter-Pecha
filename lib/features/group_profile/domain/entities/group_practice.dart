@@ -6,25 +6,56 @@ import 'package:flutter_pecha/shared/domain/value_objects/responsive_image.dart'
 
 enum GroupPracticeType { accumulator, series, collection, plan }
 
-class GroupPracticeCollection extends Equatable {
+class GroupRecitationCollectionItem extends Equatable {
+  final String id;
+  final String textId;
+  final String title;
+  final String language;
+  final String type;
+  final int displayOrder;
+
+  const GroupRecitationCollectionItem({
+    required this.id,
+    required this.textId,
+    required this.title,
+    required this.language,
+    required this.type,
+    required this.displayOrder,
+  });
+
+  @override
+  List<Object?> get props => [id, textId, title, language, type, displayOrder];
+}
+
+class GroupRecitationCollection extends Equatable {
   final String id;
   final String groupId;
   final String name;
   final String? imageUrl;
-  final int itemCount;
   final DateTime? createdAt;
+  final int itemCount;
+  final List<GroupRecitationCollectionItem> items;
 
-  const GroupPracticeCollection({
+  const GroupRecitationCollection({
     required this.id,
     required this.groupId,
     required this.name,
     this.imageUrl,
-    this.itemCount = 0,
     this.createdAt,
+    this.itemCount = 0,
+    this.items = const [],
   });
 
   @override
-  List<Object?> get props => [id, groupId, name, imageUrl, itemCount, createdAt];
+  List<Object?> get props => [
+    id,
+    groupId,
+    name,
+    imageUrl,
+    createdAt,
+    itemCount,
+    items,
+  ];
 }
 
 class GroupPracticePlan extends Equatable {
@@ -108,7 +139,7 @@ class GroupPractice extends Equatable {
   final String? groupAvatarUrl;
   final GroupProfileSeries? series;
   final GroupAccumulator? accumulator;
-  final GroupPracticeCollection? collection;
+  final GroupRecitationCollection? collection;
   final GroupPracticePlan? plan;
 
   const GroupPractice({

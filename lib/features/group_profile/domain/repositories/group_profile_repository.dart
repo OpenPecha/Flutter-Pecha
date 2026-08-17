@@ -41,6 +41,12 @@ abstract class GroupProfileRepositoryInterface {
     required int limit,
   });
 
+  Future<Either<Failure, GroupRecitationCollection>>
+  getRecitationCollectionDetail({
+    required String groupId,
+    required String collectionId,
+  });
+
   Future<Either<Failure, GroupMembersPage>> getGroupMembers(
     String groupId, {
     required int skip,

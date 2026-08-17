@@ -136,6 +136,35 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<GroupRecitationCollectionModel> fetchRecitationCollectionDetail({
+    required String groupId,
+    required String collectionId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/author/groups/$groupId/recitation-collections/$collectionId',
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupRecitationCollectionModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+
+      _logger.error(
+        'Failed to load recitation collection $collectionId for $groupId: ${response.statusCode}',
+      );
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load recitation collection',
+      );
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchRecitationCollectionDetail', e);
+      throw _dioToException(e, 'Failed to load recitation collection');
+    }
+  }
+
   Future<GroupMembersPageModel> fetchGroupMembers(
     String groupId, {
     required int skip,
@@ -194,13 +223,8 @@ class GroupProfileRemoteDatasource {
           language: language,
         );
       } else {
-        _logger.error(
-          'Failed to load connect events: ${response.statusCode}',
-        );
-        throw _statusToException(
-          response.statusCode,
-          'Failed to load events',
-        );
+        _logger.error('Failed to load connect events: ${response.statusCode}');
+        throw _statusToException(response.statusCode, 'Failed to load events');
       }
     } on DioException catch (e) {
       _logger.error('Dio error in fetchConnectEvents', e);
