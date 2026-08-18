@@ -73,10 +73,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
 
     return Material(
       color: cardColor,
-      elevation: isDark ? 0 : 1,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap:
             _isEnrollingSeries
@@ -85,71 +81,74 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 140,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  series.image != null && !series.image!.isEmpty
-                      ? ResponsiveCoverImage(
-                        image: series.image,
-                        fit: BoxFit.cover,
-                      )
-                      : ColoredBox(
-                        color:
-                            isDark
-                                ? AppColors.surfaceVariantDark
-                                : AppColors.grey100,
-                        child: Icon(
-                          AppAssets.bookOpenText,
-                          size: 40,
-                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+            ClipRect(
+              child: AspectRatio(
+                aspectRatio: 2,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    series.image != null && !series.image!.isEmpty
+                        ? ResponsiveCoverImage(
+                          image: series.image,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.bookOpenText,
+                            size: 40,
+                            color:
+                                isDark ? AppColors.grey500 : AppColors.grey600,
+                          ),
                         ),
-                      ),
-                  if (showPracticeOverlay)
-                    Container(
-                      color: Colors.black.withValues(alpha: 0.55),
-                      alignment: Alignment.center,
-                      child:
-                          _isEnrollingSeries
-                              ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                              : GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap:
-                                    () => _onPracticeWithUsTap(practice, series),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
+                    if (showPracticeOverlay)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        alignment: Alignment.center,
+                        child:
+                            _isEnrollingSeries
+                                ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(999),
                                   ),
-                                  child: Text(
-                                    context.l10n.group_practice_with_us,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
+                                )
+                                : GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap:
+                                      () =>
+                                          _onPracticeWithUsTap(practice, series),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      context.l10n.group_practice_with_us,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                    ),
-                ],
+                      ),
+                  ],
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -205,6 +204,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
       isDark: isDark,
       lineHeight: lineHeight,
       isJoining: _joiningAccumulatorId == accumulator.id,
+      fullBleed: true,
       groupName: practice.groupName,
       groupAvatarUrl: practice.groupAvatarUrl,
       groupId: practice.groupId,
@@ -229,38 +229,36 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
 
     return Material(
       color: cardColor,
-      elevation: isDark ? 0 : 1,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _navigateToPlanDetail(practice, plan),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 140,
-              width: double.infinity,
-              child:
-                  plan.imageUrl != null && plan.imageUrl!.isNotEmpty
-                      ? CachedNetworkImageWidget(
-                        imageUrl: plan.imageUrl!,
-                        fit: BoxFit.cover,
-                      )
-                      : ColoredBox(
-                        color:
-                            isDark
-                                ? AppColors.surfaceVariantDark
-                                : AppColors.grey100,
-                        child: Icon(
-                          AppAssets.bookOpenText,
-                          size: 40,
-                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+            ClipRect(
+              child: AspectRatio(
+                aspectRatio: 2,
+                child:
+                    plan.imageUrl != null && plan.imageUrl!.isNotEmpty
+                        ? CachedNetworkImageWidget(
+                          imageUrl: plan.imageUrl!,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.bookOpenText,
+                            size: 40,
+                            color:
+                                isDark ? AppColors.grey500 : AppColors.grey600,
+                          ),
                         ),
-                      ),
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -307,36 +305,33 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
 
     return Material(
       color: cardColor,
-      elevation: isDark ? 0 : 1,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 140,
-            width: double.infinity,
-            child:
-                collection.imageUrl != null && collection.imageUrl!.isNotEmpty
-                    ? CachedNetworkImageWidget(
-                      imageUrl: collection.imageUrl!,
-                      fit: BoxFit.cover,
-                    )
-                    : ColoredBox(
-                      color:
-                          isDark
-                              ? AppColors.surfaceVariantDark
-                              : AppColors.grey100,
-                      child: Icon(
-                        AppAssets.bookOpenText,
-                        size: 40,
-                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+          ClipRect(
+            child: AspectRatio(
+              aspectRatio: 2,
+              child:
+                  collection.imageUrl != null && collection.imageUrl!.isNotEmpty
+                      ? CachedNetworkImageWidget(
+                        imageUrl: collection.imageUrl!,
+                        fit: BoxFit.cover,
+                      )
+                      : ColoredBox(
+                        color:
+                            isDark
+                                ? AppColors.surfaceVariantDark
+                                : AppColors.grey100,
+                        child: Icon(
+                          AppAssets.bookOpenText,
+                          size: 40,
+                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+                        ),
                       ),
-                    ),
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

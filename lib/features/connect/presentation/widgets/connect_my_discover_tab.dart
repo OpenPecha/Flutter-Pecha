@@ -101,7 +101,7 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
           child: ConnectSegmentedControl(
             segments: [
               context.l10n.connect_segment_my,

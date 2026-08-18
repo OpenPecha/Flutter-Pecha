@@ -47,38 +47,36 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
 
     return Material(
       color: cardColor,
-      elevation: isDark ? 0 : 1,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/home/events/${event.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 160,
-              width: double.infinity,
-              child:
-                  event.image != null && !event.image!.isEmpty
-                      ? ResponsiveCoverImage(
-                        image: event.image,
-                        fit: BoxFit.cover,
-                      )
-                      : ColoredBox(
-                        color:
-                            isDark
-                                ? AppColors.surfaceVariantDark
-                                : AppColors.grey100,
-                        child: Icon(
-                          AppAssets.calendarDots,
-                          size: 40,
-                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+            ClipRect(
+              child: AspectRatio(
+                aspectRatio: 2,
+                child:
+                    event.image != null && !event.image!.isEmpty
+                        ? ResponsiveCoverImage(
+                          image: event.image,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.calendarDots,
+                            size: 40,
+                            color:
+                                isDark ? AppColors.grey500 : AppColors.grey600,
+                          ),
                         ),
-                      ),
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

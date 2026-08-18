@@ -53,74 +53,69 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
             .toList();
 
     return Material(
-      color: Colors.transparent,
+      color: cardColor,
       child: InkWell(
         onTap: _openDetail,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _AuthorRow(
-                  name: post.groupName,
-                  avatarUrl: post.groupAvatarUrl,
-                  isDark: isDark,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+              child: _AuthorRow(
+                name: post.groupName,
+                avatarUrl: post.groupAvatarUrl,
+                isDark: isDark,
+              ),
+            ),
+            if (caption.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                child: Text(
+                  caption,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (caption.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    caption,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      height: 1.4,
-                    ),
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
+              ),
+            if (imageMedia.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _PostMediaGallery(media: imageMedia, isDark: isDark),
+            ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Row(
+                children: [
+                  _ActionButton(
+                    icon: _isLiked ? AppAssets.heartFill : AppAssets.heart,
+                    iconColor:
+                        _isLiked
+                            ? AppColors.error
+                            : (isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondary),
+                    count: _likeCount,
+                    isLoading: _likeState.isSubmitting,
+                    onTap: _toggleLike,
+                  ),
+                  const SizedBox(width: 16),
+                  _ActionButton(
+                    icon: AppAssets.chatCircle,
+                    count: post.commentCount,
+                    onTap: _openDetail,
+                  ),
+                  const Spacer(),
+                  _ActionButton(
+                    icon: AppAssets.readerShare,
+                    onTap: () => _sharePost(post),
                   ),
                 ],
-                if (imageMedia.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _PostMediaGallery(media: imageMedia, isDark: isDark),
-                ],
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _ActionButton(
-                      icon: _isLiked ? AppAssets.heartFill : AppAssets.heart,
-                      iconColor:
-                          _isLiked
-                              ? AppColors.error
-                              : (isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondary),
-                      count: _likeCount,
-                      isLoading: _likeState.isSubmitting,
-                      onTap: _toggleLike,
-                    ),
-                    const SizedBox(width: 20),
-                    _ActionButton(
-                      icon: AppAssets.chatCircle,
-                      count: post.commentCount,
-                      onTap: _openDetail,
-                    ),
-                    const Spacer(),
-                    _ActionButton(
-                      icon: AppAssets.readerShare,
-                      onTap: () => _sharePost(post),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -258,7 +253,7 @@ class _PostMediaGallery extends StatelessWidget {
     return Row(
       children: [
         for (var i = 0; i < visibleMedia.length; i++) ...[
-          if (i > 0) const SizedBox(width: 8),
+          if (i > 0) const SizedBox(width: 2),
           Expanded(
             child: _PostMediaTile(
               media: visibleMedia[i],
@@ -294,8 +289,7 @@ class _PostMediaTile extends StatelessWidget {
     );
 
     if (compact) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+      return ClipRect(
         child: AspectRatio(
           aspectRatio: 1,
           child: CachedNetworkImageWidget(
@@ -310,8 +304,7 @@ class _PostMediaTile extends StatelessWidget {
     final width = media.width;
     final height = media.height;
     if (width != null && height != null && width > 0 && height > 0) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+      return ClipRect(
         child: AspectRatio(
           aspectRatio: width / height,
           child: CachedNetworkImageWidget(
@@ -323,14 +316,11 @@ class _PostMediaTile extends StatelessWidget {
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: CachedNetworkImageWidget(
-        imageUrl: media.url,
-        width: double.infinity,
-        fit: BoxFit.fitWidth,
-        errorWidget: errorWidget,
-      ),
+    return CachedNetworkImageWidget(
+      imageUrl: media.url,
+      width: double.infinity,
+      fit: BoxFit.fitWidth,
+      errorWidget: errorWidget,
     );
   }
 }
