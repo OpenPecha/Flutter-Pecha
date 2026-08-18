@@ -1594,6 +1594,36 @@ abstract class AppLocalizations {
   /// **'Online'**
   String get connect_online;
 
+  /// No description provided for @home_group_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Events'**
+  String get home_group_events;
+
+  /// No description provided for @connect_events_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get connect_events_filter_all;
+
+  /// No description provided for @connect_events_filter_in_person.
+  ///
+  /// In en, this message translates to:
+  /// **'In person'**
+  String get connect_events_filter_in_person;
+
+  /// No description provided for @connect_events_filter_empty_online.
+  ///
+  /// In en, this message translates to:
+  /// **'No online events'**
+  String get connect_events_filter_empty_online;
+
+  /// No description provided for @connect_events_filter_empty_in_person.
+  ///
+  /// In en, this message translates to:
+  /// **'No in-person events'**
+  String get connect_events_filter_empty_in_person;
+
   /// No description provided for @connect_open.
   ///
   /// In en, this message translates to:

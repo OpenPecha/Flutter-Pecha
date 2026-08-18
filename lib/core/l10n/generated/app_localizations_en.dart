@@ -831,6 +831,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_online => 'Online';
 
   @override
+  String get home_group_events => 'Group Events';
+
+  @override
+  String get connect_events_filter_all => 'All';
+
+  @override
+  String get connect_events_filter_in_person => 'In person';
+
+  @override
+  String get connect_events_filter_empty_online => 'No online events';
+
+  @override
+  String get connect_events_filter_empty_in_person => 'No in-person events';
+
+  @override
   String get connect_open => 'Open';
 
   @override

@@ -842,6 +842,22 @@ class AppLocalizationsBo extends AppLocalizations {
   String get connect_online => 'དྲ་ཐོག';
 
   @override
+  String get home_group_events => 'ཚོགས་པའི་བྱེད་སྒོ།';
+
+  @override
+  String get connect_events_filter_all => 'ཡོངས།';
+
+  @override
+  String get connect_events_filter_in_person => 'ས་ཁུལ་དུ།';
+
+  @override
+  String get connect_events_filter_empty_online => 'དྲ་ཐོག་བྱེད་སྒོ་མེད།';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'ས་ཁུལ་དུའི་བྱེད་སྒོ་མེད།';
+
+  @override
   String get connect_open => 'ཁ་ཕྱེ།';
 
   @override

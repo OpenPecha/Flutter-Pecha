@@ -837,6 +837,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get connect_online => 'ऑनलाइन';
 
   @override
+  String get home_group_events => 'समूह कार्यक्रम';
+
+  @override
+  String get connect_events_filter_all => 'सभी';
+
+  @override
+  String get connect_events_filter_in_person => 'सामने';
+
+  @override
+  String get connect_events_filter_empty_online => 'कोई ऑनलाइन कार्यक्रम नहीं';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'कोई सामने का कार्यक्रम नहीं';
+
+  @override
   String get connect_open => 'खोलें';
 
   @override

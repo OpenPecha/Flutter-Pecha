@@ -844,6 +844,22 @@ class AppLocalizationsNe extends AppLocalizations {
   String get connect_online => 'अनलाइन';
 
   @override
+  String get home_group_events => 'समूह कार्यक्रम';
+
+  @override
+  String get connect_events_filter_all => 'सबै';
+
+  @override
+  String get connect_events_filter_in_person => 'प्रत्यक्ष';
+
+  @override
+  String get connect_events_filter_empty_online => 'कुनै अनलाइन कार्यक्रम छैन';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'कुनै प्रत्यक्ष कार्यक्रम छैन';
+
+  @override
   String get connect_open => 'खोल्नुहोस्';
 
   @override
