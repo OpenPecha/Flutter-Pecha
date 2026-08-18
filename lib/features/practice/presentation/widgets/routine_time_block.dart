@@ -116,10 +116,15 @@ class _RoutineTimeBlockState extends State<RoutineTimeBlock> {
                 ),
               ),
             ],
-            const Spacer(),
-            _DeleteBlockButton(
-              onTap: () => _confirmDeleteBlock(context),
-              label: localizations.routine_delete_block,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _DeleteBlockButton(
+                  onTap: () => _confirmDeleteBlock(context),
+                  label: localizations.routine_delete_block,
+                ),
+              ),
             ),
           ],
         ),
@@ -361,6 +366,9 @@ class _DeleteBlockButton extends StatelessWidget {
       onTap: onTap,
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.end,
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
