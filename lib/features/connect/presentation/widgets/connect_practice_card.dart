@@ -85,7 +85,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupName: practice.groupName ?? '',
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
-              timestamp: practice.practiceAt,
               subtitle: dateRange,
             ),
             Padding(
@@ -186,7 +185,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupName: practice.groupName ?? '',
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
-              timestamp: practice.practiceAt,
               subtitle: dateRange,
             ),
             Padding(
@@ -279,7 +277,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupName: practice.groupName ?? '',
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
-              timestamp: practice.practiceAt,
               subtitle: details.isNotEmpty ? details : null,
             ),
             Padding(
