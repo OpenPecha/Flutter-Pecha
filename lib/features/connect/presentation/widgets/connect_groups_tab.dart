@@ -93,6 +93,7 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
         scrollController: _scrollController,
         onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
         emptyDiscoverMessage: context.l10n.connect_empty_discover_groups,
+        useHairlineDividers: false,
         separatorHeight: 12,
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         itemBuilder:
