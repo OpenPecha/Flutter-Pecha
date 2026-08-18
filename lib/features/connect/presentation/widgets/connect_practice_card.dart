@@ -14,7 +14,6 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_pract
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
-import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_date_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -126,35 +125,28 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                 isDark ? AppColors.grey500 : AppColors.grey600,
                           ),
                         ),
+                    if (series.enrolledCount > 0)
+                      Positioned(
+                        right: 12,
+                        bottom: 12,
+                        child: _PracticeImageMemberBadge(
+                          count: series.enrolledCount,
+                        ),
+                      ),
                   ],
                 ),
               ),
             ),
-            ConnectFeedActionBar(
-              actions: [
-                if (series.enrolledCount > 0)
-                  (
-                    icon: AppAssets.usercard,
-                    iconColor: null,
-                    count: series.enrolledCount,
-                    isLoading: false,
-                    onTap: () => _navigateToSeriesDetail(
-                      practice,
-                      series,
-                      isEnrolled,
-                    ),
-                  ),
-              ],
-              trailing:
-                  !isEnrolled
-                      ? _PracticeJoinButton(
-                        label: context.l10n.group_practice_with_us,
-                        isLoading: _isEnrollingSeries,
-                        isDark: isDark,
-                        onTap: () => _onPracticeWithUsTap(practice, series),
-                      )
-                      : null,
-            ),
+            if (!isEnrolled)
+              ConnectFeedActionBar(
+                actions: const [],
+                trailing: _PracticeJoinButton(
+                  label: context.l10n.group_practice_with_us,
+                  isLoading: _isEnrollingSeries,
+                  isDark: isDark,
+                  onTap: () => _onPracticeWithUsTap(practice, series),
+                ),
+              ),
           ],
         ),
       ),
@@ -175,30 +167,90 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
           accumulator,
           localJoinedIds: localJoinedIds,
         );
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+    final dateRange = PlanDateFormat.formatRangeOrNull(
+      accumulator.startDate,
+      accumulator.endDate,
+    );
+    final isJoining = _joiningAccumulatorId == accumulator.id;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ConnectFeedCardHeader(
-          groupName: practice.groupName ?? '',
-          groupAvatarUrl: practice.groupAvatarUrl,
-          groupId: practice.groupId,
-          timestamp: practice.practiceAt,
+    return Material(
+      color: cardColor,
+      child: InkWell(
+        onTap: isJoining ? null : () => _navigateToAccumulatorDetail(accumulator.id, practice),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ConnectFeedCardHeader(
+              groupName: practice.groupName ?? '',
+              groupAvatarUrl: practice.groupAvatarUrl,
+              groupId: practice.groupId,
+              timestamp: practice.practiceAt,
+              subtitle: dateRange,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                accumulator.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: lineHeight,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ClipRect(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    accumulator.image != null && !accumulator.image!.isEmpty
+                        ? ResponsiveCoverImage(
+                          image: accumulator.image,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.bookOpenText,
+                            size: 40,
+                            color:
+                                isDark ? AppColors.grey500 : AppColors.grey600,
+                          ),
+                        ),
+                    if (accumulator.memberCount > 0)
+                      Positioned(
+                        right: 12,
+                        bottom: 12,
+                        child: _PracticeImageMemberBadge(
+                          count: accumulator.memberCount,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            if (!hasJoined)
+              ConnectFeedActionBar(
+                actions: const [],
+                trailing: _PracticeJoinButton(
+                  label: context.l10n.group_join_to_contribute,
+                  isLoading: isJoining,
+                  isDark: isDark,
+                  onTap: () => _onJoinAccumulatorTap(practice, accumulator),
+                ),
+              ),
+          ],
         ),
-        GroupAccumulatorCard(
-          accumulator: accumulator,
-          hasJoined: hasJoined,
-          isDark: isDark,
-          lineHeight: lineHeight,
-          isJoining: _joiningAccumulatorId == accumulator.id,
-          fullBleed: true,
-          groupName: practice.groupName,
-          groupAvatarUrl: practice.groupAvatarUrl,
-          groupId: practice.groupId,
-          onTap: () => _navigateToAccumulatorDetail(accumulator.id, practice),
-          onJoinTap: () => _onJoinAccumulatorTap(practice, accumulator),
-        ),
-      ],
+      ),
     );
   }
 
@@ -461,6 +513,38 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
       SnackBar(
         content: Text(context.l10n.group_accumulator_join_error),
         backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+class _PracticeImageMemberBadge extends StatelessWidget {
+  const _PracticeImageMemberBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(AppAssets.usercard, size: 14, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            '$count',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
