@@ -1,6 +1,7 @@
 import 'package:flutter_pecha/core/network/interceptors/cache_interceptor.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/state/auth_state.dart';
+import 'package:flutter_pecha/features/home/presentation/screens/main_navigation_screen.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/routine_info_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/streak_provider.dart';
 import 'package:flutter_pecha/features/more/presentation/providers/user_stats_provider.dart';
@@ -28,5 +29,12 @@ final userSessionBootstrapProvider = Provider<void>((ref) {
 
     ref.read(cacheInterceptorProvider).clearUserScoped();
     _invalidateUserScopedProviders(ref);
+
+    // In-app login (e.g. from the Me tab) keeps the current shell route (/home)
+    // but should land on Home, not stay on the tab where sign-in was triggered.
+    if (!wasAuthenticated && isAuthenticated) {
+      ref.read(mainNavigationIndexProvider.notifier).state =
+          MainTab.home.index;
+    }
   });
 });
