@@ -5,6 +5,7 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
@@ -30,6 +31,9 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
       collectionId: collectionId,
     );
     final detailAsync = ref.watch(groupRecitationCollectionDetailProvider(key));
+    final completionState = ref.watch(
+      groupRecitationCollectionCompletionProvider(key),
+    );
     final detail = detailAsync.valueOrNull?.fold((_) => null, (value) => value);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -54,7 +58,11 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
                       ),
                       (collection) => _CollectionContent(
                         collection: collection,
+                        completionState: completionState,
                         isDark: isDark,
+                        onOpenItem:
+                            (item) =>
+                                _openReaderAndComplete(context, ref, key, item),
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -72,6 +80,35 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openReaderAndComplete(
+    BuildContext context,
+    WidgetRef ref,
+    GroupRecitationCollectionKey key,
+    GroupRecitationCollectionItem item,
+  ) async {
+    final textId = item.textId.trim();
+    final chantId = item.id.trim();
+    if (textId.isEmpty || chantId.isEmpty) return;
+
+    await context.push(
+      '/reader/$textId',
+      extra: const NavigationContext(source: NavigationSource.recitationList),
+    );
+
+    final authState = ref.read(authProvider);
+    if (authState.isGuest || !authState.isLoggedIn) return;
+
+    final completed = await ref
+        .read(groupRecitationCollectionCompletionProvider(key).notifier)
+        .completeChant(chantId);
+
+    if (!completed && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.somethingWrong)));
+    }
   }
 }
 
@@ -115,10 +152,17 @@ class _CollectionAppBar extends StatelessWidget {
 }
 
 class _CollectionContent extends StatelessWidget {
-  const _CollectionContent({required this.collection, required this.isDark});
+  const _CollectionContent({
+    required this.collection,
+    required this.completionState,
+    required this.isDark,
+    required this.onOpenItem,
+  });
 
   final GroupRecitationCollection collection;
+  final GroupRecitationCollectionCompletionState completionState;
   final bool isDark;
+  final ValueChanged<GroupRecitationCollectionItem> onOpenItem;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +185,9 @@ class _CollectionContent extends StatelessWidget {
                     (item) => _RecitationCollectionRow(
                       item: item,
                       isDark: isDark,
-                      onTap: () => _openReader(context, item),
+                      isCompleted: completionState.isCompleted(item.id),
+                      isSubmitting: completionState.isSubmitting(item.id),
+                      onTap: () => onOpenItem(item),
                     ),
                   )
                 else
@@ -176,9 +222,7 @@ class _CollectionContent extends StatelessWidget {
             height: 52,
             child: ElevatedButton(
               onPressed:
-                  hasItems
-                      ? () => _openReader(context, collection.items.first)
-                      : null,
+                  hasItems ? () => onOpenItem(collection.items.first) : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor:
@@ -202,16 +246,6 @@ class _CollectionContent extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  void _openReader(BuildContext context, GroupRecitationCollectionItem item) {
-    final textId = item.textId.trim();
-    if (textId.isEmpty) return;
-
-    context.push(
-      '/reader/$textId',
-      extra: const NavigationContext(source: NavigationSource.recitationList),
     );
   }
 }
@@ -323,11 +357,15 @@ class _RecitationCollectionRow extends StatelessWidget {
   const _RecitationCollectionRow({
     required this.item,
     required this.isDark,
+    required this.isCompleted,
+    required this.isSubmitting,
     required this.onTap,
   });
 
   final GroupRecitationCollectionItem item;
   final bool isDark;
+  final bool isCompleted;
+  final bool isSubmitting;
   final VoidCallback onTap;
 
   @override
@@ -337,19 +375,17 @@ class _RecitationCollectionRow extends StatelessWidget {
     final borderColor = isDark ? AppColors.grey800 : AppColors.grey600;
 
     return InkWell(
-      onTap: onTap,
+      onTap: isSubmitting ? null : onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 9),
         child: Row(
           children: [
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor, width: 1),
-              ),
+            _CompletionIndicator(
+              isCompleted: isCompleted,
+              isSubmitting: isSubmitting,
+              isDark: isDark,
+              borderColor: borderColor,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -380,6 +416,51 @@ class _RecitationCollectionRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CompletionIndicator extends StatelessWidget {
+  const _CompletionIndicator({
+    required this.isCompleted,
+    required this.isSubmitting,
+    required this.isDark,
+    required this.borderColor,
+  });
+
+  final bool isCompleted;
+  final bool isSubmitting;
+  final bool isDark;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isSubmitting) {
+      return const SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    final fillColor = isDark ? AppColors.surfaceWhite : AppColors.textPrimary;
+    final checkColor = isDark ? AppColors.textPrimary : AppColors.surfaceWhite;
+
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted ? fillColor : Colors.transparent,
+        border: Border.all(
+          color: isCompleted ? fillColor : borderColor,
+          width: 1,
+        ),
+      ),
+      child:
+          isCompleted
+              ? Icon(AppAssets.check, size: 13, color: checkColor)
+              : null,
     );
   }
 }
