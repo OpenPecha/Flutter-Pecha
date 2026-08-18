@@ -7,6 +7,8 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_practices_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_action_bar.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -67,7 +69,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
       series.endDate,
     );
     final isEnrolled = practice.isJoined || series.isGroupEnrolled == true;
-    final showPracticeOverlay = !isEnrolled;
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
 
@@ -81,9 +82,30 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ConnectFeedCardHeader(
+              groupName: practice.groupName ?? '',
+              groupAvatarUrl: practice.groupAvatarUrl,
+              groupId: practice.groupId,
+              timestamp: practice.practiceAt,
+              subtitle: dateRange,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                series.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: lineHeight,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 10),
             ClipRect(
               child: AspectRatio(
-                aspectRatio: 2,
+                aspectRatio: 16 / 9,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -104,78 +126,34 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                 isDark ? AppColors.grey500 : AppColors.grey600,
                           ),
                         ),
-                    if (showPracticeOverlay)
-                      Container(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        alignment: Alignment.center,
-                        child:
-                            _isEnrollingSeries
-                                ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                : GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap:
-                                      () =>
-                                          _onPracticeWithUsTap(practice, series),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      context.l10n.group_practice_with_us,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                      ),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    series.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      height: lineHeight,
+            ConnectFeedActionBar(
+              actions: [
+                if (series.enrolledCount > 0)
+                  (
+                    icon: AppAssets.usercard,
+                    iconColor: null,
+                    count: series.enrolledCount,
+                    isLoading: false,
+                    onTap: () => _navigateToSeriesDetail(
+                      practice,
+                      series,
+                      isEnrolled,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (dateRange != null ||
-                      series.enrolledCount > 0 ||
-                      _hasGroupLabel(practice)) ...[
-                    const SizedBox(height: 4),
-                    _ConnectPracticeMetaRow(
-                      practice: practice,
-                      isDark: isDark,
-                      lineHeight: lineHeight,
-                      dateText: dateRange,
-                      joinCount: series.enrolledCount,
-                    ),
-                  ],
-                ],
-              ),
+              ],
+              trailing:
+                  !isEnrolled
+                      ? _PracticeJoinButton(
+                        label: context.l10n.group_practice_with_us,
+                        isLoading: _isEnrollingSeries,
+                        isDark: isDark,
+                        onTap: () => _onPracticeWithUsTap(practice, series),
+                      )
+                      : null,
             ),
           ],
         ),
@@ -198,18 +176,29 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
           localJoinedIds: localJoinedIds,
         );
 
-    return GroupAccumulatorCard(
-      accumulator: accumulator,
-      hasJoined: hasJoined,
-      isDark: isDark,
-      lineHeight: lineHeight,
-      isJoining: _joiningAccumulatorId == accumulator.id,
-      fullBleed: true,
-      groupName: practice.groupName,
-      groupAvatarUrl: practice.groupAvatarUrl,
-      groupId: practice.groupId,
-      onTap: () => _navigateToAccumulatorDetail(accumulator.id, practice),
-      onJoinTap: () => _onJoinAccumulatorTap(practice, accumulator),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ConnectFeedCardHeader(
+          groupName: practice.groupName ?? '',
+          groupAvatarUrl: practice.groupAvatarUrl,
+          groupId: practice.groupId,
+          timestamp: practice.practiceAt,
+        ),
+        GroupAccumulatorCard(
+          accumulator: accumulator,
+          hasJoined: hasJoined,
+          isDark: isDark,
+          lineHeight: lineHeight,
+          isJoining: _joiningAccumulatorId == accumulator.id,
+          fullBleed: true,
+          groupName: practice.groupName,
+          groupAvatarUrl: practice.groupAvatarUrl,
+          groupId: practice.groupId,
+          onTap: () => _navigateToAccumulatorDetail(accumulator.id, practice),
+          onJoinTap: () => _onJoinAccumulatorTap(practice, accumulator),
+        ),
+      ],
     );
   }
 
@@ -234,9 +223,30 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ConnectFeedCardHeader(
+              groupName: practice.groupName ?? '',
+              groupAvatarUrl: practice.groupAvatarUrl,
+              groupId: practice.groupId,
+              timestamp: practice.practiceAt,
+              subtitle: details.isNotEmpty ? details : null,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                plan.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: lineHeight,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 10),
             ClipRect(
               child: AspectRatio(
-                aspectRatio: 2,
+                aspectRatio: 16 / 9,
                 child:
                     plan.imageUrl != null && plan.imageUrl!.isNotEmpty
                         ? CachedNetworkImageWidget(
@@ -257,33 +267,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                         ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    plan.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      height: lineHeight,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (details.isNotEmpty || _hasGroupLabel(practice)) ...[
-                    const SizedBox(height: 4),
-                    _ConnectPracticeMetaRow(
-                      practice: practice,
-                      isDark: isDark,
-                      lineHeight: lineHeight,
-                      dateText: details.isNotEmpty ? details : null,
-                    ),
-                  ],
-                ],
-              ),
-            ),
+            const SizedBox(height: 4),
           ],
         ),
       ),
@@ -308,9 +292,30 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ConnectFeedCardHeader(
+            groupName: practice.groupName ?? '',
+            groupAvatarUrl: practice.groupAvatarUrl,
+            groupId: practice.groupId,
+            timestamp: practice.practiceAt,
+            subtitle: itemCountLabel,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(
+              collection.name,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: lineHeight,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(height: 10),
           ClipRect(
             child: AspectRatio(
-              aspectRatio: 2,
+              aspectRatio: 16 / 9,
               child:
                   collection.imageUrl != null && collection.imageUrl!.isNotEmpty
                       ? CachedNetworkImageWidget(
@@ -330,41 +335,21 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                       ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  collection.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    height: lineHeight,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (itemCountLabel != null || _hasGroupLabel(practice)) ...[
-                  const SizedBox(height: 4),
-                  _ConnectPracticeMetaRow(
-                    practice: practice,
-                    isDark: isDark,
-                    lineHeight: lineHeight,
-                    dateText: itemCountLabel,
-                  ),
-                ],
-              ],
-            ),
-          ),
+          const SizedBox(height: 4),
         ],
       ),
     );
   }
 
-  bool _hasGroupLabel(GroupPractice practice) {
-    return practice.groupId != null &&
-        (practice.groupName?.trim().isNotEmpty ?? false);
+  void _navigateToPlanDetail(GroupPractice practice, GroupPracticePlan plan) {
+    final planEntity = plan.toPlan();
+    context.push(
+      '/practice/plans/preview',
+      extra: {
+        'plan': planEntity,
+        if (plan.seriesId != null) 'seriesId': plan.seriesId,
+      },
+    );
   }
 
   void _navigateToSeriesDetail(
@@ -479,204 +464,61 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
       ),
     );
   }
-
-  void _navigateToPlanDetail(GroupPractice practice, GroupPracticePlan plan) {
-    final planEntity = plan.toPlan();
-    context.push(
-      '/practice/plans/preview',
-      extra: {
-        'plan': planEntity,
-        if (plan.seriesId != null) 'seriesId': plan.seriesId,
-      },
-    );
-  }
 }
 
-class _ConnectPracticeMetaRow extends StatelessWidget {
-  const _ConnectPracticeMetaRow({
-    required this.practice,
+class _PracticeJoinButton extends StatelessWidget {
+  const _PracticeJoinButton({
+    required this.label,
+    required this.isLoading,
     required this.isDark,
-    this.lineHeight,
-    this.dateText,
-    this.joinCount = 0,
+    required this.onTap,
   });
 
-  final GroupPractice practice;
+  final String label;
+  final bool isLoading;
   final bool isDark;
-  final double? lineHeight;
-  final String? dateText;
-  final int joinCount;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final hasGroup = _hasGroup(practice);
-    final secondaryColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
-    final trimmedDate = dateText?.trim();
-
-    if (!hasGroup &&
-        (trimmedDate == null || trimmedDate.isEmpty) &&
-        joinCount <= 0) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (hasGroup)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _ConnectPracticeGroupAvatar(
-                avatarUrl: practice.groupAvatarUrl,
-                groupId: practice.groupId,
-                isDark: isDark,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _ConnectPracticeGroupName(
-                  name: practice.groupName ?? '',
-                  groupId: practice.groupId,
-                  isDark: isDark,
-                ),
-              ),
-            ],
-          ),
-        if ((trimmedDate != null && trimmedDate.isNotEmpty) || joinCount > 0) ...[
-          if (hasGroup) const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (trimmedDate != null && trimmedDate.isNotEmpty)
-                Expanded(
-                  child: Text(
-                    trimmedDate,
+    return GestureDetector(
+      onTap: isLoading ? null : onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color:
+                          isDark
+                              ? AppColors.textPrimary
+                              : AppColors.surfaceWhite,
+                    ),
+                  )
+                  : Text(
+                    label,
                     style: TextStyle(
-                      fontSize: 14,
-                      color: secondaryColor,
-                      height: lineHeight,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          isDark
+                              ? AppColors.textPrimary
+                              : AppColors.surfaceWhite,
                     ),
                   ),
-                )
-              else
-                const SizedBox.shrink(),
-              if (joinCount > 0)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(AppAssets.usercard, size: 16, color: secondaryColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$joinCount',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: secondaryColor,
-                        height: lineHeight,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
-  bool _hasGroup(GroupPractice practice) {
-    return practice.groupId != null &&
-        (practice.groupName?.trim().isNotEmpty ?? false);
-  }
-}
-
-class _ConnectPracticeGroupAvatar extends StatelessWidget {
-  const _ConnectPracticeGroupAvatar({
-    this.avatarUrl,
-    this.groupId,
-    required this.isDark,
-  });
-
-  final String? avatarUrl;
-  final String? groupId;
-  final bool isDark;
-
-  static const double _avatarSize = 24;
-
-  @override
-  Widget build(BuildContext context) {
-    final placeholderColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
-    final trimmedAvatar = avatarUrl?.trim();
-
-    final avatar = ClipOval(
-      child: SizedBox(
-        width: _avatarSize,
-        height: _avatarSize,
-        child:
-            trimmedAvatar != null && trimmedAvatar.isNotEmpty
-                ? CachedNetworkImageWidget(
-                  imageUrl: trimmedAvatar,
-                  fit: BoxFit.cover,
-                  width: _avatarSize,
-                  height: _avatarSize,
-                )
-                : ColoredBox(
-                  color: placeholderColor,
-                  child: Icon(
-                    AppAssets.usersThree,
-                    size: 14,
-                    color: isDark ? AppColors.grey500 : AppColors.grey600,
-                  ),
-                ),
+        ),
       ),
-    );
-
-    final trimmedGroupId = groupId?.trim();
-    if (trimmedGroupId == null || trimmedGroupId.isEmpty) return avatar;
-
-    return GestureDetector(
-      onTap: () => context.push('/home/group/$trimmedGroupId'),
-      behavior: HitTestBehavior.opaque,
-      child: avatar,
-    );
-  }
-}
-
-class _ConnectPracticeGroupName extends StatelessWidget {
-  const _ConnectPracticeGroupName({
-    required this.name,
-    this.groupId,
-    required this.isDark,
-  });
-
-  final String name;
-  final String? groupId;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final displayName =
-        name.trim().isNotEmpty
-            ? name.trim()
-            : context.l10n.connect_group_fallback_title;
-
-    final text = Text(
-      displayName,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: isDark ? AppColors.textPrimaryDark : AppColors.primaryDark,
-      ),
-    );
-
-    final trimmedGroupId = groupId?.trim();
-    if (trimmedGroupId == null || trimmedGroupId.isEmpty) return text;
-
-    return GestureDetector(
-      onTap: () => context.push('/home/group/$trimmedGroupId'),
-      behavior: HitTestBehavior.opaque,
-      child: text,
     );
   }
 }

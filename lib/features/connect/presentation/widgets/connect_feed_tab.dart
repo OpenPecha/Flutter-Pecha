@@ -43,9 +43,6 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
 
   @override
   Widget build(BuildContext context) {
-    // Watch both providers unconditionally so they stay alive across
-    // My/Discover segment switches; only `loadActiveSegment()` decides
-    // when to actually fetch.
     final myState = ref.watch(myConnectFeedProvider);
     final discoverState = ref.watch(discoverConnectFeedProvider);
 

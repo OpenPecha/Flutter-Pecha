@@ -15,7 +15,8 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
     required this.onRetry,
     required this.itemBuilder,
     this.scrollController,
-    this.separatorHeight = 8,
+    this.separatorHeight = 0,
+    this.useHairlineDividers = true,
     this.padding = const EdgeInsets.fromLTRB(0, 0, 0, 24),
     this.emptyDiscoverMessage,
     this.myEmptyState,
@@ -33,6 +34,7 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
   final VoidCallback onRetry;
   final IndexedWidgetBuilder itemBuilder;
   final double separatorHeight;
+  final bool useHairlineDividers;
   final EdgeInsets padding;
   final String? emptyDiscoverMessage;
   final Widget? myEmptyState;
@@ -87,7 +89,17 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: padding,
       itemCount: itemCount,
-      separatorBuilder: (_, __) => SizedBox(height: separatorHeight),
+      separatorBuilder: (context, _) {
+        if (useHairlineDividers) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Divider(
+            height: 1,
+            thickness: 1,
+            color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+          );
+        }
+        return SizedBox(height: separatorHeight);
+      },
       itemBuilder: (context, index) {
         if (index < leadingItemCount) {
           return leadingItemBuilder!(context);

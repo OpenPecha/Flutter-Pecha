@@ -1,7 +1,8 @@
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 
-enum ConnectFeedItemType { post, event }
+enum ConnectFeedItemType { post, event, practice }
 
 class ConnectFeedItem {
   final ConnectFeedItemType type;
@@ -13,6 +14,7 @@ class ConnectFeedItem {
   final String? groupAvatarUrl;
   final ConnectPost? post;
   final GroupEvent? event;
+  final GroupPractice? practice;
 
   const ConnectFeedItem({
     required this.type,
@@ -24,7 +26,48 @@ class ConnectFeedItem {
     this.groupAvatarUrl,
     this.post,
     this.event,
+    this.practice,
   });
+
+  factory ConnectFeedItem.fromPractice(GroupPractice practice) {
+    return ConnectFeedItem(
+      type: ConnectFeedItemType.practice,
+      feedAt: practice.practiceAt,
+      isJoined: practice.isJoined,
+      groupId: practice.groupId ?? '',
+      groupName: practice.groupName ?? '',
+      groupAvatarUrl: practice.groupAvatarUrl,
+      practice: practice,
+    );
+  }
+
+  DateTime? get sortDate {
+    return switch (type) {
+      ConnectFeedItemType.post =>
+        feedAt ??
+            post?.publishedAt ??
+            post?.createdAt,
+      ConnectFeedItemType.event => feedAt ?? event?.startDate,
+      ConnectFeedItemType.practice => feedAt ?? practice?.practiceAt,
+    };
+  }
+
+  String get dedupeKey => switch (type) {
+    ConnectFeedItemType.post => 'post:${post?.id}',
+    ConnectFeedItemType.event => 'event:${event?.id}',
+    ConnectFeedItemType.practice => 'practice:$_practiceId',
+  };
+
+  String get _practiceId {
+    final item = practice;
+    if (item == null) return '';
+    return switch (item.type) {
+      GroupPracticeType.series => item.series?.id ?? '',
+      GroupPracticeType.accumulator => item.accumulator?.id ?? '',
+      GroupPracticeType.collection => item.collection?.id ?? '',
+      GroupPracticeType.plan => item.plan?.id ?? '',
+    };
+  }
 
   ConnectFeedItem copyWithPost(ConnectPost updatedPost) {
     return ConnectFeedItem(
@@ -37,6 +80,7 @@ class ConnectFeedItem {
       groupAvatarUrl: groupAvatarUrl,
       post: updatedPost,
       event: event,
+      practice: practice,
     );
   }
 }
