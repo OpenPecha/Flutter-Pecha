@@ -133,15 +133,19 @@ class HomeShellScaffold extends ConsumerWidget {
         Theme.of(context).platform == TargetPlatform.android;
     final int selectedIndex = ref.watch(mainNavigationIndexProvider);
     final bool isHomeTab = selectedIndex == MainTab.home.index;
+    final bool isAtHomeRoute =
+        GoRouterState.of(context).uri.path == '/home';
     final bool routerCanPop = GoRouter.of(context).canPop();
     final bool shellCanPop =
         shellNavigatorKey.currentState?.canPop() ?? false;
     final bool hasRouteToPop = routerCanPop || shellCanPop;
 
-    // On Android: block exit when there are nested routes to pop OR when we are
-    // not yet on the Home tab. On iOS (and other platforms): never block — the
-    // platform handles back gestures natively.
-    final bool allowPop = !isAndroid || (!hasRouteToPop && isHomeTab);
+    // On Android: block exit until there is nothing to pop, the Home tab is
+    // selected, AND the location is actually /home. A sibling shell route
+    // (e.g. /about after go()) can have an empty stack while still showing a
+    // non-Home page. On iOS: never block — native swipe-back handles it.
+    final bool allowPop =
+        !isAndroid || (!hasRouteToPop && isHomeTab && isAtHomeRoute);
 
     final scaffold = Scaffold(
       body: child,
@@ -178,13 +182,18 @@ class HomeShellScaffold extends ConsumerWidget {
           shell.pop();
           return;
         }
-        // At a non-Home tab root: return to Home tab.
+        // Nothing left to pop. Return to the Home tab and /home so the
+        // highlighted tab matches the visible page (sibling shell routes
+        // like /about can replace /home via go() and leave an empty stack).
         if (ref.read(mainNavigationIndexProvider) != MainTab.home.index) {
           ref.read(mainNavigationIndexProvider.notifier).state =
               MainTab.home.index;
         }
-        // If already on Home tab with nothing to pop, allowPop is true so
-        // Android handles the exit automatically.
+        if (GoRouterState.of(context).uri.path != '/home') {
+          context.go('/home');
+        }
+        // If already on Home tab at /home, allowPop is true so Android
+        // finishes the Activity.
       },
       child: scaffold,
     );

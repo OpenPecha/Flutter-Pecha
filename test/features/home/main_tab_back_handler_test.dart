@@ -26,11 +26,14 @@ class _TestShellScaffold extends ConsumerWidget {
         Theme.of(context).platform == TargetPlatform.android;
     final int selectedIndex = ref.watch(mainNavigationIndexProvider);
     final bool isHomeTab = selectedIndex == MainTab.home.index;
+    final bool isAtHomeRoute =
+        GoRouterState.of(context).uri.path == '/home';
     final bool routerCanPop = GoRouter.of(context).canPop();
     final bool shellCanPop =
         shellNavigatorKey.currentState?.canPop() ?? false;
     final bool hasRouteToPop = routerCanPop || shellCanPop;
-    final bool allowPop = !isAndroid || (!hasRouteToPop && isHomeTab);
+    final bool allowPop =
+        !isAndroid || (!hasRouteToPop && isHomeTab && isAtHomeRoute);
 
     final scaffold = Scaffold(body: child);
 
@@ -52,6 +55,9 @@ class _TestShellScaffold extends ConsumerWidget {
         if (ref.read(mainNavigationIndexProvider) != MainTab.home.index) {
           ref.read(mainNavigationIndexProvider.notifier).state =
               MainTab.home.index;
+        }
+        if (GoRouterState.of(context).uri.path != '/home') {
+          context.go('/home');
         }
       },
       child: scaffold,
@@ -84,6 +90,11 @@ GoRouter _buildRouter({required GlobalKey<NavigatorState> shellKey}) {
                 builder: (_, __) => const Text('settings-page'),
               ),
             ],
+          ),
+          // Sibling of /home in the same shell — models /about, /legal, etc.
+          GoRoute(
+            path: '/about',
+            builder: (_, __) => const Text('about-page'),
           ),
         ],
       ),
@@ -239,6 +250,51 @@ void main() {
           container.read(mainNavigationIndexProvider),
           MainTab.home.index,
         );
+      },
+    );
+
+    testWidgets(
+      'go(/about) with Me tab: back restores /home AND Home tab',
+      (tester) async {
+        final container = await _pumpScaffold(
+          tester,
+          platform: TargetPlatform.android,
+          shellKey: shellKey,
+        );
+
+        container.read(mainNavigationIndexProvider.notifier).state =
+            MainTab.me.index;
+        final context = tester.element(find.byType(_TestShellScaffold));
+        GoRouter.of(context).go('/about');
+        await tester.pumpAndSettle();
+        expect(find.text('about-page'), findsOneWidget);
+
+        final handled = await _triggerSystemBack(tester);
+        expect(handled, isTrue);
+        expect(find.text('home-tab'), findsOneWidget);
+        expect(find.text('about-page'), findsNothing);
+        expect(container.read(mainNavigationIndexProvider), MainTab.home.index);
+      },
+    );
+
+    testWidgets(
+      'go(/about) with Home tab: back restores /home instead of exiting',
+      (tester) async {
+        await _pumpScaffold(
+          tester,
+          platform: TargetPlatform.android,
+          shellKey: shellKey,
+        );
+
+        final context = tester.element(find.byType(_TestShellScaffold));
+        GoRouter.of(context).go('/about');
+        await tester.pumpAndSettle();
+        expect(find.text('about-page'), findsOneWidget);
+
+        final handled = await _triggerSystemBack(tester);
+        expect(handled, isTrue);
+        expect(find.text('home-tab'), findsOneWidget);
+        expect(find.text('about-page'), findsNothing);
       },
     );
   });
