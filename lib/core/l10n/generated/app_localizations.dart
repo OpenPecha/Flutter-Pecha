@@ -1399,7 +1399,7 @@ abstract class AppLocalizations {
   /// No description provided for @connect_segment_my.
   ///
   /// In en, this message translates to:
-  /// **'My'**
+  /// **'For you'**
   String get connect_segment_my;
 
   /// No description provided for @connect_segment_discover.
@@ -2959,7 +2959,7 @@ abstract class AppLocalizations {
   /// No description provided for @about_connect_with_us.
   ///
   /// In en, this message translates to:
-  /// **'Connect with us'**
+  /// **'Connect with us...'**
   String get about_connect_with_us;
 
   /// No description provided for @about_description.
