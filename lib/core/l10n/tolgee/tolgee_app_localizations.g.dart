@@ -1509,14 +1509,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get connect_my_empty_practices_subtitle => TolgeeBridge.get(
-    localeName,
-    'connect_my_empty_practices_subtitle',
-    () => _fallback.connect_my_empty_practices_subtitle,
-  );
-
-
-  @override
   String get connect_my_empty_groups_subtitle => TolgeeBridge.get(
     localeName,
     'connect_my_empty_groups_subtitle',
