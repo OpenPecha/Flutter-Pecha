@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
@@ -9,8 +10,10 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 class GroupRecitationCollectionScreen extends ConsumerWidget {
   final String groupId;
@@ -63,6 +66,7 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
                         onOpenItem:
                             (item) =>
                                 _openReaderAndComplete(context, ref, key, item),
+                        onShare: () => _onShare(context, ref, collection),
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -109,6 +113,41 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
         context,
       ).showSnackBar(SnackBar(content: Text(context.l10n.somethingWrong)));
     }
+  }
+
+  Future<void> _onShare(
+    BuildContext context,
+    WidgetRef ref,
+    GroupRecitationCollection collection,
+  ) async {
+    final groupName = _resolveGroupName(ref, collection.groupId);
+    final shareMessage =
+        groupName == null
+            ? 'Check out the recitation collection "${collection.name}" on WeBuddhist. Join us in practice!'
+            : 'Check out "${collection.name}", a recitation collection by $groupName on WeBuddhist. Join us in practice!';
+    final shareUrl =
+        DeepLinkUrlBuilder.groupRecitationCollectionLink(
+          groupId: collection.groupId,
+          collectionId: collection.id,
+        ).toString();
+    final sharePositionOrigin = getSharePositionOrigin(context: context);
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: '$shareMessage\n\n$shareUrl',
+        sharePositionOrigin: sharePositionOrigin,
+      ),
+    );
+  }
+
+  /// Resolves the group name from the cached group profile if available.
+  String? _resolveGroupName(WidgetRef ref, String groupId) {
+    return ref
+        .read(groupProfileProvider(groupId))
+        .whenOrNull(
+          data:
+              (either) => either.fold((_) => null, (profile) => profile.title),
+        );
   }
 }
 
@@ -157,12 +196,14 @@ class _CollectionContent extends StatelessWidget {
     required this.completionState,
     required this.isDark,
     required this.onOpenItem,
+    required this.onShare,
   });
 
   final GroupRecitationCollection collection;
   final GroupRecitationCollectionCompletionState completionState;
   final bool isDark;
   final ValueChanged<GroupRecitationCollectionItem> onOpenItem;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +219,7 @@ class _CollectionContent extends StatelessWidget {
               children: [
                 _CollectionHero(imageUrl: collection.imageUrl, isDark: isDark),
                 const SizedBox(height: 14),
-                _PlaceholderActionBar(isDark: isDark),
+                _PlaceholderActionBar(isDark: isDark, onShare: onShare),
                 const SizedBox(height: 12),
                 if (hasItems)
                   ...collection.items.map(
@@ -286,32 +327,42 @@ class _CollectionHero extends StatelessWidget {
 }
 
 class _PlaceholderActionBar extends StatelessWidget {
-  const _PlaceholderActionBar({required this.isDark});
+  const _PlaceholderActionBar({
+    required this.isDark,
+    required this.onShare,
+  });
 
   final bool isDark;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) {
-    final actions = [
-      // (AppAssets.language, context.l10n.language),
-      // (AppAssets.speakerSimpleHigh, 'Audio'),
-      (AppAssets.plus, 'Practice'),
-      (AppAssets.bookmarkSimple, context.l10n.bookmark),
-      (AppAssets.readerShare, context.l10n.share),
-    ];
-
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          for (final action in actions) ...[
-            _PlaceholderActionChip(
-              icon: action.$1,
-              label: action.$2,
-              isDark: isDark,
-            ),
-            const SizedBox(width: 8),
-          ],
+          // Practice chip (placeholder)
+          _PlaceholderActionChip(
+            icon: AppAssets.plus,
+            label: 'Practice',
+            isDark: isDark,
+          ),
+          const SizedBox(width: 8),
+          // Bookmark chip (placeholder)
+          _PlaceholderActionChip(
+            icon: AppAssets.bookmarkSimple,
+            label: context.l10n.bookmark,
+            isDark: isDark,
+          ),
+          const SizedBox(width: 8),
+          // Share chip (functional)
+          _PlaceholderActionChip(
+            icon: AppAssets.readerShare,
+            label: context.l10n.share,
+            isDark: isDark,
+            onTap: onShare,
+          ),
+          const SizedBox(width: 8),
         ],
       ),
     );
@@ -323,31 +374,37 @@ class _PlaceholderActionChip extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.isDark,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool isDark;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
     );
   }

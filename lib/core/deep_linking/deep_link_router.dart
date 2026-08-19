@@ -192,6 +192,19 @@ class DeepLinkRouter {
       );
     }
 
+    if (segments.length >= 5 &&
+        segments[0] == 'open' &&
+        segments[1] == 'group' &&
+        segments[3] == 'recitation-collections') {
+      final groupId = segments[2];
+      final collectionId = segments[4];
+      return _DeepLinkDestination(
+        '/home/group/${Uri.encodeComponent(groupId)}/recitation-collections/${Uri.encodeComponent(collectionId)}',
+        parentLocation: '/home/group/${Uri.encodeComponent(groupId)}',
+        opensOnTop: true,
+      );
+    }
+
     if (segments.length >= 3 &&
         segments[0] == 'open' &&
         segments[1] == 'group') {
