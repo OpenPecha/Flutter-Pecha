@@ -293,8 +293,8 @@ class _PlaceholderActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actions = [
-      (AppAssets.language, context.l10n.language),
-      (AppAssets.speakerSimpleHigh, 'Audio'),
+      // (AppAssets.language, context.l10n.language),
+      // (AppAssets.speakerSimpleHigh, 'Audio'),
       (AppAssets.plus, 'Practice'),
       (AppAssets.bookmarkSimple, context.l10n.bookmark),
       (AppAssets.readerShare, context.l10n.share),
