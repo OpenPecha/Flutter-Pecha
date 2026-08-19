@@ -10,7 +10,7 @@ import 'package:flutter_pecha/core/widgets/destructive_confirmation_dialog.dart'
 import 'package:flutter_pecha/features/practice/presentation/widgets/practice_chant_list_tile.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/routine_item_card.dart';
 
-class RoutineTimeBlock extends StatelessWidget {
+class RoutineTimeBlock extends StatefulWidget {
   final TimeOfDay time;
   final bool notificationEnabled;
   final List<RoutineItem> items;
@@ -34,17 +34,24 @@ class RoutineTimeBlock extends StatelessWidget {
     required this.onDeleteItem,
   });
 
+  @override
+  State<RoutineTimeBlock> createState() => _RoutineTimeBlockState();
+}
+
+class _RoutineTimeBlockState extends State<RoutineTimeBlock> {
+  bool _expanded = true;
+
   Future<void> _confirmDeleteItem(BuildContext context, int index) async {
     final l10n = context.l10n;
     final confirmed = await showDestructiveConfirmationDialog(
       context,
       title: l10n.removeItem,
       message: l10n.removeConfirmation(
-        routineItemDisplayTitle(items[index], l10n),
+        routineItemDisplayTitle(widget.items[index], l10n),
       ),
     );
     if (confirmed == true) {
-      onDeleteItem(index);
+      widget.onDeleteItem(index);
     }
   }
 
@@ -56,105 +63,153 @@ class RoutineTimeBlock extends StatelessWidget {
       message: localizations.routine_delete_block_message,
     );
     if (confirmed == true) {
-      await onDelete();
+      await widget.onDelete();
     }
+  }
+
+  void _toggleExpanded() {
+    if (widget.items.isEmpty) return;
+    setState(() => _expanded = !_expanded);
   }
 
   @override
   Widget build(BuildContext context) {
     final localizations = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasItems = widget.items.isNotEmpty;
+    final showList = _expanded && hasItems;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Time selector row
+        // Time selector row — expand control is separate so time picker
+        // / notification / delete taps are not stolen.
         Row(
           children: [
             _TimeSelector(
-              time: time,
-              onTap: onTimeChanged,
+              time: widget.time,
+              onTap: widget.onTimeChanged,
               isDark: isDark,
-              formattedTime: formatRoutineTime(time),
+              formattedTime: formatRoutineTime(widget.time),
             ),
             const SizedBox(width: 4),
             _NotificationIcon(
-              enabled: notificationEnabled,
-              onTap: onNotificationToggle,
+              enabled: widget.notificationEnabled,
+              onTap: widget.onNotificationToggle,
               isDark: isDark,
             ),
-            const Spacer(),
-            _DeleteBlockButton(
-              onTap: () => _confirmDeleteBlock(context),
-              label: localizations.routine_delete_block,
+            if (hasItems) ...[
+              const SizedBox(width: 4),
+              IconButton(
+                onPressed: _toggleExpanded,
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: Icon(
+                  _expanded ? AppAssets.caretUp : AppAssets.caretDown,
+                  size: 18,
+                  color:
+                      isDark
+                          ? AppColors.textTertiaryDark
+                          : AppColors.textSecondary,
+                ),
+              ),
+            ],
+            const SizedBox(width: 8),
+            Flexible(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _DeleteBlockButton(
+                  onTap: () => _confirmDeleteBlock(context),
+                  label: localizations.routine_delete_block,
+                ),
+              ),
             ),
           ],
         ),
-        // Items list (above action buttons)
-        if (items.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          ReorderableListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            buildDefaultDragHandles: false,
-            itemCount: items.length,
-            onReorder: onReorderItems,
-            proxyDecorator: (child, index, animation) {
-              return Material(
-                elevation: 2,
-                borderRadius: BorderRadius.circular(12),
-                child: child,
-              );
-            },
-            itemBuilder: (context, i) {
-              final item = items[i];
-              return Padding(
-                key: ValueKey(item.id),
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Minus button — outside the card
-                    GestureDetector(
-                      onTap: () => _confirmDeleteItem(context, i),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.surfaceVariantDark
-                              : AppColors.grey100,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Icon(
-                            AppAssets.minus,
-                            size: 14,
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimary,
-                          ),
-                        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child:
+              showList
+                  ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 8),
+                      ReorderableListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        buildDefaultDragHandles: false,
+                        itemCount: widget.items.length,
+                        onReorder: widget.onReorderItems,
+                        proxyDecorator: (child, index, animation) {
+                          return Material(
+                            elevation: 2,
+                            borderRadius: BorderRadius.circular(12),
+                            child: child,
+                          );
+                        },
+                        itemBuilder: (context, i) {
+                          final item = widget.items[i];
+                          return Padding(
+                            key: ValueKey(item.id),
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => _confirmDeleteItem(context, i),
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isDark
+                                              ? AppColors.surfaceVariantDark
+                                              : AppColors.grey100,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        AppAssets.minus,
+                                        size: 14,
+                                        color:
+                                            isDark
+                                                ? AppColors.textPrimaryDark
+                                                : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _buildItemTile(
+                                    context,
+                                    item,
+                                    i,
+                                    isDark,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                    Expanded(
-                      child: _buildItemTile(context, item, i, isDark),
-                    ),
-                  ],
-                ),
-              );
-            },
+                    ],
+                  )
+                  : const SizedBox.shrink(),
+        ),
+        if (_expanded || !hasItems) ...[
+          const SizedBox(height: 12),
+          _AddSessionButton(
+            label: localizations.routine_add_session,
+            onTap: widget.onAddSession,
+            isDark: isDark,
           ),
         ],
-        // Add Session button (below items)
-        const SizedBox(height: 12),
-        _AddSessionButton(
-          label: localizations.routine_add_session,
-          onTap: onAddSession,
-          isDark: isDark,
-        ),
       ],
     );
   }
@@ -172,8 +227,7 @@ class RoutineTimeBlock extends StatelessWidget {
         child: Icon(
           AppAssets.list,
           size: 22,
-          color:
-              isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
+          color: isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
         ),
       ),
     );
@@ -189,9 +243,10 @@ class RoutineTimeBlock extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.cardBackgroundDark
-            : AppColors.cardBackgroundLight,
+        color:
+            isDark
+                ? AppColors.cardBackgroundDark
+                : AppColors.cardBackgroundLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -311,6 +366,9 @@ class _DeleteBlockButton extends StatelessWidget {
       onTap: onTap,
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.end,
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,

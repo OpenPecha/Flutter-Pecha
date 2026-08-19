@@ -88,12 +88,19 @@ class _WeekDayColumn extends StatelessWidget {
 
     return Column(
       children: [
-        Text(
-          _weekdayLabel(dayIndex),
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.center,
+          child: Text(
+            _weekdayLabel(dayIndex),
+            maxLines: 1,
+            softWrap: false,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 8),

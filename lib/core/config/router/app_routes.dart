@@ -83,6 +83,10 @@ class AppRoutes {
     home,
     more,
     settings, // Guests can access settings (theme, language, notifications)
+    about, // Linked from Settings; informational, no auth needed
+    legal, // Linked from Settings; terms + privacy live as sibling routes
+    termsOfService,
+    privacyPolicy,
     texts,
     practice, // Guests can see empty practice screen
     practiceMyPractices, // Guests can browse my practices empty state
