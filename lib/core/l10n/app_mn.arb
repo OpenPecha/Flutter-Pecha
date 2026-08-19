@@ -796,6 +796,8 @@
   "group_and_more_links": "болон дахиад {count} холбоос",
   "group_practice_with_us": "Бидэнтэй хамт дадлага хий",
   "series_practicing_with_group": "{groupName}-тай хамт дадлага хийж байна",
+  "group_change_practice_title": "Change group practice",
+  "group_change_practice_message": "You are already practicing this plan with another group. Would you like to change your practice group?",
   "group_join_to_contribute": "Хувь нэмэр оруулахын тулд нэгдэх",
   "group_accumulator_join_error": "Хуримтлалд нэгдэх боломжгүй байна. Дахин оролдоно уу.",
   "group_accumulator_participants": "{count} оролцогч",

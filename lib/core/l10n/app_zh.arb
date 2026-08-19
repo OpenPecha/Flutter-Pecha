@@ -730,6 +730,8 @@
   "group_and_more_links": "及另外 {count} 個連結",
   "group_practice_with_us": "與我們一起修行",
   "series_practicing_with_group": "與 {groupName} 一起修行",
+  "group_change_practice_title": "Change group practice",
+  "group_change_practice_message": "You are already practicing this plan with another group. Would you like to change your practice group?",
   "group_join_to_contribute": "加入以貢獻",
   "group_accumulator_join_error": "無法加入累積，請再試一次。",
   "group_accumulator_participants": "{count} 位參與者",

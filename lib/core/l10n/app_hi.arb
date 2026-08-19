@@ -796,6 +796,8 @@
   "group_and_more_links": "और {count} और लिंक",
   "group_practice_with_us": "हमारे साथ अभ्यास करें",
   "series_practicing_with_group": "{groupName} के साथ अभ्यास",
+  "group_change_practice_title": "Change group practice",
+  "group_change_practice_message": "You are already practicing this plan with another group. Would you like to change your practice group?",
   "group_join_to_contribute": "योगदान के लिए शामिल हों",
   "group_accumulator_join_error": "संचय में शामिल होने में असमर्थ। कृपया पुनः प्रयास करें।",
   "group_accumulator_participants": "{count} प्रतिभागी",
