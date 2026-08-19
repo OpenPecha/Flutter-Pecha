@@ -47,17 +47,17 @@ class _GroupEventsContent extends StatelessWidget {
     final dividerColor = isDark ? AppColors.cardBorderDark : AppColors.grey100;
     final sectionContentGap = isTibetan ? 16.0 : 12.0;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        GroupEventsSection._horizontalPadding,
-        0,
-        GroupEventsSection._horizontalPadding,
-        16,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            GroupEventsSection._horizontalPadding,
+            0,
+            GroupEventsSection._horizontalPadding,
+            0,
+          ),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
@@ -97,14 +97,15 @@ class _GroupEventsContent extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: sectionContentGap),
-          for (var i = 0; i < events.length; i++) ...[
-            ConnectEventCard(event: events[i]),
-            if (i < events.length - 1)
-              Divider(height: 1, thickness: 1, color: dividerColor),
-          ],
+        ),
+        SizedBox(height: sectionContentGap),
+        for (var i = 0; i < events.length; i++) ...[
+          ConnectEventCard(event: events[i]),
+          if (i < events.length - 1)
+            Divider(height: 1, thickness: 1, color: dividerColor),
         ],
-      ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

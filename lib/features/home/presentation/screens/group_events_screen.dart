@@ -6,7 +6,6 @@ import 'package:flutter_pecha/features/connect/presentation/providers/connect_ev
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_filter_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_segmented_control.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,16 +17,23 @@ class GroupEventsScreen extends ConsumerStatefulWidget {
   ConsumerState<GroupEventsScreen> createState() => _GroupEventsScreenState();
 }
 
-class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen> {
+class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen>
+    with SingleTickerProviderStateMixin {
   static const _paginationThreshold = 200.0;
 
-  int _selectedFilterIndex = 0;
-  final ScrollController _scrollController = ScrollController();
+  late TabController _tabController;
+  late final List<ScrollController> _scrollControllers;
+  late final List<VoidCallback> _scrollListeners;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _tabController = TabController(length: 3, vsync: this);
+    _scrollControllers = List.generate(3, (_) => ScrollController());
+    _scrollListeners = List.generate(3, (index) => () => _onScroll(index));
+    for (var i = 0; i < _scrollControllers.length; i++) {
+      _scrollControllers[i].addListener(_scrollListeners[i]);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(myConnectEventsProvider.notifier).ensureLoaded();
     });
@@ -35,41 +41,29 @@ class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen> {
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    for (var i = 0; i < _scrollControllers.length; i++) {
+      _scrollControllers[i].removeListener(_scrollListeners[i]);
+      _scrollControllers[i].dispose();
+    }
+    _tabController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    if (_scrollController.position.pixels <
-        _scrollController.position.maxScrollExtent - _paginationThreshold) {
+  void _onScroll(int tabIndex) {
+    final controller = _scrollControllers[tabIndex];
+    if (!controller.hasClients) return;
+    if (controller.position.pixels <
+        controller.position.maxScrollExtent - _paginationThreshold) {
       return;
     }
     ref.read(myConnectEventsProvider.notifier).loadMore();
   }
 
-  ConnectEventLocationFilter get _selectedFilter =>
-      ConnectEventLocationFilter.values[_selectedFilterIndex];
-
-  String? _emptyMessage(BuildContext context) {
-    final l10n = context.l10n;
-    return switch (_selectedFilter) {
-      ConnectEventLocationFilter.all => null,
-      ConnectEventLocationFilter.online => l10n.connect_events_filter_empty_online,
-      ConnectEventLocationFilter.inPerson =>
-        l10n.connect_events_filter_empty_in_person,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final state = ref.watch(myConnectEventsProvider);
-    final filteredEvents = filterGroupEventsByLocation(
-      state.events,
-      _selectedFilter,
-    );
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -83,44 +77,115 @@ class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
-            child: ConnectSegmentedControl(
-              segments: [
-                l10n.connect_events_filter_all,
-                l10n.connect_online,
-                l10n.connect_events_filter_in_person,
-              ],
-              selectedIndex: _selectedFilterIndex,
-              onChanged: (index) {
-                if (_selectedFilterIndex == index) return;
-                setState(() => _selectedFilterIndex = index);
-              },
-            ),
-          ),
+          _GroupEventsTabBar(controller: _tabController, isDark: isDark),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
-              child: ConnectPaginatedListView<GroupEvent>(
-                items: filteredEvents,
-                isLoading: state.isLoading,
-                isLoadingMore: state.isLoadingMore,
-                error: state.error,
-                hasMore: state.hasMore,
-                hasLoaded: state.hasLoaded,
-                scrollController: _scrollController,
-                onRetry: () => ref.read(myConnectEventsProvider.notifier).retry(),
-                emptyDiscoverMessage: _emptyMessage(context),
-                myEmptyState:
-                    _selectedFilter == ConnectEventLocationFilter.all
-                        ? _GroupEventsEmptyState()
-                        : null,
-                itemBuilder:
-                    (context, index) =>
-                        ConnectEventCard(event: filteredEvents[index]),
-              ),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                for (
+                  var i = 0;
+                  i < ConnectEventLocationFilter.values.length;
+                  i++
+                )
+                  _GroupEventsTabContent(
+                    filter: ConnectEventLocationFilter.values[i],
+                    scrollController: _scrollControllers[i],
+                  ),
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GroupEventsTabContent extends ConsumerWidget {
+  const _GroupEventsTabContent({
+    required this.filter,
+    required this.scrollController,
+  });
+
+  final ConnectEventLocationFilter filter;
+  final ScrollController scrollController;
+
+  String? _emptyMessage(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (filter) {
+      ConnectEventLocationFilter.all => null,
+      ConnectEventLocationFilter.online =>
+        l10n.connect_events_filter_empty_online,
+      ConnectEventLocationFilter.inPerson =>
+        l10n.connect_events_filter_empty_in_person,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(myConnectEventsProvider);
+    final filteredEvents = filterGroupEventsByLocation(state.events, filter);
+
+    return RefreshIndicator(
+      onRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
+      child: ConnectPaginatedListView<GroupEvent>(
+        items: filteredEvents,
+        isLoading: state.isLoading,
+        isLoadingMore: state.isLoadingMore,
+        error: state.error,
+        hasMore: state.hasMore,
+        hasLoaded: state.hasLoaded,
+        scrollController: scrollController,
+        onRetry: () => ref.read(myConnectEventsProvider.notifier).retry(),
+        emptyDiscoverMessage: _emptyMessage(context),
+        myEmptyState:
+            filter == ConnectEventLocationFilter.all
+                ? _GroupEventsEmptyState()
+                : null,
+        itemBuilder:
+            (context, index) => ConnectEventCard(event: filteredEvents[index]),
+      ),
+    );
+  }
+}
+
+class _GroupEventsTabBar extends StatelessWidget {
+  const _GroupEventsTabBar({required this.controller, required this.isDark});
+
+  final TabController controller;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final labelColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final unselectedColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: dividerColor)),
+      ),
+      child: TabBar(
+        controller: controller,
+        tabAlignment: TabAlignment.fill,
+        labelColor: labelColor,
+        unselectedLabelColor: unselectedColor,
+        indicatorColor: labelColor,
+        indicatorWeight: 2,
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: Colors.transparent,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+        labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+        tabs: [
+          Tab(text: l10n.connect_events_filter_all),
+          Tab(text: l10n.connect_online),
+          Tab(text: l10n.connect_events_filter_in_person),
         ],
       ),
     );
@@ -157,11 +222,7 @@ class _GroupEventsEmptyState extends StatelessWidget {
           Text(
             l10n.connect_my_empty_events_subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              color: subtitleColor,
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: 15, color: subtitleColor, height: 1.5),
           ),
         ],
       ),
