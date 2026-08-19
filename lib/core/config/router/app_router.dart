@@ -223,8 +223,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   final groupType = extra?['groupType'] as GroupType?;
                   final isGroupEnrolled =
                       extra?['isGroupEnrolled'] as bool? ?? false;
+                  final series = extra?['series'] as Series?;
                   return SeriesDetailScreen(
                     seriesId: id,
+                    initialSeries: series,
                     groupId: groupId,
                     groupType: groupType,
                     isGroupEnrolled: isGroupEnrolled,

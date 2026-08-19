@@ -234,7 +234,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _navigateToSeries(Series series) {
-    context.pushNamed('home-series-detail', pathParameters: {'id': series.id});
+    context.pushNamed(
+      'home-series-detail',
+      pathParameters: {'id': series.id},
+      extra: {'series': series},
+    );
   }
 
   @override

@@ -239,9 +239,6 @@ class FeaturedPlanCard extends ConsumerWidget {
                 aspectRatio: 16 / 9,
                 child: _PlanCoverImage(
                   image: displayImage,
-                  placeholderIconSize: 48,
-                  placeholderAlphaMin: 0.4,
-                  placeholderAlphaMax: 0.7,
                 ),
               ),
             ),
@@ -519,8 +516,6 @@ class PlanListItem extends ConsumerWidget {
                 child: _PlanCoverImage(
                   image: plan.coverImage,
                   placeholderIconSize: 24,
-                  placeholderAlphaMin: 0.3,
-                  placeholderAlphaMax: 0.5,
                 ),
               ),
               const SizedBox(width: 12),
@@ -711,14 +706,10 @@ _EnrolledPlanInfo? _getEnrolledInfoFromMyPlans(WidgetRef ref, String planId) {
 class _PlanCoverImage extends StatelessWidget {
   final ResponsiveImage? image;
   final double placeholderIconSize;
-  final double placeholderAlphaMin;
-  final double placeholderAlphaMax;
 
   const _PlanCoverImage({
     required this.image,
-    required this.placeholderIconSize,
-    required this.placeholderAlphaMin,
-    required this.placeholderAlphaMax,
+    this.placeholderIconSize = 48,
   });
 
   @override
@@ -732,26 +723,26 @@ class _PlanCoverImage extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? AppColors.surfaceDark : AppColors.greyLight;
+    final highlightColor = isDark ? AppColors.grey900 : AppColors.grey300;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: placeholderAlphaMin),
-            Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: placeholderAlphaMax),
-          ],
+          colors: [baseColor, highlightColor],
         ),
       ),
       child: Center(
         child: Icon(
           Icons.image_outlined,
           size: placeholderIconSize,
-          color: Colors.white.withValues(alpha: 0.5),
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: 0.35)
+                  : AppColors.grey800.withValues(alpha: 0.4),
         ),
       ),
     );
