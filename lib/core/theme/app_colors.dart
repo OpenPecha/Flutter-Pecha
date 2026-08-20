@@ -86,6 +86,10 @@ class AppColors {
   static const Color blueDark = Color(0xFF8CB5F8); // Dark mode
   static const Color brandblue = Color(0xFF3382FD);
 
+  /// My Practices card and filled action button — dark card with a subtle blue tint.
+  static final Color myPracticesBackground =
+      Color.lerp(cardDark, blue, 0.18)!;
+
   // ============ Semantic Colors (for compatibility) ============
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color error = Color(0xFFD32F2F);
