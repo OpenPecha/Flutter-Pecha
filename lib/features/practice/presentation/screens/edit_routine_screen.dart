@@ -11,8 +11,6 @@ import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/notifications/data/services/notification_service.dart';
-import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
-import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
 import 'package:flutter_pecha/features/home/domain/usecases/get_series_by_id_usecase.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
@@ -184,19 +182,11 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
 
   void _injectInitialPlan(Plan plan) {
     final alreadyExists = _blocks.any(
-      (b) => b.items.any(
-        (item) => item.id == plan.id && item.type == RoutineItemType.series,
-      ),
+      (b) => b.items.any((item) => item.representsStandalonePlan(plan.id)),
     );
     if (alreadyExists) return;
 
-    final newItem = RoutineItem(
-      id: plan.id,
-      title: plan.title,
-      coverImage: plan.coverImage,
-      type: RoutineItemType.series,
-      enrolledAt: DateTime.now(),
-    );
+    final newItem = _routineItemFromPlan(plan);
 
     final resolved = _resolveInjectionTarget();
     resolved.target.items.add(newItem);
@@ -277,9 +267,11 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
   void _syncInjectedPlan(Plan plan) {
     for (final block in _blocks) {
       if (block.items.any(
-        (i) => i.id == plan.id && i.type == RoutineItemType.series,
+        (i) => i.representsStandalonePlan(plan.id),
       )) {
-        _syncBlock(block).catchError((e) {
+        _syncBlock(block).then((_) {
+          if (mounted) _refreshPracticeEnrollments();
+        }).catchError((e) {
           if (mounted) _showErrorSnackBar(_mapError(e));
         });
         break;
@@ -308,7 +300,9 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
       (series) {
         final injectedBlock = _injectSeries(series);
         if (injectedBlock != null) {
-          _syncBlock(injectedBlock).catchError((e) {
+          _syncBlock(injectedBlock).then((_) {
+            if (mounted) _refreshPracticeEnrollments();
+          }).catchError((e) {
             if (mounted) _showErrorSnackBar(_mapError(e));
           });
         }
@@ -1114,7 +1108,7 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
         case RecitationSessionSelection(:final recitation):
           await _addRecitationToBlock(blockIndex, recitation);
         case SeriesSessionSelection(:final series):
-          await _handleSeriesEnrollmentFromSelection(blockIndex, series);
+          await _addSeriesToBlock(blockIndex, series);
         case TimerSessionSelection(:final timer):
           await _addTimerToBlock(blockIndex, timer);
         case MantraSessionSelection(:final mantra):
@@ -1125,9 +1119,17 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
     }
   }
 
+  RoutineItem _routineItemFromPlan(Plan plan) => RoutineItem(
+    id: plan.id,
+    title: plan.title,
+    coverImage: plan.coverImage,
+    type: RoutineItemType.plan,
+    enrolledAt: DateTime.now(),
+  );
+
   Future<void> _addPlanToBlock(int blockIndex, Plan plan) async {
     final isDuplicate = _blocks[blockIndex].items.any(
-      (item) => item.id == plan.id && item.type == RoutineItemType.series,
+      (item) => item.representsStandalonePlan(plan.id),
     );
     if (isDuplicate) {
       _logger.warning('Duplicate item prevented: ${plan.id}');
@@ -1142,18 +1144,13 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
       return;
     }
 
-    final newItem = RoutineItem(
-      id: plan.id,
-      title: plan.title,
-      coverImage: plan.coverImage,
-      type: RoutineItemType.series,
-      enrolledAt: DateTime.now(),
-    );
+    final newItem = _routineItemFromPlan(plan);
     final block = _blocks[blockIndex];
     setState(() => block.items.add(newItem));
 
     try {
       await _syncBlock(block);
+      _refreshPracticeEnrollments();
     } catch (e) {
       if (mounted) {
         setState(() => block.items.remove(newItem));
@@ -1261,44 +1258,12 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
     }
   }
 
-  /// Enrolls the user in [series] (if not already enrolled) and adds the
-  /// series to the tapped [blockIndex].
-  ///
-  /// Per-timeblock rule: if that block already contains the series, nothing is
-  /// added and the user sees a duplicate notice. The same series can still be
-  /// added to other blocks.
-  Future<void> _handleSeriesEnrollmentFromSelection(
-    int blockIndex,
-    Series series,
-  ) async {
-    final auth = ref.read(authProvider);
-    if (auth.isGuest) {
-      if (mounted) LoginDrawer.show(context, ref);
-      return;
-    }
-
-    final seriesId = series.id;
-    final enrollments = await ref.read(userSeriesEnrollmentsProvider.future);
-    if (!mounted) return;
-    final alreadyEnrolled = enrollments.contains(seriesId);
-
-    if (!alreadyEnrolled) {
-      final notifier = ref.read(seriesEnrollmentProvider(seriesId).notifier);
-      final ok = await notifier.enroll();
-      if (!mounted) return;
-
-      if (!ok) {
-        final state = ref.read(seriesEnrollmentProvider(seriesId));
-        final message =
-            state is SeriesEnrollmentFailure
-                ? state.failure.message
-                : AppLocalizations.of(context)!.series_enroll_error;
-        _showErrorSnackBar(message);
-        return;
-      }
-    }
-
-    await _addSeriesToBlock(blockIndex, series);
+  /// Adding a PLAN or SERIES session enrolls the user server-side, so the
+  /// client only needs to refresh enrolled-plan / series caches after sync.
+  void _refreshPracticeEnrollments() {
+    ref.read(myPlansPaginatedProvider.notifier).refresh();
+    ref.invalidate(userSeriesEnrollmentsProvider);
+    ref.invalidate(routineInfoFutureProvider);
   }
 
   Future<void> _addSeriesToBlock(int blockIndex, Series series) async {
@@ -1331,6 +1296,7 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
 
     try {
       await _syncBlock(block);
+      _refreshPracticeEnrollments();
     } catch (e) {
       if (mounted) {
         setState(() => block.items.remove(newItem));
@@ -1408,12 +1374,7 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
             if (injectedSeriesBlock != null) {
               _syncBlock(injectedSeriesBlock!)
                   .then((_) {
-                    // Adding the SERIES session enrolls the user in its plans
-                    // server-side; refresh so "My Plans" reflects them even if
-                    // the user backs out without saving.
-                    if (mounted) {
-                      ref.read(myPlansPaginatedProvider.notifier).refresh();
-                    }
+                    if (mounted) _refreshPracticeEnrollments();
                   })
                   .catchError((e) {
                     if (mounted) _showErrorSnackBar(_mapError(e));

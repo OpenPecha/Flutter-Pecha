@@ -69,7 +69,7 @@ class PushMessageNavigator {
         _ref.read(pendingNotificationNavProvider.notifier).state =
             NotificationNav(
               itemId: sourceId,
-              itemType: RoutineItemType.series.name,
+              itemType: RoutineItemType.plan.name,
               planId: sourceId,
             );
         _ref.read(mainNavigationIndexProvider.notifier).state =

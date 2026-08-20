@@ -340,6 +340,13 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
     switch (item.type) {
       case RoutineItemType.recitation:
         _navigateToReader(context, item.id);
+      case RoutineItemType.plan:
+        await _navigateToPlanDetails(
+          context,
+          ref,
+          item,
+          planId: item.currentPlanId ?? item.id,
+        );
       case RoutineItemType.series:
         if (!context.mounted) return;
         context.pushNamed(
@@ -542,7 +549,7 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
           imageSize: 56,
           onTap: () => _onItemTap(context, ref, item),
           onPlanTap:
-              item.currentPlanId != null
+              item.type == RoutineItemType.series && item.currentPlanId != null
                   ? () => _onPlanArrowTap(context, ref, item)
                   : null,
         ),

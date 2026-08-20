@@ -303,7 +303,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
             ref.read(pendingNotificationNavProvider.notifier).state =
                 NotificationNav(
                   itemId: planId,
-                  itemType: RoutineItemType.series.name,
+                  itemType: RoutineItemType.plan.name,
                   planId: planId,
                   dayNumber: dayNumber,
                   planLanguage: planLanguage,

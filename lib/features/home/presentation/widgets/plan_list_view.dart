@@ -19,7 +19,6 @@ import 'package:flutter_pecha/features/plans/domain/entities/plan.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/user_plans_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_track/enrolled_plan_status_indicator.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_track/plan_date_range_label.dart';
-import 'package:flutter_pecha/features/practice/data/models/routine_model.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/routine_api_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/routine_item_chip.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -679,7 +678,7 @@ bool _isPlanEnrolledFromMyData(WidgetRef ref, String planId) {
   if (routineData == null) return false;
   return routineData.blocks.any(
     (block) => block.items.any(
-      (item) => item.id == planId && item.type == RoutineItemType.series,
+      (item) => item.representsStandalonePlan(planId),
     ),
   );
 }

@@ -26,6 +26,7 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
     title: s.title,
     coverImage: s.coverImage,
     type: switch (s.sessionType) {
+      SessionType.plan => RoutineItemType.plan,
       SessionType.series => RoutineItemType.series,
       SessionType.recitation => RoutineItemType.recitation,
       SessionType.timer => RoutineItemType.timer,
@@ -34,7 +35,10 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
     enrolledAt: s.startedAt,
     language: s.language,
     startDate: s.startDate,
-    currentPlanId: s.currentPlanId,
+    currentPlanId:
+        s.sessionType == SessionType.plan
+            ? (s.currentPlanId ?? s.sourceId)
+            : s.currentPlanId,
     currentPlanTitle: s.currentPlanTitle,
     durationMs: s.durationMs,
     firstSegment: s.firstSegment,
@@ -51,6 +55,7 @@ List<SessionRequest> _sessionsForBlock(RoutineBlock block) {
     sessions.add(
       SessionRequest(
         sessionType: switch (item.type) {
+          RoutineItemType.plan => SessionType.plan,
           RoutineItemType.series => SessionType.series,
           RoutineItemType.recitation => SessionType.recitation,
           RoutineItemType.timer => SessionType.timer,

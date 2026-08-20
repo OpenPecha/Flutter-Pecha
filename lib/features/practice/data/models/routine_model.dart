@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
 
-enum RoutineItemType { series, recitation, timer, accumulator }
+enum RoutineItemType { plan, series, recitation, timer, accumulator }
 
 class RoutineItem {
   final String id;
@@ -41,6 +41,15 @@ class RoutineItem {
 
   /// Smallest cover URL — legacy persistence and notifications.
   String? get imageUrl => coverImage?.displayUrl;
+
+  /// True when this session is the standalone plan [planId].
+  ///
+  /// Older payloads stored a plan as [RoutineItemType.series] with the plan
+  /// id; those still match so duplicate-detection stays correct until refresh.
+  bool representsStandalonePlan(String planId) {
+    if (id != planId) return false;
+    return type == RoutineItemType.plan || type == RoutineItemType.series;
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -116,7 +125,7 @@ class RoutineItem {
   static RoutineItemType _parseRoutineItemType(dynamic value) {
     if (value is! String) return RoutineItemType.series;
     return switch (value) {
-      'plan' => RoutineItemType.series,
+      'plan' => RoutineItemType.plan,
       'series' => RoutineItemType.series,
       'recitation' => RoutineItemType.recitation,
       'timer' => RoutineItemType.timer,
