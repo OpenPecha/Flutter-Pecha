@@ -233,7 +233,6 @@ final groupRecitationCollectionDetailProvider = FutureProvider.autoDispose
       ref.watch(authProvider);
       final repository = ref.watch(groupProfileRepositoryProvider);
       return repository.getRecitationCollectionDetail(
-        groupId: key.groupId,
         collectionId: key.collectionId,
       );
     });

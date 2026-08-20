@@ -118,13 +118,9 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
 
   @override
   Future<Either<Failure, GroupRecitationCollection>>
-  getRecitationCollectionDetail({
-    required String groupId,
-    required String collectionId,
-  }) async {
+  getRecitationCollectionDetail({required String collectionId}) async {
     try {
       final model = await remote.fetchRecitationCollectionDetail(
-        groupId: groupId,
         collectionId: collectionId,
       );
       return Right(model.toEntity());

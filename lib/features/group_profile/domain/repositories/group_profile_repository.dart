@@ -42,10 +42,7 @@ abstract class GroupProfileRepositoryInterface {
   });
 
   Future<Either<Failure, GroupRecitationCollection>>
-  getRecitationCollectionDetail({
-    required String groupId,
-    required String collectionId,
-  });
+  getRecitationCollectionDetail({required String collectionId});
 
   Future<Either<Failure, Set<String>>> getTodayRecitationCollectionCompletions({
     required String groupId,
