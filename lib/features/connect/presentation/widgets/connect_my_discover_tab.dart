@@ -5,12 +5,11 @@ import 'package:flutter_pecha/features/connect/presentation/widgets/connect_segm
 typedef ConnectSegmentChildBuilder =
     Widget Function(
       BuildContext context,
-      ScrollController scrollController,
       VoidCallback switchToDiscover,
+      Widget scrollHeader,
     );
 
-/// Shared My / Discover segmented tab scaffold with dual scroll controllers
-/// and threshold-based pagination.
+/// Shared My / Discover segmented tab scaffold with threshold-based pagination.
 class ConnectMyDiscoverTab extends StatefulWidget {
   const ConnectMyDiscoverTab({
     super.key,
@@ -41,50 +40,28 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
   static const _paginationThreshold = 200.0;
 
   late int _selectedSegment;
-  final ScrollController _myScrollController = ScrollController();
-  final ScrollController _discoverScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _selectedSegment = widget.initialSegment.clamp(0, 1);
-    if (widget.onMyLoadMore != null) {
-      _myScrollController.addListener(_onMyScroll);
-    }
-    if (widget.onDiscoverLoadMore != null) {
-      _discoverScrollController.addListener(_onDiscoverScroll);
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       widget.onSegmentChanged?.call(_selectedSegment);
     });
   }
 
-  @override
-  void dispose() {
-    if (widget.onMyLoadMore != null) {
-      _myScrollController.removeListener(_onMyScroll);
-    }
-    if (widget.onDiscoverLoadMore != null) {
-      _discoverScrollController.removeListener(_onDiscoverScroll);
-    }
-    _myScrollController.dispose();
-    _discoverScrollController.dispose();
-    super.dispose();
-  }
-
-  void _onMyScroll() => _onScroll(_myScrollController, widget.onMyLoadMore);
-
-  void _onDiscoverScroll() =>
-      _onScroll(_discoverScrollController, widget.onDiscoverLoadMore);
-
-  void _onScroll(ScrollController controller, VoidCallback? loadMore) {
-    if (loadMore == null || !controller.hasClients) return;
-    if (controller.position.pixels <
-        controller.position.maxScrollExtent - _paginationThreshold) {
-      return;
+  bool _handleScrollNotification(
+    ScrollNotification notification,
+    VoidCallback? loadMore,
+  ) {
+    if (loadMore == null) return false;
+    if (notification.metrics.pixels <
+        notification.metrics.maxScrollExtent - _paginationThreshold) {
+      return false;
     }
     loadMore();
+    return false;
   }
 
   void _switchToDiscover() => _selectSegment(1);
@@ -95,44 +72,49 @@ class _ConnectMyDiscoverTabState extends State<ConnectMyDiscoverTab> {
     widget.onSegmentChanged?.call(index);
   }
 
+  Widget _buildScrollHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+      child: ConnectSegmentedControl(
+        segments: [
+          context.l10n.connect_segment_my,
+          context.l10n.connect_segment_discover,
+        ],
+        selectedIndex: _selectedSegment,
+        onChanged: _selectSegment,
+      ),
+    );
+  }
+
+  Widget _buildSegment({
+    required ConnectSegmentChildBuilder builder,
+    required Future<void> Function()? onRefresh,
+    required VoidCallback? onLoadMore,
+  }) {
+    return RefreshIndicator(
+      onRefresh: onRefresh ?? () async {},
+      child: NotificationListener<ScrollNotification>(
+        onNotification:
+            (notification) => _handleScrollNotification(notification, onLoadMore),
+        child: builder(context, _switchToDiscover, _buildScrollHeader()),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return IndexedStack(
+      index: _selectedSegment,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
-          child: ConnectSegmentedControl(
-            segments: [
-              context.l10n.connect_segment_my,
-              context.l10n.connect_segment_discover,
-            ],
-            selectedIndex: _selectedSegment,
-            onChanged: _selectSegment,
-          ),
+        _buildSegment(
+          builder: widget.myBuilder,
+          onRefresh: widget.onMyRefresh,
+          onLoadMore: widget.onMyLoadMore,
         ),
-        Expanded(
-          child: IndexedStack(
-            index: _selectedSegment,
-            children: [
-              RefreshIndicator(
-                onRefresh: widget.onMyRefresh ?? () async {},
-                child: widget.myBuilder(
-                  context,
-                  _myScrollController,
-                  _switchToDiscover,
-                ),
-              ),
-              RefreshIndicator(
-                onRefresh: widget.onDiscoverRefresh ?? () async {},
-                child: widget.discoverBuilder(
-                  context,
-                  _discoverScrollController,
-                  _switchToDiscover,
-                ),
-              ),
-            ],
-          ),
+        _buildSegment(
+          builder: widget.discoverBuilder,
+          onRefresh: widget.onDiscoverRefresh,
+          onLoadMore: widget.onDiscoverLoadMore,
         ),
       ],
     );

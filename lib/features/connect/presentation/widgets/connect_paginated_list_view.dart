@@ -15,6 +15,8 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
     required this.onRetry,
     required this.itemBuilder,
     this.scrollController,
+    this.scrollViewKey,
+    this.header,
     this.separatorHeight = 0,
     this.useHairlineDividers = true,
     this.padding = const EdgeInsets.fromLTRB(0, 0, 0, 24),
@@ -31,6 +33,8 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
   final String? error;
   final bool hasMore;
   final ScrollController? scrollController;
+  final Key? scrollViewKey;
+  final Widget? header;
   final VoidCallback onRetry;
   final IndexedWidgetBuilder itemBuilder;
   final double separatorHeight;
@@ -84,52 +88,63 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
 
     final itemCount = leadingItemCount + items.length + (hasMore ? 1 : 0);
 
-    return ListView.separated(
+    return CustomScrollView(
+      key: scrollViewKey,
       controller: scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: padding,
-      itemCount: itemCount,
-      separatorBuilder: (context, _) {
-        if (useHairlineDividers) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          return Divider(
-            height: 1,
-            thickness: 1,
-            color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
-          );
-        }
-        return SizedBox(height: separatorHeight);
-      },
-      itemBuilder: (context, index) {
-        if (index < leadingItemCount) {
-          return leadingItemBuilder!(context);
-        }
+      slivers: [
+        if (header != null) SliverToBoxAdapter(child: header!),
+        SliverPadding(
+          padding: padding,
+          sliver: SliverList.separated(
+            itemCount: itemCount,
+            separatorBuilder: (context, _) {
+              if (useHairlineDividers) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+                );
+              }
+              return SizedBox(height: separatorHeight);
+            },
+            itemBuilder: (context, index) {
+              if (index < leadingItemCount) {
+                return leadingItemBuilder!(context);
+              }
 
-        final dataIndex = index - leadingItemCount;
-        if (dataIndex == items.length) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child:
-                  isLoadingMore
-                      ? const CircularProgressIndicator()
-                      : const SizedBox.shrink(),
-            ),
-          );
-        }
+              final dataIndex = index - leadingItemCount;
+              if (dataIndex == items.length) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child:
+                        isLoadingMore
+                            ? const CircularProgressIndicator()
+                            : const SizedBox.shrink(),
+                  ),
+                );
+              }
 
-        return itemBuilder(context, dataIndex);
-      },
+              return itemBuilder(context, dataIndex);
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  static Widget _scrollableState(
+  Widget _scrollableState(
     Widget child, {
     bool hasScrollBody = true,
   }) {
     return CustomScrollView(
+      key: scrollViewKey,
+      controller: scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
+        if (header != null) SliverToBoxAdapter(child: header!),
         SliverFillRemaining(
           hasScrollBody: hasScrollBody,
           child: child,

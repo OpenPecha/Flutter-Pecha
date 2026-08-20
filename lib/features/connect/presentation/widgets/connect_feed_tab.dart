@@ -57,15 +57,16 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
       onMyLoadMore: () => ref.read(myConnectFeedProvider.notifier).loadMore(),
       onDiscoverLoadMore:
           () => ref.read(discoverConnectFeedProvider.notifier).loadMore(),
-      myBuilder: (context, scrollController, switchToDiscover) {
+      myBuilder: (context, switchToDiscover, scrollHeader) {
         return ConnectPaginatedListView(
+          scrollViewKey: const PageStorageKey<String>('connect_feed_my'),
+          header: scrollHeader,
           items: myState.items,
           isLoading: myState.isLoading,
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
           hasLoaded: myState.hasLoaded,
-          scrollController: scrollController,
           onRetry: () => ref.read(myConnectFeedProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
             type: ConnectMyEmptyStateType.feed,
@@ -79,15 +80,16 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
               ),
         );
       },
-      discoverBuilder: (context, scrollController, _) {
+      discoverBuilder: (context, _, scrollHeader) {
         return ConnectPaginatedListView(
+          scrollViewKey: const PageStorageKey<String>('connect_feed_discover'),
+          header: scrollHeader,
           items: discoverState.items,
           isLoading: discoverState.isLoading,
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
           hasLoaded: discoverState.hasLoaded,
-          scrollController: scrollController,
           onRetry: () => ref.read(discoverConnectFeedProvider.notifier).retry(),
           emptyDiscoverMessage: context.l10n.connect_empty_discover_feed,
           itemBuilder:

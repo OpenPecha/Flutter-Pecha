@@ -90,37 +90,38 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FollowedGroupsRow(
-            groups: displayedMyGroups,
-            isLoading: myGroupsLoading,
-          ),
-          _ConnectMainTabBar(controller: _tabController, isDark: isDark),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                ConnectFeedTab(
-                  myGroups: displayedMyGroups,
-                  isActive: activeTabIndex == 0,
-                ),
-                ConnectEventsTab(
-                  myGroups: displayedMyGroups,
-                  isActive: activeTabIndex == 1,
-                ),
-                ConnectPostsTab(isActive: activeTabIndex == 2),
-                ConnectPracticesTab(isActive: activeTabIndex == 3),
-                ConnectGroupsTab(
-                  myGroups: displayedMyGroups,
-                  onRefresh: _onGroupsRefresh,
-                  isActive: activeTabIndex == 4,
-                ),
-              ],
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          SliverToBoxAdapter(
+            child: FollowedGroupsRow(
+              groups: displayedMyGroups,
+              isLoading: myGroupsLoading,
             ),
           ),
+          SliverToBoxAdapter(
+            child: _ConnectMainTabBar(controller: _tabController, isDark: isDark),
+          ),
         ],
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            ConnectFeedTab(
+              myGroups: displayedMyGroups,
+              isActive: activeTabIndex == 0,
+            ),
+            ConnectEventsTab(
+              myGroups: displayedMyGroups,
+              isActive: activeTabIndex == 1,
+            ),
+            ConnectPostsTab(isActive: activeTabIndex == 2),
+            ConnectPracticesTab(isActive: activeTabIndex == 3),
+            ConnectGroupsTab(
+              myGroups: displayedMyGroups,
+              onRefresh: _onGroupsRefresh,
+              isActive: activeTabIndex == 4,
+            ),
+          ],
+        ),
       ),
     );
   }
