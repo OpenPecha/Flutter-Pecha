@@ -118,13 +118,9 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
 
   @override
   Future<Either<Failure, GroupRecitationCollection>>
-  getRecitationCollectionDetail({
-    required String groupId,
-    required String collectionId,
-  }) async {
+  getRecitationCollectionDetail({required String collectionId}) async {
     try {
       final model = await remote.fetchRecitationCollectionDetail(
-        groupId: groupId,
         collectionId: collectionId,
       );
       return Right(model.toEntity());
@@ -145,13 +141,11 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
 
   @override
   Future<Either<Failure, Set<String>>> getTodayRecitationCollectionCompletions({
-    required String groupId,
     required String collectionId,
   }) async {
     try {
       final completedChantIds = await remote
           .fetchTodayRecitationCollectionCompletions(
-            groupId: groupId,
             collectionId: collectionId,
           );
       return Right(completedChantIds);
@@ -172,13 +166,11 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
 
   @override
   Future<Either<Failure, void>> completeRecitationCollectionChant({
-    required String groupId,
     required String collectionId,
     required String chantId,
   }) async {
     try {
       await remote.completeRecitationCollectionChant(
-        groupId: groupId,
         collectionId: collectionId,
         chantId: chantId,
       );
