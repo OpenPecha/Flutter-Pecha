@@ -837,6 +837,22 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_online => 'Онлайн';
 
   @override
+  String get home_group_events => 'Бүлгийн арга хэмжээ';
+
+  @override
+  String get connect_events_filter_all => 'Бүгд';
+
+  @override
+  String get connect_events_filter_in_person => 'Биечлэн';
+
+  @override
+  String get connect_events_filter_empty_online => 'Онлайн арга хэмжээ байхгүй';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'Биечлэн арга хэмжээ байхгүй';
+
+  @override
   String get connect_open => 'Нээх';
 
   @override

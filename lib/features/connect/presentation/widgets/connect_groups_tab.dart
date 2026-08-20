@@ -26,12 +26,9 @@ class ConnectGroupsTab extends ConsumerStatefulWidget {
 class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
   static const _paginationThreshold = 200.0;
 
-  final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     if (widget.isActive) {
       _scheduleLoad();
     }
@@ -45,13 +42,6 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   void _scheduleLoad() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.isActive) return;
@@ -59,13 +49,14 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
     });
   }
 
-  void _onScroll() {
-    if (!widget.isActive || !_scrollController.hasClients) return;
-    if (_scrollController.position.pixels <
-        _scrollController.position.maxScrollExtent - _paginationThreshold) {
-      return;
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (!widget.isActive) return false;
+    if (notification.metrics.pixels <
+        notification.metrics.maxScrollExtent - _paginationThreshold) {
+      return false;
     }
     ref.read(discoverGroupsProvider.notifier).loadMore();
+    return false;
   }
 
   List<GroupProfile> _discoverGroups(DiscoverGroupsState discoverState) {
@@ -83,23 +74,27 @@ class _ConnectGroupsTabState extends ConsumerState<ConnectGroupsTab> {
 
     return RefreshIndicator(
       onRefresh: widget.onRefresh,
-      child: ConnectPaginatedListView(
-        items: discoverGroups,
-        isLoading: discoverState.isLoading,
-        isLoadingMore: discoverState.isLoadingMore,
-        error: discoverState.error,
-        hasMore: discoverState.hasMore,
-        hasLoaded: discoverState.hasLoaded,
-        scrollController: _scrollController,
-        onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
-        emptyDiscoverMessage: context.l10n.connect_empty_discover_groups,
-        separatorHeight: 12,
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        itemBuilder:
-            (context, index) => DiscoverGroupCard(
-              group: discoverGroups[index],
-              showJoinButton: true,
-            ),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: ConnectPaginatedListView(
+          scrollViewKey: const PageStorageKey<String>('connect_groups'),
+          items: discoverGroups,
+          isLoading: discoverState.isLoading,
+          isLoadingMore: discoverState.isLoadingMore,
+          error: discoverState.error,
+          hasMore: discoverState.hasMore,
+          hasLoaded: discoverState.hasLoaded,
+          onRetry: () => ref.read(discoverGroupsProvider.notifier).retry(),
+          emptyDiscoverMessage: context.l10n.connect_empty_discover_groups,
+          useHairlineDividers: false,
+          separatorHeight: 12,
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          itemBuilder:
+              (context, index) => DiscoverGroupCard(
+                group: discoverGroups[index],
+                showJoinButton: true,
+              ),
+        ),
       ),
     );
   }

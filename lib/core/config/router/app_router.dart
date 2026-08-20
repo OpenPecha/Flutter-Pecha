@@ -18,6 +18,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/screens/group_
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_profile_screen.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
+import 'package:flutter_pecha/features/home/presentation/screens/group_events_screen.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/main_navigation_screen.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/plan_list_screen.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/series_detail_screen.dart';
@@ -267,6 +268,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     groupTitle: groupTitle,
                   );
                 },
+              ),
+              GoRoute(
+                path: "group-events",
+                name: "home-group-events",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) => const GroupEventsScreen(),
               ),
               GoRoute(
                 path: "events/:eventId",

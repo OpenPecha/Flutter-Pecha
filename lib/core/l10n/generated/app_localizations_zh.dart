@@ -786,6 +786,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_online => '線上';
 
   @override
+  String get home_group_events => '社群活動';
+
+  @override
+  String get connect_events_filter_all => '全部';
+
+  @override
+  String get connect_events_filter_in_person => '實體';
+
+  @override
+  String get connect_events_filter_empty_online => '沒有線上活動';
+
+  @override
+  String get connect_events_filter_empty_in_person => '沒有實體活動';
+
+  @override
   String get connect_open => '開啟';
 
   @override
