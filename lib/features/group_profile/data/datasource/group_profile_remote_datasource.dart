@@ -141,12 +141,11 @@ class GroupProfileRemoteDatasource {
   }
 
   Future<GroupRecitationCollectionModel> fetchRecitationCollectionDetail({
-    required String groupId,
     required String collectionId,
   }) async {
     try {
       final response = await dio.get(
-        '/author/groups/$groupId/recitation-collections/$collectionId',
+        '/author/groups/recitation-collections/$collectionId',
         options: Options(extra: {'no_cache': true}),
       );
 
@@ -157,7 +156,7 @@ class GroupProfileRemoteDatasource {
       }
 
       _logger.error(
-        'Failed to load recitation collection $collectionId for $groupId: ${response.statusCode}',
+        'Failed to load recitation collection $collectionId: ${response.statusCode}',
       );
       throw _statusToException(
         response.statusCode,
@@ -170,12 +169,11 @@ class GroupProfileRemoteDatasource {
   }
 
   Future<Set<String>> fetchTodayRecitationCollectionCompletions({
-    required String groupId,
     required String collectionId,
   }) async {
     try {
       final response = await dio.get(
-        '/users/me/groups/$groupId/recitation-collections/$collectionId/complete/today',
+        '/users/me/groups/recitation-collections/$collectionId/complete/today',
         options: Options(extra: {'no_cache': true}),
       );
 
@@ -197,7 +195,7 @@ class GroupProfileRemoteDatasource {
       // failing the screen.
       if (e.response?.statusCode == 403) {
         _logger.info(
-          'No membership for $groupId — no completion ticks to show',
+          'No membership for collection $collectionId — no completion ticks to show',
         );
         return const {};
       }
@@ -211,13 +209,12 @@ class GroupProfileRemoteDatasource {
   }
 
   Future<void> completeRecitationCollectionChant({
-    required String groupId,
     required String collectionId,
     required String chantId,
   }) async {
     try {
       final response = await dio.post(
-        '/users/me/groups/$groupId/recitation-collections/$collectionId/complete',
+        '/users/me/groups/recitation-collections/$collectionId/complete',
         data: {'chant_id': chantId},
       );
 
@@ -239,7 +236,9 @@ class GroupProfileRemoteDatasource {
 
       // Followers can read a collection but only members can log completions.
       if (e.response?.statusCode == 403) {
-        _logger.info('Completion rejected for $groupId — membership required');
+        _logger.info(
+          'Completion rejected for collection $collectionId — membership required',
+        );
         throw const AuthorizationException(noGroupMembershipCode);
       }
 
