@@ -120,16 +120,51 @@ class _GroupEventsTabContent extends ConsumerWidget {
     };
   }
 
+  bool _shouldAutoLoadMoreForFilter(
+    ConnectEventsState state,
+    List<GroupEvent> filteredEvents,
+  ) {
+    return filter != ConnectEventLocationFilter.all &&
+        filteredEvents.isEmpty &&
+        state.hasLoaded &&
+        !state.isLoading &&
+        !state.isLoadingMore &&
+        state.hasMore &&
+        state.error == null;
+  }
+
+  bool _isResolvingFilteredEmpty(
+    ConnectEventsState state,
+    List<GroupEvent> filteredEvents,
+  ) {
+    return filter != ConnectEventLocationFilter.all &&
+        filteredEvents.isEmpty &&
+        state.hasLoaded &&
+        state.hasMore &&
+        state.error == null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(myConnectEventsProvider);
     final filteredEvents = filterGroupEventsByLocation(state.events, filter);
 
+    if (_shouldAutoLoadMoreForFilter(state, filteredEvents)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(myConnectEventsProvider.notifier).loadMore();
+      });
+    }
+
+    final isResolvingFilteredEmpty = _isResolvingFilteredEmpty(
+      state,
+      filteredEvents,
+    );
+
     return RefreshIndicator(
       onRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
       child: ConnectPaginatedListView<GroupEvent>(
         items: filteredEvents,
-        isLoading: state.isLoading,
+        isLoading: state.isLoading || isResolvingFilteredEmpty,
         isLoadingMore: state.isLoadingMore,
         error: state.error,
         hasMore: state.hasMore,
