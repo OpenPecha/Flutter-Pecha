@@ -34,13 +34,20 @@ class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen>
     for (var i = 0; i < _scrollControllers.length; i++) {
       _scrollControllers[i].addListener(_scrollListeners[i]);
     }
+    _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(myConnectEventsProvider.notifier).ensureLoaded();
     });
   }
 
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) return;
+    setState(() {});
+  }
+
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     for (var i = 0; i < _scrollControllers.length; i++) {
       _scrollControllers[i].removeListener(_scrollListeners[i]);
       _scrollControllers[i].dispose();
@@ -120,17 +127,31 @@ class _GroupEventsTabContent extends ConsumerWidget {
     };
   }
 
-  bool _shouldAutoLoadMoreForFilter(
-    ConnectEventsState state,
-    List<GroupEvent> filteredEvents,
-  ) {
+  bool _canAutoLoadMoreForFilter(ConnectEventsState state) {
     return filter != ConnectEventLocationFilter.all &&
-        filteredEvents.isEmpty &&
         state.hasLoaded &&
         !state.isLoading &&
         !state.isLoadingMore &&
         state.hasMore &&
         state.error == null;
+  }
+
+  bool _needsMoreFilteredEvents(
+    List<GroupEvent> filteredEvents,
+    ScrollController scrollController,
+  ) {
+    if (filteredEvents.isEmpty) return true;
+    if (!scrollController.hasClients) return false;
+    return scrollController.position.maxScrollExtent <= 0;
+  }
+
+  bool _shouldAutoLoadMoreForFilter(
+    ConnectEventsState state,
+    List<GroupEvent> filteredEvents,
+    ScrollController scrollController,
+  ) {
+    if (!_canAutoLoadMoreForFilter(state)) return false;
+    return _needsMoreFilteredEvents(filteredEvents, scrollController);
   }
 
   bool _isResolvingFilteredEmpty(
@@ -149,8 +170,20 @@ class _GroupEventsTabContent extends ConsumerWidget {
     final state = ref.watch(myConnectEventsProvider);
     final filteredEvents = filterGroupEventsByLocation(state.events, filter);
 
-    if (_shouldAutoLoadMoreForFilter(state, filteredEvents)) {
+    if (_canAutoLoadMoreForFilter(state)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        final currentState = ref.read(myConnectEventsProvider);
+        final currentFiltered = filterGroupEventsByLocation(
+          currentState.events,
+          filter,
+        );
+        if (!_shouldAutoLoadMoreForFilter(
+          currentState,
+          currentFiltered,
+          scrollController,
+        )) {
+          return;
+        }
         ref.read(myConnectEventsProvider.notifier).loadMore();
       });
     }
