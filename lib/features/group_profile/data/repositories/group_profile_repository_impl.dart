@@ -189,6 +189,8 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
       return Left(NetworkFailure(e.message));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
+    } on AuthorizationException catch (e) {
+      return Left(AuthorizationFailure(e.message));
     } on NotFoundException catch (e) {
       return Left(NotFoundFailure(e.message));
     } on RateLimitException catch (e) {

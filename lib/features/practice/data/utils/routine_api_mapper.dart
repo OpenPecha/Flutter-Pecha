@@ -30,6 +30,8 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
       SessionType.recitation => RoutineItemType.recitation,
       SessionType.timer => RoutineItemType.timer,
       SessionType.accumulator => RoutineItemType.accumulator,
+      SessionType.groupRecitationCollection =>
+        RoutineItemType.groupRecitationCollection,
     },
     enrolledAt: s.startedAt,
     language: s.language,
@@ -38,6 +40,7 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
     currentPlanTitle: s.currentPlanTitle,
     durationMs: s.durationMs,
     firstSegment: s.firstSegment,
+    itemCount: s.itemCount,
   );
 }
 
@@ -55,6 +58,8 @@ List<SessionRequest> _sessionsForBlock(RoutineBlock block) {
           RoutineItemType.recitation => SessionType.recitation,
           RoutineItemType.timer => SessionType.timer,
           RoutineItemType.accumulator => SessionType.accumulator,
+          RoutineItemType.groupRecitationCollection =>
+            SessionType.groupRecitationCollection,
         },
         sourceId: item.id,
         displayOrder: i,

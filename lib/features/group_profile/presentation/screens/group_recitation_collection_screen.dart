@@ -7,8 +7,12 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
+import 'package:flutter_pecha/features/practice/presentation/controllers/bookmark_controller.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/bookmark_providers.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,15 +108,23 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) return;
 
-    final completed = await ref
+    final result = await ref
         .read(groupRecitationCollectionCompletionProvider(key).notifier)
         .completeChant(chantId);
 
-    if (!completed && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.somethingWrong)));
-    }
+    if (!context.mounted) return;
+
+    final message = switch (result) {
+      GroupChantCompletionResult.completed => null,
+      GroupChantCompletionResult.membershipRequired =>
+        'Join this group to track your progress',
+      GroupChantCompletionResult.failed => context.l10n.somethingWrong,
+    };
+    if (message == null) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _onShare(
@@ -219,7 +231,11 @@ class _CollectionContent extends StatelessWidget {
               children: [
                 _CollectionHero(imageUrl: collection.imageUrl, isDark: isDark),
                 const SizedBox(height: 14),
-                _PlaceholderActionBar(isDark: isDark, onShare: onShare),
+                _CollectionActionBar(
+                  collection: collection,
+                  isDark: isDark,
+                  onShare: onShare,
+                ),
                 const SizedBox(height: 12),
                 if (hasItems)
                   ...collection.items.map(
@@ -326,37 +342,54 @@ class _CollectionHero extends StatelessWidget {
   }
 }
 
-class _PlaceholderActionBar extends StatelessWidget {
-  const _PlaceholderActionBar({
+class _CollectionActionBar extends ConsumerWidget {
+  const _CollectionActionBar({
+    required this.collection,
     required this.isDark,
     required this.onShare,
   });
 
+  final GroupRecitationCollection collection;
   final bool isDark;
   final VoidCallback onShare;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookmarkTarget = BookmarkTarget(
+      type: BookmarkType.groupRecitationCollection,
+      sourceId: collection.id,
+    );
+    final isBookmarked = ref.watch(isBookmarkedProvider(bookmarkTarget));
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          // Practice chip (placeholder)
-          _PlaceholderActionChip(
+          _ActionChip(
             icon: AppAssets.plus,
-            label: 'Practice',
+            label: context.l10n.nav_practice,
             isDark: isDark,
+            onTap: () => _addToPractices(context, ref),
           ),
           const SizedBox(width: 8),
-          // Bookmark chip (placeholder)
-          _PlaceholderActionChip(
-            icon: AppAssets.bookmarkSimple,
+          _ActionChip(
+            icon:
+                isBookmarked
+                    ? AppAssets.bookmarkSimpleFill
+                    : AppAssets.bookmarkSimple,
             label: context.l10n.bookmark,
             isDark: isDark,
+            onTap:
+                () => BookmarkController(
+                  ref: ref,
+                  context: context,
+                ).toggleGroupRecitationCollection(
+                  collection.id,
+                  name: collection.name,
+                ),
           ),
           const SizedBox(width: 8),
-          // Share chip (functional)
-          _PlaceholderActionChip(
+          _ActionChip(
             icon: AppAssets.readerShare,
             label: context.l10n.share,
             isDark: isDark,
@@ -367,10 +400,23 @@ class _PlaceholderActionBar extends StatelessWidget {
       ),
     );
   }
+
+  /// Hands the collection to the routine editor, which injects it as a
+  /// GROUP_RECITATION_COLLECTION session and lets the user place its time block.
+  void _addToPractices(BuildContext context, WidgetRef ref) {
+    if (ref.read(authProvider).isGuest) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    context.pushNamed(
+      'edit-routine',
+      extra: {'initialGroupCollection': collection},
+    );
+  }
 }
 
-class _PlaceholderActionChip extends StatelessWidget {
-  const _PlaceholderActionChip({
+class _ActionChip extends StatelessWidget {
+  const _ActionChip({
     required this.icon,
     required this.label,
     required this.isDark,

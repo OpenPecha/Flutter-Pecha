@@ -119,6 +119,13 @@ class RoutineItemCard extends StatelessWidget {
                 size: imageSize,
                 isDark: isDark,
               )
+            else if (type == RoutineItemType.groupRecitationCollection)
+              _CollectionCoverImage(
+                coverImage: coverImage,
+                imageUrl: imageUrl,
+                size: imageSize,
+                isDark: isDark,
+              )
             else
               ResponsiveCoverImage(
                 image:
@@ -206,6 +213,55 @@ class RoutineItemCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Chant-collection artwork. The cover is optional on group collections, so a
+/// placeholder stands in rather than collapsing to an empty gap.
+class _CollectionCoverImage extends StatelessWidget {
+  const _CollectionCoverImage({
+    required this.coverImage,
+    required this.imageUrl,
+    required this.size,
+    required this.isDark,
+  });
+
+  final ResponsiveImage? coverImage;
+  final String? imageUrl;
+  final double size;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final image =
+        coverImage ??
+        (imageUrl != null && imageUrl!.isNotEmpty
+            ? ResponsiveImage.uniform(imageUrl!)
+            : null);
+
+    if (image != null && !image.isEmpty) {
+      return ResponsiveCoverImage(
+        image: image,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(10),
+      );
+    }
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(
+        AppAssets.bookOpenText,
+        size: size * 0.45,
+        color: isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
       ),
     );
   }

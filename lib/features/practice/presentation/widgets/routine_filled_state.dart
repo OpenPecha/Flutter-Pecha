@@ -108,6 +108,14 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
       return;
     }
 
+    if (itemType == RoutineItemType.groupRecitationCollection) {
+      // Opening a collection needs its group id, which notification payloads
+      // don't carry. Consume the nav so it doesn't fall through to the plan
+      // lookup below and surface a misleading "not found".
+      ref.read(pendingNotificationNavProvider.notifier).state = null;
+      return;
+    }
+
     if (itemType == RoutineItemType.timer) {
       // Open the timer screen — same destination as tapping the timer item in
       // the routine. `/home/timers/active` is a root-navigator route, so it is
@@ -335,6 +343,10 @@ class _RoutineBlockSection extends ConsumerWidget {
         _navigateToTimer(context, item);
       case RoutineItemType.accumulator:
         context.push('/mala', extra: {'presetId': item.id});
+      case RoutineItemType.groupRecitationCollection:
+        // Every collection endpoint is scoped by group id, which the routine
+        // read does not return — so there is nothing to navigate to from here.
+        break;
     }
   }
 
@@ -462,6 +474,9 @@ class _RoutineBlockSection extends ConsumerWidget {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCollection =
+        item.type == RoutineItemType.groupRecitationCollection;
+    final itemCount = item.itemCount;
 
     return Container(
       decoration: BoxDecoration(
@@ -476,9 +491,12 @@ class _RoutineBlockSection extends ConsumerWidget {
           title: routineItemDisplayTitle(item, context.l10n),
           coverImage: item.coverImage,
           type: item.type,
-          planTitle: item.currentPlanTitle,
+          planTitle:
+              isCollection && itemCount != null && itemCount > 0
+                  ? context.l10n.home_recitation_count(itemCount)
+                  : item.currentPlanTitle,
           imageSize: 56,
-          onTap: () => _onItemTap(context, ref, item),
+          onTap: isCollection ? null : () => _onItemTap(context, ref, item),
           onPlanTap:
               item.currentPlanId != null
                   ? () => _onPlanArrowTap(context, ref, item)

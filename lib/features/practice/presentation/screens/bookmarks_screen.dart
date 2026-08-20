@@ -25,6 +25,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
   List<String> _tabLabels(BuildContext context) => [
     context.l10n.search_all,
     context.l10n.home_shortcut_plans,
+    context.l10n.home_chants,
     context.l10n.bookmark_mala,
     context.l10n.bookmark_timers,
     context.l10n.bookmark_texts,
@@ -32,6 +33,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
   static const _tabs = [
     BookmarkTab.all,
     BookmarkTab.plans,
+    BookmarkTab.chants,
     BookmarkTab.mala,
     BookmarkTab.timers,
     BookmarkTab.texts,
@@ -45,6 +47,10 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
     (
       context.l10n.bookmarks_empty_plans_title,
       context.l10n.bookmarks_empty_plans_subtitle,
+    ),
+    (
+      'No chant collections bookmarked yet.',
+      'Bookmark a chant collection to save it here.',
     ),
     (
       context.l10n.bookmarks_empty_malas_title,
@@ -125,13 +131,18 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
         );
       case BookmarkItemType.accumulator:
         context.push('/mala', extra: {'presetId': bookmark.sourceId});
+      case BookmarkItemType.groupRecitationCollection:
+        final groupId = bookmark.groupId;
+        if (groupId == null || groupId.isEmpty) return;
+        context.push(
+          '/home/group/$groupId/recitation-collections/${bookmark.sourceId}',
+          extra: {'title': bookmark.displayTitle},
+        );
       case BookmarkItemType.plan:
         // No reliable id-based deep link for a plan from bookmark data alone.
         break;
     }
   }
-
-  bool _isTappable(BookmarkItemType type) => type != BookmarkItemType.plan;
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +178,6 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
             onRetry: () => ref.read(bookmarksProvider.notifier).load(),
             onRemove: _onRemove,
             onTap: _onTap,
-            isTappable: _isTappable,
           ),
         ),
       ),
@@ -232,7 +242,6 @@ class _BookmarkTabView extends StatelessWidget {
     required this.onRetry,
     required this.onRemove,
     required this.onTap,
-    required this.isTappable,
   });
 
   final BookmarksState state;
@@ -243,7 +252,6 @@ class _BookmarkTabView extends StatelessWidget {
   final VoidCallback onRetry;
   final void Function(BookmarkDTO) onRemove;
   final void Function(BookmarkDTO) onTap;
-  final bool Function(BookmarkItemType) isTappable;
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +310,7 @@ class _BookmarkTabView extends StatelessWidget {
         BookmarkCard(
           bookmark: bookmark,
           onRemove: () => onRemove(bookmark),
-          onTap: isTappable(bookmark.type) ? () => onTap(bookmark) : null,
+          onTap: bookmark.isOpenable ? () => onTap(bookmark) : null,
         ),
       );
     }
