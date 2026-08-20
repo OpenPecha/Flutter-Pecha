@@ -137,12 +137,11 @@ class GroupProfileRemoteDatasource {
   }
 
   Future<GroupRecitationCollectionModel> fetchRecitationCollectionDetail({
-    required String groupId,
     required String collectionId,
   }) async {
     try {
       final response = await dio.get(
-        '/author/groups/$groupId/recitation-collections/$collectionId',
+        '/author/groups/recitation-collections/$collectionId',
         options: Options(extra: {'no_cache': true}),
       );
 
@@ -153,7 +152,7 @@ class GroupProfileRemoteDatasource {
       }
 
       _logger.error(
-        'Failed to load recitation collection $collectionId for $groupId: ${response.statusCode}',
+        'Failed to load recitation collection $collectionId: ${response.statusCode}',
       );
       throw _statusToException(
         response.statusCode,
