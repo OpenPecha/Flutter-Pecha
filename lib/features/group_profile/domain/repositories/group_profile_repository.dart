@@ -45,12 +45,10 @@ abstract class GroupProfileRepositoryInterface {
   getRecitationCollectionDetail({required String collectionId});
 
   Future<Either<Failure, Set<String>>> getTodayRecitationCollectionCompletions({
-    required String groupId,
     required String collectionId,
   });
 
   Future<Either<Failure, void>> completeRecitationCollectionChant({
-    required String groupId,
     required String collectionId,
     required String chantId,
   });

@@ -165,12 +165,11 @@ class GroupProfileRemoteDatasource {
   }
 
   Future<Set<String>> fetchTodayRecitationCollectionCompletions({
-    required String groupId,
     required String collectionId,
   }) async {
     try {
       final response = await dio.get(
-        '/users/me/groups/$groupId/recitation-collections/$collectionId/complete/today',
+        '/users/me/groups/recitation-collections/$collectionId/complete/today',
         options: Options(extra: {'no_cache': true}),
       );
 
@@ -196,13 +195,12 @@ class GroupProfileRemoteDatasource {
   }
 
   Future<void> completeRecitationCollectionChant({
-    required String groupId,
     required String collectionId,
     required String chantId,
   }) async {
     try {
       final response = await dio.post(
-        '/users/me/groups/$groupId/recitation-collections/$collectionId/complete',
+        '/users/me/groups/recitation-collections/$collectionId/complete',
         data: {'chant_id': chantId},
       );
 

@@ -295,7 +295,6 @@ class GroupRecitationCollectionCompletionNotifier
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _repository.getTodayRecitationCollectionCompletions(
-      groupId: _key.groupId,
       collectionId: _key.collectionId,
     );
 
@@ -327,7 +326,6 @@ class GroupRecitationCollectionCompletionNotifier
     );
 
     final result = await _repository.completeRecitationCollectionChant(
-      groupId: _key.groupId,
       collectionId: _key.collectionId,
       chantId: trimmedChantId,
     );
