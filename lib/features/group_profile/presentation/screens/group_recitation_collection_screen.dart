@@ -68,8 +68,13 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
                         completionState: completionState,
                         isDark: isDark,
                         onOpenItem:
-                            (item) =>
-                                _openReaderAndComplete(context, ref, key, item),
+                            (item) => _openReaderAndComplete(
+                              context,
+                              ref,
+                              key,
+                              item,
+                              collection,
+                            ),
                         onShare: () => _onShare(context, ref, collection),
                       ),
                     ),
@@ -95,36 +100,40 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
     WidgetRef ref,
     GroupRecitationCollectionKey key,
     GroupRecitationCollectionItem item,
+    GroupRecitationCollection collection,
   ) async {
     final textId = item.textId.trim();
     final chantId = item.id.trim();
     if (textId.isEmpty || chantId.isEmpty) return;
 
-    await context.push(
-      '/reader/$textId',
-      extra: const NavigationContext(source: NavigationSource.recitationList),
+    // Build navigation context with all chants in the collection
+    final completionState = ref.read(
+      groupRecitationCollectionCompletionProvider(key),
+    );
+    final currentIndex =
+        collection.items.indexWhere((i) => i.id == item.id);
+
+    final planTextItems = collection.items.map((collectionItem) {
+      return PlanTextItem.sourceReference(
+        textId: collectionItem.textId,
+        title: collectionItem.title,
+        subtaskId: collectionItem.id,
+        isCompleted: completionState.isCompleted(collectionItem.id),
+      );
+    }).toList();
+
+    final navigationContext = NavigationContext(
+      source: NavigationSource.groupRecitationCollection,
+      planTextItems: planTextItems,
+      currentTextIndex: currentIndex >= 0 ? currentIndex : 0,
+      groupId: key.groupId,
+      collectionId: key.collectionId,
     );
 
-    final authState = ref.read(authProvider);
-    if (authState.isGuest || !authState.isLoggedIn) return;
-
-    final result = await ref
-        .read(groupRecitationCollectionCompletionProvider(key).notifier)
-        .completeChant(chantId);
-
-    if (!context.mounted) return;
-
-    final message = switch (result) {
-      GroupChantCompletionResult.completed => null,
-      GroupChantCompletionResult.membershipRequired =>
-        'Join this group to track your progress',
-      GroupChantCompletionResult.failed => context.l10n.somethingWrong,
-    };
-    if (message == null) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    await context.push(
+      '/reader/$textId',
+      extra: navigationContext,
+    );
   }
 
   Future<void> _onShare(
