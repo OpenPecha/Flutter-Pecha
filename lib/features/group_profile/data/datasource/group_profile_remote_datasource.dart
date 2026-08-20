@@ -195,7 +195,7 @@ class GroupProfileRemoteDatasource {
       // failing the screen.
       if (e.response?.statusCode == 403) {
         _logger.info(
-          'No membership for $groupId — no completion ticks to show',
+          'No membership for collection $collectionId — no completion ticks to show',
         );
         return const {};
       }
@@ -236,7 +236,9 @@ class GroupProfileRemoteDatasource {
 
       // Followers can read a collection but only members can log completions.
       if (e.response?.statusCode == 403) {
-        _logger.info('Completion rejected for $groupId — membership required');
+        _logger.info(
+          'Completion rejected for collection $collectionId — membership required',
+        );
         throw const AuthorizationException(noGroupMembershipCode);
       }
 
