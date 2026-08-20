@@ -91,17 +91,21 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
         ],
       ),
       body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverToBoxAdapter(
-            child: FollowedGroupsRow(
-              groups: displayedMyGroups,
-              isLoading: myGroupsLoading,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _ConnectMainTabBar(controller: _tabController, isDark: isDark),
-          ),
-        ],
+        headerSliverBuilder:
+            (context, innerBoxIsScrolled) => [
+              SliverToBoxAdapter(
+                child: FollowedGroupsRow(
+                  groups: displayedMyGroups,
+                  isLoading: myGroupsLoading,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _ConnectMainTabBar(
+                  controller: _tabController,
+                  isDark: isDark,
+                ),
+              ),
+            ],
         body: TabBarView(
           controller: _tabController,
           children: [
@@ -128,10 +132,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
 }
 
 class _ConnectMainTabBar extends StatelessWidget {
-  const _ConnectMainTabBar({
-    required this.controller,
-    required this.isDark,
-  });
+  const _ConnectMainTabBar({required this.controller, required this.isDark});
 
   final TabController controller;
   final bool isDark;
@@ -154,14 +155,13 @@ class _ConnectMainTabBar extends StatelessWidget {
         labelColor: labelColor,
         unselectedLabelColor: unselectedColor,
         indicatorColor: labelColor,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
         indicatorWeight: 2,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
         labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-        labelStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w700,
-        ),
+        labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
