@@ -715,7 +715,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => 'For you';
 
   @override
   String get connect_segment_discover => 'Discover';
@@ -1614,7 +1614,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about_title => 'About';
 
   @override
-  String get about_connect_with_us => 'Connect with us';
+  String get about_connect_with_us => 'Connect with us...';
 
   @override
   String get about_description =>

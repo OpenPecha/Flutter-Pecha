@@ -154,14 +154,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mala_add_to_practice => '加入我的修持';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => '新增念珠遍數';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => '新增念珠遍數：';
 
   @override
-  String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+  String get mala_add_rounds_message => '新增你在此應用程式之外完成的念珠遍數。';
 
   @override
   String get mala_add_to_bookmark => '書籤';
@@ -679,7 +678,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => '我的';
+  String get connect_segment_my => '為你';
 
   @override
   String get connect_segment_discover => '探索';
@@ -1753,11 +1752,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get group_change_practice_title => 'Change group practice';
+  String get group_change_practice_title => '改變小組實踐';
 
   @override
-  String get group_change_practice_message =>
-      'You are already practicing this plan with another group. Would you like to change your practice group?';
+  String get group_change_practice_message => '您目前已與其他小組一起練習此計劃。您是否想更換練習小組？';
 
   @override
   String get group_join_to_contribute => '加入以貢獻';

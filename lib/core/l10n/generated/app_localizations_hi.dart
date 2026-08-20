@@ -162,14 +162,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mala_add_to_practice => 'मेरे अभ्यास में जोड़ें';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => 'माला राउंड जोड़ें';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => 'माला राउंड जोड़ें:';
 
   @override
   String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+      'इस ऐप के बाहर किए गए माला राउंड की संख्या जोड़ें।';
 
   @override
   String get mala_add_to_bookmark => 'बुकमार्क';
@@ -720,7 +720,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'मेरा';
+  String get connect_segment_my => 'आपके लिए';
 
   @override
   String get connect_segment_discover => 'खोजें';
@@ -1855,11 +1855,11 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get group_change_practice_title => 'Change group practice';
+  String get group_change_practice_title => 'अभ्यास समूह बदलें';
 
   @override
   String get group_change_practice_message =>
-      'You are already practicing this plan with another group. Would you like to change your practice group?';
+      'आप पहले से ही किसी दूसरे समूह के साथ इस योजना का अभ्यास कर रहे हैं। क्या आप अपना अभ्यास समूह बदलना चाहेंगे?';
 
   @override
   String get group_join_to_contribute => 'योगदान के लिए शामिल हों';

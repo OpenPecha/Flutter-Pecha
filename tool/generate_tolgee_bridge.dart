@@ -254,10 +254,10 @@ void _format(String path) {
   }
 }
 
-/// Compares ignoring formatting differences so `--check` does not fail purely
-/// because the committed file has been through `dart format`.
+/// Compares ignoring wrap, indent, and CRLF so `--check` does not fail when
+/// `dart format` on Windows vs Ubuntu produces different line breaks.
 String _normalize(String source) =>
-    source.replaceAll(RegExp(r'\s+'), ' ').trim();
+    source.replaceAll(RegExp(r'\s+'), '').trim();
 
 class _Member {
   _Member({
