@@ -187,7 +187,12 @@ class _GroupRecitationCollectionScreenState
     if (!mounted) return;
 
     final dayCount = result.fold((_) => null, (count) => count);
-    if (dayCount == null) return;
+    if (dayCount == null) {
+      // Fetch failed — un-claim so the next rebuild while still fully
+      // completed retries instead of losing the celebration for good.
+      _hasShownCompletionSheetThisVisit = false;
+      return;
+    }
 
     showCollectionCompletionSheet(
       context,

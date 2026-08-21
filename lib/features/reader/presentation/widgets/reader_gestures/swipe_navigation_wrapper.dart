@@ -48,13 +48,8 @@ class _SwipeNavigationWrapperState
     final hideBottomNav = state.hasSelection && !state.isCommentaryOpen;
     final isGroupChant =
         navigationContext?.source == NavigationSource.groupAccumulatorChant;
-    final isGroupRecitationCollection =
-        navigationContext?.source == NavigationSource.groupRecitationCollection;
-    final showBottomBar = !hideBottomNav &&
-        !state.isCommentaryOpen &&
-        !isGroupChant &&
-        (navigationContext?.source == NavigationSource.plan ||
-            isGroupRecitationCollection);
+    final showBottomBar =
+        !hideBottomNav && !state.isCommentaryOpen && !isGroupChant;
 
     final canSwipe = navigationContext != null && navigationContext.canSwipe;
 
@@ -89,7 +84,8 @@ class _SwipeNavigationWrapperState
                         : null,
                 onFinishedTap:
                     navigationContext != null &&
-                            (navigationContext.source == NavigationSource.plan ||
+                            (navigationContext.source ==
+                                    NavigationSource.plan ||
                                 navigationContext.source ==
                                     NavigationSource.groupRecitationCollection)
                         ? _finishReading
