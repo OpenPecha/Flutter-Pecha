@@ -116,6 +116,29 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
     );
   }
 
+  @override
+  Future<Either<Failure, GroupRecitationCollection>>
+  getRecitationCollectionDetail({required String collectionId}) async {
+    try {
+      final model = await remote.fetchRecitationCollectionDetail(
+        collectionId: collectionId,
+      );
+      return Right(model.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load recitation collection: $e'));
+    }
+  }
+
   Future<Either<Failure, GroupPracticesPage>> _loadPractices({
     String? groupId,
     required bool includeUnfollowed,

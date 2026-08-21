@@ -119,8 +119,9 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ? _visibleTabs[previous.index]
             : null;
     var initialIndex = selectedTab == null ? -1 : tabs.indexOf(selectedTab);
-    if (initialIndex < 0)
+    if (initialIndex < 0) {
       initialIndex = tabs.indexOf(_GroupProfileTab.practices);
+    }
     if (initialIndex < 0) initialIndex = 0;
 
     final controller = TabController(
@@ -771,9 +772,18 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                 lineHeight,
               ),
             GroupPracticeType.collection when practice.collection != null =>
-              _buildCollectionCard(practice.collection!, isDark, lineHeight),
-            GroupPracticeType.plan when practice.plan != null =>
-              _buildPlanCard(profile, practice.plan!, isDark, lineHeight),
+              _buildCollectionCard(
+                profile,
+                practice.collection!,
+                isDark,
+                lineHeight,
+              ),
+            GroupPracticeType.plan when practice.plan != null => _buildPlanCard(
+              profile,
+              practice.plan!,
+              isDark,
+              lineHeight,
+            ),
             _ => const SizedBox.shrink(),
           },
         );
@@ -782,7 +792,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   Widget _buildCollectionCard(
-    GroupPracticeCollection collection,
+    GroupProfile profile,
+    GroupRecitationCollection collection,
     bool isDark,
     double? lineHeight,
   ) {
@@ -797,60 +808,72 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       shadowColor: Colors.black.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 140,
-            width: double.infinity,
-            child:
-                collection.imageUrl != null && collection.imageUrl!.isNotEmpty
-                    ? CachedNetworkImageWidget(
-                      imageUrl: collection.imageUrl!,
-                      fit: BoxFit.cover,
-                    )
-                    : ColoredBox(
-                      color:
-                          isDark
-                              ? AppColors.surfaceVariantDark
-                              : AppColors.grey100,
-                      child: Icon(
-                        AppAssets.bookOpenText,
-                        size: 40,
-                        color: isDark ? AppColors.grey500 : AppColors.grey600,
+      child: InkWell(
+        onTap: () {
+          final groupId =
+              collection.groupId.trim().isNotEmpty
+                  ? collection.groupId
+                  : profile.id;
+          context.push(
+            '/home/group/$groupId/recitation-collections/${collection.id}',
+            extra: {'title': collection.name},
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 140,
+              width: double.infinity,
+              child:
+                  collection.imageUrl != null && collection.imageUrl!.isNotEmpty
+                      ? CachedNetworkImageWidget(
+                        imageUrl: collection.imageUrl!,
+                        fit: BoxFit.cover,
+                      )
+                      : ColoredBox(
+                        color:
+                            isDark
+                                ? AppColors.surfaceVariantDark
+                                : AppColors.grey100,
+                        child: Icon(
+                          AppAssets.bookOpenText,
+                          size: 40,
+                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+                        ),
                       ),
-                    ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  collection.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    height: lineHeight,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (collection.itemCount > 0) ...[
-                  const SizedBox(height: 4),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    context.l10n.home_recitation_count(collection.itemCount),
+                    collection.name,
                     style: TextStyle(
-                      fontSize: 13,
-                      color: secondaryColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                       height: lineHeight,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                  if (collection.itemCount > 0) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.home_recitation_count(collection.itemCount),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: secondaryColor,
+                        height: lineHeight,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
