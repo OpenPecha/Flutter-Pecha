@@ -150,6 +150,7 @@ class ReaderSettingsScreen extends ConsumerWidget {
     final picked = _secondarySlot(ref);
     if (picked.isUnset || picked.versionId != null) return;
 
+    final resolveGeneration = notifier.secondaryResolveGeneration;
     final resolving = ref.read(
       readerSecondaryResolvingProvider(textId).notifier,
     );
@@ -160,6 +161,7 @@ class ReaderSettingsScreen extends ConsumerWidget {
         textId: textId,
         slot: picked,
         mainConfig: mainConfig,
+        resolveGeneration: resolveGeneration,
       );
     } finally {
       resolving.state = false;

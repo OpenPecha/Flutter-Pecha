@@ -39,6 +39,7 @@ Future<void> autoSelectSecondaryVersion({
   required String textId,
   required ReaderSlotConfig slot,
   required ReaderSlotConfig mainConfig,
+  required int resolveGeneration,
 }) async {
   final notifier = ref.read(readerDualSettingsProvider(textId).notifier);
   final query = ReaderLanguageQuery(
@@ -46,8 +47,13 @@ Future<void> autoSelectSecondaryVersion({
     language: slot.languageCode,
   );
 
+  bool isCurrentResolve() =>
+      notifier.secondaryResolveGeneration == resolveGeneration;
+
   try {
     final versions = await ref.read(readerVersionsProvider(query).future);
+    if (!isCurrentResolve()) return;
+
     final bool sameLanguageAsMain = readerLanguagesMatch(
       slot.languageCode,
       mainConfig.languageCode,
@@ -60,12 +66,7 @@ Future<void> autoSelectSecondaryVersion({
       break;
     }
 
-    // The slot may have changed again while awaiting (user picked another
-    // language). Only apply if it still matches what we resolved for.
-    final latest = ref.read(readerDualSettingsProvider(textId)).secondary;
-    if (latest.languageCode != slot.languageCode || latest.versionId != null) {
-      return;
-    }
+    if (!isCurrentResolve()) return;
 
     if (chosen == null) {
       notifier.replaceSecondary(slot.copyWith(versionUnavailable: true));
@@ -79,10 +80,7 @@ Future<void> autoSelectSecondaryVersion({
       ),
     );
   } catch (_) {
-    final latest = ref.read(readerDualSettingsProvider(textId)).secondary;
-    if (latest.languageCode != slot.languageCode || latest.versionId != null) {
-      return;
-    }
+    if (!isCurrentResolve()) return;
     notifier.replaceSecondary(slot.copyWith(versionUnavailable: true));
   }
 }
@@ -129,6 +127,7 @@ Future<bool> fillSettingsLanguageSecondary({
     languageLabel: getLanguageName(option.code, context),
   );
   notifier.replaceSecondary(slot);
+  final resolveGeneration = notifier.secondaryResolveGeneration;
 
   await autoSelectSecondaryVersion(
     ref: ref,
@@ -139,6 +138,7 @@ Future<bool> fillSettingsLanguageSecondary({
       languageLabel: getLanguageName(sourceLanguage, context),
       versionId: sourceVersionId,
     ),
+    resolveGeneration: resolveGeneration,
   );
 
   final filled = ref.read(readerDualSettingsProvider(textId)).secondary;
