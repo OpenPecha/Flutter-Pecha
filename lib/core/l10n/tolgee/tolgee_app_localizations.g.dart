@@ -3766,6 +3766,46 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) => TolgeeBridge.format(
+    localeName,
+    'group_recitation_collection_share_message',
+    <String, Object>{'collection': collection, 'group': group},
+    () =>
+        _fallback.group_recitation_collection_share_message(collection, group),
+  );
+
+  @override
+  String group_recitation_collection_share_message_no_group(
+    String collection,
+  ) => TolgeeBridge.format(
+    localeName,
+    'group_recitation_collection_share_message_no_group',
+    <String, Object>{'collection': collection},
+    () => _fallback.group_recitation_collection_share_message_no_group(
+      collection,
+    ),
+  );
+
+  @override
+  String group_recitation_collection_completed_title(String collection) =>
+      TolgeeBridge.format(
+        localeName,
+        'group_recitation_collection_completed_title',
+        <String, Object>{'collection': collection},
+        () => _fallback.group_recitation_collection_completed_title(collection),
+      );
+
+  @override
+  String get group_recitation_collection_dedication => TolgeeBridge.get(
+    localeName,
+    'group_recitation_collection_dedication',
+    () => _fallback.group_recitation_collection_dedication,
+  );
+
+  @override
   String get share_this_quote => TolgeeBridge.get(
     localeName,
     'share_this_quote',

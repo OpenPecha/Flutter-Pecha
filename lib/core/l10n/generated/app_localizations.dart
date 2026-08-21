@@ -3497,6 +3497,33 @@ abstract class AppLocalizations {
   /// **'Unable to share session. Please try again'**
   String get group_accumulator_session_share_error;
 
+  /// No description provided for @group_recitation_collection_share_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out \"{collection}\", a recitation collection by {group} on WeBuddhist. Join us in practice!'**
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  );
+
+  /// No description provided for @group_recitation_collection_share_message_no_group.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out the recitation collection \"{collection}\" on WeBuddhist. Join us in practice!'**
+  String group_recitation_collection_share_message_no_group(String collection);
+
+  /// No description provided for @group_recitation_collection_completed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'{collection} completed'**
+  String group_recitation_collection_completed_title(String collection);
+
+  /// No description provided for @group_recitation_collection_dedication.
+  ///
+  /// In en, this message translates to:
+  /// **'By this merit, may all beings\nbe free from suffering.'**
+  String get group_recitation_collection_dedication;
+
   /// No description provided for @share_this_quote.
   ///
   /// In en, this message translates to:

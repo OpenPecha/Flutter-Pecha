@@ -197,11 +197,17 @@ class _GroupRecitationCollectionScreenState
   }
 
   Future<void> _onShare(GroupRecitationCollection collection) async {
+    final l10n = context.l10n;
     final groupName = _resolveGroupName(ref, collection.groupId);
     final shareMessage =
         groupName == null
-            ? 'Check out the recitation collection "${collection.name}" on WeBuddhist. Join us in practice!'
-            : 'Check out "${collection.name}", a recitation collection by $groupName on WeBuddhist. Join us in practice!';
+            ? l10n.group_recitation_collection_share_message_no_group(
+                collection.name,
+              )
+            : l10n.group_recitation_collection_share_message(
+                collection.name,
+                groupName,
+              );
     final shareUrl =
         DeepLinkUrlBuilder.groupRecitationCollectionLink(
           groupId: collection.groupId,

@@ -5,9 +5,6 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 /// Celebration sheet shown once all chants in a group recitation collection
 /// have been completed for the day.
-///
-/// TODO(l10n): the title/dedication copy is static English for now —
-/// localize once translations are ready.
 class CollectionCompletionSheet extends StatelessWidget {
   const CollectionCompletionSheet({
     super.key,
@@ -47,7 +44,7 @@ class CollectionCompletionSheet extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                '$collectionName completed',
+                l10n.group_recitation_collection_completed_title(collectionName),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
               ),
@@ -59,12 +56,12 @@ class CollectionCompletionSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                '$dayCount days',
+                l10n.days_count(dayCount),
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               Text(
-                'By this merit, may all beings\nbe free from suffering.',
+                l10n.group_recitation_collection_dedication,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13, color: subtitleColor),
               ),
