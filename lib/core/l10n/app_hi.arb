@@ -271,6 +271,8 @@
   "home_no_tags_found": "कोई टैग नहीं मिला",
   "home_celebrated_by": "इनके द्वारा मनाया जाता है:",
   "reader_settings_tooltip": "रीडर सेटिंग्स",
+  "reader_translate_tooltip": "अनुवाद दिखाएँ",
+  "reader_translate_unavailable": "इस पाठ के लिए अनुवाद उपलब्ध नहीं है",
   "reader_font_size_tooltip": "फ़ॉन्ट आकार",
   "reader_version_title": "संस्करण · {language}",
   "@reader_version_title": {

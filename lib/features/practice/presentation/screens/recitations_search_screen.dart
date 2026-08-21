@@ -219,7 +219,11 @@ class _RecitationsSearchScreenState
         final recitation = searchState.results[index];
         return PracticeChantListTile(
           recitation: recitation,
-          onTap: () => openRecitationReader(context, recitation),
+          onTap: () => openRecitationReader(
+            context,
+            recitation,
+            listLanguage: widget.languageCode,
+          ),
         );
       },
     );

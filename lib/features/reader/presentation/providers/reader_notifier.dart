@@ -11,6 +11,7 @@ import 'package:flutter_pecha/features/reader/data/models/reader_state.dart';
 import 'package:flutter_pecha/features/reader/domain/services/section_flattener_service.dart';
 import 'package:flutter_pecha/features/reader/domain/services/section_merger_service.dart';
 import 'package:flutter_pecha/features/reader/presentation/providers/reader_dual_settings_provider.dart';
+import 'package:flutter_pecha/features/reader/presentation/providers/reader_settings_providers.dart';
 import 'package:flutter_pecha/features/texts/presentation/providers/texts_provider.dart';
 import 'package:flutter_pecha/features/texts/data/models/segment.dart';
 import 'package:flutter_pecha/features/texts/data/models/text/reader_response.dart';
@@ -28,16 +29,20 @@ class ReaderParams {
     this.navigationContext,
   });
 
+  /// Language requested by navigation (e.g. the All chants picker).
+  String? get language => navigationContext?.language;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is ReaderParams &&
         other.textId == textId &&
-        other.segmentId == segmentId;
+        other.segmentId == segmentId &&
+        other.language == language;
   }
 
   @override
-  int get hashCode => Object.hash(textId, segmentId);
+  int get hashCode => Object.hash(textId, segmentId, language);
 }
 
 /// Notifier for managing reader state
@@ -55,6 +60,12 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   /// when a settings change actually warrants a reload. Starts `null` —
   /// matches "no `version_id` sent" which the API treats as "main text".
   String? _activeVersionId;
+
+  /// Path id for `/texts/{id}/details` when opening from the chant list.
+  /// Resolved once from [readerVersionsProvider] if that language has versions.
+  /// Not written into dual-settings primary — chant text stays on top.
+  String? _resolvedLanguageTextId;
+  bool _didResolveLanguageTextId = false;
 
   ReaderNotifier({
     required Ref ref,
@@ -218,18 +229,24 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   /// primary stream stays in lockstep with what Reader Settings → Main text
   /// reports. When no version is selected we omit it and the API returns the
   /// text's default version.
+  ///
+  /// Opening from the chant list also sends [NavigationContext.language] so
+  /// the body matches the list picker. If the details endpoint still ignores
+  /// `language`, we load the first version for that language as the path id
+  /// (same as dual-version primary, without calling `replacePrimary`).
   Future<ReaderResponse> _fetchContent({
     String? segmentId,
     required String direction,
   }) async {
-    final dualSettings = _ref.read(readerDualSettingsProvider(_params.textId));
-    final primaryVersionId = dualSettings.primary.versionId;
     // Note: do NOT update _activeVersionId here. It's the id of the
     // currently-LOADED version (set after a successful initial fetch in
     // `_initialize`), not the value we happen to pass to the API on each
     // call. Pagination calls reuse the same loaded version, so overwriting
     // it here would race with the pagination stale-version guard and leave
     // skeletons stuck on screen.
+
+    final detailsTextId = await _resolveDetailsTextId();
+    final language = _params.language?.trim();
 
     final params = TextDetailsParams(
       // A "version" is itself a text_id — different primary versions live at
@@ -240,9 +257,10 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       // No body `versionId` for the primary stream — the picked id is already
       // in the path. Body `version_id` is the secondary's mechanism for
       // requesting a parallel-aligned translation of the same text.
-      textId: primaryVersionId ?? _params.textId,
+      textId: detailsTextId,
       segmentId: segmentId,
       direction: direction,
+      language: (language != null && language.isNotEmpty) ? language : null,
     );
 
     final result = await _ref.read(textDetailsFutureProvider(params).future);
@@ -251,6 +269,55 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
           throw Exception('Failed to fetch content: ${failure.message}'),
       (response) => response,
     );
+  }
+
+  /// Dual-settings primary version wins. Otherwise, if navigation asked for a
+  /// language and versions exist for it, use that version's `text_id`.
+  Future<String> _resolveDetailsTextId() async {
+    final dualSettings = _ref.read(readerDualSettingsProvider(_params.textId));
+    final primaryVersionId = dualSettings.primary.versionId;
+    if (primaryVersionId != null && primaryVersionId.isNotEmpty) {
+      return primaryVersionId;
+    }
+
+    if (_resolvedLanguageTextId != null) {
+      return _resolvedLanguageTextId!;
+    }
+
+    final language = _params.language?.trim();
+    if (language == null || language.isEmpty) {
+      return _params.textId;
+    }
+
+    if (!_didResolveLanguageTextId) {
+      _didResolveLanguageTextId = true;
+      try {
+        final versions = await _ref.read(
+          readerVersionsProvider(
+            ReaderLanguageQuery(
+              textId: _params.textId,
+              language: language,
+            ),
+          ).future,
+        );
+        if (versions.isNotEmpty) {
+          final id = versions.first.id.trim();
+          if (id.isNotEmpty) {
+            _resolvedLanguageTextId = id;
+            _logger.debug(
+              'Resolved chant language "$language" to text_id $id',
+            );
+            return id;
+          }
+        }
+      } catch (e) {
+        _logger.debug(
+          'Could not resolve version for chant language $language: $e',
+        );
+      }
+    }
+
+    return _params.textId;
   }
 
   /// Load the next page of content

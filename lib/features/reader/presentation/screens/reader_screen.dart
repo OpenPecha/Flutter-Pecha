@@ -135,9 +135,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     Future.microtask(() async {
       if (!mounted) return;
       await ref
-          .read(
-            malaAccumulationSelectionProvider(presetId).notifier,
-          )
+          .read(malaAccumulationSelectionProvider(presetId).notifier)
           .applyNavigationIntent(groupAccumulatorId);
       if (!mounted) return;
       final countsNotifier = ref.read(
@@ -169,13 +167,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     final presetId = ctx.presetAccumulatorId!;
     final groupAccumulatorId = ctx.groupAccumulatorId!;
     final settings = ref.read(malaSettingsProvider);
-    ref.read(groupAccumulationCountsProvider(presetId).notifier).increment(
-      groupAccumulatorId: groupAccumulatorId,
-      groups: const [],
-      soundEnabled: settings.soundEnabled,
-      vibrationEnabled: settings.vibrationEnabled,
-      beadsPerRound: kBeadsPerRound,
-    );
+    ref
+        .read(groupAccumulationCountsProvider(presetId).notifier)
+        .increment(
+          groupAccumulatorId: groupAccumulatorId,
+          groups: const [],
+          soundEnabled: settings.soundEnabled,
+          vibrationEnabled: settings.vibrationEnabled,
+          beadsPerRound: kBeadsPerRound,
+        );
   }
 
   void _onChantAgain() {
@@ -190,11 +190,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     final ctx = _chantContext;
     if (ctx == null) return;
 
-    ref.read(groupAccumulationCountsProvider(ctx.presetAccumulatorId!).notifier).addCount(
-      groupAccumulatorId: ctx.groupAccumulatorId!,
-      groups: const [],
-      count: count,
-    );
+    ref
+        .read(
+          groupAccumulationCountsProvider(ctx.presetAccumulatorId!).notifier,
+        )
+        .addCount(
+          groupAccumulatorId: ctx.groupAccumulatorId!,
+          groups: const [],
+          count: count,
+        );
   }
 
   Future<void> _finishChantSession() async {
@@ -228,8 +232,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     if (ctx == null) return 0;
     final presetId = ctx.presetAccumulatorId!;
     final groupAccumulatorId = ctx.groupAccumulatorId!;
-    final notifier =
-        ref.read(groupAccumulationCountsProvider(presetId).notifier);
+    final notifier = ref.read(
+      groupAccumulationCountsProvider(presetId).notifier,
+    );
     final absolute =
         counts != null
             ? counts[groupAccumulatorId] ??
@@ -444,15 +449,16 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
         !isPanelOpen && (_hasAudio || isActionBarVisible);
     final chantBarHeight =
         _isGroupAccumulatorChant ? GroupAccumulatorChantBar.barHeight : 0.0;
-    final chantSessionCount = _isGroupAccumulatorChant
-        ? _groupChantSessionCount(
-            ref.watch(
-              groupAccumulationCountsProvider(
-                _chantContext!.presetAccumulatorId!,
+    final chantSessionCount =
+        _isGroupAccumulatorChant
+            ? _groupChantSessionCount(
+              ref.watch(
+                groupAccumulationCountsProvider(
+                  _chantContext!.presetAccumulatorId!,
+                ),
               ),
-            ),
-          )
-        : 0;
+            )
+            : 0;
     final contentBottomPadding =
         (isBottomOverlayVisible
             ? (_bottomOverlayHeight > 0
@@ -502,11 +508,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
                                 colorIndex: widget.colorIndex,
                                 onSearchPressed:
                                     () => _handleSearch(context, state),
-                                onSettingsPressed:
-                                    () => _openReaderSettings(
-                                      context,
-                                      textDetail,
-                                    ),
                                 onMorePressed:
                                     () => _openMoreBottomSheet(
                                       context,
@@ -751,6 +752,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
               : null,
       onAddOfflineRecitation:
           _isGroupAccumulatorChant ? _addOfflineChantCount : null,
+      onParallelVersion: () => _openReaderSettings(context, textDetail),
     );
   }
 

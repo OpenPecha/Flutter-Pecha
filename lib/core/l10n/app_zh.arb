@@ -271,6 +271,8 @@
   "home_no_tags_found": "找不到該標籤",
   "home_celebrated_by": "慶祝者：",
   "reader_settings_tooltip": "閱讀器設定",
+  "reader_translate_tooltip": "顯示譯文",
+  "reader_translate_unavailable": "此文本沒有可用譯文",
   "reader_font_size_tooltip": "字體大小",
   "reader_version_title": "版本 · {language}",
   "@reader_version_title": {

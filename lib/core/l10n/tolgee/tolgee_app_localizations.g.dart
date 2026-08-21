@@ -1481,13 +1481,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get connect_my_empty_practices_title => TolgeeBridge.get(
-    localeName,
-    'connect_my_empty_practices_title',
-    () => _fallback.connect_my_empty_practices_title,
-  );
-
-  @override
   String get connect_my_empty_groups_title => TolgeeBridge.get(
     localeName,
     'connect_my_empty_groups_title',
@@ -1516,13 +1509,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get connect_my_empty_practices_subtitle => TolgeeBridge.get(
-    localeName,
-    'connect_my_empty_practices_subtitle',
-    () => _fallback.connect_my_empty_practices_subtitle,
-  );
-
-  @override
   String get connect_my_empty_groups_subtitle => TolgeeBridge.get(
     localeName,
     'connect_my_empty_groups_subtitle',
@@ -1548,6 +1534,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_my_empty_posts_browse',
     () => _fallback.connect_my_empty_posts_browse,
+  );
+
+  @override
+  String get connect_my_empty_practices_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_title',
+    () => _fallback.connect_my_empty_practices_title,
+  );
+
+  @override
+  String get connect_my_empty_practices_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_subtitle',
+    () => _fallback.connect_my_empty_practices_subtitle,
   );
 
   @override
@@ -1768,6 +1768,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'reader_settings_tooltip',
     () => _fallback.reader_settings_tooltip,
+  );
+
+  @override
+  String get reader_translate_tooltip => TolgeeBridge.get(
+    localeName,
+    'reader_translate_tooltip',
+    () => _fallback.reader_translate_tooltip,
+  );
+
+  @override
+  String get reader_translate_unavailable => TolgeeBridge.get(
+    localeName,
+    'reader_translate_unavailable',
+    () => _fallback.reader_translate_unavailable,
   );
 
   @override

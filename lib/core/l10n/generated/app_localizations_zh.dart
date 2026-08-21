@@ -846,6 +846,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reader_settings_tooltip => '閱讀器設定';
 
   @override
+  String get reader_translate_tooltip => '顯示譯文';
+
+  @override
+  String get reader_translate_unavailable => '此文本沒有可用譯文';
+
+  @override
   String get reader_font_size_tooltip => '字體大小';
 
   @override

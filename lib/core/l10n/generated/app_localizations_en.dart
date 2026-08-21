@@ -895,6 +895,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reader_settings_tooltip => 'Reader settings';
 
   @override
+  String get reader_translate_tooltip => 'Show translation';
+
+  @override
+  String get reader_translate_unavailable =>
+      'Translation not available for this text';
+
+  @override
   String get reader_font_size_tooltip => 'Font size';
 
   @override

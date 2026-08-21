@@ -101,6 +101,7 @@ class CacheKeys {
     String? versionId,
     String? segmentId,
     String? direction,
+    String? language,
   }) {
     final parts = [
       'text_details',
@@ -109,6 +110,7 @@ class CacheKeys {
       versionId ?? 'default',
       segmentId ?? 'start',
       direction ?? 'next',
+      language ?? 'default',
     ];
     return parts.join('_');
   }

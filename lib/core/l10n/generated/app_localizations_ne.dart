@@ -908,6 +908,12 @@ class AppLocalizationsNe extends AppLocalizations {
   String get reader_settings_tooltip => 'रिडर सेटिङ';
 
   @override
+  String get reader_translate_tooltip => 'अनुवाद देखाउनुहोस्';
+
+  @override
+  String get reader_translate_unavailable => 'यस पाठका लागि अनुवाद उपलब्ध छैन';
+
+  @override
   String get reader_font_size_tooltip => 'फन्ट आकार';
 
   @override

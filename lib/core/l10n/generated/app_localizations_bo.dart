@@ -906,6 +906,12 @@ class AppLocalizationsBo extends AppLocalizations {
   String get reader_settings_tooltip => 'འགྱུར་མ་ཤན་སྦྱར།';
 
   @override
+  String get reader_translate_tooltip => 'འགྱུར་མ་སྟོན།';
+
+  @override
+  String get reader_translate_unavailable => 'འདི་ལ་འགྱུར་མ་མེད།';
+
+  @override
   String get reader_font_size_tooltip => 'ཡིག་གཟུགས་ཆེ་ཆུང་།';
 
   @override

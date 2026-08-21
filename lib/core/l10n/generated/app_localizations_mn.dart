@@ -901,6 +901,12 @@ class AppLocalizationsMn extends AppLocalizations {
   String get reader_settings_tooltip => 'Уншигчийн тохиргоо';
 
   @override
+  String get reader_translate_tooltip => 'Орчуулга харуулах';
+
+  @override
+  String get reader_translate_unavailable => 'Энэ текстэд орчуулга байхгүй';
+
+  @override
   String get reader_font_size_tooltip => 'Үсгийн хэмжээ';
 
   @override
