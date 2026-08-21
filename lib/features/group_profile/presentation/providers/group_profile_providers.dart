@@ -237,6 +237,140 @@ final groupRecitationCollectionDetailProvider = FutureProvider.autoDispose
       );
     });
 
+class GroupRecitationCollectionCompletionState {
+  final Set<String> completedChantIds;
+  final Set<String> submittingChantIds;
+  final bool isLoading;
+  final String? error;
+
+  const GroupRecitationCollectionCompletionState({
+    this.completedChantIds = const {},
+    this.submittingChantIds = const {},
+    this.isLoading = false,
+    this.error,
+  });
+
+  bool isCompleted(String chantId) =>
+      completedChantIds.contains(chantId.trim());
+
+  bool isSubmitting(String chantId) =>
+      submittingChantIds.contains(chantId.trim());
+
+  GroupRecitationCollectionCompletionState copyWith({
+    Set<String>? completedChantIds,
+    Set<String>? submittingChantIds,
+    bool? isLoading,
+    String? error,
+    bool clearError = false,
+  }) {
+    return GroupRecitationCollectionCompletionState(
+      completedChantIds: completedChantIds ?? this.completedChantIds,
+      submittingChantIds: submittingChantIds ?? this.submittingChantIds,
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : error ?? this.error,
+    );
+  }
+}
+
+class GroupRecitationCollectionCompletionNotifier
+    extends StateNotifier<GroupRecitationCollectionCompletionState> {
+  GroupRecitationCollectionCompletionNotifier({
+    required GroupProfileRepositoryInterface repository,
+    required GroupRecitationCollectionKey key,
+    required bool isAuthenticated,
+  }) : _repository = repository,
+       _key = key,
+       _isAuthenticated = isAuthenticated,
+       super(const GroupRecitationCollectionCompletionState());
+
+  final GroupProfileRepositoryInterface _repository;
+  final GroupRecitationCollectionKey _key;
+  final bool _isAuthenticated;
+  int _requestGeneration = 0;
+
+  Future<void> loadToday() async {
+    if (!_isAuthenticated || state.isLoading) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _repository.getTodayRecitationCollectionCompletions(
+      collectionId: _key.collectionId,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (completedChantIds) {
+        state = state.copyWith(
+          completedChantIds: completedChantIds,
+          isLoading: false,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<bool> completeChant(String chantId) async {
+    final trimmedChantId = chantId.trim();
+    if (!_isAuthenticated || trimmedChantId.isEmpty) return false;
+    if (state.completedChantIds.contains(trimmedChantId)) return true;
+    if (state.submittingChantIds.contains(trimmedChantId)) return false;
+
+    state = state.copyWith(
+      submittingChantIds: {...state.submittingChantIds, trimmedChantId},
+      clearError: true,
+    );
+
+    final result = await _repository.completeRecitationCollectionChant(
+      collectionId: _key.collectionId,
+      chantId: trimmedChantId,
+    );
+
+    if (!mounted) return false;
+
+    final submitting = {...state.submittingChantIds}..remove(trimmedChantId);
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          submittingChantIds: submitting,
+          error: failure.message,
+        );
+        return false;
+      },
+      (_) {
+        state = state.copyWith(
+          completedChantIds: {...state.completedChantIds, trimmedChantId},
+          submittingChantIds: submitting,
+          clearError: true,
+        );
+        return true;
+      },
+    );
+  }
+}
+
+final groupRecitationCollectionCompletionProvider = StateNotifierProvider
+    .autoDispose
+    .family<
+      GroupRecitationCollectionCompletionNotifier,
+      GroupRecitationCollectionCompletionState,
+      GroupRecitationCollectionKey
+    >((ref, key) {
+      final authState = ref.watch(authProvider);
+      final notifier = GroupRecitationCollectionCompletionNotifier(
+        repository: ref.watch(groupProfileRepositoryProvider),
+        key: key,
+        isAuthenticated: authState.isLoggedIn && !authState.isGuest,
+      );
+      notifier.loadToday();
+      return notifier;
+    });
+
 @immutable
 class GroupFollowKey {
   final String groupId;

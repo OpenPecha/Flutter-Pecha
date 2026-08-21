@@ -139,6 +139,57 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
     }
   }
 
+  @override
+  Future<Either<Failure, Set<String>>> getTodayRecitationCollectionCompletions({
+    required String collectionId,
+  }) async {
+    try {
+      final completedChantIds = await remote
+          .fetchTodayRecitationCollectionCompletions(
+            collectionId: collectionId,
+          );
+      return Right(completedChantIds);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load completed recitations: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> completeRecitationCollectionChant({
+    required String collectionId,
+    required String chantId,
+  }) async {
+    try {
+      await remote.completeRecitationCollectionChant(
+        collectionId: collectionId,
+        chantId: chantId,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to complete recitation: $e'));
+    }
+  }
+
   Future<Either<Failure, GroupPracticesPage>> _loadPractices({
     String? groupId,
     required bool includeUnfollowed,

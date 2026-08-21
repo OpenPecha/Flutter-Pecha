@@ -164,6 +164,67 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<Set<String>> fetchTodayRecitationCollectionCompletions({
+    required String collectionId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/users/me/groups/recitation-collections/$collectionId/complete/today',
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        return (data['completed_chant_ids'] as List<dynamic>?)
+                ?.whereType<String>()
+                .toSet() ??
+            const {};
+      }
+
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load completed recitations',
+      );
+    } on DioException catch (e) {
+      _logger.error(
+        'Dio error in fetchTodayRecitationCollectionCompletions',
+        e,
+      );
+      throw _dioToException(e, 'Failed to load completed recitations');
+    }
+  }
+
+  Future<void> completeRecitationCollectionChant({
+    required String collectionId,
+    required String chantId,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/users/me/groups/recitation-collections/$collectionId/complete',
+        data: {'chant_id': chantId},
+      );
+
+      if (response.statusCode == null ||
+          response.statusCode! < 200 ||
+          response.statusCode! >= 300) {
+        throw _statusToException(
+          response.statusCode,
+          'Failed to complete recitation',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        _logger.info(
+          'Recitation $chantId already completed (409) — treating as success',
+        );
+        return;
+      }
+
+      _logger.error('Dio error in completeRecitationCollectionChant', e);
+      throw _dioToException(e, 'Failed to complete recitation');
+    }
+  }
+
   Future<GroupMembersPageModel> fetchGroupMembers(
     String groupId, {
     required int skip,
