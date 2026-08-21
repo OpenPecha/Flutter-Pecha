@@ -263,6 +263,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 },
               ),
               GoRoute(
+                path: "recitation-collection/:collectionId",
+                name: "recitation-collection",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final collectionId =
+                      state.pathParameters['collectionId'] ?? '';
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return GroupRecitationCollectionScreen(
+                    groupId: '',
+                    collectionId: collectionId,
+                    initialTitle: extra?['title'] as String?,
+                  );
+                },
+              ),
+              GoRoute(
                 path: "group/:groupId",
                 name: "home-group-profile",
                 parentNavigatorKey: rootNavigatorKey,
