@@ -224,6 +224,31 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
   }
 
   @override
+  Future<Either<Failure, int>> getRecitationCollectionCompletionDaysCount({
+    required String collectionId,
+  }) async {
+    try {
+      final dayCount = await remote
+          .fetchRecitationCollectionCompletionDaysCount(
+            collectionId: collectionId,
+          );
+      return Right(dayCount);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load completion day count: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, GroupMembersPage>> getGroupMembers(
     String groupId, {
     required int skip,

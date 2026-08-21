@@ -53,6 +53,12 @@ abstract class GroupProfileRepositoryInterface {
     required String chantId,
   });
 
+  /// Number of days the user has completed this recitation collection,
+  /// per `GET /users/me/groups/recitation-collections/{id}/complete/days-count`.
+  Future<Either<Failure, int>> getRecitationCollectionCompletionDaysCount({
+    required String collectionId,
+  });
+
   Future<Either<Failure, GroupMembersPage>> getGroupMembers(
     String groupId, {
     required int skip,

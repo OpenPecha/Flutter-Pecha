@@ -208,6 +208,33 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<int> fetchRecitationCollectionCompletionDaysCount({
+    required String collectionId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/users/me/groups/recitation-collections/$collectionId/complete/days-count',
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        return (data['day_count'] as num?)?.toInt() ?? 0;
+      }
+
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load completion day count',
+      );
+    } on DioException catch (e) {
+      _logger.error(
+        'Dio error in fetchRecitationCollectionCompletionDaysCount',
+        e,
+      );
+      throw _dioToException(e, 'Failed to load completion day count');
+    }
+  }
+
   Future<void> completeRecitationCollectionChant({
     required String collectionId,
     required String chantId,
