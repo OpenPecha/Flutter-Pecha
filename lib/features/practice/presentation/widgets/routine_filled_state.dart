@@ -109,10 +109,13 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
     }
 
     if (itemType == RoutineItemType.groupRecitationCollection) {
-      // Opening a collection needs its group id, which notification payloads
-      // don't carry. Consume the nav so it doesn't fall through to the plan
-      // lookup below and surface a misleading "not found".
       ref.read(pendingNotificationNavProvider.notifier).state = null;
+      final item = _findRoutineItem(widget.routineData, pendingNav.itemId);
+      context.pushNamed(
+        'recitation-collection',
+        pathParameters: {'collectionId': pendingNav.itemId},
+        extra: {'title': item?.title},
+      );
       return;
     }
 
@@ -344,9 +347,11 @@ class _RoutineBlockSection extends ConsumerWidget {
       case RoutineItemType.accumulator:
         context.push('/mala', extra: {'presetId': item.id});
       case RoutineItemType.groupRecitationCollection:
-        // Every collection endpoint is scoped by group id, which the routine
-        // read does not return — so there is nothing to navigate to from here.
-        break;
+        context.pushNamed(
+          'recitation-collection',
+          pathParameters: {'collectionId': item.id},
+          extra: {'title': item.title},
+        );
     }
   }
 
@@ -496,7 +501,7 @@ class _RoutineBlockSection extends ConsumerWidget {
                   ? context.l10n.home_recitation_count(itemCount)
                   : item.currentPlanTitle,
           imageSize: 56,
-          onTap: isCollection ? null : () => _onItemTap(context, ref, item),
+          onTap: () => _onItemTap(context, ref, item),
           onPlanTap:
               item.currentPlanId != null
                   ? () => _onPlanArrowTap(context, ref, item)
