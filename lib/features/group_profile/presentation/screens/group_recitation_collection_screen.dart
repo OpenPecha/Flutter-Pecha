@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
+import 'package:flutter_pecha/features/practice/presentation/controllers/bookmark_controller.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/bookmark_providers.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
+import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 class GroupRecitationCollectionScreen extends ConsumerWidget {
   final String groupId;
@@ -63,6 +70,7 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
                         onOpenItem:
                             (item) =>
                                 _openReaderAndComplete(context, ref, key, item),
+                        onShare: () => _onShare(context, ref, collection),
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -100,15 +108,58 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) return;
 
-    final completed = await ref
+    final result = await ref
         .read(groupRecitationCollectionCompletionProvider(key).notifier)
         .completeChant(chantId);
 
-    if (!completed && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.somethingWrong)));
-    }
+    if (!context.mounted) return;
+
+    final message = switch (result) {
+      GroupChantCompletionResult.completed => null,
+      GroupChantCompletionResult.membershipRequired =>
+        'Join this group to track your progress',
+      GroupChantCompletionResult.failed => context.l10n.somethingWrong,
+    };
+    if (message == null) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _onShare(
+    BuildContext context,
+    WidgetRef ref,
+    GroupRecitationCollection collection,
+  ) async {
+    final groupName = _resolveGroupName(ref, collection.groupId);
+    final shareMessage =
+        groupName == null
+            ? 'Check out the recitation collection "${collection.name}" on WeBuddhist. Join us in practice!'
+            : 'Check out "${collection.name}", a recitation collection by $groupName on WeBuddhist. Join us in practice!';
+    final shareUrl =
+        DeepLinkUrlBuilder.groupRecitationCollectionLink(
+          groupId: collection.groupId,
+          collectionId: collection.id,
+        ).toString();
+    final sharePositionOrigin = getSharePositionOrigin(context: context);
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: '$shareMessage\n\n$shareUrl',
+        sharePositionOrigin: sharePositionOrigin,
+      ),
+    );
+  }
+
+  /// Resolves the group name from the cached group profile if available.
+  String? _resolveGroupName(WidgetRef ref, String groupId) {
+    return ref
+        .read(groupProfileProvider(groupId))
+        .whenOrNull(
+          data:
+              (either) => either.fold((_) => null, (profile) => profile.title),
+        );
   }
 }
 
@@ -157,12 +208,14 @@ class _CollectionContent extends StatelessWidget {
     required this.completionState,
     required this.isDark,
     required this.onOpenItem,
+    required this.onShare,
   });
 
   final GroupRecitationCollection collection;
   final GroupRecitationCollectionCompletionState completionState;
   final bool isDark;
   final ValueChanged<GroupRecitationCollectionItem> onOpenItem;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +231,11 @@ class _CollectionContent extends StatelessWidget {
               children: [
                 _CollectionHero(imageUrl: collection.imageUrl, isDark: isDark),
                 const SizedBox(height: 14),
-                _PlaceholderActionBar(isDark: isDark),
+                _CollectionActionBar(
+                  collection: collection,
+                  isDark: isDark,
+                  onShare: onShare,
+                ),
                 const SizedBox(height: 12),
                 if (hasItems)
                   ...collection.items.map(
@@ -285,69 +342,115 @@ class _CollectionHero extends StatelessWidget {
   }
 }
 
-class _PlaceholderActionBar extends StatelessWidget {
-  const _PlaceholderActionBar({required this.isDark});
+class _CollectionActionBar extends ConsumerWidget {
+  const _CollectionActionBar({
+    required this.collection,
+    required this.isDark,
+    required this.onShare,
+  });
 
+  final GroupRecitationCollection collection;
   final bool isDark;
+  final VoidCallback onShare;
 
   @override
-  Widget build(BuildContext context) {
-    final actions = [
-      (AppAssets.language, context.l10n.language),
-      (AppAssets.speakerSimpleHigh, 'Audio'),
-      (AppAssets.plus, 'Practice'),
-      (AppAssets.bookmarkSimple, context.l10n.bookmark),
-      (AppAssets.readerShare, context.l10n.share),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookmarkTarget = BookmarkTarget(
+      type: BookmarkType.groupRecitationCollection,
+      sourceId: collection.id,
+    );
+    final isBookmarked = ref.watch(isBookmarkedProvider(bookmarkTarget));
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          for (final action in actions) ...[
-            _PlaceholderActionChip(
-              icon: action.$1,
-              label: action.$2,
-              isDark: isDark,
-            ),
-            const SizedBox(width: 8),
-          ],
+          _ActionChip(
+            icon: AppAssets.plus,
+            label: context.l10n.nav_practice,
+            isDark: isDark,
+            onTap: () => _addToPractices(context, ref),
+          ),
+          const SizedBox(width: 8),
+          _ActionChip(
+            icon:
+                isBookmarked
+                    ? AppAssets.bookmarkSimpleFill
+                    : AppAssets.bookmarkSimple,
+            label: context.l10n.bookmark,
+            isDark: isDark,
+            onTap:
+                () => BookmarkController(
+                  ref: ref,
+                  context: context,
+                ).toggleGroupRecitationCollection(
+                  collection.id,
+                  name: collection.name,
+                ),
+          ),
+          const SizedBox(width: 8),
+          _ActionChip(
+            icon: AppAssets.readerShare,
+            label: context.l10n.share,
+            isDark: isDark,
+            onTap: onShare,
+          ),
+          const SizedBox(width: 8),
         ],
       ),
     );
   }
+
+  /// Hands the collection to the routine editor, which injects it as a
+  /// GROUP_RECITATION_COLLECTION session and lets the user place its time block.
+  void _addToPractices(BuildContext context, WidgetRef ref) {
+    if (ref.read(authProvider).isGuest) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    context.pushNamed(
+      'edit-routine',
+      extra: {'initialGroupCollection': collection},
+    );
+  }
 }
 
-class _PlaceholderActionChip extends StatelessWidget {
-  const _PlaceholderActionChip({
+class _ActionChip extends StatelessWidget {
+  const _ActionChip({
     required this.icon,
     required this.label,
     required this.isDark,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool isDark;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
     );
   }

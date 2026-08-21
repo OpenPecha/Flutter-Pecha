@@ -237,6 +237,17 @@ final groupRecitationCollectionDetailProvider = FutureProvider.autoDispose
       );
     });
 
+/// Outcome of logging one chant as completed.
+enum GroupChantCompletionResult {
+  completed,
+
+  /// Rejected because the user follows the group but has not joined it.
+  membershipRequired,
+
+  /// Skipped (guest, empty id, already in flight) or the call failed.
+  failed,
+}
+
 class GroupRecitationCollectionCompletionState {
   final Set<String> completedChantIds;
   final Set<String> submittingChantIds;
@@ -314,11 +325,17 @@ class GroupRecitationCollectionCompletionNotifier
     );
   }
 
-  Future<bool> completeChant(String chantId) async {
+  Future<GroupChantCompletionResult> completeChant(String chantId) async {
     final trimmedChantId = chantId.trim();
-    if (!_isAuthenticated || trimmedChantId.isEmpty) return false;
-    if (state.completedChantIds.contains(trimmedChantId)) return true;
-    if (state.submittingChantIds.contains(trimmedChantId)) return false;
+    if (!_isAuthenticated || trimmedChantId.isEmpty) {
+      return GroupChantCompletionResult.failed;
+    }
+    if (state.completedChantIds.contains(trimmedChantId)) {
+      return GroupChantCompletionResult.completed;
+    }
+    if (state.submittingChantIds.contains(trimmedChantId)) {
+      return GroupChantCompletionResult.failed;
+    }
 
     state = state.copyWith(
       submittingChantIds: {...state.submittingChantIds, trimmedChantId},
@@ -330,7 +347,7 @@ class GroupRecitationCollectionCompletionNotifier
       chantId: trimmedChantId,
     );
 
-    if (!mounted) return false;
+    if (!mounted) return GroupChantCompletionResult.failed;
 
     final submitting = {...state.submittingChantIds}..remove(trimmedChantId);
 
@@ -340,7 +357,10 @@ class GroupRecitationCollectionCompletionNotifier
           submittingChantIds: submitting,
           error: failure.message,
         );
-        return false;
+        return failure is AuthorizationFailure &&
+                failure.message == noGroupMembershipCode
+            ? GroupChantCompletionResult.membershipRequired
+            : GroupChantCompletionResult.failed;
       },
       (_) {
         state = state.copyWith(
@@ -348,7 +368,7 @@ class GroupRecitationCollectionCompletionNotifier
           submittingChantIds: submitting,
           clearError: true,
         );
-        return true;
+        return GroupChantCompletionResult.completed;
       },
     );
   }

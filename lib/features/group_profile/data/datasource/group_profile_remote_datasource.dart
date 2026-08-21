@@ -7,6 +7,10 @@ import 'package:flutter_pecha/features/group_profile/data/models/group_practice_
 import 'package:flutter_pecha/features/group_profile/data/models/group_profile_model.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 
+/// Marker carried by the failure raised when a chant completion is rejected
+/// because the user only follows the group instead of having joined it.
+const String noGroupMembershipCode = 'NO_GROUP_MEMBERSHIP';
+
 class GroupProfileRemoteDatasource {
   final Dio dio;
   final _logger = AppLogger('GroupProfileRemoteDatasource');
@@ -186,6 +190,16 @@ class GroupProfileRemoteDatasource {
         'Failed to load completed recitations',
       );
     } on DioException catch (e) {
+      // Only members may track completions. A follower can still open the
+      // collection, so treat the rejection as "nothing completed" instead of
+      // failing the screen.
+      if (e.response?.statusCode == 403) {
+        _logger.info(
+          'No membership for collection $collectionId — no completion ticks to show',
+        );
+        return const {};
+      }
+
       _logger.error(
         'Dio error in fetchTodayRecitationCollectionCompletions',
         e,
@@ -218,6 +232,14 @@ class GroupProfileRemoteDatasource {
           'Recitation $chantId already completed (409) — treating as success',
         );
         return;
+      }
+
+      // Followers can read a collection but only members can log completions.
+      if (e.response?.statusCode == 403) {
+        _logger.info(
+          'Completion rejected for collection $collectionId — membership required',
+        );
+        throw const AuthorizationException(noGroupMembershipCode);
       }
 
       _logger.error('Dio error in completeRecitationCollectionChant', e);

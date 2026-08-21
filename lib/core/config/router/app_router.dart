@@ -13,6 +13,7 @@ import 'package:flutter_pecha/features/auth/presentation/screens/splash_screen.d
 import 'package:flutter_pecha/features/calendar/presentation/screens/tibetan_calendar_screen.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/connect_post_detail_screen.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
@@ -263,6 +264,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 },
               ),
               GoRoute(
+                path: "recitation-collection/:collectionId",
+                name: "recitation-collection",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final collectionId =
+                      state.pathParameters['collectionId'] ?? '';
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return GroupRecitationCollectionScreen(
+                    groupId: '',
+                    collectionId: collectionId,
+                    initialTitle: extra?['title'] as String?,
+                  );
+                },
+              ),
+              GoRoute(
                 path: "group/:groupId",
                 name: "home-group-profile",
                 parentNavigatorKey: rootNavigatorKey,
@@ -462,6 +478,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final mantra = extra?['initialMantra'] as Mantra?;
           final enrollSeriesId = extra?['enrollSeriesId'] as String?;
           final timer = extra?['initialTimer'] as PresetTimer?;
+          final groupCollection =
+              extra?['initialGroupCollection'] as GroupRecitationCollection?;
           return EditRoutineScreen(
             initialPlan: plan,
             initialRecitation: recitation,
@@ -469,6 +487,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             initialSeries: series,
             initialMantra: mantra,
             enrollSeriesId: enrollSeriesId,
+            initialGroupCollection: groupCollection,
           );
         },
         routes: [

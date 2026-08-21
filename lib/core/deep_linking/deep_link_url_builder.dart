@@ -127,4 +127,18 @@ class DeepLinkUrlBuilder {
       pathSegments: ['open', 'timer', timerId],
     );
   }
+
+  /// Returns a link that opens a group recitation collection detail page.
+  ///
+  /// Format: https://webuddhist.com/open/group/{groupId}/recitation-collections/{collectionId}
+  static Uri groupRecitationCollectionLink({
+    required String groupId,
+    required String collectionId,
+  }) {
+    return Uri(
+      scheme: 'https',
+      host: _host,
+      pathSegments: ['open', 'group', groupId, 'recitation-collections', collectionId],
+    );
+  }
 }

@@ -109,6 +109,17 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
       return;
     }
 
+    if (itemType == RoutineItemType.groupRecitationCollection) {
+      ref.read(pendingNotificationNavProvider.notifier).state = null;
+      final item = _findRoutineItem(widget.routineData, pendingNav.itemId);
+      context.pushNamed(
+        'recitation-collection',
+        pathParameters: {'collectionId': pendingNav.itemId},
+        extra: {'title': item?.title},
+      );
+      return;
+    }
+
     if (itemType == RoutineItemType.timer) {
       // Open the timer screen — same destination as tapping the timer item in
       // the routine. `/home/timers/active` is a root-navigator route, so it is
@@ -350,6 +361,12 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
         _navigateToTimer(context, item);
       case RoutineItemType.accumulator:
         context.push('/mala', extra: {'presetId': item.id});
+      case RoutineItemType.groupRecitationCollection:
+        context.pushNamed(
+          'recitation-collection',
+          pathParameters: {'collectionId': item.id},
+          extra: {'title': item.title},
+        );
     }
   }
 
@@ -523,6 +540,9 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCollection =
+        item.type == RoutineItemType.groupRecitationCollection;
+    final itemCount = item.itemCount;
 
     return Container(
       decoration: BoxDecoration(
@@ -538,7 +558,10 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
           title: routineItemDisplayTitle(item, context.l10n),
           coverImage: item.coverImage,
           type: item.type,
-          planTitle: item.currentPlanTitle,
+          planTitle:
+              isCollection && itemCount != null && itemCount > 0
+                  ? context.l10n.home_recitation_count(itemCount)
+                  : item.currentPlanTitle,
           imageSize: 56,
           onTap: () => _onItemTap(context, ref, item),
           onPlanTap:
