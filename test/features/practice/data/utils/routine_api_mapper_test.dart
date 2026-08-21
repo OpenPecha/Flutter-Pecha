@@ -33,6 +33,23 @@ void main() {
       expect(actualItem.type, RoutineItemType.plan);
       expect(actualItem.currentPlanId, 'plan-1');
     });
+
+    test('uses sourceId when PLAN currentPlanId is empty', () {
+      const inputSession = SessionDTO(
+        id: 'session-1',
+        sessionType: SessionType.plan,
+        sourceId: 'plan-1',
+        title: 'Lojong',
+        language: '',
+        displayOrder: 0,
+        currentPlanId: '',
+      );
+
+      final actualItem = routineItemFromSessionDto(inputSession);
+
+      expect(actualItem.language, isNull);
+      expect(actualItem.currentPlanId, 'plan-1');
+    });
   });
 
   group('routineBlockToRequest', () {

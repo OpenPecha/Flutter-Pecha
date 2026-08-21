@@ -33,16 +33,19 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
       SessionType.accumulator => RoutineItemType.accumulator,
     },
     enrolledAt: s.startedAt,
-    language: s.language,
+    language: s.language.isEmpty ? null : s.language,
     startDate: s.startDate,
-    currentPlanId:
-        s.sessionType == SessionType.plan
-            ? (s.currentPlanId ?? s.sourceId)
-            : s.currentPlanId,
+    currentPlanId: _nonEmptyId(s.currentPlanId) ??
+        (s.sessionType == SessionType.plan ? s.sourceId : null),
     currentPlanTitle: s.currentPlanTitle,
     durationMs: s.durationMs,
     firstSegment: s.firstSegment,
   );
+}
+
+String? _nonEmptyId(String? value) {
+  if (value == null || value.isEmpty) return null;
+  return value;
 }
 
 List<SessionRequest> _sessionsForBlock(RoutineBlock block) {
