@@ -79,6 +79,10 @@ Future<void> autoSelectSecondaryVersion({
       ),
     );
   } catch (_) {
+    final latest = ref.read(readerDualSettingsProvider(textId)).secondary;
+    if (latest.languageCode != slot.languageCode || latest.versionId != null) {
+      return;
+    }
     notifier.replaceSecondary(slot.copyWith(versionUnavailable: true));
   }
 }
