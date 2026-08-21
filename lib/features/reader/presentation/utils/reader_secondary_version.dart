@@ -103,7 +103,13 @@ Future<bool> fillSettingsLanguageSecondary({
   if (settingsLang.isEmpty) return false;
   if (readerLanguagesMatch(settingsLang, sourceLanguage)) return false;
 
+  final notifier = ref.read(readerDualSettingsProvider(textId).notifier);
+  final enabledGeneration = notifier.secondaryEnabledGeneration;
+  bool toggleUnchanged() =>
+      notifier.secondaryEnabledGeneration == enabledGeneration;
+
   final languages = await ref.read(readerLanguagesProvider(textId).future);
+  if (!toggleUnchanged()) return false;
   ReaderLanguageOption? option;
   for (final language in languages) {
     if (readerLanguagesMatch(language.code, settingsLang)) {
@@ -114,7 +120,6 @@ Future<bool> fillSettingsLanguageSecondary({
   if (option == null) return false;
   if (!context.mounted) return false;
 
-  final notifier = ref.read(readerDualSettingsProvider(textId).notifier);
   final current = ref.read(readerDualSettingsProvider(textId)).secondary;
   if (current.versionId != null &&
       readerLanguagesMatch(current.languageCode, settingsLang)) {
@@ -141,6 +146,7 @@ Future<bool> fillSettingsLanguageSecondary({
     resolveGeneration: resolveGeneration,
   );
 
+  if (!toggleUnchanged()) return false;
   final filled = ref.read(readerDualSettingsProvider(textId)).secondary;
   if (filled.versionId == null) return false;
   notifier.setSecondaryEnabled(true);
