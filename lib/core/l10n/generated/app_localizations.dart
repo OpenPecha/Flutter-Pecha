@@ -1399,7 +1399,7 @@ abstract class AppLocalizations {
   /// No description provided for @connect_segment_my.
   ///
   /// In en, this message translates to:
-  /// **'My'**
+  /// **'For you'**
   String get connect_segment_my;
 
   /// No description provided for @connect_segment_discover.
@@ -1593,6 +1593,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Online'**
   String get connect_online;
+
+  /// No description provided for @home_group_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Events'**
+  String get home_group_events;
+
+  /// No description provided for @connect_events_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get connect_events_filter_all;
+
+  /// No description provided for @connect_events_filter_in_person.
+  ///
+  /// In en, this message translates to:
+  /// **'In person'**
+  String get connect_events_filter_in_person;
+
+  /// No description provided for @connect_events_filter_empty_online.
+  ///
+  /// In en, this message translates to:
+  /// **'No online events'**
+  String get connect_events_filter_empty_online;
+
+  /// No description provided for @connect_events_filter_empty_in_person.
+  ///
+  /// In en, this message translates to:
+  /// **'No in-person events'**
+  String get connect_events_filter_empty_in_person;
 
   /// No description provided for @connect_open.
   ///
@@ -2971,7 +3001,7 @@ abstract class AppLocalizations {
   /// No description provided for @about_connect_with_us.
   ///
   /// In en, this message translates to:
-  /// **'Connect with us'**
+  /// **'Connect with us...'**
   String get about_connect_with_us;
 
   /// No description provided for @about_description.

@@ -152,32 +152,25 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get currentDateLabel => _en.currentDateLabel;
 
   @override
-  // TODO: implement dateInputLabel
-  String get dateInputLabel => throw UnimplementedError();
+  String get dateInputLabel => _en.dateInputLabel;
 
   @override
-  // TODO: implement dateOutOfRangeLabel
-  String get dateOutOfRangeLabel => throw UnimplementedError();
+  String get dateOutOfRangeLabel => _en.dateOutOfRangeLabel;
 
   @override
-  // TODO: implement datePickerHelpText
-  String get datePickerHelpText => throw UnimplementedError();
+  String get datePickerHelpText => _en.datePickerHelpText;
 
   @override
-  // TODO: implement dateRangeEndLabel
-  String get dateRangeEndLabel => throw UnimplementedError();
+  String get dateRangeEndLabel => _en.dateRangeEndLabel;
 
   @override
-  // TODO: implement dateRangePickerHelpText
-  String get dateRangePickerHelpText => throw UnimplementedError();
+  String get dateRangePickerHelpText => _en.dateRangePickerHelpText;
 
   @override
-  // TODO: implement dateRangeStartLabel
-  String get dateRangeStartLabel => throw UnimplementedError();
+  String get dateRangeStartLabel => _en.dateRangeStartLabel;
 
   @override
-  // TODO: implement dateSeparator
-  String get dateSeparator => throw UnimplementedError();
+  String get dateSeparator => _en.dateSeparator;
 
   @override
   String get dialModeButtonLabel => _en.dialModeButtonLabel;
@@ -201,283 +194,214 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get expansionTileExpandedTapHint => _en.expansionTileExpandedTapHint;
 
   @override
-  // TODO: implement firstPageTooltip
-  String get firstPageTooltip => throw UnimplementedError();
+  String get firstPageTooltip => _en.firstPageTooltip;
 
   @override
-  // TODO: implement hideAccountsLabel
-  String get hideAccountsLabel => throw UnimplementedError();
+  String get hideAccountsLabel => _en.hideAccountsLabel;
 
   @override
-  // TODO: implement invalidDateFormatLabel
-  String get invalidDateFormatLabel => throw UnimplementedError();
+  String get invalidDateFormatLabel => _en.invalidDateFormatLabel;
 
   @override
-  // TODO: implement invalidDateRangeLabel
-  String get invalidDateRangeLabel => throw UnimplementedError();
+  String get invalidDateRangeLabel => _en.invalidDateRangeLabel;
 
   @override
-  // TODO: implement invalidTimeLabel
-  String get invalidTimeLabel => throw UnimplementedError();
+  String get invalidTimeLabel => _en.invalidTimeLabel;
 
   @override
-  // TODO: implement keyboardKeyAlt
-  String get keyboardKeyAlt => throw UnimplementedError();
+  String get keyboardKeyAlt => _en.keyboardKeyAlt;
 
   @override
-  // TODO: implement keyboardKeyAltGraph
-  String get keyboardKeyAltGraph => throw UnimplementedError();
+  String get keyboardKeyAltGraph => _en.keyboardKeyAltGraph;
 
   @override
-  // TODO: implement keyboardKeyBackspace
-  String get keyboardKeyBackspace => throw UnimplementedError();
+  String get keyboardKeyBackspace => _en.keyboardKeyBackspace;
 
   @override
-  // TODO: implement keyboardKeyCapsLock
-  String get keyboardKeyCapsLock => throw UnimplementedError();
+  String get keyboardKeyCapsLock => _en.keyboardKeyCapsLock;
 
   @override
-  // TODO: implement keyboardKeyChannelDown
-  String get keyboardKeyChannelDown => throw UnimplementedError();
+  String get keyboardKeyChannelDown => _en.keyboardKeyChannelDown;
 
   @override
-  // TODO: implement keyboardKeyChannelUp
-  String get keyboardKeyChannelUp => throw UnimplementedError();
+  String get keyboardKeyChannelUp => _en.keyboardKeyChannelUp;
 
   @override
-  // TODO: implement keyboardKeyControl
-  String get keyboardKeyControl => throw UnimplementedError();
+  String get keyboardKeyControl => _en.keyboardKeyControl;
 
   @override
-  // TODO: implement keyboardKeyDelete
-  String get keyboardKeyDelete => throw UnimplementedError();
+  String get keyboardKeyDelete => _en.keyboardKeyDelete;
 
   @override
-  // TODO: implement keyboardKeyEject
-  String get keyboardKeyEject => throw UnimplementedError();
+  String get keyboardKeyEject => _en.keyboardKeyEject;
 
   @override
-  // TODO: implement keyboardKeyEnd
-  String get keyboardKeyEnd => throw UnimplementedError();
+  String get keyboardKeyEnd => _en.keyboardKeyEnd;
 
   @override
-  // TODO: implement keyboardKeyEscape
-  String get keyboardKeyEscape => throw UnimplementedError();
+  String get keyboardKeyEscape => _en.keyboardKeyEscape;
 
   @override
-  // TODO: implement keyboardKeyFn
-  String get keyboardKeyFn => throw UnimplementedError();
+  String get keyboardKeyFn => _en.keyboardKeyFn;
 
   @override
-  // TODO: implement keyboardKeyHome
-  String get keyboardKeyHome => throw UnimplementedError();
+  String get keyboardKeyHome => _en.keyboardKeyHome;
 
   @override
-  // TODO: implement keyboardKeyInsert
-  String get keyboardKeyInsert => throw UnimplementedError();
+  String get keyboardKeyInsert => _en.keyboardKeyInsert;
 
   @override
-  // TODO: implement keyboardKeyMeta
-  String get keyboardKeyMeta => throw UnimplementedError();
+  String get keyboardKeyMeta => _en.keyboardKeyMeta;
 
   @override
-  // TODO: implement keyboardKeyMetaMacOs
-  String get keyboardKeyMetaMacOs => throw UnimplementedError();
+  String get keyboardKeyMetaMacOs => _en.keyboardKeyMetaMacOs;
 
   @override
-  // TODO: implement keyboardKeyMetaWindows
-  String get keyboardKeyMetaWindows => throw UnimplementedError();
+  String get keyboardKeyMetaWindows => _en.keyboardKeyMetaWindows;
 
   @override
-  // TODO: implement keyboardKeyNumLock
-  String get keyboardKeyNumLock => throw UnimplementedError();
+  String get keyboardKeyNumLock => _en.keyboardKeyNumLock;
 
   @override
-  // TODO: implement keyboardKeyNumpad0
-  String get keyboardKeyNumpad0 => throw UnimplementedError();
+  String get keyboardKeyNumpad0 => _en.keyboardKeyNumpad0;
 
   @override
-  // TODO: implement keyboardKeyNumpad1
-  String get keyboardKeyNumpad1 => throw UnimplementedError();
+  String get keyboardKeyNumpad1 => _en.keyboardKeyNumpad1;
 
   @override
-  // TODO: implement keyboardKeyNumpad2
-  String get keyboardKeyNumpad2 => throw UnimplementedError();
+  String get keyboardKeyNumpad2 => _en.keyboardKeyNumpad2;
 
   @override
-  // TODO: implement keyboardKeyNumpad3
-  String get keyboardKeyNumpad3 => throw UnimplementedError();
+  String get keyboardKeyNumpad3 => _en.keyboardKeyNumpad3;
 
   @override
-  // TODO: implement keyboardKeyNumpad4
-  String get keyboardKeyNumpad4 => throw UnimplementedError();
+  String get keyboardKeyNumpad4 => _en.keyboardKeyNumpad4;
 
   @override
-  // TODO: implement keyboardKeyNumpad5
-  String get keyboardKeyNumpad5 => throw UnimplementedError();
+  String get keyboardKeyNumpad5 => _en.keyboardKeyNumpad5;
 
   @override
-  // TODO: implement keyboardKeyNumpad6
-  String get keyboardKeyNumpad6 => throw UnimplementedError();
+  String get keyboardKeyNumpad6 => _en.keyboardKeyNumpad6;
 
   @override
-  // TODO: implement keyboardKeyNumpad7
-  String get keyboardKeyNumpad7 => throw UnimplementedError();
+  String get keyboardKeyNumpad7 => _en.keyboardKeyNumpad7;
 
   @override
-  // TODO: implement keyboardKeyNumpad8
-  String get keyboardKeyNumpad8 => throw UnimplementedError();
+  String get keyboardKeyNumpad8 => _en.keyboardKeyNumpad8;
 
   @override
-  // TODO: implement keyboardKeyNumpad9
-  String get keyboardKeyNumpad9 => throw UnimplementedError();
+  String get keyboardKeyNumpad9 => _en.keyboardKeyNumpad9;
 
   @override
-  // TODO: implement keyboardKeyNumpadAdd
-  String get keyboardKeyNumpadAdd => throw UnimplementedError();
+  String get keyboardKeyNumpadAdd => _en.keyboardKeyNumpadAdd;
 
   @override
-  // TODO: implement keyboardKeyNumpadComma
-  String get keyboardKeyNumpadComma => throw UnimplementedError();
+  String get keyboardKeyNumpadComma => _en.keyboardKeyNumpadComma;
 
   @override
-  // TODO: implement keyboardKeyNumpadDecimal
-  String get keyboardKeyNumpadDecimal => throw UnimplementedError();
+  String get keyboardKeyNumpadDecimal => _en.keyboardKeyNumpadDecimal;
 
   @override
-  // TODO: implement keyboardKeyNumpadDivide
-  String get keyboardKeyNumpadDivide => throw UnimplementedError();
+  String get keyboardKeyNumpadDivide => _en.keyboardKeyNumpadDivide;
 
   @override
-  // TODO: implement keyboardKeyNumpadEnter
-  String get keyboardKeyNumpadEnter => throw UnimplementedError();
+  String get keyboardKeyNumpadEnter => _en.keyboardKeyNumpadEnter;
 
   @override
-  // TODO: implement keyboardKeyNumpadEqual
-  String get keyboardKeyNumpadEqual => throw UnimplementedError();
+  String get keyboardKeyNumpadEqual => _en.keyboardKeyNumpadEqual;
 
   @override
-  // TODO: implement keyboardKeyNumpadMultiply
-  String get keyboardKeyNumpadMultiply => throw UnimplementedError();
+  String get keyboardKeyNumpadMultiply => _en.keyboardKeyNumpadMultiply;
 
   @override
-  // TODO: implement keyboardKeyNumpadParenLeft
-  String get keyboardKeyNumpadParenLeft => throw UnimplementedError();
+  String get keyboardKeyNumpadParenLeft => _en.keyboardKeyNumpadParenLeft;
 
   @override
-  // TODO: implement keyboardKeyNumpadParenRight
-  String get keyboardKeyNumpadParenRight => throw UnimplementedError();
+  String get keyboardKeyNumpadParenRight => _en.keyboardKeyNumpadParenRight;
 
   @override
-  // TODO: implement keyboardKeyNumpadSubtract
-  String get keyboardKeyNumpadSubtract => throw UnimplementedError();
+  String get keyboardKeyNumpadSubtract => _en.keyboardKeyNumpadSubtract;
 
   @override
-  // TODO: implement keyboardKeyPageDown
-  String get keyboardKeyPageDown => throw UnimplementedError();
+  String get keyboardKeyPageDown => _en.keyboardKeyPageDown;
 
   @override
-  // TODO: implement keyboardKeyPageUp
-  String get keyboardKeyPageUp => throw UnimplementedError();
+  String get keyboardKeyPageUp => _en.keyboardKeyPageUp;
 
   @override
-  // TODO: implement keyboardKeyPower
-  String get keyboardKeyPower => throw UnimplementedError();
+  String get keyboardKeyPower => _en.keyboardKeyPower;
 
   @override
-  // TODO: implement keyboardKeyPowerOff
-  String get keyboardKeyPowerOff => throw UnimplementedError();
+  String get keyboardKeyPowerOff => _en.keyboardKeyPowerOff;
 
   @override
-  // TODO: implement keyboardKeyPrintScreen
-  String get keyboardKeyPrintScreen => throw UnimplementedError();
+  String get keyboardKeyPrintScreen => _en.keyboardKeyPrintScreen;
 
   @override
-  // TODO: implement keyboardKeyScrollLock
-  String get keyboardKeyScrollLock => throw UnimplementedError();
+  String get keyboardKeyScrollLock => _en.keyboardKeyScrollLock;
 
   @override
-  // TODO: implement keyboardKeySelect
-  String get keyboardKeySelect => throw UnimplementedError();
+  String get keyboardKeySelect => _en.keyboardKeySelect;
 
   @override
-  // TODO: implement keyboardKeyShift
-  String get keyboardKeyShift => throw UnimplementedError();
+  String get keyboardKeyShift => _en.keyboardKeyShift;
 
   @override
-  // TODO: implement keyboardKeySpace
-  String get keyboardKeySpace => throw UnimplementedError();
+  String get keyboardKeySpace => _en.keyboardKeySpace;
 
   @override
-  // TODO: implement lastPageTooltip
-  String get lastPageTooltip => throw UnimplementedError();
+  String get lastPageTooltip => _en.lastPageTooltip;
 
   @override
-  // TODO: implement licensesPackageDetailTextOther
-  String get licensesPackageDetailTextOther => throw UnimplementedError();
+  String get licensesPackageDetailTextOther => _en.licensesPackageDetailTextOther;
 
   @override
-  // TODO: implement lookUpButtonLabel
-  String get lookUpButtonLabel => throw UnimplementedError();
+  String get lookUpButtonLabel => _en.lookUpButtonLabel;
 
   @override
-  // TODO: implement menuBarMenuLabel
-  String get menuBarMenuLabel => throw UnimplementedError();
+  String get menuBarMenuLabel => _en.menuBarMenuLabel;
 
   @override
   String get menuDismissLabel => 'Dismiss';
 
   @override
-  // TODO: implement moreButtonTooltip
-  String get moreButtonTooltip => throw UnimplementedError();
+  String get moreButtonTooltip => _en.moreButtonTooltip;
 
   @override
-  // TODO: implement openAppDrawerTooltip
-  String get openAppDrawerTooltip => throw UnimplementedError();
+  String get openAppDrawerTooltip => _en.openAppDrawerTooltip;
 
   @override
-  // TODO: implement pageRowsInfoTitleRaw
-  String get pageRowsInfoTitleRaw => throw UnimplementedError();
+  String get pageRowsInfoTitleRaw => _en.pageRowsInfoTitleRaw;
 
   @override
-  // TODO: implement remainingTextFieldCharacterCountOther
-  String get remainingTextFieldCharacterCountOther =>
-      throw UnimplementedError();
+  String get remainingTextFieldCharacterCountOther => _en.remainingTextFieldCharacterCountOther;
 
   @override
-  // TODO: implement reorderItemDown
-  String get reorderItemDown => throw UnimplementedError();
+  String get reorderItemDown => _en.reorderItemDown;
 
   @override
-  // TODO: implement reorderItemLeft
-  String get reorderItemLeft => throw UnimplementedError();
+  String get reorderItemLeft => _en.reorderItemLeft;
 
   @override
-  // TODO: implement reorderItemRight
-  String get reorderItemRight => throw UnimplementedError();
+  String get reorderItemRight => _en.reorderItemRight;
 
   @override
-  // TODO: implement reorderItemToEnd
-  String get reorderItemToEnd => throw UnimplementedError();
+  String get reorderItemToEnd => _en.reorderItemToEnd;
 
   @override
-  // TODO: implement reorderItemToStart
-  String get reorderItemToStart => throw UnimplementedError();
+  String get reorderItemToStart => _en.reorderItemToStart;
 
   @override
-  // TODO: implement reorderItemUp
-  String get reorderItemUp => throw UnimplementedError();
+  String get reorderItemUp => _en.reorderItemUp;
 
   @override
-  // TODO: implement rowsPerPageTitle
-  String get rowsPerPageTitle => throw UnimplementedError();
+  String get rowsPerPageTitle => _en.rowsPerPageTitle;
 
   @override
   String get saveButtonLabel => 'Save';
 
   @override
-  // TODO: implement scanTextButtonLabel
-  String get scanTextButtonLabel => throw UnimplementedError();
+  String get scanTextButtonLabel => _en.scanTextButtonLabel;
 
   @override
   String get scrimLabel => 'Close';
@@ -492,23 +416,19 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Search';
 
   @override
-  // TODO: implement searchWebButtonLabel
-  String get searchWebButtonLabel => throw UnimplementedError();
+  String get searchWebButtonLabel => _en.searchWebButtonLabel;
 
   @override
-  // TODO: implement selectedDateLabel
-  String get selectedDateLabel => throw UnimplementedError();
+  String get selectedDateLabel => _en.selectedDateLabel;
 
   @override
-  // TODO: implement selectedRowCountTitleOther
-  String get selectedRowCountTitleOther => throw UnimplementedError();
+  String get selectedRowCountTitleOther => _en.selectedRowCountTitleOther;
 
   @override
   String get shareButtonLabel => 'Share';
 
   @override
-  // TODO: implement showAccountsLabel
-  String get showAccountsLabel => throw UnimplementedError();
+  String get showAccountsLabel => _en.showAccountsLabel;
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => _en.timeOfDayFormatRaw;
@@ -525,12 +445,10 @@ class MaterialLocalizationsBo extends GlobalMaterialLocalizations {
       _en.timePickerMinuteModeAnnouncement;
 
   @override
-  // TODO: implement unspecifiedDate
-  String get unspecifiedDate => throw UnimplementedError();
+  String get unspecifiedDate => _en.unspecifiedDate;
 
   @override
-  // TODO: implement unspecifiedDateRange
-  String get unspecifiedDateRange => throw UnimplementedError();
+  String get unspecifiedDateRange => _en.unspecifiedDateRange;
 }
 
 class _MaterialLocalizationsBoDelegate

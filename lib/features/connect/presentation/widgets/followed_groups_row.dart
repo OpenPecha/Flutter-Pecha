@@ -21,12 +21,14 @@ class FollowedGroupsRow extends StatelessWidget {
     super.key,
     required this.groups,
     this.isLoading = false,
+    this.highlightGroupIds = const {},
   });
 
   final List<GroupProfile> groups;
   final bool isLoading;
+  final Set<String> highlightGroupIds;
 
-  static const double _avatarSize = 56;
+  static const double _avatarSize = 48;
   static const double _titleFontSize = 11;
 
   @override
@@ -42,17 +44,22 @@ class FollowedGroupsRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
-      height: 100,
+      height: 84,
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         scrollDirection: Axis.horizontal,
         itemCount: groups.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, __) => const SizedBox(width: 14),
         itemBuilder: (context, index) {
           if (index == groups.length) {
             return _AllGroupsTile(isDark: isDark);
           }
-          return _FollowedGroupTile(group: groups[index], isDark: isDark);
+          final group = groups[index];
+          return _FollowedGroupTile(
+            group: group,
+            isDark: isDark,
+            hasHighlight: highlightGroupIds.contains(group.id),
+          );
         },
       ),
     );
@@ -60,10 +67,15 @@ class FollowedGroupsRow extends StatelessWidget {
 }
 
 class _FollowedGroupTile extends StatelessWidget {
-  const _FollowedGroupTile({required this.group, required this.isDark});
+  const _FollowedGroupTile({
+    required this.group,
+    required this.isDark,
+    this.hasHighlight = true,
+  });
 
   final GroupProfile group;
   final bool isDark;
+  final bool hasHighlight;
 
   @override
   Widget build(BuildContext context) {
@@ -81,13 +93,17 @@ class _FollowedGroupTile extends StatelessWidget {
     );
 
     return SizedBox(
-      width: 64,
+      width: 60,
       child: GestureDetector(
         onTap: () => context.push('/home/group/${group.id}'),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _GroupAvatar(group: group, isDark: isDark),
+            _StoryAvatar(
+              group: group,
+              isDark: isDark,
+              hasHighlight: hasHighlight,
+            ),
             const SizedBox(height: 4),
             Text(
               group.title,
@@ -117,6 +133,50 @@ class _FollowedGroupTile extends StatelessWidget {
   }
 }
 
+class _StoryAvatar extends StatelessWidget {
+  const _StoryAvatar({
+    required this.group,
+    required this.isDark,
+    required this.hasHighlight,
+  });
+
+  final GroupProfile group;
+  final bool isDark;
+  final bool hasHighlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: FollowedGroupsRow._avatarSize + 4,
+      height: FollowedGroupsRow._avatarSize + 4,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient:
+            hasHighlight
+                ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary,
+                    Color(0xFFFF6B35),
+                    Color(0xFF833AB4),
+                  ],
+                )
+                : null,
+        border:
+            hasHighlight
+                ? null
+                : Border.all(
+                  color: isDark ? AppColors.cardBorderDark : AppColors.grey300,
+                  width: 1.5,
+                ),
+      ),
+      child: _GroupAvatar(group: group, isDark: isDark),
+    );
+  }
+}
+
 class _AllGroupsTile extends StatelessWidget {
   const _AllGroupsTile({required this.isDark});
 
@@ -129,7 +189,7 @@ class _AllGroupsTile extends StatelessWidget {
     final backgroundColor =
         isDark ? AppColors.surfaceDark : AppColors.surfaceWhite;
     final borderColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
-    final label = context.l10n.search_all;
+    final label = context.l10n.connect_all_groups;
     final hasTibetanLabel =
         context.isTibetanLocale || _containsTibetan(label);
     final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -143,7 +203,7 @@ class _AllGroupsTile extends StatelessWidget {
     );
 
     return SizedBox(
-      width: 64,
+      width: 60,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).push(
@@ -223,7 +283,7 @@ class _GroupAvatar extends StatelessWidget {
                   color: placeholderColor,
                   child: Icon(
                     AppAssets.usersThree,
-                    size: 24,
+                    size: 22,
                     color: isDark ? AppColors.grey500 : AppColors.grey600,
                   ),
                 ),
@@ -242,27 +302,27 @@ class _FollowedGroupsRowSkeleton extends StatelessWidget {
     return Skeletonizer(
       enabled: true,
       child: SizedBox(
-        height: 100,
+        height: 84,
         child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
           scrollDirection: Axis.horizontal,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _placeholderCount,
-          separatorBuilder: (_, __) => const SizedBox(width: 16),
+          separatorBuilder: (_, __) => const SizedBox(width: 14),
           itemBuilder: (context, index) {
             return SizedBox(
-              width: 64,
+              width: 60,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Bone(
                     width: FollowedGroupsRow._avatarSize,
                     height: FollowedGroupsRow._avatarSize,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   const SizedBox(height: 4),
                   Bone(
-                    width: 48,
+                    width: 44,
                     height: 11,
                     borderRadius: BorderRadius.circular(4),
                   ),

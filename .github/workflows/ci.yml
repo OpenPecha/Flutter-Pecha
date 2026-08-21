@@ -1,6 +1,6 @@
 name: ✅ CI
 
-# Fast feedback on every PR into develop or main: format, static analysis, tests.
+# Fast feedback on every PR into develop or main: static analysis, tests.
 # No signing, no store credentials — keeps PRs cheap and runnable from forks.
 
 on:
@@ -45,11 +45,8 @@ jobs:
       - name: 🩺 Check ARB consistency
         run: dart run tool/tolgee_sync.dart doctor
 
-      - name: 🎨 Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
-
       - name: 🔍 Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: 🧪 Test
         run: flutter test

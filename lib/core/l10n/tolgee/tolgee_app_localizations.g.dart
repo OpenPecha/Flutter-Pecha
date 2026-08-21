@@ -1637,6 +1637,41 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get home_group_events => TolgeeBridge.get(
+    localeName,
+    'home_group_events',
+    () => _fallback.home_group_events,
+  );
+
+  @override
+  String get connect_events_filter_all => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_all',
+    () => _fallback.connect_events_filter_all,
+  );
+
+  @override
+  String get connect_events_filter_in_person => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_in_person',
+    () => _fallback.connect_events_filter_in_person,
+  );
+
+  @override
+  String get connect_events_filter_empty_online => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_online',
+    () => _fallback.connect_events_filter_empty_online,
+  );
+
+  @override
+  String get connect_events_filter_empty_in_person => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_in_person',
+    () => _fallback.connect_events_filter_empty_in_person,
+  );
+
+  @override
   String get connect_open => TolgeeBridge.get(
     localeName,
     'connect_open',

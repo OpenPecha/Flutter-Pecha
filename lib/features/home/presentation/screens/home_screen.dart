@@ -7,6 +7,7 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/featured_series_provider.dart';
+import 'package:flutter_pecha/features/home/presentation/providers/home_group_events_preview_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/routine_info_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/streak_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_provider.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_pecha/features/home/presentation/providers/today_events_
 import 'package:flutter_pecha/features/home/presentation/providers/verse_of_day_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/home_screen_constants.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/featured_plan_section.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/group_events_section.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/home_header.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/home_share_prompt.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/home_shortcuts_row.dart';
@@ -209,6 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _onRefresh() async {
     ref.invalidate(seriesListFutureProvider);
     ref.invalidate(featuredSeriesFutureProvider);
+    ref.invalidate(homeGroupEventsPreviewProvider);
     ref.invalidate(verseOfDayFutureProvider);
     ref.invalidate(todayEventsFutureProvider);
     ref.invalidate(routineInfoFutureProvider);
@@ -216,6 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await Future.wait([
       ref.read(seriesListFutureProvider.future),
       ref.read(featuredSeriesFutureProvider.future),
+      ref.read(homeGroupEventsPreviewProvider.future),
       ref.read(verseOfDayFutureProvider.future),
       ref.read(todayEventsFutureProvider.future),
       ref.read(routineInfoFutureProvider.future),
@@ -321,6 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       _navigateToSeries(series);
                     },
                   ),
+                  const SizedBox(height: HomeScreenConstants.cardSpacing),
+                  const GroupEventsSection(),
                 ],
               ),
             ),
