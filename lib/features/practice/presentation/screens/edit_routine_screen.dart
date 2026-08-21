@@ -1478,6 +1478,7 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
                       }
                       final block = _blocks[index];
                       return RoutineTimeBlock(
+                        key: ValueKey(block.id),
                         time: block.time,
                         notificationEnabled: block.notificationEnabled,
                         items: block.items,

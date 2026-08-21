@@ -59,7 +59,13 @@ class _ConnectMyDiscoverTabGateState extends State<ConnectMyDiscoverTabGate> {
   @override
   Widget build(BuildContext context) {
     if (!_ready) {
-      return const Center(child: CircularProgressIndicator());
+      return const CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ],
+      );
     }
 
     return ConnectMyDiscoverTab(

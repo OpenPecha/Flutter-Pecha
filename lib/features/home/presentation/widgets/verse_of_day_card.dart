@@ -16,8 +16,6 @@ class VerseOfDayCard extends ConsumerStatefulWidget {
 }
 
 class _VerseOfDayCardState extends ConsumerState<VerseOfDayCard> {
-  static const _borderRadius = 24.0;
-
   final GlobalKey _shareIconKey = GlobalKey();
   bool _isSharing = false;
 
@@ -39,18 +37,10 @@ class _VerseOfDayCardState extends ConsumerState<VerseOfDayCard> {
     final typography = VerseOfDayTypography.forCard(languageCode);
     final colorScheme = Theme.of(context).colorScheme;
 
-    final borderRadius = BorderRadius.only(
-      bottomLeft: Radius.circular(_borderRadius),
-      bottomRight: Radius.circular(_borderRadius),
-    );
-
     return Material(
       color: colorScheme.surface,
-      borderRadius: borderRadius,
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => showVerseShareSheet(context, widget.verseOfDay),
-        borderRadius: borderRadius,
         child: VerseOfDayContent(
           verseOfDay: widget.verseOfDay,
           typography: typography,
