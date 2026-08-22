@@ -6,8 +6,10 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/notifications/data/models/notification_nav.dart';
+import 'package:flutter_pecha/features/plans/data/models/plans_model.dart';
 import 'package:flutter_pecha/features/plans/data/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
+import 'package:flutter_pecha/features/plans/domain/entities/plan.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/use_case_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/user_plans_provider.dart';
@@ -26,24 +28,22 @@ Future<UserPlansModel?> resolveRoutineUserPlan(
   String planId, {
   String? language,
 }) async {
+  if (planId.isEmpty) return null;
   final contentLanguage = ref.read(contentLanguageProvider);
+  final hasLanguageHint = language != null && language.isNotEmpty;
   final isSameLanguage =
-      language == null ||
+      !hasLanguageHint ||
       language.toLowerCase() == contentLanguage.toLowerCase();
-
   if (isSameLanguage) {
     var plans = ref.read(myPlansPaginatedProvider).plans;
     var userPlan = plans.where((p) => p.id == planId).firstOrNull;
-
     if (userPlan == null) {
       await ref.read(myPlansPaginatedProvider.notifier).refresh();
       plans = ref.read(myPlansPaginatedProvider).plans;
       userPlan = plans.where((p) => p.id == planId).firstOrNull;
     }
-
     return userPlan;
   }
-
   final repo = ref.read(userPlansDomainRepositoryProvider);
   final result = await repo.getUserPlans(language: language);
   return result.fold(
@@ -351,6 +351,8 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
     switch (item.type) {
       case RoutineItemType.recitation:
         _navigateToReader(context, item.id);
+      case RoutineItemType.plan:
+        await _openPlanDetails(context, ref, item, planId: item.id);
       case RoutineItemType.series:
         if (!context.mounted) return;
         context.pushNamed(
@@ -376,8 +378,8 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
     RoutineItem item,
   ) async {
     final planId = item.currentPlanId;
-    if (planId == null) return;
-    await _navigateToPlanDetails(context, ref, item, planId: planId);
+    if (planId == null || planId.isEmpty) return;
+    await _openPlanDetails(context, ref, item, planId: planId);
   }
 
   void _navigateToReader(BuildContext context, String textId) {
@@ -403,20 +405,18 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
     );
   }
 
-  Future<void> _navigateToPlanDetails(
+  /// Opens plan details for [planId]. For PLAN sessions that id is
+  /// `source_id` from GET /users/me/routine. Does not search My Plans.
+  Future<void> _openPlanDetails(
     BuildContext context,
     WidgetRef ref,
     RoutineItem item, {
     required String planId,
-    UserPlansModel? userPlan,
   }) async {
-    userPlan ??= await resolveRoutineUserPlan(
-      ref,
-      planId,
-      language: item.language,
-    );
-
-    if (userPlan == null) {
+    final catalogEither = await ref.read(planByIdFutureProvider(planId).future);
+    final catalogPlan = catalogEither.fold((_) => null, (plan) => plan);
+    if (catalogPlan == null) {
+      _logger.warning('[ENROLL-NAV] plan $planId not found');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -424,25 +424,16 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
       }
       return;
     }
-
     if (!context.mounted) return;
-
+    final userPlan = _userPlanFromCatalogPlan(catalogPlan, item);
     final startDate =
-        userPlan.startDate ??
-        item.startDate ??
-        item.enrolledAt ??
-        userPlan.startedAt;
+        item.startDate ?? item.enrolledAt ?? userPlan.startedAt;
     final daysSinceEnrollment =
         DateTime.now().difference(DateUtils.dateOnly(startDate)).inDays;
     final selectedDay = (daysSinceEnrollment + 1).clamp(1, userPlan.totalDays);
     _logger.info(
-      '[ENROLL-NAV] open plan ${userPlan.id} '
-      'anchor=${startDate.toIso8601String()} '
-      'startDate=${userPlan.startDate?.toIso8601String()} '
-      'startedAt=${userPlan.startedAt.toIso8601String()} '
-      'selectedDay=$selectedDay/${userPlan.totalDays}',
+      '[ENROLL-NAV] open plan ${userPlan.id} selectedDay=$selectedDay/${userPlan.totalDays}',
     );
-
     context.push(
       '/practice/details',
       extra: {
@@ -565,7 +556,7 @@ class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
           imageSize: 56,
           onTap: () => _onItemTap(context, ref, item),
           onPlanTap:
-              item.currentPlanId != null
+              item.type == RoutineItemType.series && item.currentPlanId != null
                   ? () => _onPlanArrowTap(context, ref, item)
                   : null,
         ),
@@ -581,4 +572,22 @@ RoutineItem? _findRoutineItem(RoutineData routineData, String itemId) {
     }
   }
   return null;
+}
+
+UserPlansModel _userPlanFromCatalogPlan(Plan plan, RoutineItem item) {
+  return UserPlansModel(
+    id: plan.id,
+    title: plan.title,
+    description: plan.description,
+    language: plan.language,
+    difficultyLevel: plan.difficulty.name,
+    image:
+        plan.coverImage != null
+            ? ImageModel.fromResponsiveImage(plan.coverImage!)
+            : null,
+    startedAt: item.enrolledAt ?? item.startDate ?? plan.startDate ?? DateTime.now(),
+    totalDays: plan.totalDays,
+    tags: null,
+    startDate: item.startDate ?? plan.startDate,
+  );
 }

@@ -86,8 +86,7 @@ class _PlanPreviewDetailsState extends ConsumerState<PlanPreviewDetails> {
   bool _isPlanInRoutine(RoutineData routineData) {
     return routineData.blocks.any(
       (block) => block.items.any(
-        (item) =>
-            item.id == widget.plan.id && item.type == RoutineItemType.series,
+        (item) => item.representsStandalonePlan(widget.plan.id),
       ),
     );
   }

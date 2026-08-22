@@ -26,6 +26,7 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
     title: s.title,
     coverImage: s.coverImage,
     type: switch (s.sessionType) {
+      SessionType.plan => RoutineItemType.plan,
       SessionType.series => RoutineItemType.series,
       SessionType.recitation => RoutineItemType.recitation,
       SessionType.timer => RoutineItemType.timer,
@@ -34,14 +35,20 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
         RoutineItemType.groupRecitationCollection,
     },
     enrolledAt: s.startedAt,
-    language: s.language,
+    language: s.language.isEmpty ? null : s.language,
     startDate: s.startDate,
-    currentPlanId: s.currentPlanId,
+    currentPlanId: _nonEmptyId(s.currentPlanId) ??
+        (s.sessionType == SessionType.plan ? s.sourceId : null),
     currentPlanTitle: s.currentPlanTitle,
     durationMs: s.durationMs,
     firstSegment: s.firstSegment,
     itemCount: s.itemCount,
   );
+}
+
+String? _nonEmptyId(String? value) {
+  if (value == null || value.isEmpty) return null;
+  return value;
 }
 
 List<SessionRequest> _sessionsForBlock(RoutineBlock block) {
@@ -54,6 +61,7 @@ List<SessionRequest> _sessionsForBlock(RoutineBlock block) {
     sessions.add(
       SessionRequest(
         sessionType: switch (item.type) {
+          RoutineItemType.plan => SessionType.plan,
           RoutineItemType.series => SessionType.series,
           RoutineItemType.recitation => SessionType.recitation,
           RoutineItemType.timer => SessionType.timer,

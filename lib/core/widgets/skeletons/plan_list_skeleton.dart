@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 /// Skeleton loading widget for the plan list screen.
@@ -14,8 +15,13 @@ class PlanListSkeleton extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final listItemCount = _calculateListItemCount(context, constraints);
-        return Skeletonizer(
-          enabled: true,
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Skeletonizer.zone(
+          effect: ShimmerEffect(
+            baseColor: isDark ? const Color(0xFF3A3A3A) : AppColors.greyLight,
+            highlightColor:
+                isDark ? const Color(0xFF4A4A4A) : AppColors.grey50,
+          ),
           child: CustomScrollView(
             physics: const NeverScrollableScrollPhysics(),
             slivers: [
@@ -71,6 +77,7 @@ class PlanListSkeleton extends StatelessWidget {
   Widget _buildFeaturedCardSkeleton(BuildContext context) {
     return Material(
       color: Theme.of(context).cardColor,
+      surfaceTintColor: Colors.transparent,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: Column(
