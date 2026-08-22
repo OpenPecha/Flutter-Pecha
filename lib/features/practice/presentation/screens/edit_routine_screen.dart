@@ -13,6 +13,7 @@ import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/notifications/data/services/notification_service.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
 import 'package:flutter_pecha/features/home/domain/usecases/get_series_by_id_usecase.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/mala/domain/entities/mantra.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/routine_info_provider.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
@@ -41,6 +42,12 @@ final _logger = AppLogger('EditRoutineScreen');
 
 ResponsiveImage? _accumulatorCoverImage(Mantra mantra) {
   final url = mantra.beadImageUrl ?? mantra.mantra?.beadImageUrl;
+  if (url == null || url.trim().isEmpty) return null;
+  return ResponsiveImage.uniform(url);
+}
+
+ResponsiveImage? _collectionCoverImage(GroupRecitationCollection collection) {
+  final url = collection.imageUrl;
   if (url == null || url.trim().isEmpty) return null;
   return ResponsiveImage.uniform(url);
 }
@@ -82,6 +89,10 @@ class EditRoutineScreen extends ConsumerStatefulWidget {
   /// the routine by id. Used by the Enroll button, which only has the id.
   final String? enrollSeriesId;
 
+  /// When provided, the group chant collection is injected into the routine
+  /// after hydration as a GROUP_RECITATION_COLLECTION session.
+  final GroupRecitationCollection? initialGroupCollection;
+
   const EditRoutineScreen({
     super.key,
     this.initialPlan,
@@ -90,6 +101,7 @@ class EditRoutineScreen extends ConsumerStatefulWidget {
     this.initialMantra,
     this.initialSeries,
     this.enrollSeriesId,
+    this.initialGroupCollection,
   });
 
   @override
@@ -253,6 +265,44 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
         title: mantra.displayTitle(language),
         coverImage: _accumulatorCoverImage(mantra),
         type: RoutineItemType.accumulator,
+        enrolledAt: DateTime.now(),
+      ),
+    );
+    if (resolved.isNewBlock) {
+      _blocks.add(resolved.target);
+    }
+    _sortBlocks();
+    return resolved.target;
+  }
+
+  /// Adds [collection] into the routine as a chant-collection session.
+  ///
+  /// The backend allows a collection only once per routine — across every time
+  /// block, not just the target one — so the duplicate guard is global here and
+  /// returns null rather than letting the sync fail with a 422.
+  _EditableBlock? _injectInitialGroupCollection(
+    GroupRecitationCollection collection,
+  ) {
+    final alreadyInRoutine = _blocks.any(
+      (b) => b.items.any(
+        (item) =>
+            item.id == collection.id &&
+            item.type == RoutineItemType.groupRecitationCollection,
+      ),
+    );
+    if (alreadyInRoutine) return null;
+
+    final resolved = _resolveInjectionTarget();
+    resolved.target.items.add(
+      RoutineItem(
+        id: collection.id,
+        title: collection.name,
+        coverImage: _collectionCoverImage(collection),
+        type: RoutineItemType.groupRecitationCollection,
+        itemCount:
+            collection.itemCount > 0
+                ? collection.itemCount
+                : collection.items.length,
         enrolledAt: DateTime.now(),
       ),
     );
@@ -1333,6 +1383,8 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
             _EditableBlock? injectedTimerBlock;
             _EditableBlock? injectedSeriesBlock;
             _EditableBlock? injectedAccumulatorBlock;
+            _EditableBlock? injectedCollectionBlock;
+            var collectionAlreadyInRoutine = false;
             setState(() {
               _hydratedFromApi = true;
               _applyInitialData(routineData);
@@ -1356,6 +1408,12 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
                 injectedAccumulatorBlock = _injectInitialAccumulator(
                   widget.initialMantra!,
                 );
+              }
+              if (widget.initialGroupCollection != null) {
+                injectedCollectionBlock = _injectInitialGroupCollection(
+                  widget.initialGroupCollection!,
+                );
+                collectionAlreadyInRoutine = injectedCollectionBlock == null;
               }
             });
             if (widget.initialPlan != null) {
@@ -1384,6 +1442,20 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
               _syncBlock(injectedAccumulatorBlock!).catchError((e) {
                 if (mounted) _showErrorSnackBar(_mapError(e));
               });
+            }
+            if (injectedCollectionBlock != null) {
+              _syncBlock(injectedCollectionBlock!).catchError((e) {
+                if (mounted) _showErrorSnackBar(_mapError(e));
+              });
+            } else if (collectionAlreadyInRoutine && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    'This collection is already in your practices',
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
             }
             if (widget.enrollSeriesId != null && !_seriesEnrollmentHydrated) {
               _seriesEnrollmentHydrated = true;

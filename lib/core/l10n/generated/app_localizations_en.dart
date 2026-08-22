@@ -715,7 +715,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'My';
+  String get connect_segment_my => 'For you';
 
   @override
   String get connect_segment_discover => 'Discover';
@@ -829,6 +829,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connect_online => 'Online';
+
+  @override
+  String get home_group_events => 'Group Events';
+
+  @override
+  String get connect_events_filter_all => 'All';
+
+  @override
+  String get connect_events_filter_in_person => 'In person';
+
+  @override
+  String get connect_events_filter_empty_online => 'No online events';
+
+  @override
+  String get connect_events_filter_empty_in_person => 'No in-person events';
 
   @override
   String get connect_open => 'Open';
@@ -1614,7 +1629,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about_title => 'About';
 
   @override
-  String get about_connect_with_us => 'Connect with us';
+  String get about_connect_with_us => 'Connect with us...';
 
   @override
   String get about_description =>
@@ -1926,6 +1941,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get group_accumulator_session_share_error =>
       'Unable to share session. Please try again';
+
+  @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
 
   @override
   String get share_this_quote => 'Share this quote';

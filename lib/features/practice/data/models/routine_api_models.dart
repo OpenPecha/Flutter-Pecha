@@ -7,7 +7,8 @@ enum SessionType {
   series,
   recitation,
   timer,
-  accumulator;
+  accumulator,
+  groupRecitationCollection;
 
   String toJson() => switch (this) {
     SessionType.plan => 'PLAN',
@@ -15,6 +16,7 @@ enum SessionType {
     SessionType.recitation => 'RECITATION',
     SessionType.timer => 'TIMER',
     SessionType.accumulator => 'ACCUMULATOR',
+    SessionType.groupRecitationCollection => 'GROUP_RECITATION_COLLECTION',
   };
 
   static SessionType fromJson(String value) => switch (value.toUpperCase()) {
@@ -23,6 +25,7 @@ enum SessionType {
     'RECITATION' => SessionType.recitation,
     'TIMER' => SessionType.timer,
     'ACCUMULATOR' => SessionType.accumulator,
+    'GROUP_RECITATION_COLLECTION' => SessionType.groupRecitationCollection,
     _ => throw FormatException('Unknown SessionType: $value'),
   };
 }
@@ -95,6 +98,9 @@ class SessionDTO {
   final String? currentPlanTitle;
   final RecitationFirstSegmentModel? firstSegment;
 
+  /// Number of chants in a chant-collection session.
+  final int? itemCount;
+
   const SessionDTO({
     required this.id,
     required this.sessionType,
@@ -109,6 +115,7 @@ class SessionDTO {
     this.currentPlanId,
     this.currentPlanTitle,
     this.firstSegment,
+    this.itemCount,
   });
 
   String? get imageUrl => image?.displayUrl;
@@ -146,6 +153,7 @@ class SessionDTO {
                 json['first_segment'] as Map<String, dynamic>,
               )
               : null,
+      itemCount: (json['item_count'] as num?)?.toInt(),
     );
   }
 

@@ -51,15 +51,16 @@ class _ConnectPracticesTabState extends ConsumerState<ConnectPracticesTab>
       onMyLoadMore: () => ref.read(myConnectPracticesProvider.notifier).loadMore(),
       onDiscoverLoadMore:
           () => ref.read(discoverConnectPracticesProvider.notifier).loadMore(),
-      myBuilder: (context, scrollController, switchToDiscover) {
+      myBuilder: (context, switchToDiscover, scrollHeader) {
         return ConnectPaginatedListView<GroupPractice>(
+          scrollViewKey: const PageStorageKey<String>('connect_practices_my'),
+          header: scrollHeader,
           items: myState.practices,
           isLoading: myState.isLoading,
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
           hasLoaded: myState.hasLoaded,
-          scrollController: scrollController,
           onRetry: () => ref.read(myConnectPracticesProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
             type: ConnectMyEmptyStateType.practices,
@@ -70,15 +71,16 @@ class _ConnectPracticesTabState extends ConsumerState<ConnectPracticesTab>
                   ConnectPracticeCard(practice: myState.practices[index]),
         );
       },
-      discoverBuilder: (context, scrollController, _) {
+      discoverBuilder: (context, _, scrollHeader) {
         return ConnectPaginatedListView<GroupPractice>(
+          scrollViewKey: const PageStorageKey<String>('connect_practices_discover'),
+          header: scrollHeader,
           items: discoverState.practices,
           isLoading: discoverState.isLoading,
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
           hasLoaded: discoverState.hasLoaded,
-          scrollController: scrollController,
           onRetry:
               () => ref.read(discoverConnectPracticesProvider.notifier).retry(),
           emptyDiscoverMessage: context.l10n.connect_empty_discover_practices,

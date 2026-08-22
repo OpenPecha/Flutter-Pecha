@@ -1399,7 +1399,7 @@ abstract class AppLocalizations {
   /// No description provided for @connect_segment_my.
   ///
   /// In en, this message translates to:
-  /// **'My'**
+  /// **'For you'**
   String get connect_segment_my;
 
   /// No description provided for @connect_segment_discover.
@@ -1593,6 +1593,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Online'**
   String get connect_online;
+
+  /// No description provided for @home_group_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Events'**
+  String get home_group_events;
+
+  /// No description provided for @connect_events_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get connect_events_filter_all;
+
+  /// No description provided for @connect_events_filter_in_person.
+  ///
+  /// In en, this message translates to:
+  /// **'In person'**
+  String get connect_events_filter_in_person;
+
+  /// No description provided for @connect_events_filter_empty_online.
+  ///
+  /// In en, this message translates to:
+  /// **'No online events'**
+  String get connect_events_filter_empty_online;
+
+  /// No description provided for @connect_events_filter_empty_in_person.
+  ///
+  /// In en, this message translates to:
+  /// **'No in-person events'**
+  String get connect_events_filter_empty_in_person;
 
   /// No description provided for @connect_open.
   ///
@@ -2959,7 +2989,7 @@ abstract class AppLocalizations {
   /// No description provided for @about_connect_with_us.
   ///
   /// In en, this message translates to:
-  /// **'Connect with us'**
+  /// **'Connect with us...'**
   String get about_connect_with_us;
 
   /// No description provided for @about_description.
@@ -3496,6 +3526,33 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to share session. Please try again'**
   String get group_accumulator_session_share_error;
+
+  /// No description provided for @group_recitation_collection_share_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out \"{collection}\", a recitation collection by {group} on WeBuddhist. Join us in practice!'**
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  );
+
+  /// No description provided for @group_recitation_collection_share_message_no_group.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out the recitation collection \"{collection}\" on WeBuddhist. Join us in practice!'**
+  String group_recitation_collection_share_message_no_group(String collection);
+
+  /// No description provided for @group_recitation_collection_completed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'{collection} completed'**
+  String group_recitation_collection_completed_title(String collection);
+
+  /// No description provided for @group_recitation_collection_dedication.
+  ///
+  /// In en, this message translates to:
+  /// **'By this merit, may all beings\nbe free from suffering.'**
+  String get group_recitation_collection_dedication;
 
   /// No description provided for @share_this_quote.
   ///

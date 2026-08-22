@@ -163,14 +163,14 @@ class AppLocalizationsMn extends AppLocalizations {
   String get mala_add_to_practice => 'Миний дадлагад нэмэх';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => 'Эрхийн ээлж нэмэх';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => 'Эрхийн ээлж нэмэх:';
 
   @override
   String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+      'Энэ аппаас гадуур хийсэн эрхийн ээлжийнхээ тоог нэмнэ үү.';
 
   @override
   String get mala_add_to_bookmark => 'Хавчуурга';
@@ -721,7 +721,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'Миний';
+  String get connect_segment_my => 'Танд';
 
   @override
   String get connect_segment_discover => 'Судлах';
@@ -835,6 +835,22 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_online => 'Онлайн';
+
+  @override
+  String get home_group_events => 'Бүлгийн арга хэмжээ';
+
+  @override
+  String get connect_events_filter_all => 'Бүгд';
+
+  @override
+  String get connect_events_filter_in_person => 'Биечлэн';
+
+  @override
+  String get connect_events_filter_empty_online => 'Онлайн арга хэмжээ байхгүй';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'Биечлэн арга хэмжээ байхгүй';
 
   @override
   String get connect_open => 'Нээх';
@@ -1858,11 +1874,11 @@ class AppLocalizationsMn extends AppLocalizations {
   }
 
   @override
-  String get group_change_practice_title => 'Change group practice';
+  String get group_change_practice_title => 'Бүлгийн дадлыг өөрчлөх';
 
   @override
   String get group_change_practice_message =>
-      'You are already practicing this plan with another group. Would you like to change your practice group?';
+      'Та энэ төлөвлөгөөг өөр бүлэгтэй хамт аль хэдийн дадлага хийж байна. Та дадлагын бүлгээ өөрчлөхийг хүсэж байна уу?';
 
   @override
   String get group_join_to_contribute => 'Хувь нэмэр оруулахын тулд нэгдэх';
@@ -1943,6 +1959,28 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get group_accumulator_session_share_error =>
       'Хуралдааныг хуваалцаж чадсангүй. Дахин оролдоно уу';
+
+  @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
 
   @override
   String get share_this_quote => 'Энэ ишлэлийг хуваалцах';

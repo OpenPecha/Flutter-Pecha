@@ -10,12 +10,14 @@ class PracticeTabButton extends StatelessWidget {
     required this.variant,
     required this.onTap,
     this.icon,
+    this.backgroundColor,
   });
 
   final String label;
   final PracticeActionButtonVariant variant;
   final VoidCallback onTap;
   final IconData? icon;
+  final Color? backgroundColor;
 
   static const _borderRadius = 12.0;
   static const _height = 44.0;
@@ -30,7 +32,7 @@ class PracticeTabButton extends StatelessWidget {
     final borderColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
 
     return Material(
-      color: isFilled ? AppColors.blue : backgroundColor,
+      color: isFilled ? (this.backgroundColor ?? AppColors.blue) : backgroundColor,
       borderRadius: BorderRadius.circular(_borderRadius),
       child: InkWell(
         onTap: onTap,

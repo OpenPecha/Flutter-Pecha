@@ -1481,13 +1481,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get connect_my_empty_practices_title => TolgeeBridge.get(
-    localeName,
-    'connect_my_empty_practices_title',
-    () => _fallback.connect_my_empty_practices_title,
-  );
-
-  @override
   String get connect_my_empty_groups_title => TolgeeBridge.get(
     localeName,
     'connect_my_empty_groups_title',
@@ -1516,13 +1509,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get connect_my_empty_practices_subtitle => TolgeeBridge.get(
-    localeName,
-    'connect_my_empty_practices_subtitle',
-    () => _fallback.connect_my_empty_practices_subtitle,
-  );
-
-  @override
   String get connect_my_empty_groups_subtitle => TolgeeBridge.get(
     localeName,
     'connect_my_empty_groups_subtitle',
@@ -1548,6 +1534,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_my_empty_posts_browse',
     () => _fallback.connect_my_empty_posts_browse,
+  );
+
+  @override
+  String get connect_my_empty_practices_title => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_title',
+    () => _fallback.connect_my_empty_practices_title,
+  );
+
+  @override
+  String get connect_my_empty_practices_subtitle => TolgeeBridge.get(
+    localeName,
+    'connect_my_empty_practices_subtitle',
+    () => _fallback.connect_my_empty_practices_subtitle,
   );
 
   @override
@@ -1634,6 +1634,41 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_online',
     () => _fallback.connect_online,
+  );
+
+  @override
+  String get home_group_events => TolgeeBridge.get(
+    localeName,
+    'home_group_events',
+    () => _fallback.home_group_events,
+  );
+
+  @override
+  String get connect_events_filter_all => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_all',
+    () => _fallback.connect_events_filter_all,
+  );
+
+  @override
+  String get connect_events_filter_in_person => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_in_person',
+    () => _fallback.connect_events_filter_in_person,
+  );
+
+  @override
+  String get connect_events_filter_empty_online => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_online',
+    () => _fallback.connect_events_filter_empty_online,
+  );
+
+  @override
+  String get connect_events_filter_empty_in_person => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_in_person',
+    () => _fallback.connect_events_filter_empty_in_person,
   );
 
   @override
@@ -3763,6 +3798,46 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'group_accumulator_session_share_error',
     () => _fallback.group_accumulator_session_share_error,
+  );
+
+  @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) => TolgeeBridge.format(
+    localeName,
+    'group_recitation_collection_share_message',
+    <String, Object>{'collection': collection, 'group': group},
+    () =>
+        _fallback.group_recitation_collection_share_message(collection, group),
+  );
+
+  @override
+  String group_recitation_collection_share_message_no_group(
+    String collection,
+  ) => TolgeeBridge.format(
+    localeName,
+    'group_recitation_collection_share_message_no_group',
+    <String, Object>{'collection': collection},
+    () => _fallback.group_recitation_collection_share_message_no_group(
+      collection,
+    ),
+  );
+
+  @override
+  String group_recitation_collection_completed_title(String collection) =>
+      TolgeeBridge.format(
+        localeName,
+        'group_recitation_collection_completed_title',
+        <String, Object>{'collection': collection},
+        () => _fallback.group_recitation_collection_completed_title(collection),
+      );
+
+  @override
+  String get group_recitation_collection_dedication => TolgeeBridge.get(
+    localeName,
+    'group_recitation_collection_dedication',
+    () => _fallback.group_recitation_collection_dedication,
   );
 
   @override

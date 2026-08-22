@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_explore_providers.dart';
@@ -55,6 +56,7 @@ class _PracticeExploreScreenState extends ConsumerState<PracticeExploreScreen> {
             child: PracticeTabButton(
               label: l10n.routine_title,
               variant: PracticeActionButtonVariant.filled,
+              backgroundColor: AppColors.myPracticesBackground,
               onTap: () => context.pushNamed('my-practices'),
             ),
           ),
