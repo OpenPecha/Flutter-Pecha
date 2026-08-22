@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
+import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_card.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_list_skeleton.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class RecitationSearchDelegate extends SearchDelegate<RecitationModel?> {
   final WidgetRef ref;
@@ -114,14 +113,7 @@ class _SearchResultsView extends ConsumerWidget {
           margin: const EdgeInsets.only(bottom: 12),
           child: RecitationCard(
             recitation: recitation,
-            onTap: () {
-              context.push(
-                '/reader/${recitation.textId}',
-                extra: const NavigationContext(
-                  source: NavigationSource.recitationList,
-                ),
-              );
-            },
+            onTap: () => openRecitationReader(context, recitation),
           ),
         );
       },

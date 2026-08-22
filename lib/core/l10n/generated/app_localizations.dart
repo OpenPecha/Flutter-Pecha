@@ -1738,6 +1738,18 @@ abstract class AppLocalizations {
   /// **'Reader settings'**
   String get reader_settings_tooltip;
 
+  /// No description provided for @reader_translate_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Show translation'**
+  String get reader_translate_tooltip;
+
+  /// No description provided for @reader_translate_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation not available for this text'**
+  String get reader_translate_unavailable;
+
   /// No description provided for @reader_font_size_tooltip.
   ///
   /// In en, this message translates to:

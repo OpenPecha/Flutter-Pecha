@@ -332,6 +332,10 @@ class NavigationContext {
   /// User session count from `GET /group-accumulators/{id}` before entering.
   final int? groupAccumulatorSessionCount;
 
+  /// Language to load in the reader (e.g. the chant-list picker).
+  /// Plans, library, and deep links leave this null so the API uses Settings.
+  final String? language;
+
   /// Group recitation collection ID — set when [source] is
   /// [NavigationSource.groupRecitationCollection].
   final String? collectionId;
@@ -351,6 +355,7 @@ class NavigationContext {
     this.groupId,
     this.groupTitle,
     this.groupAccumulatorSessionCount,
+    this.language,
     this.collectionId,
   });
 
@@ -447,6 +452,7 @@ class NavigationContext {
     String? groupId,
     String? groupTitle,
     int? groupAccumulatorSessionCount,
+    String? language,
     String? collectionId,
   }) {
     return NavigationContext(
@@ -466,6 +472,7 @@ class NavigationContext {
       groupTitle: groupTitle ?? this.groupTitle,
       groupAccumulatorSessionCount:
           groupAccumulatorSessionCount ?? this.groupAccumulatorSessionCount,
+      language: language ?? this.language,
       collectionId: collectionId ?? this.collectionId,
     );
   }
@@ -478,12 +485,19 @@ class NavigationContext {
         other.planId == planId &&
         other.dayNumber == dayNumber &&
         other.targetSegmentId == targetSegmentId &&
-        other.currentTextIndex == currentTextIndex;
+        other.currentTextIndex == currentTextIndex &&
+        other.language == language;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(source, planId, dayNumber, targetSegmentId, currentTextIndex);
+  int get hashCode => Object.hash(
+        source,
+        planId,
+        dayNumber,
+        targetSegmentId,
+        currentTextIndex,
+        language,
+      );
 
   @override
   String toString() {

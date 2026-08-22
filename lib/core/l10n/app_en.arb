@@ -351,6 +351,8 @@
   "home_no_tags_found": "No tags found",
   "home_celebrated_by": "Celebrated by: ",
   "reader_settings_tooltip": "Reader settings",
+  "reader_translate_tooltip": "Show translation",
+  "reader_translate_unavailable": "Translation not available for this text",
   "reader_font_size_tooltip": "Font size",
   "reader_version_title": "Version · {language}",
   "@reader_version_title": {

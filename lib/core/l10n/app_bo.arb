@@ -271,6 +271,8 @@
   "home_no_tags_found": "རྟགས་རྙེད་མ་སོང་།",
   "home_celebrated_by": "སྲུང་བརྩི་བྱེད་མཁན།",
   "reader_settings_tooltip": "འགྱུར་མ་ཤན་སྦྱར།",
+  "reader_translate_tooltip": "འགྱུར་མ་སྟོན།",
+  "reader_translate_unavailable": "འདི་ལ་འགྱུར་མ་མེད།",
   "reader_font_size_tooltip": "ཡིག་གཟུགས་ཆེ་ཆུང་།",
   "reader_version_title": "པར་མ། · {language}",
   "@reader_version_title": {

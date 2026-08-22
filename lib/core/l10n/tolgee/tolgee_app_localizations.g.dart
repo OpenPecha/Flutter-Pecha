@@ -1806,6 +1806,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get reader_translate_tooltip => TolgeeBridge.get(
+    localeName,
+    'reader_translate_tooltip',
+    () => _fallback.reader_translate_tooltip,
+  );
+
+  @override
+  String get reader_translate_unavailable => TolgeeBridge.get(
+    localeName,
+    'reader_translate_unavailable',
+    () => _fallback.reader_translate_unavailable,
+  );
+
+  @override
   String get reader_font_size_tooltip => TolgeeBridge.get(
     localeName,
     'reader_font_size_tooltip',

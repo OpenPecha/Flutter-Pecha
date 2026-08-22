@@ -120,6 +120,7 @@ class TextRemoteDatasource {
     String? versionId,
     String? segmentId,
     String? direction,
+    String? language,
     int size = 20,
   }) async {
     final response = await dio.post(
@@ -128,6 +129,7 @@ class TextRemoteDatasource {
         if (contentId != null) 'content_id': contentId,
         if (versionId != null) 'version_id': versionId,
         if (segmentId != null) 'segment_id': segmentId,
+        if (language != null) 'language': language,
         'size': size,
         'direction': direction,
       },

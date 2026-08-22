@@ -917,6 +917,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reader_settings_tooltip => 'रीडर सेटिंग्स';
 
   @override
+  String get reader_translate_tooltip => 'अनुवाद दिखाएँ';
+
+  @override
+  String get reader_translate_unavailable =>
+      'इस पाठ के लिए अनुवाद उपलब्ध नहीं है';
+
+  @override
   String get reader_font_size_tooltip => 'फ़ॉन्ट आकार';
 
   @override
