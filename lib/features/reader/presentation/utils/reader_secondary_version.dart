@@ -105,11 +105,16 @@ Future<bool> fillSettingsLanguageSecondary({
 
   final notifier = ref.read(readerDualSettingsProvider(textId).notifier);
   final enabledGeneration = notifier.secondaryEnabledGeneration;
+  final startResolveGeneration = notifier.secondaryResolveGeneration;
   bool toggleUnchanged() =>
       notifier.secondaryEnabledGeneration == enabledGeneration;
+  // True while nothing else (e.g. a manual pick in the settings screen) has
+  // written the secondary slot since this fill started.
+  bool slotUnchanged() =>
+      notifier.secondaryResolveGeneration == startResolveGeneration;
 
   final languages = await ref.read(readerLanguagesProvider(textId).future);
-  if (!toggleUnchanged()) return false;
+  if (!toggleUnchanged() || !slotUnchanged()) return false;
   ReaderLanguageOption? option;
   for (final language in languages) {
     if (readerLanguagesMatch(language.code, settingsLang)) {
