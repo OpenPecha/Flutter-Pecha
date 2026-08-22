@@ -677,6 +677,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               source = NavigationSource.routine;
             } else if (sourceStr == 'groupAccumulatorChant') {
               source = NavigationSource.groupAccumulatorChant;
+            } else if (sourceStr == 'groupRecitationCollection') {
+              source = NavigationSource.groupRecitationCollection;
             }
 
             navigationContext = NavigationContext(
@@ -690,6 +692,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               groupTitle: extra['groupTitle'] as String?,
               groupAccumulatorSessionCount:
                   extra['groupAccumulatorSessionCount'] as int?,
+              collectionId: extra['collectionId'] as String?,
             );
           } else if (segmentId != null && segmentId.isNotEmpty) {
             navigationContext = NavigationContext(
@@ -706,7 +709,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Use directional transition for plan navigation
           if (navigationContext != null &&
-              navigationContext.source == NavigationSource.plan) {
+              (navigationContext.source == NavigationSource.plan ||
+                  navigationContext.source ==
+                      NavigationSource.groupRecitationCollection)) {
             final direction = navigationContext.navigationDirection;
             return CustomTransitionPage(
               key: state.pageKey,

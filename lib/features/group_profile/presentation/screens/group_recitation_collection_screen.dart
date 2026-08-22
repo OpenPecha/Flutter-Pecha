@@ -10,6 +10,7 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/collection_completion_sheet.dart';
 import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
 import 'package:flutter_pecha/features/practice/presentation/controllers/bookmark_controller.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/bookmark_providers.dart';
@@ -19,7 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-class GroupRecitationCollectionScreen extends ConsumerWidget {
+class GroupRecitationCollectionScreen extends ConsumerStatefulWidget {
   final String groupId;
   final String collectionId;
   final String? initialTitle;
@@ -32,17 +33,34 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final key = GroupRecitationCollectionKey(
-      groupId: groupId,
-      collectionId: collectionId,
-    );
+  ConsumerState<GroupRecitationCollectionScreen> createState() =>
+      _GroupRecitationCollectionScreenState();
+}
+
+class _GroupRecitationCollectionScreenState
+    extends ConsumerState<GroupRecitationCollectionScreen> {
+  /// Guards against re-showing the sheet after the user dismisses it while
+  /// staying on this screen instance (e.g. a rebuild triggered by an
+  /// unrelated state change). Resets naturally on the next visit, since a
+  /// fresh screen instance is created each time it's navigated to.
+  bool _hasShownCompletionSheetThisVisit = false;
+
+  GroupRecitationCollectionKey get _key => GroupRecitationCollectionKey(
+    groupId: widget.groupId,
+    collectionId: widget.collectionId,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final key = _key;
     final detailAsync = ref.watch(groupRecitationCollectionDetailProvider(key));
     final completionState = ref.watch(
       groupRecitationCollectionCompletionProvider(key),
     );
     final detail = detailAsync.valueOrNull?.fold((_) => null, (value) => value);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    _maybeShowCompletionSheet(key, detail, completionState);
 
     return Scaffold(
       backgroundColor:
@@ -51,7 +69,7 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
         bottom: false,
         child: Column(
           children: [
-            _CollectionAppBar(title: detail?.name ?? initialTitle),
+            _CollectionAppBar(title: detail?.name ?? widget.initialTitle),
             Expanded(
               child: detailAsync.when(
                 data:
@@ -68,9 +86,12 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
                         completionState: completionState,
                         isDark: isDark,
                         onOpenItem:
-                            (item) =>
-                                _openReaderAndComplete(context, ref, key, item),
-                        onShare: () => _onShare(context, ref, collection),
+                            (item) => _openReaderAndComplete(
+                              key,
+                              item,
+                              collection,
+                            ),
+                        onShare: () => _onShare(collection),
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -90,53 +111,108 @@ class GroupRecitationCollectionScreen extends ConsumerWidget {
     );
   }
 
+  /// Shows the completion celebration once per visit to this screen, as
+  /// soon as every chant in [collection] is marked completed in
+  /// [completionState] — whether that happened moments ago (returning from
+  /// the reader) or the collection was already fully completed for today
+  /// before this screen was even opened.
+  void _maybeShowCompletionSheet(
+    GroupRecitationCollectionKey key,
+    GroupRecitationCollection? collection,
+    GroupRecitationCollectionCompletionState completionState,
+  ) {
+    if (_hasShownCompletionSheetThisVisit) return;
+    if (collection == null || collection.items.isEmpty) return;
+
+    final isFullyCompleted = collection.items.every(
+      (item) => completionState.isCompleted(item.id),
+    );
+    if (!isFullyCompleted) return;
+
+    // Claim it now so a rebuild before the post-frame callback runs can't
+    // schedule a second show.
+    _hasShownCompletionSheetThisVisit = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showCompletionSheet(key, collection.name);
+    });
+  }
+
   Future<void> _openReaderAndComplete(
-    BuildContext context,
-    WidgetRef ref,
     GroupRecitationCollectionKey key,
     GroupRecitationCollectionItem item,
+    GroupRecitationCollection collection,
   ) async {
     final textId = item.textId.trim();
     final chantId = item.id.trim();
     if (textId.isEmpty || chantId.isEmpty) return;
 
-    await context.push(
-      '/reader/$textId',
-      extra: const NavigationContext(source: NavigationSource.recitationList),
+    // Build navigation context with all chants in the collection
+    final completionState = ref.read(
+      groupRecitationCollectionCompletionProvider(key),
+    );
+    final currentIndex =
+        collection.items.indexWhere((i) => i.id == item.id);
+
+    final planTextItems = collection.items.map((collectionItem) {
+      return PlanTextItem.sourceReference(
+        textId: collectionItem.textId,
+        title: collectionItem.title,
+        subtaskId: collectionItem.id,
+        isCompleted: completionState.isCompleted(collectionItem.id),
+      );
+    }).toList();
+
+    final navigationContext = NavigationContext(
+      source: NavigationSource.groupRecitationCollection,
+      planTextItems: planTextItems,
+      currentTextIndex: currentIndex >= 0 ? currentIndex : 0,
+      groupId: key.groupId,
+      collectionId: key.collectionId,
     );
 
-    final authState = ref.read(authProvider);
-    if (authState.isGuest || !authState.isLoggedIn) return;
-
-    final result = await ref
-        .read(groupRecitationCollectionCompletionProvider(key).notifier)
-        .completeChant(chantId);
-
-    if (!context.mounted) return;
-
-    final message = switch (result) {
-      GroupChantCompletionResult.completed => null,
-      GroupChantCompletionResult.membershipRequired =>
-        'Join this group to track your progress',
-      GroupChantCompletionResult.failed => context.l10n.somethingWrong,
-    };
-    if (message == null) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    await context.push('/reader/$textId', extra: navigationContext);
+    // No return-value handling needed — the next build after popping back
+    // re-evaluates _maybeShowCompletionSheet against the live completion
+    // state, so a freshly-completed collection is caught automatically.
   }
 
-  Future<void> _onShare(
-    BuildContext context,
-    WidgetRef ref,
-    GroupRecitationCollection collection,
+  Future<void> _showCompletionSheet(
+    GroupRecitationCollectionKey key,
+    String collectionName,
   ) async {
+    final result = await ref.read(
+      groupRecitationCollectionDaysCountProvider(key).future,
+    );
+    if (!mounted) return;
+
+    final dayCount = result.fold((_) => null, (count) => count);
+    if (dayCount == null) {
+      // Fetch failed — un-claim so the next rebuild while still fully
+      // completed retries instead of losing the celebration for good.
+      _hasShownCompletionSheetThisVisit = false;
+      return;
+    }
+
+    showCollectionCompletionSheet(
+      context,
+      collectionName: collectionName,
+      dayCount: dayCount,
+    );
+  }
+
+  Future<void> _onShare(GroupRecitationCollection collection) async {
+    final l10n = context.l10n;
     final groupName = _resolveGroupName(ref, collection.groupId);
     final shareMessage =
         groupName == null
-            ? 'Check out the recitation collection "${collection.name}" on WeBuddhist. Join us in practice!'
-            : 'Check out "${collection.name}", a recitation collection by $groupName on WeBuddhist. Join us in practice!';
+            ? l10n.group_recitation_collection_share_message_no_group(
+                collection.name,
+              )
+            : l10n.group_recitation_collection_share_message(
+                collection.name,
+                groupName,
+              );
     final shareUrl =
         DeepLinkUrlBuilder.groupRecitationCollectionLink(
           groupId: collection.groupId,

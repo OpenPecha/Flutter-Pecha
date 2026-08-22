@@ -391,6 +391,22 @@ final groupRecitationCollectionCompletionProvider = StateNotifierProvider
       return notifier;
     });
 
+/// Number of days the user has completed [key]'s recitation collection.
+///
+/// Fetched on demand (e.g. right after the last chant of the day is
+/// checked off) rather than eagerly, since it's only needed to populate the
+/// completion celebration sheet.
+final groupRecitationCollectionDaysCountProvider = FutureProvider.autoDispose
+    .family<Either<Failure, int>, GroupRecitationCollectionKey>((
+      ref,
+      key,
+    ) async {
+      final repository = ref.watch(groupProfileRepositoryProvider);
+      return repository.getRecitationCollectionCompletionDaysCount(
+        collectionId: key.collectionId,
+      );
+    });
+
 @immutable
 class GroupFollowKey {
   final String groupId;

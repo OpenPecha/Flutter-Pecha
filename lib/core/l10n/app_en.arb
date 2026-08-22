@@ -942,6 +942,34 @@
     }
   },
   "group_accumulator_session_share_error": "Unable to share session. Please try again",
+  "group_recitation_collection_share_message": "Check out \"{collection}\", a recitation collection by {group} on WeBuddhist. Join us in practice!",
+  "@group_recitation_collection_share_message": {
+    "placeholders": {
+      "collection": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "group_recitation_collection_share_message_no_group": "Check out the recitation collection \"{collection}\" on WeBuddhist. Join us in practice!",
+  "@group_recitation_collection_share_message_no_group": {
+    "placeholders": {
+      "collection": {
+        "type": "String"
+      }
+    }
+  },
+  "group_recitation_collection_completed_title": "{collection} completed",
+  "@group_recitation_collection_completed_title": {
+    "placeholders": {
+      "collection": {
+        "type": "String"
+      }
+    }
+  },
+  "group_recitation_collection_dedication": "By this merit, may all beings\nbe free from suffering.",
   "@group_and_more_links": {
     "placeholders": {
       "count": {
