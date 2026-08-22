@@ -13,10 +13,12 @@ import 'package:flutter_pecha/features/auth/presentation/screens/splash_screen.d
 import 'package:flutter_pecha/features/calendar/presentation/screens/tibetan_calendar_screen.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/connect_post_detail_screen.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_profile_screen.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/screens/group_recitation_collection_screen.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/group_events_screen.dart';
 import 'package:flutter_pecha/features/home/presentation/screens/main_navigation_screen.dart';
@@ -224,8 +226,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   final groupType = extra?['groupType'] as GroupType?;
                   final isGroupEnrolled =
                       extra?['isGroupEnrolled'] as bool? ?? false;
+                  final series = extra?['series'] as Series?;
                   return SeriesDetailScreen(
                     seriesId: id,
+                    initialSeries: series,
                     groupId: groupId,
                     groupType: groupType,
                     isGroupEnrolled: isGroupEnrolled,
@@ -244,6 +248,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     },
                   ),
                 ],
+              ),
+              GoRoute(
+                path: "group/:groupId/recitation-collections/:collectionId",
+                name: "home-group-recitation-collection",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final groupId = state.pathParameters['groupId'] ?? '';
+                  final collectionId =
+                      state.pathParameters['collectionId'] ?? '';
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return GroupRecitationCollectionScreen(
+                    groupId: groupId,
+                    collectionId: collectionId,
+                    initialTitle: extra?['title'] as String?,
+                  );
+                },
+              ),
+              GoRoute(
+                path: "recitation-collection/:collectionId",
+                name: "recitation-collection",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final collectionId =
+                      state.pathParameters['collectionId'] ?? '';
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return GroupRecitationCollectionScreen(
+                    groupId: '',
+                    collectionId: collectionId,
+                    initialTitle: extra?['title'] as String?,
+                  );
+                },
               ),
               GoRoute(
                 path: "group/:groupId",
@@ -415,8 +450,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           return MalaScreen(
             initialPresetId: extra?['presetId'] as String?,
-            initialGroupAccumulatorId:
-                extra?['groupAccumulatorId'] as String?,
+            initialGroupAccumulatorId: extra?['groupAccumulatorId'] as String?,
           );
         },
       ),
@@ -446,6 +480,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final mantra = extra?['initialMantra'] as Mantra?;
           final enrollSeriesId = extra?['enrollSeriesId'] as String?;
           final timer = extra?['initialTimer'] as PresetTimer?;
+          final groupCollection =
+              extra?['initialGroupCollection'] as GroupRecitationCollection?;
           return EditRoutineScreen(
             initialPlan: plan,
             initialRecitation: recitation,
@@ -453,6 +489,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             initialSeries: series,
             initialMantra: mantra,
             enrollSeriesId: enrollSeriesId,
+            initialGroupCollection: groupCollection,
           );
         },
         routes: [
@@ -642,6 +679,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               source = NavigationSource.routine;
             } else if (sourceStr == 'groupAccumulatorChant') {
               source = NavigationSource.groupAccumulatorChant;
+            } else if (sourceStr == 'groupRecitationCollection') {
+              source = NavigationSource.groupRecitationCollection;
             }
 
             navigationContext = NavigationContext(
@@ -655,6 +694,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               groupTitle: extra['groupTitle'] as String?,
               groupAccumulatorSessionCount:
                   extra['groupAccumulatorSessionCount'] as int?,
+              collectionId: extra['collectionId'] as String?,
             );
           } else if (segmentId != null && segmentId.isNotEmpty) {
             navigationContext = NavigationContext(
@@ -671,7 +711,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Use directional transition for plan navigation
           if (navigationContext != null &&
-              navigationContext.source == NavigationSource.plan) {
+              (navigationContext.source == NavigationSource.plan ||
+                  navigationContext.source ==
+                      NavigationSource.groupRecitationCollection)) {
             final direction = navigationContext.navigationDirection;
             return CustomTransitionPage(
               key: state.pageKey,

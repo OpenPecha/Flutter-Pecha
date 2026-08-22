@@ -28,10 +28,8 @@ class RecitationSessionSelection extends SessionSelection {
 /// Represents a series selection from the session picker.
 ///
 /// The full [series] entity is carried (not just the id) so the consumer can
-/// display the series name in transient UI (snackbars/loaders) without an
-/// extra fetch. Enrollment + plan injection are handled downstream by
-/// reusing the existing `seriesEnrollmentProvider` + `enrollSeriesId`
-/// handoff to `EditRoutineScreen`.
+/// display the series name without an extra fetch. Adding the SERIES session
+/// to a time block enrolls the user server-side.
 class SeriesSessionSelection extends SessionSelection {
   final Series series;
 

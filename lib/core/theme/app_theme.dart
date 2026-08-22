@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_config.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'app_colors.dart';
 import 'font_config.dart';
 
@@ -45,7 +46,16 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         surfaceContainer: AppColors.surfaceWhite, // used for container bgcolor
         outline: AppColors.greyLight, // used for container border color
+        surfaceTint: Colors.transparent,
       ),
+      extensions: const [
+        SkeletonizerConfigData(
+          effect: ShimmerEffect(
+            baseColor: AppColors.greyLight,
+            highlightColor: AppColors.grey50,
+          ),
+        ),
+      ],
 
       // AppBar with cream background matching scaffold
       appBarTheme: AppBarTheme(
@@ -237,7 +247,16 @@ class AppTheme {
         surfaceContainer:
             AppColors.cardBorderDark, // used for container bgcolor
         outline: AppColors.cardBorderDark, // used for container border color
+        surfaceTint: Colors.transparent,
       ),
+      extensions: const [
+        SkeletonizerConfigData.dark(
+          effect: ShimmerEffect(
+            baseColor: Color(0xFF3A3A3A),
+            highlightColor: Color(0xFF4A4A4A),
+          ),
+        ),
+      ],
 
       // AppBar with dark background
       appBarTheme: AppBarTheme(

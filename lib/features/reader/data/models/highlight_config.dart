@@ -38,6 +38,7 @@ class HighlightConfig {
       case NavigationSource.recitationList:
       case NavigationSource.routine:
       case NavigationSource.groupAccumulatorChant:
+      case NavigationSource.groupRecitationCollection:
         return HighlightConfig(
           duration: Duration.zero,
           colorBuilder: (context) => Colors.transparent,

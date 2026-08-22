@@ -21,32 +21,31 @@ import 'package:fpdart/fpdart.dart';
 
 final groupProfileRemoteDatasourceProvider =
     Provider<GroupProfileRemoteDatasource>((ref) {
-  return GroupProfileRemoteDatasource(dio: ref.watch(dioProvider));
-});
+      return GroupProfileRemoteDatasource(dio: ref.watch(dioProvider));
+    });
 
 final groupProfileRepositoryProvider =
     Provider<GroupProfileRepositoryInterface>((ref) {
-  return GroupProfileRepositoryImpl(
-    remote: ref.watch(groupProfileRemoteDatasourceProvider),
-  );
-});
+      return GroupProfileRepositoryImpl(
+        remote: ref.watch(groupProfileRemoteDatasourceProvider),
+      );
+    });
 
-final getGroupProfileUseCaseProvider =
-    Provider<GetGroupProfileUseCase>((ref) {
+final getGroupProfileUseCaseProvider = Provider<GetGroupProfileUseCase>((ref) {
   final repository = ref.watch(groupProfileRepositoryProvider);
   return GetGroupProfileUseCase(repository.getGroupProfile);
 });
 
-final groupProfileProvider = FutureProvider.autoDispose
-    .family<Either<Failure, GroupProfile>, String>((ref, groupId) async {
+final groupProfileProvider = FutureProvider.autoDispose.family<
+  Either<Failure, GroupProfile>,
+  String
+>((ref, groupId) async {
   // Refetch when auth changes so user-specific fields (e.g. is_group_enrolled)
   // are loaded with the Bearer token attached.
   ref.watch(authProvider);
   final language = ref.watch(contentLanguageProvider);
   final useCase = ref.watch(getGroupProfileUseCaseProvider);
-  return useCase(
-    GetGroupProfileParams(groupId: groupId, language: language),
-  );
+  return useCase(GetGroupProfileParams(groupId: groupId, language: language));
 });
 
 class GroupPracticesState {
@@ -180,17 +179,20 @@ class GroupPracticesNotifier extends StateNotifier<GroupPracticesState> {
 }
 
 final groupPracticesProvider = StateNotifierProvider.autoDispose
-    .family<GroupPracticesNotifier, GroupPracticesState, String>((ref, groupId) {
-  ref.watch(authProvider);
-  ref.watch(contentLanguageProvider);
-  final notifier = GroupPracticesNotifier(
-    repository: ref.watch(groupProfileRepositoryProvider),
-    ref: ref,
-    groupId: groupId,
-  );
-  notifier.loadInitial();
-  return notifier;
-});
+    .family<GroupPracticesNotifier, GroupPracticesState, String>((
+      ref,
+      groupId,
+    ) {
+      ref.watch(authProvider);
+      ref.watch(contentLanguageProvider);
+      final notifier = GroupPracticesNotifier(
+        repository: ref.watch(groupProfileRepositoryProvider),
+        ref: ref,
+        groupId: groupId,
+      );
+      notifier.loadInitial();
+      return notifier;
+    });
 
 void refreshGroupPractices(WidgetRef ref, String groupId) {
   if (!ref.exists(groupPracticesProvider(groupId))) return;
@@ -201,6 +203,209 @@ void refreshGroupPracticesFromRef(Ref ref, String groupId) {
   if (!ref.exists(groupPracticesProvider(groupId))) return;
   ref.read(groupPracticesProvider(groupId).notifier).loadInitial();
 }
+
+@immutable
+class GroupRecitationCollectionKey {
+  final String groupId;
+  final String collectionId;
+
+  const GroupRecitationCollectionKey({
+    required this.groupId,
+    required this.collectionId,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    return other is GroupRecitationCollectionKey &&
+        other.groupId == groupId &&
+        other.collectionId == collectionId;
+  }
+
+  @override
+  int get hashCode => Object.hash(groupId, collectionId);
+}
+
+final groupRecitationCollectionDetailProvider = FutureProvider.autoDispose
+    .family<
+      Either<Failure, GroupRecitationCollection>,
+      GroupRecitationCollectionKey
+    >((ref, key) async {
+      ref.watch(authProvider);
+      final repository = ref.watch(groupProfileRepositoryProvider);
+      return repository.getRecitationCollectionDetail(
+        collectionId: key.collectionId,
+      );
+    });
+
+/// Outcome of logging one chant as completed.
+enum GroupChantCompletionResult {
+  completed,
+
+  /// Rejected because the user follows the group but has not joined it.
+  membershipRequired,
+
+  /// Skipped (guest, empty id, already in flight) or the call failed.
+  failed,
+}
+
+class GroupRecitationCollectionCompletionState {
+  final Set<String> completedChantIds;
+  final Set<String> submittingChantIds;
+  final bool isLoading;
+  final String? error;
+
+  const GroupRecitationCollectionCompletionState({
+    this.completedChantIds = const {},
+    this.submittingChantIds = const {},
+    this.isLoading = false,
+    this.error,
+  });
+
+  bool isCompleted(String chantId) =>
+      completedChantIds.contains(chantId.trim());
+
+  bool isSubmitting(String chantId) =>
+      submittingChantIds.contains(chantId.trim());
+
+  GroupRecitationCollectionCompletionState copyWith({
+    Set<String>? completedChantIds,
+    Set<String>? submittingChantIds,
+    bool? isLoading,
+    String? error,
+    bool clearError = false,
+  }) {
+    return GroupRecitationCollectionCompletionState(
+      completedChantIds: completedChantIds ?? this.completedChantIds,
+      submittingChantIds: submittingChantIds ?? this.submittingChantIds,
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : error ?? this.error,
+    );
+  }
+}
+
+class GroupRecitationCollectionCompletionNotifier
+    extends StateNotifier<GroupRecitationCollectionCompletionState> {
+  GroupRecitationCollectionCompletionNotifier({
+    required GroupProfileRepositoryInterface repository,
+    required GroupRecitationCollectionKey key,
+    required bool isAuthenticated,
+  }) : _repository = repository,
+       _key = key,
+       _isAuthenticated = isAuthenticated,
+       super(const GroupRecitationCollectionCompletionState());
+
+  final GroupProfileRepositoryInterface _repository;
+  final GroupRecitationCollectionKey _key;
+  final bool _isAuthenticated;
+  int _requestGeneration = 0;
+
+  Future<void> loadToday() async {
+    if (!_isAuthenticated || state.isLoading) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _repository.getTodayRecitationCollectionCompletions(
+      collectionId: _key.collectionId,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (completedChantIds) {
+        state = state.copyWith(
+          completedChantIds: completedChantIds,
+          isLoading: false,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<GroupChantCompletionResult> completeChant(String chantId) async {
+    final trimmedChantId = chantId.trim();
+    if (!_isAuthenticated || trimmedChantId.isEmpty) {
+      return GroupChantCompletionResult.failed;
+    }
+    if (state.completedChantIds.contains(trimmedChantId)) {
+      return GroupChantCompletionResult.completed;
+    }
+    if (state.submittingChantIds.contains(trimmedChantId)) {
+      return GroupChantCompletionResult.failed;
+    }
+
+    state = state.copyWith(
+      submittingChantIds: {...state.submittingChantIds, trimmedChantId},
+      clearError: true,
+    );
+
+    final result = await _repository.completeRecitationCollectionChant(
+      collectionId: _key.collectionId,
+      chantId: trimmedChantId,
+    );
+
+    if (!mounted) return GroupChantCompletionResult.failed;
+
+    final submitting = {...state.submittingChantIds}..remove(trimmedChantId);
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          submittingChantIds: submitting,
+          error: failure.message,
+        );
+        return failure is AuthorizationFailure &&
+                failure.message == noGroupMembershipCode
+            ? GroupChantCompletionResult.membershipRequired
+            : GroupChantCompletionResult.failed;
+      },
+      (_) {
+        state = state.copyWith(
+          completedChantIds: {...state.completedChantIds, trimmedChantId},
+          submittingChantIds: submitting,
+          clearError: true,
+        );
+        return GroupChantCompletionResult.completed;
+      },
+    );
+  }
+}
+
+final groupRecitationCollectionCompletionProvider = StateNotifierProvider
+    .autoDispose
+    .family<
+      GroupRecitationCollectionCompletionNotifier,
+      GroupRecitationCollectionCompletionState,
+      GroupRecitationCollectionKey
+    >((ref, key) {
+      final authState = ref.watch(authProvider);
+      final notifier = GroupRecitationCollectionCompletionNotifier(
+        repository: ref.watch(groupProfileRepositoryProvider),
+        key: key,
+        isAuthenticated: authState.isLoggedIn && !authState.isGuest,
+      );
+      notifier.loadToday();
+      return notifier;
+    });
+
+/// Number of days the user has completed [key]'s recitation collection.
+///
+/// Fetched on demand (e.g. right after the last chant of the day is
+/// checked off) rather than eagerly, since it's only needed to populate the
+/// completion celebration sheet.
+final groupRecitationCollectionDaysCountProvider = FutureProvider.autoDispose
+    .family<Either<Failure, int>, GroupRecitationCollectionKey>((
+      ref,
+      key,
+    ) async {
+      final repository = ref.watch(groupProfileRepositoryProvider);
+      return repository.getRecitationCollectionCompletionDaysCount(
+        collectionId: key.collectionId,
+      );
+    });
 
 @immutable
 class GroupFollowKey {
@@ -238,10 +443,7 @@ class GroupFollowSuccess extends GroupFollowState {
   final bool isFollowing;
   final int countDelta;
 
-  const GroupFollowSuccess({
-    required this.isFollowing,
-    this.countDelta = 0,
-  });
+  const GroupFollowSuccess({required this.isFollowing, this.countDelta = 0});
 }
 
 class GroupFollowFailure extends GroupFollowState {
@@ -319,21 +521,21 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
   }
 
   void _removePendingJoinedGroup(String groupId) {
-    _ref.read(pendingJoinedGroupsProvider.notifier).update(
-      (groups) => groups.where((g) => g.id != groupId).toList(),
-    );
+    _ref
+        .read(pendingJoinedGroupsProvider.notifier)
+        .update((groups) => groups.where((g) => g.id != groupId).toList());
   }
 
   void _markPendingUnjoined(String groupId) {
-    _ref.read(pendingUnjoinedGroupIdsProvider.notifier).update(
-      (ids) => {...ids, groupId},
-    );
+    _ref
+        .read(pendingUnjoinedGroupIdsProvider.notifier)
+        .update((ids) => {...ids, groupId});
   }
 
   void _clearPendingUnjoined(String groupId) {
-    _ref.read(pendingUnjoinedGroupIdsProvider.notifier).update(
-      (ids) => {...ids}..remove(groupId),
-    );
+    _ref
+        .read(pendingUnjoinedGroupIdsProvider.notifier)
+        .update((ids) => {...ids}..remove(groupId));
   }
 
   Future<void> _loadInitialStatus() async {
@@ -358,10 +560,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
     if (state is GroupFollowLoading) return false;
     state = const GroupFollowLoading();
 
-    final result = await _repository.followGroup(
-      _key.groupId,
-      _key.groupType,
-    );
+    final result = await _repository.followGroup(_key.groupId, _key.groupType);
     if (!mounted) return false;
 
     return await result.fold(
@@ -428,9 +627,9 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
     _invalidateConnectProviders();
     if (connectGroup != null) {
       _addPendingJoinedGroup(connectGroup);
-      _ref
-          .read(discoverGroupsProvider.notifier)
-          .removeGroups({connectGroup.id});
+      _ref.read(discoverGroupsProvider.notifier).removeGroups({
+        connectGroup.id,
+      });
     }
   }
 
@@ -471,16 +670,16 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
 
 final groupFollowProvider = StateNotifierProvider.autoDispose
     .family<GroupFollowNotifier, GroupFollowState, GroupFollowKey>((ref, key) {
-  final authState = ref.watch(authProvider);
-  final isAuthenticated = !authState.isGuest && authState.isLoggedIn;
+      final authState = ref.watch(authProvider);
+      final isAuthenticated = !authState.isGuest && authState.isLoggedIn;
 
-  return GroupFollowNotifier(
-    repository: ref.watch(groupProfileRepositoryProvider),
-    ref: ref,
-    key: key,
-    isAuthenticated: isAuthenticated,
-  );
-});
+      return GroupFollowNotifier(
+        repository: ref.watch(groupProfileRepositoryProvider),
+        ref: ref,
+        key: key,
+        isAuthenticated: isAuthenticated,
+      );
+    });
 
 bool isSeriesGroupEnrolledInProfile(GroupProfile profile, String seriesId) {
   return profile.series.any(
@@ -727,30 +926,30 @@ final groupMembersNeedsRefreshProvider = StateProvider.autoDispose
 
 final groupMembersProvider = StateNotifierProvider.autoDispose
     .family<GroupMembersNotifier, GroupMembersState, String>((ref, groupId) {
-  return GroupMembersNotifier(
-    repository: ref.watch(groupProfileRepositoryProvider),
-    groupId: groupId,
-  );
-});
+      return GroupMembersNotifier(
+        repository: ref.watch(groupProfileRepositoryProvider),
+        groupId: groupId,
+      );
+    });
 
 final groupEventsProvider = FutureProvider.autoDispose
     .family<Either<Failure, GroupEventsPage>, String>((ref, groupId) async {
-  final repository = ref.watch(groupProfileRepositoryProvider);
-  return repository.getGroupEvents(groupId);
-});
+      final repository = ref.watch(groupProfileRepositoryProvider);
+      return repository.getGroupEvents(groupId);
+    });
 
 final groupEventDetailProvider = FutureProvider.autoDispose
     .family<Either<Failure, GroupEvent>, String>((ref, eventId) async {
-  final language = ref.watch(contentLanguageProvider);
-  final repository = ref.watch(groupProfileRepositoryProvider);
-  return repository.getGroupEventDetail(eventId, language: language);
-});
+      final language = ref.watch(contentLanguageProvider);
+      final repository = ref.watch(groupProfileRepositoryProvider);
+      return repository.getGroupEventDetail(eventId, language: language);
+    });
 
 final groupEventParticipantsProvider = FutureProvider.autoDispose
     .family<Either<Failure, GroupEventParticipantsPage>, String>((
-  ref,
-  eventId,
-) async {
-  final repository = ref.watch(groupProfileRepositoryProvider);
-  return repository.getGroupEventParticipants(eventId, skip: 0, limit: 20);
-});
+      ref,
+      eventId,
+    ) async {
+      final repository = ref.watch(groupProfileRepositoryProvider);
+      return repository.getGroupEventParticipants(eventId, skip: 0, limit: 20);
+    });

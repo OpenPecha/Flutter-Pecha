@@ -41,6 +41,16 @@ class BookmarkController {
         name: name,
       );
 
+  Future<bool> toggleGroupRecitationCollection(
+    String collectionId, {
+    String? name,
+  }) =>
+      toggle(
+        type: BookmarkType.groupRecitationCollection,
+        sourceId: collectionId,
+        name: name,
+      );
+
   /// Optimistically toggles bookmark state, then POST or DELETE (one call).
   ///
   /// Returns `false` when the guest login gate blocked the action (the login

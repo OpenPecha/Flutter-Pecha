@@ -1965,6 +1965,28 @@ class AppLocalizationsHi extends AppLocalizations {
       'सत्र साझा नहीं कर सके। कृपया पुनः प्रयास करें';
 
   @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
+
+  @override
   String get share_this_quote => 'यह उद्धरण शेयर करें';
 
   @override

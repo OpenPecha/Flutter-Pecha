@@ -40,8 +40,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
     final practice = widget.practice;
 
     return switch (practice.type) {
-      GroupPracticeType.series when practice.series != null =>
-        _buildSeriesCard(practice, practice.series!, isDark, lineHeight),
+      GroupPracticeType.series when practice.series != null => _buildSeriesCard(
+        practice,
+        practice.series!,
+        isDark,
+        lineHeight,
+      ),
       GroupPracticeType.accumulator when practice.accumulator != null =>
         _buildAccumulatorCard(
           practice,
@@ -49,10 +53,19 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
           isDark,
           lineHeight,
         ),
-      GroupPracticeType.plan when practice.plan != null =>
-        _buildPlanCard(practice, practice.plan!, isDark, lineHeight),
+      GroupPracticeType.plan when practice.plan != null => _buildPlanCard(
+        practice,
+        practice.plan!,
+        isDark,
+        lineHeight,
+      ),
       GroupPracticeType.collection when practice.collection != null =>
-        _buildCollectionCard(practice, practice.collection!, isDark, lineHeight),
+        _buildCollectionCard(
+          practice,
+          practice.collection!,
+          isDark,
+          lineHeight,
+        ),
       _ => const SizedBox.shrink(),
     };
   }
@@ -159,13 +172,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
     double? lineHeight,
   ) {
     final groupId = practice.groupId ?? accumulator.groupId;
-    final localJoinedIds = ref.watch(groupAccumulatorJoinCacheProvider(groupId));
+    final localJoinedIds = ref.watch(
+      groupAccumulatorJoinCacheProvider(groupId),
+    );
     final hasJoined =
         practice.isJoined ||
-        accumulatorHasJoined(
-          accumulator,
-          localJoinedIds: localJoinedIds,
-        );
+        accumulatorHasJoined(accumulator, localJoinedIds: localJoinedIds);
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
     final dateRange = PlanDateFormat.formatRangeOrNull(
@@ -177,7 +189,10 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
     return Material(
       color: cardColor,
       child: InkWell(
-        onTap: isJoining ? null : () => _navigateToAccumulatorDetail(accumulator.id, practice),
+        onTap:
+            isJoining
+                ? null
+                : () => _navigateToAccumulatorDetail(accumulator.id, practice),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -325,7 +340,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
 
   Widget _buildCollectionCard(
     GroupPractice practice,
-    GroupPracticeCollection collection,
+    GroupRecitationCollection collection,
     bool isDark,
     double? lineHeight,
   ) {
@@ -338,54 +353,59 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
 
     return Material(
       color: cardColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ConnectFeedCardHeader(
-            groupName: practice.groupName ?? '',
-            groupAvatarUrl: practice.groupAvatarUrl,
-            groupId: practice.groupId,
-            timestamp: practice.practiceAt,
-            subtitle: itemCountLabel,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Text(
-              collection.name,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                height: lineHeight,
+      child: InkWell(
+        onTap: () => _navigateToCollectionDetail(practice, collection),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ConnectFeedCardHeader(
+              groupName: practice.groupName ?? '',
+              groupAvatarUrl: practice.groupAvatarUrl,
+              groupId: practice.groupId,
+              timestamp: practice.practiceAt,
+              subtitle: itemCountLabel,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                collection.name,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: lineHeight,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(height: 10),
-          ClipRect(
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child:
-                  collection.imageUrl != null && collection.imageUrl!.isNotEmpty
-                      ? CachedNetworkImageWidget(
-                        imageUrl: collection.imageUrl!,
-                        fit: BoxFit.cover,
-                      )
-                      : ColoredBox(
-                        color:
-                            isDark
-                                ? AppColors.surfaceVariantDark
-                                : AppColors.grey100,
-                        child: Icon(
-                          AppAssets.bookOpenText,
-                          size: 40,
-                          color: isDark ? AppColors.grey500 : AppColors.grey600,
+            const SizedBox(height: 10),
+            ClipRect(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child:
+                    collection.imageUrl != null &&
+                            collection.imageUrl!.isNotEmpty
+                        ? CachedNetworkImageWidget(
+                          imageUrl: collection.imageUrl!,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.bookOpenText,
+                            size: 40,
+                            color:
+                                isDark ? AppColors.grey500 : AppColors.grey600,
+                          ),
                         ),
-                      ),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-        ],
+            const SizedBox(height: 4),
+          ],
+        ),
       ),
     );
   }
@@ -511,6 +531,22 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
         content: Text(context.l10n.group_accumulator_join_error),
         backgroundColor: Colors.red,
       ),
+    );
+  }
+
+  void _navigateToCollectionDetail(
+    GroupPractice practice,
+    GroupRecitationCollection collection,
+  ) {
+    final groupId =
+        practice.groupId?.trim().isNotEmpty == true
+            ? practice.groupId!
+            : collection.groupId;
+    if (groupId.trim().isEmpty || collection.id.trim().isEmpty) return;
+
+    context.push(
+      '/home/group/$groupId/recitation-collections/${collection.id}',
+      extra: {'title': collection.name},
     );
   }
 }
