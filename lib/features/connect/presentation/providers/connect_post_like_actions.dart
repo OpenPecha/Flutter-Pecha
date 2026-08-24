@@ -1,7 +1,7 @@
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_unified_feed_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ConnectPostLikeResult {
@@ -73,8 +73,8 @@ void syncPostToListProviders(
 
   final feedProvider =
       includeUnfollowed
-          ? discoverConnectFeedProvider
-          : myConnectFeedProvider;
+          ? discoverUnifiedConnectFeedProvider
+          : myUnifiedConnectFeedProvider;
   ref.read(feedProvider.notifier).updatePost(post);
 }
 

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item.dart';
-import 'package:flutter_pecha/features/connect/presentation/providers/connect_feed_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_unified_feed_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_practice_card.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,39 +36,45 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
   void loadActiveSegment() {
     if (!isTabActive) return;
     if (selectedSegment == 0) {
-      ref.read(myConnectFeedProvider.notifier).ensureLoaded();
+      ref.read(myUnifiedConnectFeedProvider.notifier).ensureLoaded();
     } else {
-      ref.read(discoverConnectFeedProvider.notifier).ensureLoaded();
+      ref.read(discoverUnifiedConnectFeedProvider.notifier).ensureLoaded();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final myState = ref.watch(myConnectFeedProvider);
-    final discoverState = ref.watch(discoverConnectFeedProvider);
+    final myState = ref.watch(myUnifiedConnectFeedProvider);
+    final discoverState = ref.watch(discoverUnifiedConnectFeedProvider);
+    final myItems = myState.mergedItems;
+    final discoverItems = discoverState.mergedItems;
 
     return ConnectMyDiscoverTabGate(
       myHasLoaded: myState.hasLoaded,
-      myIsEmpty: myState.items.isEmpty,
+      myIsEmpty: myItems.isEmpty,
       myHasError: myState.error != null,
       onSegmentChanged: handleSegmentChanged,
-      onMyRefresh: () => ref.read(myConnectFeedProvider.notifier).refresh(),
+      onMyRefresh:
+          () => ref.read(myUnifiedConnectFeedProvider.notifier).refresh(),
       onDiscoverRefresh:
-          () => ref.read(discoverConnectFeedProvider.notifier).refresh(),
-      onMyLoadMore: () => ref.read(myConnectFeedProvider.notifier).loadMore(),
+          () =>
+              ref.read(discoverUnifiedConnectFeedProvider.notifier).refresh(),
+      onMyLoadMore:
+          () => ref.read(myUnifiedConnectFeedProvider.notifier).loadMore(),
       onDiscoverLoadMore:
-          () => ref.read(discoverConnectFeedProvider.notifier).loadMore(),
+          () =>
+              ref.read(discoverUnifiedConnectFeedProvider.notifier).loadMore(),
       myBuilder: (context, switchToDiscover, scrollHeader) {
         return ConnectPaginatedListView(
           scrollViewKey: const PageStorageKey<String>('connect_feed_my'),
           header: scrollHeader,
-          items: myState.items,
+          items: myItems,
           isLoading: myState.isLoading,
           isLoadingMore: myState.isLoadingMore,
           error: myState.error,
           hasMore: myState.hasMore,
           hasLoaded: myState.hasLoaded,
-          onRetry: () => ref.read(myConnectFeedProvider.notifier).retry(),
+          onRetry: () => ref.read(myUnifiedConnectFeedProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
             type: ConnectMyEmptyStateType.feed,
             onBrowseTap: switchToDiscover,
@@ -75,7 +82,7 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
           itemBuilder:
               (context, index) => _buildFeedItem(
                 context,
-                myState.items[index],
+                myItems[index],
                 includeUnfollowed: false,
               ),
         );
@@ -84,18 +91,19 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
         return ConnectPaginatedListView(
           scrollViewKey: const PageStorageKey<String>('connect_feed_discover'),
           header: scrollHeader,
-          items: discoverState.items,
+          items: discoverItems,
           isLoading: discoverState.isLoading,
           isLoadingMore: discoverState.isLoadingMore,
           error: discoverState.error,
           hasMore: discoverState.hasMore,
           hasLoaded: discoverState.hasLoaded,
-          onRetry: () => ref.read(discoverConnectFeedProvider.notifier).retry(),
+          onRetry:
+              () => ref.read(discoverUnifiedConnectFeedProvider.notifier).retry(),
           emptyDiscoverMessage: context.l10n.connect_empty_discover_feed,
           itemBuilder:
               (context, index) => _buildFeedItem(
                 context,
-                discoverState.items[index],
+                discoverItems[index],
                 includeUnfollowed: true,
               ),
         );
@@ -118,6 +126,10 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
 
     if (item.type == ConnectFeedItemType.event && item.event != null) {
       return ConnectEventCard(event: item.event!);
+    }
+
+    if (item.type == ConnectFeedItemType.practice && item.practice != null) {
+      return ConnectPracticeCard(practice: item.practice!);
     }
 
     return const SizedBox.shrink();
