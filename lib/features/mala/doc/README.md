@@ -53,7 +53,7 @@ mala/
 
 1. **Monotonic absolutes** — client sends absolute session totals; server takes `max()`.
 2. **Seed-before-send** — block taps until server count merged via `max()`.
-3. **User ID from persisted storage first** — `_resolveUserId()` avoids auth race.
+3. **User ID from persisted storage first** — `resolveMalaUserId()` avoids auth race.
 4. **Group session vs lifetime** — counter uses session; sheet shows lifetime (`user_total_count` vs `user.total_count`).
 5. **Presigned bead URLs** — cache as base64 in Hive; widget uses bytes only.
 
