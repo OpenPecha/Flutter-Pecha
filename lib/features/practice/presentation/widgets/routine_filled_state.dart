@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
+import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/notifications/data/models/notification_nav.dart';
+import 'package:flutter_pecha/features/plans/data/models/plans_model.dart';
 import 'package:flutter_pecha/features/plans/data/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_utils.dart';
+import 'package:flutter_pecha/features/plans/domain/entities/plan.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/use_case_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/providers/user_plans_provider.dart';
@@ -25,24 +28,22 @@ Future<UserPlansModel?> resolveRoutineUserPlan(
   String planId, {
   String? language,
 }) async {
+  if (planId.isEmpty) return null;
   final contentLanguage = ref.read(contentLanguageProvider);
+  final hasLanguageHint = language != null && language.isNotEmpty;
   final isSameLanguage =
-      language == null ||
+      !hasLanguageHint ||
       language.toLowerCase() == contentLanguage.toLowerCase();
-
   if (isSameLanguage) {
     var plans = ref.read(myPlansPaginatedProvider).plans;
     var userPlan = plans.where((p) => p.id == planId).firstOrNull;
-
     if (userPlan == null) {
       await ref.read(myPlansPaginatedProvider.notifier).refresh();
       plans = ref.read(myPlansPaginatedProvider).plans;
       userPlan = plans.where((p) => p.id == planId).firstOrNull;
     }
-
     return userPlan;
   }
-
   final repo = ref.read(userPlansDomainRepositoryProvider);
   final result = await repo.getUserPlans(language: language);
   return result.fold(
@@ -108,6 +109,17 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
       return;
     }
 
+    if (itemType == RoutineItemType.groupRecitationCollection) {
+      ref.read(pendingNotificationNavProvider.notifier).state = null;
+      final item = _findRoutineItem(widget.routineData, pendingNav.itemId);
+      context.pushNamed(
+        'recitation-collection',
+        pathParameters: {'collectionId': pendingNav.itemId},
+        extra: {'title': item?.title},
+      );
+      return;
+    }
+
     if (itemType == RoutineItemType.timer) {
       // Open the timer screen — same destination as tapping the timer item in
       // the routine. `/home/timers/active` is a root-navigator route, so it is
@@ -119,9 +131,10 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
       // found or lost its durationMs on a server round-trip.
       final durationMs = item?.durationMs ?? pendingNav.durationMs;
       if (durationMs != null && durationMs > 0) {
-        final name = (item != null && item.title.isNotEmpty)
-            ? item.title
-            : '${durationMs ~/ 60000} min session';
+        final name =
+            (item != null && item.title.isNotEmpty)
+                ? item.title
+                : '${durationMs ~/ 60000} min session';
         context.push(
           '/home/timers/active',
           extra: PresetTimer(
@@ -177,13 +190,14 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
     final startDate = userPlan.effectiveStartDate;
     // Use the specific day embedded in the deep link when available; otherwise
     // fall back to computing today's day from the plan start date.
-    final selectedDay = pendingNav.dayNumber != null
-        ? pendingNav.dayNumber!.clamp(1, userPlan.totalDays)
-        : PlanUtils.dayNumberFor(
-            startDate,
-            DateTime.now(),
-            userPlan.totalDays,
-          ).clamp(1, userPlan.totalDays);
+    final selectedDay =
+        pendingNav.dayNumber != null
+            ? pendingNav.dayNumber!.clamp(1, userPlan.totalDays)
+            : PlanUtils.dayNumberFor(
+              startDate,
+              DateTime.now(),
+              userPlan.totalDays,
+            ).clamp(1, userPlan.totalDays);
     _logger.info(
       '[ENROLL-NAV] notification open ${userPlan.id} '
       'seriesId=${pendingNav.itemId} selectedDay=$selectedDay/${userPlan.totalDays}',
@@ -239,8 +253,10 @@ class _RoutineFilledStateState extends ConsumerState<RoutineFilledState> {
               ),
               itemCount: widget.routineData.blocks.length,
               itemBuilder: (context, index) {
+                final block = widget.routineData.blocks[index];
                 return _RoutineBlockSection(
-                  block: widget.routineData.blocks[index],
+                  key: ValueKey(block.id),
+                  block: block,
                 );
               },
             ),
@@ -312,10 +328,20 @@ class _EditLink extends StatelessWidget {
   }
 }
 
-class _RoutineBlockSection extends ConsumerWidget {
+class _RoutineBlockSection extends ConsumerStatefulWidget {
   final RoutineBlock block;
 
-  const _RoutineBlockSection({required this.block});
+  const _RoutineBlockSection({super.key, required this.block});
+
+  @override
+  ConsumerState<_RoutineBlockSection> createState() =>
+      _RoutineBlockSectionState();
+}
+
+class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
+  bool _expanded = true;
+
+  RoutineBlock get block => widget.block;
 
   Future<void> _onItemTap(
     BuildContext context,
@@ -325,6 +351,8 @@ class _RoutineBlockSection extends ConsumerWidget {
     switch (item.type) {
       case RoutineItemType.recitation:
         _navigateToReader(context, item.id);
+      case RoutineItemType.plan:
+        await _openPlanDetails(context, ref, item, planId: item.id);
       case RoutineItemType.series:
         if (!context.mounted) return;
         context.pushNamed(
@@ -335,6 +363,12 @@ class _RoutineBlockSection extends ConsumerWidget {
         _navigateToTimer(context, item);
       case RoutineItemType.accumulator:
         context.push('/mala', extra: {'presetId': item.id});
+      case RoutineItemType.groupRecitationCollection:
+        context.pushNamed(
+          'recitation-collection',
+          pathParameters: {'collectionId': item.id},
+          extra: {'title': item.title},
+        );
     }
   }
 
@@ -344,8 +378,8 @@ class _RoutineBlockSection extends ConsumerWidget {
     RoutineItem item,
   ) async {
     final planId = item.currentPlanId;
-    if (planId == null) return;
-    await _navigateToPlanDetails(context, ref, item, planId: planId);
+    if (planId == null || planId.isEmpty) return;
+    await _openPlanDetails(context, ref, item, planId: planId);
   }
 
   void _navigateToReader(BuildContext context, String textId) {
@@ -371,20 +405,18 @@ class _RoutineBlockSection extends ConsumerWidget {
     );
   }
 
-  Future<void> _navigateToPlanDetails(
+  /// Opens plan details for [planId]. For PLAN sessions that id is
+  /// `source_id` from GET /users/me/routine. Does not search My Plans.
+  Future<void> _openPlanDetails(
     BuildContext context,
     WidgetRef ref,
     RoutineItem item, {
     required String planId,
-    UserPlansModel? userPlan,
   }) async {
-    userPlan ??= await resolveRoutineUserPlan(
-      ref,
-      planId,
-      language: item.language,
-    );
-
-    if (userPlan == null) {
+    final catalogEither = await ref.read(planByIdFutureProvider(planId).future);
+    final catalogPlan = catalogEither.fold((_) => null, (plan) => plan);
+    if (catalogPlan == null) {
+      _logger.warning('[ENROLL-NAV] plan $planId not found');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -392,25 +424,16 @@ class _RoutineBlockSection extends ConsumerWidget {
       }
       return;
     }
-
     if (!context.mounted) return;
-
+    final userPlan = _userPlanFromCatalogPlan(catalogPlan, item);
     final startDate =
-        userPlan.startDate ??
-        item.startDate ??
-        item.enrolledAt ??
-        userPlan.startedAt;
+        item.startDate ?? item.enrolledAt ?? userPlan.startedAt;
     final daysSinceEnrollment =
         DateTime.now().difference(DateUtils.dateOnly(startDate)).inDays;
     final selectedDay = (daysSinceEnrollment + 1).clamp(1, userPlan.totalDays);
     _logger.info(
-      '[ENROLL-NAV] open plan ${userPlan.id} '
-      'anchor=${startDate.toIso8601String()} '
-      'startDate=${userPlan.startDate?.toIso8601String()} '
-      'startedAt=${userPlan.startedAt.toIso8601String()} '
-      'selectedDay=$selectedDay/${userPlan.totalDays}',
+      '[ENROLL-NAV] open plan ${userPlan.id} selectedDay=$selectedDay/${userPlan.totalDays}',
     );
-
     context.push(
       '/practice/details',
       extra: {
@@ -422,31 +445,77 @@ class _RoutineBlockSection extends ConsumerWidget {
     );
   }
 
+  void _toggleExpanded() {
+    if (block.items.isEmpty) return;
+    setState(() => _expanded = !_expanded);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasItems = block.items.isNotEmpty;
+    final labelColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text(
-          block.formattedTime,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+        InkWell(
+          onTap: hasItems ? _toggleExpanded : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    block.formattedTime,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: labelColor,
+                    ),
+                  ),
+                ),
+                if (hasItems)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      _expanded ? AppAssets.caretUp : AppAssets.caretDown,
+                      size: 18,
+                      color:
+                          isDark
+                              ? AppColors.textTertiaryDark
+                              : AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        for (int i = 0; i < block.items.length; i++) ...[
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: i < block.items.length - 1 ? 8.0 : 0,
-            ),
-            child: _buildItemCard(context, ref, block.items[i]),
-          ),
-        ],
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child:
+              _expanded && hasItems
+                  ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      for (int i = 0; i < block.items.length; i++) ...[
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: i < block.items.length - 1 ? 8.0 : 0,
+                          ),
+                          child: _buildItemCard(context, ref, block.items[i]),
+                        ),
+                      ],
+                    ],
+                  )
+                  : const SizedBox.shrink(),
+        ),
         const SizedBox(height: 8),
       ],
     );
@@ -462,12 +531,16 @@ class _RoutineBlockSection extends ConsumerWidget {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCollection =
+        item.type == RoutineItemType.groupRecitationCollection;
+    final itemCount = item.itemCount;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.cardBackgroundDark
-            : AppColors.cardBackgroundLight,
+        color:
+            isDark
+                ? AppColors.cardBackgroundDark
+                : AppColors.cardBackgroundLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -476,11 +549,14 @@ class _RoutineBlockSection extends ConsumerWidget {
           title: routineItemDisplayTitle(item, context.l10n),
           coverImage: item.coverImage,
           type: item.type,
-          planTitle: item.currentPlanTitle,
+          planTitle:
+              isCollection && itemCount != null && itemCount > 0
+                  ? context.l10n.home_recitation_count(itemCount)
+                  : item.currentPlanTitle,
           imageSize: 56,
           onTap: () => _onItemTap(context, ref, item),
           onPlanTap:
-              item.currentPlanId != null
+              item.type == RoutineItemType.series && item.currentPlanId != null
                   ? () => _onPlanArrowTap(context, ref, item)
                   : null,
         ),
@@ -496,4 +572,22 @@ RoutineItem? _findRoutineItem(RoutineData routineData, String itemId) {
     }
   }
   return null;
+}
+
+UserPlansModel _userPlanFromCatalogPlan(Plan plan, RoutineItem item) {
+  return UserPlansModel(
+    id: plan.id,
+    title: plan.title,
+    description: plan.description,
+    language: plan.language,
+    difficultyLevel: plan.difficulty.name,
+    image:
+        plan.coverImage != null
+            ? ImageModel.fromResponsiveImage(plan.coverImage!)
+            : null,
+    startedAt: item.enrolledAt ?? item.startDate ?? plan.startDate ?? DateTime.now(),
+    totalDays: plan.totalDays,
+    tags: null,
+    startDate: item.startDate ?? plan.startDate,
+  );
 }

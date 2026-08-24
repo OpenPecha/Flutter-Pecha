@@ -16,8 +16,6 @@ class MyPracticesStatsCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   static const _borderRadius = 20.0;
-  static final _cardColor =
-      Color.lerp(AppColors.cardDark, AppColors.blue, 0.18)!;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +24,7 @@ class MyPracticesStatsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Material(
-        color: _cardColor,
+        color: AppColors.myPracticesBackground,
         borderRadius: BorderRadius.circular(_borderRadius),
         clipBehavior: Clip.antiAlias,
         child: InkWell(

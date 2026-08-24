@@ -116,6 +116,82 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
     );
   }
 
+  @override
+  Future<Either<Failure, GroupRecitationCollection>>
+  getRecitationCollectionDetail({required String collectionId}) async {
+    try {
+      final model = await remote.fetchRecitationCollectionDetail(
+        collectionId: collectionId,
+      );
+      return Right(model.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load recitation collection: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Set<String>>> getTodayRecitationCollectionCompletions({
+    required String collectionId,
+  }) async {
+    try {
+      final completedChantIds = await remote
+          .fetchTodayRecitationCollectionCompletions(
+            collectionId: collectionId,
+          );
+      return Right(completedChantIds);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load completed recitations: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> completeRecitationCollectionChant({
+    required String collectionId,
+    required String chantId,
+  }) async {
+    try {
+      await remote.completeRecitationCollectionChant(
+        collectionId: collectionId,
+        chantId: chantId,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on AuthorizationException catch (e) {
+      return Left(AuthorizationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to complete recitation: $e'));
+    }
+  }
+
   Future<Either<Failure, GroupPracticesPage>> _loadPractices({
     String? groupId,
     required bool includeUnfollowed,
@@ -144,6 +220,31 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
       return Left(RateLimitFailure(e.message));
     } catch (e) {
       return Left(UnknownFailure('Failed to load group practices: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> getRecitationCollectionCompletionDaysCount({
+    required String collectionId,
+  }) async {
+    try {
+      final dayCount = await remote
+          .fetchRecitationCollectionCompletionDaysCount(
+            collectionId: collectionId,
+          );
+      return Right(dayCount);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on RateLimitException catch (e) {
+      return Left(RateLimitFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to load completion day count: $e'));
     }
   }
 

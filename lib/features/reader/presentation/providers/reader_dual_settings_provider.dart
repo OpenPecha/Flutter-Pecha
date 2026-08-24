@@ -74,11 +74,24 @@ class ReaderDualSettingsNotifier extends StateNotifier<ReaderDualLayoutSettings>
   // reader's loaded state or the user's explicit pick.
   bool _primaryEdited = false;
   bool _secondaryEdited = false;
+  int _secondaryResolveGeneration = 0;
+  int _secondaryEnabledGeneration = 0;
 
   bool get isPrimaryEdited => _primaryEdited;
   bool get isSecondaryEdited => _secondaryEdited;
 
+  /// Bumped on every secondary slot write so in-flight version resolves can
+  /// tell whether they still own the slot (including same-language picks).
+  int get secondaryResolveGeneration => _secondaryResolveGeneration;
+
+  /// Bumped when the parallel-on toggle actually changes so a pending
+  /// Settings-language fill does not turn translation back on after the user
+  /// disables it.
+  int get secondaryEnabledGeneration => _secondaryEnabledGeneration;
+
   void setSecondaryEnabled(bool enabled) {
+    if (state.secondaryEnabled == enabled) return;
+    _secondaryEnabledGeneration++;
     _ref.read(readerSecondaryEnabledProvider.notifier).setEnabled(enabled);
   }
 
@@ -89,6 +102,7 @@ class ReaderDualSettingsNotifier extends StateNotifier<ReaderDualLayoutSettings>
 
   void replaceSecondary(ReaderSlotConfig config) {
     _secondaryEdited = true;
+    _secondaryResolveGeneration++;
     state = state.copyWith(secondary: config);
   }
 
@@ -103,6 +117,7 @@ class ReaderDualSettingsNotifier extends StateNotifier<ReaderDualLayoutSettings>
     ReaderSlotConfig Function(ReaderSlotConfig current) update,
   ) {
     _secondaryEdited = true;
+    _secondaryResolveGeneration++;
     state = state.copyWith(secondary: update(state.secondary));
   }
 }

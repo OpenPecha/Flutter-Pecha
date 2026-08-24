@@ -163,14 +163,14 @@ class AppLocalizationsBo extends AppLocalizations {
   String get mala_add_to_practice => 'ངའི་ཉམས་ལེན་ནང་སྣོན།';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => 'ཕྲེང་འཁོར་སྣོན།';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => 'ཕྲེང་འཁོར་སྣོན།:';
 
   @override
   String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+      'མཉེན་ཆས་འདི་ལས་གཞན་དུ་བགྲངས་པའི་བསགས་གྲངས་འདིར་སྣོན།';
 
   @override
   String get mala_add_to_bookmark => 'དཔེ་རྟགས།';
@@ -320,7 +320,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String commentary_not_available_for_language(String language) {
-    return '$language་གི་འགྲེལ་བ་མི་འདུག';
+    return '$language ཡི་འགྲེལ་བ་མི་འདུག';
   }
 
   @override
@@ -513,18 +513,18 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get notification_practice_subtitle_disabled =>
-      'ཕྲེང་བ་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
+      'ཕྲེང་བའི་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
 
   @override
-  String get notification_timer_title => 'སྒོམ་ཡུན་གྱི་དྲན་སྐུལ།';
+  String get notification_timer_title => 'དུས་འཛིན་དྲན་སྐུལ།';
 
   @override
   String get notification_timer_subtitle_enabled =>
-      'ཁྱེད་རང་གི་སྒོམ་ཡུན་གྱི་ཉིན་རེའི་དྲན་སྐུལ་རྣམས།';
+      'དུས་འཛིན་ཉམས་ལེན་དུས་མཚམས་ཀྱི་ཉིན་རེའི་དྲན་སྐུལ།';
 
   @override
   String get notification_timer_subtitle_disabled =>
-      'སྒོམ་ཡུན་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
+      'དུས་འཛིན་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
 
   @override
   String get notification_battery_info_title => 'རྒྱབ་ལྗོངས་དྲན་སྐུལ་གྱི་སྐོར།';
@@ -725,7 +725,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get connect_tab_groups => 'ཚོགས་པ།';
 
   @override
-  String get connect_segment_my => 'ངའི།';
+  String get connect_segment_my => 'ཁྱེད་ལ';
 
   @override
   String get connect_segment_discover => 'འཚོལ་སྙེག';
@@ -789,11 +789,11 @@ class AppLocalizationsBo extends AppLocalizations {
   String get connect_my_empty_posts_browse => 'སྤེལ་བ་གཞན་ལ་གཟིགས།';
 
   @override
-  String get connect_my_empty_practices_title => 'ད་དུང་ཉམས་ལེན་མི་འདུག';
+  String get connect_my_empty_practices_title => 'ད་དུང་ཉམས་ལེན་མེད།';
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་ཉམས་ལེན་གང་ཡང་མ་བྱས་འདུག ཚོགས་པ་གཞན་གྱིས་གང་འདོན་བཞིན་པར་གཟིགས།';
+      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་ཉམས་ལེན་གང་ཡང་འགོ་བཙུགས་མི་འདུག ཚོགས་པ་གཞན་གྱིས་གང་འབུལ་བཞིན་ཡོད་པར་གཟིགས།';
 
   @override
   String get connect_my_empty_practices_browse => 'ཉམས་ལེན་གཞན་ལ་གཟིགས།';
@@ -840,6 +840,22 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get connect_online => 'དྲ་ཐོག';
+
+  @override
+  String get home_group_events => 'ཚོགས་པའི་བྱེད་སྒོ།';
+
+  @override
+  String get connect_events_filter_all => 'ཡོངས།';
+
+  @override
+  String get connect_events_filter_in_person => 'ས་ཁུལ་དུ།';
+
+  @override
+  String get connect_events_filter_empty_online => 'དྲ་ཐོག་བྱེད་སྒོ་མེད།';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'ས་ཁུལ་དུའི་བྱེད་སྒོ་མེད།';
 
   @override
   String get connect_open => 'ཁ་ཕྱེ།';
@@ -904,6 +920,12 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get reader_settings_tooltip => 'འགྱུར་མ་ཤན་སྦྱར།';
+
+  @override
+  String get reader_translate_tooltip => 'འགྱུར་མ་སྟོན།';
+
+  @override
+  String get reader_translate_unavailable => 'འདི་ལ་འགྱུར་མ་མེད།';
 
   @override
   String get reader_font_size_tooltip => 'ཡིག་གཟུགས་ཆེ་ཆུང་།';
@@ -1012,7 +1034,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String version_search_no_results(String query) {
-    return 'འདིའི་ \"$query\" པར་གཞི་རྙེད་མ་སོང་།';
+    return '\"$query\" འདིའི་པར་གཞི་རྙེད་མ་སོང་།';
   }
 
   @override
@@ -1294,7 +1316,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get continueWithApple => 'Apple བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
 
   @override
-  String get continueWithPhone => 'ཁ་པར་ཨང་གྲངས་བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
+  String get continueWithPhone => 'ཁ་པར་བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
 
   @override
   String get continueAsGuest => 'མགྲོན་པོའི་ངོ་བོའི་ཐོག་ནས་མུ་མཐུད་རོགས།';
@@ -1343,7 +1365,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get unableToLoad =>
-      'ལེན་ཐུབ་མ་སོང་། ཁྱེད་ཀྱིས་རང་གི་དྲ་རྒྱར་བསྐྱར་ཞིབ་བྱས་ཏེ་བསྐྱར་དུ་ཚོད་ལྟ་བྱོས།';
+      'སྟོན་ཐུབ་མ་སོང་། ཁྱེད་ཀྱིས་རང་གི་དྲ་རྒྱར་བསྐྱར་ཞིབ་བྱས་ཏེ་བསྐྱར་དུ་ཚོད་ལྟ་བྱོས།';
 
   @override
   String get somethingWrong =>
@@ -1402,7 +1424,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String removeConfirmation(String itemName) {
-    return '\"$itemName\" འདི་ཚན་པ་ནས་འདོར་རྒྱུ་ཡིན་ནམ།';
+    return '\"$itemName\" འདི་ཚན་པ་ནས་ཟུབ་རྒྱུ་རེད།';
   }
 
   @override
@@ -1950,6 +1972,28 @@ class AppLocalizationsBo extends AppLocalizations {
       'ཐུན་མཉམ་སྤྱོད་བྱེད་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་།';
 
   @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
+
+  @override
   String get share_this_quote => 'ལེགས་བཤད་འདི་སྤེལ།';
 
   @override
@@ -1965,38 +2009,38 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get share_streak_message =>
-      'ངས་རང་ཉིད་ལ་ཉིན་རེའི་ཉམས་ལེན་གྱི་གོམས་གཤིས་ཤིག་ཆགས་པར་བྱས་ཡོད་པ་དེ་ཁྱེད་དང་མཉམ་དུ་མཉམ་སྤྱོད་བྱ་འདོད་ཡོད། ལས་གང་ཡང་རོགས་པ་ཞིག་དང་མཉམ་དུ་བྱས་ན་ལས་སླ་བ་ཡོད། WeBuddhist ཐོག་ལ་ང་དང་ལྷན་དུ་མཉམ་ཞུགས་གནང་དང་།';
+      'ངས་རང་ཉིད་ལ་ཉིན་རེའི་ཉམས་ལེན་གྱི་གོམས་གཤིས་ཤིག་ཆགས་པར་བྱས་ཡོད་པ་དེ་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱ་འདོད་བྱུང་། ལས་ཀ་གང་ཡང་རོགས་པ་ཞིག་དང་མཉམ་དུ་བྱས་ན་ལས་སླ་བ་ཡོད། WeBuddhist ཐོག་ལ་ང་དང་ལྷན་དུ་མཉམ་ཞུགས་གནང་དང་།';
 
   @override
   String get share_chant_message =>
-      'ངས་མགུར་འདི་ཁྱོད་དང་མཉམ་བགྲོ་བར་འདོད། ཁྱོད་ཀྱིས་དེ་ཉམས་ལེན་བྱེད་ཐུབ་ཅིང་ WeBuddhist ཐོག་མགུར་གཞུང་ཆེན་པོའི་མཛོད་དུ་རྒྱུ་ཐུབ།';
+      'ངས་ཞལ་འདོན་འདི་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། ཁྱེད་ཀྱིས་འདི་ཉམས་སུ་ལེན་ཐུབ་པ་མ་ཟད་ WeBuddhist ཐོག་ཞལ་འདོན་དང་ཡིག་ཆའི་དཔེ་མཛོད་མཇལ་ཐུབ།';
 
   @override
   String get share_quote_message =>
-      'WeBuddhist ཐོག་གི་གསུང་ཚིག་འདི་ངར་དགར་སོང་བས་ཁྱོད་དང་མཉམ་བགྲོ་བར་འདོད། WeBuddhist ཉེར་སྤྱོད་ཐོག་ལྟ་ཀློག་ཕྱི་བཀྲམ་གྱི་ཚིག་རྒྱུག་མང་པོ་དཔྱད།';
+      'ངས་ WeBuddhist ཐོག་གི་ལེགས་བཤད་འདི་ཡག་པོ་མཐོང་སོང་བས་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། WeBuddhist མཉེན་ཆས་ཐོག་འདི་ལྟ་བུའི་ལེགས་བཤད་མང་ཙམ་ཀློགས།';
 
   @override
   String get share_mala_message =>
-      'ངས་ WeBuddhist ཐོག་གི་གློག་རྡུལ་ཕྲེང་བ་འདི་བཀོལ་སྤྱོད་བྱེད་ཀྱི་ཡོད་ཅིང་ཁྱོད་དང་མཉམ་བགྲོ་བར་འདོད། གང་དུ་ཡིན་ཡང་ཉམས་ལེན་བྱེད་ལ་ཐབས་སྟབས་བདེ་བ་ཞིག་ཡིན།';
+      'ངས་ WeBuddhist ཐོག་གི་གློག་རྡུལ་ཕྲེང་བ་འདི་བཀོལ་སྤྱོད་བྱེད་ཀྱི་ཡོད་ཅིང་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། ཁྱེད་གང་དུ་སོང་ཡང་བེད་སྤྱོད་བྱེད་པར་སྟབས་བདེ་པོ་ཡོད།';
 
   @override
   String get share_passage_message =>
-      'ང་གསུང་དུམ་འདི་ལ་སྣང་བ་འགྲོ་སོང་བས་ཁྱོད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། ཁྱེད་ཀྱིས་ WeBuddhist ཐོག་ལེགས་བཤད་འདིའི་བརྗོད་དོན་ཆ་ཚང་བར་ལྟ་ཀློག་བྱེད་ཐུབ།';
+      'ང་གསུང་ཚན་འདི་ལ་སྣང་བ་འགྲོ་སོང་བས་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། ཁྱེད་ཀྱིས་ WeBuddhist ཐོག་ལེགས་བཤད་འདིའི་བརྗོད་དོན་ཆ་ཚང་བར་ལྟ་ཀློག་བྱེད་ཐུབ།';
 
   @override
   String get share_timer_message =>
-      'ངས་ WeBuddhist ཐོག་གི་བསམ་གཏན་གྱི་སྒོམ་ཡུན་འདི་ཁྱོད་ལ་མཉམ་སྤྱོད་བྱ་འདོད་ཡོད། འདིས་བསམ་གཏན་གྱི་ཉམས་ལེན་བསྐྱེད་པར་སྟབས་བདེ་སྐྲུན་གྱི་ཡོད།';
+      'ངས་ WeBuddhist ཐོག་གི་བསམ་གཏན་གྱི་སྒོམ་ཡུན་འདི་ཁྱོད་ལ་མཉམ་སྤྱོད་བྱ་འདོད་བྱུང་། འདིས་བསམ་གཏན་གྱི་ཉམས་ལེན་བསྐྱེད་པར་སྟབས་བདེ་སྐྲུན་གྱི་ཡོད།';
 
   @override
   String get share_plan_message =>
-      'ངས་ནང་པའི་ཉམས་ལེན་གྱི་ཐུན་འཆར་འདི་ཉམས་སུ་ལེན་བཞིན་ཡོད་པ་དེ་ཁྱེད་དང་མཉམ་དུ་མཉམ་སྤྱོད་བྱ་འདོད་ཡོད། ཁྱོད་ཀྱིས་ WeBuddhist ཐོག་ཏུ་རིན་མེད་ངང་ང་དང་ལྷན་དུ་མཉམ་ཞུགས་བྱེད་ཐུབ།';
+      'ངས་ནང་པའི་ཉམས་ལེན་གྱི་ཐུན་འཆར་འདི་ཉམས་སུ་ལེན་བཞིན་ཡོད་པ་དེ་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། ཁྱོད་ཀྱིས་ WeBuddhist ཐོག་ཏུ་རིན་མེད་ངང་ང་དང་ལྷན་དུ་མཉམ་ཞུགས་བྱེད་ཐུབ།';
 
   @override
   String get share_plan_subject => 'WeBuddhist ཐོག་ང་མཉམ་ཞུགས་མཛོད།';
 
   @override
   String get share_group_invite_message =>
-      'ངའི་སྡེ་ཚན་དུ་ཁྱོད་ཞུགས་ན་སྙིང་གི་དགའ་བ། WeBuddhist ཐོག་མཉམ་དུ་ཉམས་ལེན་བྱོས།';
+      'ང་ཚོའི་ཚོགས་པར་ཁྱེད་རང་ཞུགས་ན་ང་དགའ་པོ་ཡོང་བ། ང་ཚོ་མཉམ་དུ་ WeBuddhist ཐོག་ཉམས་ལེན་བྱེད།';
 
   @override
   String get weekday_monday => 'ཟླ།';
@@ -2110,7 +2154,7 @@ class AppLocalizationsBo extends AppLocalizations {
       'ཤོག་ངོས་ལེན་པར་དུས་ཚོད་ཞེ་དྲག་འགོར་སོང་། ཁྱེད་ཀྱི་དྲ་རྒྱའི་སྦྲེལ་མཐུད་ལ་ཞིབ་བཤེར་གནང་རོགས།';
 
   @override
-  String get webview_load_failed => 'ཤོག་ངོས་འཇུག་མ་ཐུབ།';
+  String get webview_load_failed => 'ཤོག་ངོས་སྟོན་ཐུབ་མ་སོང་།';
 
   @override
   String get privacy_policy_load_error =>
@@ -2118,7 +2162,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get terms_of_service_load_error =>
-      'ཞབས་ཞུའི་ཆ་རྐྱེན་ཤོག་ངོས་འཇུག་མ་ཐུབ།';
+      'ཞབས་ཞུའི་ཆ་རྐྱེན་ཤོག་ངོས་སྟོན་ཐུབ་མ་སོང་།';
 
   @override
   String get series_enroll_error => 'རིམ་པའི་ནང་ཐོ་འགོད་མ་ཐུབ།';
@@ -2142,25 +2186,25 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get session_plans_load_error =>
-      'འཆར་གཞི་འཇུག་མ་ཐུབ།\nརྗེས་སུ་ཡང་བསྐྱར་འབད་རྩོལ་གནང་རོགས།';
+      'ཐུན་འཆར་སྟོན་ཐུབ་མ་སོང་།\nཏོག་ཙམ་རྗེས་ནས་ཚོད་ལྟ་གནང་རོགས།';
 
   @override
-  String get session_chants_load_error => 'འདོན་ཆ་འཇུག་མ་ཐུབ།';
+  String get session_chants_load_error => 'ཞལ་འདོན་སྟོན་ཐུབ་མ་སོང་།';
 
   @override
-  String get session_no_chants => 'འདོན་ཆ་མ་རྙེད།';
+  String get session_no_chants => 'ཞལ་འདོན་རྙེད་མ་སོང་།';
 
   @override
-  String get session_malas_load_error => 'ཕྲེང་བ་འཇུག་མ་ཐུབ།';
+  String get session_malas_load_error => 'ཕྲེང་བ་སྟོན་ཐུབ་མ་སོང་།';
 
   @override
-  String get session_no_malas => 'ཕྲེང་བ་མ་རྙེད།';
+  String get session_no_malas => 'ཕྲེང་བ་རྙེད་མ་སོང་།';
 
   @override
-  String get session_timers_load_error => 'སྒོམ་ཡུན་ལེན་མ་ཐུབ།';
+  String get session_timers_load_error => 'སྒོམ་ཡུན་སྟོན་ཐུབ་མ་སོང་།';
 
   @override
-  String get session_no_timers => 'སྒོམ་ཡུན་མ་རྙེད།';
+  String get session_no_timers => 'སྒོམ་ཡུན་རྙེད་མ་སོང་།';
 
   @override
   String days_count(int count) {
@@ -2178,11 +2222,11 @@ class AppLocalizationsBo extends AppLocalizations {
   }
 
   @override
-  String get timer_notification_in_progress => 'སྒོམ་སྒྲུབ་མུ་མཐུད་བཞིན་པ།';
+  String get timer_notification_in_progress => 'སྒོམ་སྒྲུབ་བྱེད་བཞིན་པ།';
 
   @override
   String timer_notification_paused(String time) {
-    return 'བར་མཚམས། ལྷག་མ་ $time';
+    return 'བཀག་སོང་། $time ལྷག་འདུག';
   }
 
   @override
@@ -2218,7 +2262,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get link_invalid => 'URL ནུས་མེད།';
 
   @override
-  String get author_no_plans => 'ད་དུང་འཆར་གཞི་གསར་བཟོ་བྱས་མེད།';
+  String get author_no_plans => 'ད་དུང་འཆར་གཞི་གསར་བཟོ་བྱས་མི་འདུག';
 
   @override
   String get author_plans_load_error => 'འཆར་གཞི་ལེན་མ་ཐུབ།';

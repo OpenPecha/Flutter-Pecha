@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_date_format.dart';
@@ -54,7 +55,7 @@ class BookmarkCard extends StatelessWidget {
   }
 
   Widget _buildIconRow(BuildContext context, bool isDark) {
-    final dateLabel = _dateRangeLabel;
+    final dateLabel = _secondaryLabel(context);
     return Row(
       children: [
         _Leading(bookmark: bookmark, isDark: isDark),
@@ -94,8 +95,18 @@ class BookmarkCard extends StatelessWidget {
     );
   }
 
-  /// Fixed-format date label for plan/series bookmarks with a schedule window.
-  String? get _dateRangeLabel {
+  /// Secondary line under the title: a chant count for collections (or a notice
+  /// when the group deleted the collection), otherwise the plan/series schedule.
+  String? _secondaryLabel(BuildContext context) {
+    if (bookmark.type == BookmarkItemType.groupRecitationCollection) {
+      if (bookmark.isOrphaned) {
+        return 'No longer available';
+      }
+      final count = bookmark.itemCount;
+      if (count == null || count <= 0) return null;
+      return context.l10n.home_recitation_count(count);
+    }
+
     return PlanDateFormat.formatRangeOrSingle(
       bookmark.startDate,
       bookmark.endDate,
@@ -217,7 +228,9 @@ class _IconTile extends StatelessWidget {
     BookmarkItemType.plan => PhosphorIconsRegular.calendarCheck,
     BookmarkItemType.series => PhosphorIconsRegular.cards,
     BookmarkItemType.accumulator => PhosphorIconsRegular.circlesThree,
-    BookmarkItemType.text || BookmarkItemType.verse =>
+    BookmarkItemType.text ||
+    BookmarkItemType.verse ||
+    BookmarkItemType.groupRecitationCollection =>
       PhosphorIconsRegular.bookOpenText,
   };
 }

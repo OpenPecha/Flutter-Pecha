@@ -90,47 +90,49 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FollowedGroupsRow(
-            groups: displayedMyGroups,
-            isLoading: myGroupsLoading,
-          ),
-          _ConnectMainTabBar(controller: _tabController, isDark: isDark),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                ConnectFeedTab(
-                  myGroups: displayedMyGroups,
-                  isActive: activeTabIndex == 0,
+      body: NestedScrollView(
+        headerSliverBuilder:
+            (context, innerBoxIsScrolled) => [
+              SliverToBoxAdapter(
+                child: FollowedGroupsRow(
+                  groups: displayedMyGroups,
+                  isLoading: myGroupsLoading,
                 ),
-                ConnectEventsTab(
-                  myGroups: displayedMyGroups,
-                  isActive: activeTabIndex == 1,
+              ),
+              SliverToBoxAdapter(
+                child: _ConnectMainTabBar(
+                  controller: _tabController,
+                  isDark: isDark,
                 ),
-                ConnectPostsTab(isActive: activeTabIndex == 2),
-                ConnectPracticesTab(isActive: activeTabIndex == 3),
-                ConnectGroupsTab(
-                  myGroups: displayedMyGroups,
-                  onRefresh: _onGroupsRefresh,
-                  isActive: activeTabIndex == 4,
-                ),
-              ],
+              ),
+            ],
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            ConnectFeedTab(
+              myGroups: displayedMyGroups,
+              isActive: activeTabIndex == 0,
             ),
-          ),
-        ],
+            ConnectEventsTab(
+              myGroups: displayedMyGroups,
+              isActive: activeTabIndex == 1,
+            ),
+            ConnectPostsTab(isActive: activeTabIndex == 2),
+            ConnectPracticesTab(isActive: activeTabIndex == 3),
+            ConnectGroupsTab(
+              myGroups: displayedMyGroups,
+              onRefresh: _onGroupsRefresh,
+              isActive: activeTabIndex == 4,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _ConnectMainTabBar extends StatelessWidget {
-  const _ConnectMainTabBar({
-    required this.controller,
-    required this.isDark,
-  });
+  const _ConnectMainTabBar({required this.controller, required this.isDark});
 
   final TabController controller;
   final bool isDark;
@@ -153,14 +155,13 @@ class _ConnectMainTabBar extends StatelessWidget {
         labelColor: labelColor,
         unselectedLabelColor: unselectedColor,
         indicatorColor: labelColor,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
         indicatorWeight: 2,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
         labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-        labelStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w700,
-        ),
+        labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,

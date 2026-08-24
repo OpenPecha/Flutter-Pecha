@@ -392,7 +392,12 @@ class NotificationSyncEngine {
     if (!recitationOn) return const [];
     if (block.items.isEmpty || !block.notificationEnabled) return const [];
 
-    final firstItem = block.items.first;
+    // Anchor on the first recitation rather than the first item so a block that
+    // also holds a non-recitation session cannot hijack the title and payload.
+    final firstItem = block.items.firstWhere(
+      (i) => i.type == RoutineItemType.recitation,
+      orElse: () => block.items.first,
+    );
     final nowTz = tz.TZDateTime.from(now, tz.local);
     var scheduledDate = tz.TZDateTime(
       tz.local,

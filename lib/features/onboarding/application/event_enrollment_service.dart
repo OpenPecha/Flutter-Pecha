@@ -9,7 +9,6 @@ import 'package:flutter_pecha/features/plans/data/models/response/user_plan_list
 import 'package:flutter_pecha/features/plans/data/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/domain/usecases/user_plans_usecases.dart';
 import 'package:flutter_pecha/features/practice/data/models/routine_api_models.dart';
-import 'package:flutter_pecha/features/practice/data/models/routine_model.dart';
 import 'package:flutter_pecha/features/practice/domain/usecases/routine_api_usecases.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/routine_api_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/routine_provider.dart';
@@ -127,7 +126,7 @@ class EventEnrollmentService {
     if (routineData != null) {
       final alreadyInRoutine = routineData.blocks.any(
         (block) => block.items.any(
-          (item) => item.id == planId && item.type == RoutineItemType.series,
+          (item) => item.representsStandalonePlan(planId),
         ),
       );
       if (alreadyInRoutine) {
@@ -142,7 +141,7 @@ class EventEnrollmentService {
       notificationEnabled: true,
       sessions: [
         SessionRequest(
-          sessionType: SessionType.series,
+          sessionType: SessionType.plan,
           sourceId: planId,
           displayOrder: 0,
         ),

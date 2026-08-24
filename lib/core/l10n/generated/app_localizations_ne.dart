@@ -163,14 +163,14 @@ class AppLocalizationsNe extends AppLocalizations {
   String get mala_add_to_practice => 'मेरा अभ्यासहरूमा थप्नुहोस्';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => 'माला चक्र थप्नुहोस्';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => 'माला चक्र थप्नुहोस्:';
 
   @override
   String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+      'यस एपबाहिर गर्नुभएको माला चक्रको संख्या थप्नुहोस्।';
 
   @override
   String get mala_add_to_bookmark => 'बुकमार्क';
@@ -506,22 +506,22 @@ class AppLocalizationsNe extends AppLocalizations {
       'पाठ रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
-  String get notification_practice_title => 'माला रिमाइन्डर';
+  String get notification_practice_title => 'माला रिमाइन्डरहरू';
 
   @override
   String get notification_practice_subtitle_enabled =>
-      'तपाईंको माला अभ्यासका लागि दैनिक रिमाइन्डर';
+      'तपाईंको माला अभ्यासका लागि दैनिक रिमाइन्डरहरू';
 
   @override
   String get notification_practice_subtitle_disabled =>
       'माला रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
-  String get notification_timer_title => 'टाइमर रिमाइन्डर';
+  String get notification_timer_title => 'टाइमर रिमाइन्डरहरू';
 
   @override
   String get notification_timer_subtitle_enabled =>
-      'तपाईंको टाइमर सत्रहरूको लागि दैनिक रिमाइन्डर';
+      'तपाईंका टाइमर सत्रहरूका लागि दैनिक रिमाइन्डरहरू';
 
   @override
   String get notification_timer_subtitle_disabled =>
@@ -721,13 +721,13 @@ class AppLocalizationsNe extends AppLocalizations {
   String get connect_tab_posts => 'पोस्ट';
 
   @override
-  String get connect_tab_practices => 'Practices';
+  String get connect_tab_practices => 'अभ्यास';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'मेरो';
+  String get connect_segment_my => 'तपाईंका लागि';
 
   @override
   String get connect_segment_discover => 'अन्वेषण';
@@ -793,7 +793,7 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'तपाईंका समूहहरूले कुनै अभ्यास सुरु गरेका छैनन्। अन्य समूहहरूले के प्रस्ताव गरिरहेका छन् हेर्नुहोस्।';
+      'तपाईंका समूहहरूले कुनै अभ्यासहरू सुरु गरेका छैनन्। अन्य समूहहरूले के प्रस्ताव गरिरहेका छन् हेर्नुहोस्।';
 
   @override
   String get connect_my_empty_practices_browse => 'अन्य अभ्यासहरू हेर्नुहोस्';
@@ -842,6 +842,22 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get connect_online => 'अनलाइन';
+
+  @override
+  String get home_group_events => 'समूह कार्यक्रम';
+
+  @override
+  String get connect_events_filter_all => 'सबै';
+
+  @override
+  String get connect_events_filter_in_person => 'प्रत्यक्ष';
+
+  @override
+  String get connect_events_filter_empty_online => 'कुनै अनलाइन कार्यक्रम छैन';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'कुनै प्रत्यक्ष कार्यक्रम छैन';
 
   @override
   String get connect_open => 'खोल्नुहोस्';
@@ -906,6 +922,12 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get reader_settings_tooltip => 'रिडर सेटिङ';
+
+  @override
+  String get reader_translate_tooltip => 'अनुवाद देखाउनुहोस्';
+
+  @override
+  String get reader_translate_unavailable => 'यस पाठका लागि अनुवाद उपलब्ध छैन';
 
   @override
   String get reader_font_size_tooltip => 'फन्ट आकार';
@@ -1295,7 +1317,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get continueWithApple => 'Apple सँग जारी राख्नुहोस्';
 
   @override
-  String get continueWithPhone => 'फोन नम्बरसँग जारी राख्नुहोस्';
+  String get continueWithPhone => 'फोनसँग जारी राख्नुहोस्';
 
   @override
   String get continueAsGuest => 'अतिथिको रूपमा जारी राख्नुहोस्';
@@ -1863,11 +1885,11 @@ class AppLocalizationsNe extends AppLocalizations {
   }
 
   @override
-  String get group_change_practice_title => 'Change group practice';
+  String get group_change_practice_title => 'समूह अभ्यास परिवर्तन गर्नुहोस्';
 
   @override
   String get group_change_practice_message =>
-      'You are already practicing this plan with another group. Would you like to change your practice group?';
+      'तपाईं पहिले नै अर्को समूहसँग यो योजना अभ्यास गर्दै हुनुहुन्छ। के तपाईं आफ्नो अभ्यास समूह परिवर्तन गर्न चाहनुहुन्छ?';
 
   @override
   String get group_join_to_contribute => 'योगदानका लागि सामेल हुनुहोस्';
@@ -1948,6 +1970,28 @@ class AppLocalizationsNe extends AppLocalizations {
   @override
   String get group_accumulator_session_share_error =>
       'सत्र साझा गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्';
+
+  @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
 
   @override
   String get share_this_quote => 'यो उद्धरण साझा गर्नुहोस्';

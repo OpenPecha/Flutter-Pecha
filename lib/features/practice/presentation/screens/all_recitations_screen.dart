@@ -154,7 +154,11 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
         final recitation = state.recitations[index];
         return PracticeChantListTile(
           recitation: recitation,
-          onTap: () => openRecitationReader(context, recitation),
+          onTap: () => openRecitationReader(
+            context,
+            recitation,
+            listLanguage: languageCode,
+          ),
         );
       },
     );

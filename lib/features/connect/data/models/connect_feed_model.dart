@@ -2,7 +2,9 @@ import 'package:flutter_pecha/features/connect/data/models/connect_post_model.da
 import 'package:flutter_pecha/features/connect/domain/entities/connect_feed_item.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_event_model.dart';
+import 'package:flutter_pecha/features/group_profile/data/models/group_practice_model.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
+import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 
 class ConnectFeedItemModel {
   final ConnectFeedItemType type;
@@ -14,6 +16,7 @@ class ConnectFeedItemModel {
   final String? groupAvatarUrl;
   final ConnectPost? post;
   final GroupEvent? event;
+  final GroupPractice? practice;
 
   const ConnectFeedItemModel({
     required this.type,
@@ -25,6 +28,7 @@ class ConnectFeedItemModel {
     this.groupAvatarUrl,
     this.post,
     this.event,
+    this.practice,
   });
 
   factory ConnectFeedItemModel.fromJson(
@@ -32,10 +36,11 @@ class ConnectFeedItemModel {
     required String language,
   }) {
     final typeRaw = (json['type'] as String? ?? '').toLowerCase();
-    final type =
-        typeRaw == 'post'
-            ? ConnectFeedItemType.post
-            : ConnectFeedItemType.event;
+    final type = switch (typeRaw) {
+      'post' => ConnectFeedItemType.post,
+      'practice' => ConnectFeedItemType.practice,
+      _ => ConnectFeedItemType.event,
+    };
 
     ConnectPost? post;
     if (json['post'] is Map<String, dynamic>) {
@@ -75,9 +80,15 @@ class ConnectFeedItemModel {
           ).toEntity();
     }
 
+    GroupPractice? practice;
+    if (json['practice'] is Map<String, dynamic> ||
+        type == ConnectFeedItemType.practice) {
+      practice = GroupPracticeModel.fromJson(json).toEntity();
+    }
+
     return ConnectFeedItemModel(
       type: type,
-      feedAt: _parseDateTime(json['feed_at']),
+      feedAt: _parseDateTime(json['feed_at'] ?? json['practice_at']),
       isJoined: json['is_joined'] as bool? ?? false,
       groupId: json['group_id'] as String? ?? '',
       groupName: json['group_name'] as String? ?? '',
@@ -85,6 +96,7 @@ class ConnectFeedItemModel {
       groupAvatarUrl: json['group_avatar_url'] as String?,
       post: post,
       event: event,
+      practice: practice,
     );
   }
 
@@ -99,6 +111,7 @@ class ConnectFeedItemModel {
       groupAvatarUrl: groupAvatarUrl,
       post: post,
       event: event,
+      practice: practice,
     );
   }
 
@@ -139,6 +152,7 @@ class ConnectFeedPageModel {
               return switch (item.type) {
                 ConnectFeedItemType.post => item.post != null,
                 ConnectFeedItemType.event => item.event != null,
+                ConnectFeedItemType.practice => item.practice != null,
               };
             })
             .toList();

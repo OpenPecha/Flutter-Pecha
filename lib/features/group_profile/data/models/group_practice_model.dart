@@ -4,42 +4,97 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_pract
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/shared/domain/value_objects/responsive_image.dart';
 
-class GroupPracticeCollectionModel {
+class GroupRecitationCollectionItemModel {
+  final String id;
+  final String textId;
+  final String title;
+  final String language;
+  final String type;
+  final int displayOrder;
+
+  GroupRecitationCollectionItemModel({
+    required this.id,
+    required this.textId,
+    required this.title,
+    required this.language,
+    required this.type,
+    required this.displayOrder,
+  });
+
+  factory GroupRecitationCollectionItemModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return GroupRecitationCollectionItemModel(
+      id: json['id'] as String? ?? '',
+      textId: json['text_id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      language: json['language'] as String? ?? 'en',
+      type: json['type'] as String? ?? '',
+      displayOrder: (json['display_order'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  GroupRecitationCollectionItem toEntity() {
+    return GroupRecitationCollectionItem(
+      id: id,
+      textId: textId,
+      title: title,
+      language: language,
+      type: type,
+      displayOrder: displayOrder,
+    );
+  }
+}
+
+class GroupRecitationCollectionModel {
   final String id;
   final String groupId;
   final String name;
   final String? imageUrl;
-  final int itemCount;
   final DateTime? createdAt;
+  final int itemCount;
+  final List<GroupRecitationCollectionItemModel> items;
 
-  GroupPracticeCollectionModel({
+  GroupRecitationCollectionModel({
     required this.id,
     required this.groupId,
     required this.name,
     this.imageUrl,
-    this.itemCount = 0,
     this.createdAt,
+    this.itemCount = 0,
+    this.items = const [],
   });
 
-  factory GroupPracticeCollectionModel.fromJson(Map<String, dynamic> json) {
-    return GroupPracticeCollectionModel(
+  factory GroupRecitationCollectionModel.fromJson(Map<String, dynamic> json) {
+    final items = (json['items'] as List<dynamic>?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(GroupRecitationCollectionItemModel.fromJson)
+            .toList() ??
+        const [];
+
+    return GroupRecitationCollectionModel(
       id: json['id'] as String? ?? '',
       groupId: json['group_id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       imageUrl: json['img_url'] as String?,
-      itemCount: (json['item_count'] as num?)?.toInt() ?? 0,
       createdAt: GroupProfileModel.parseDate(json['created_at']),
+      itemCount: (json['item_count'] as num?)?.toInt() ?? items.length,
+      items: items,
     );
   }
 
-  GroupPracticeCollection toEntity() {
-    return GroupPracticeCollection(
+  GroupRecitationCollection toEntity() {
+    final sortedItems = [...items]
+      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+
+    return GroupRecitationCollection(
       id: id,
       groupId: groupId,
       name: name,
       imageUrl: imageUrl,
-      itemCount: itemCount,
       createdAt: createdAt,
+      itemCount: itemCount,
+      items: sortedItems.map((item) => item.toEntity()).toList(),
     );
   }
 }
@@ -180,7 +235,9 @@ class GroupPracticeModel {
               : null,
       collection:
           collectionJson != null
-              ? GroupPracticeCollectionModel.fromJson(collectionJson!).toEntity()
+              ? GroupRecitationCollectionModel.fromJson(
+                collectionJson!,
+              ).toEntity()
               : null,
       plan:
           planJson != null

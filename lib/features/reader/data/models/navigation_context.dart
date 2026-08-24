@@ -8,6 +8,8 @@ enum NavigationSource {
   routine,
   /// Text reader opened from a group accumulation with chant counting.
   groupAccumulatorChant,
+  /// Text reader opened from a group recitation collection with swipe navigation.
+  groupRecitationCollection,
 }
 
 /// Discriminator for the kind of content a [PlanTextItem] carries.
@@ -330,6 +332,14 @@ class NavigationContext {
   /// User session count from `GET /group-accumulators/{id}` before entering.
   final int? groupAccumulatorSessionCount;
 
+  /// Language to load in the reader (e.g. the chant-list picker).
+  /// Plans, library, and deep links leave this null so the API uses Settings.
+  final String? language;
+
+  /// Group recitation collection ID — set when [source] is
+  /// [NavigationSource.groupRecitationCollection].
+  final String? collectionId;
+
   const NavigationContext({
     required this.source,
     this.planId,
@@ -345,6 +355,8 @@ class NavigationContext {
     this.groupId,
     this.groupTitle,
     this.groupAccumulatorSessionCount,
+    this.language,
+    this.collectionId,
   });
 
   /// True when the reader should show chant-again / finish-session controls
@@ -366,20 +378,34 @@ class NavigationContext {
       currentTextIndex! >= 0 &&
       currentTextIndex! < planTextItems!.length;
 
+  /// Whether this context can navigate between group recitation collection items.
+  bool get hasGroupRecitationItems =>
+      source == NavigationSource.groupRecitationCollection &&
+      planTextItems != null &&
+      planTextItems!.isNotEmpty &&
+      currentTextIndex != null &&
+      currentTextIndex! >= 0 &&
+      currentTextIndex! < planTextItems!.length;
+
   /// Check if this navigation context supports swipe navigation
   /// (more than one item to move between).
-  bool get canSwipe => hasPlanItems && planTextItems!.length > 1;
+  bool get canSwipe =>
+      (hasPlanItems || hasGroupRecitationItems) && planTextItems!.length > 1;
 
   /// Check if there is a next text in the plan
   bool get hasNextText =>
-      hasPlanItems && currentTextIndex! < planTextItems!.length - 1;
+      (hasPlanItems || hasGroupRecitationItems) &&
+      currentTextIndex! < planTextItems!.length - 1;
 
   /// Check if there is a previous text in the plan
-  bool get hasPreviousText => hasPlanItems && currentTextIndex! > 0;
+  bool get hasPreviousText =>
+      (hasPlanItems || hasGroupRecitationItems) && currentTextIndex! > 0;
 
   /// Get the currently selected plan item, if any.
   PlanTextItem? get currentItem =>
-      hasPlanItems ? planTextItems![currentTextIndex!] : null;
+      (hasPlanItems || hasGroupRecitationItems)
+          ? planTextItems![currentTextIndex!]
+          : null;
 
   /// Get the next text item in the plan
   PlanTextItem? get nextTextItem {
@@ -426,6 +452,8 @@ class NavigationContext {
     String? groupId,
     String? groupTitle,
     int? groupAccumulatorSessionCount,
+    String? language,
+    String? collectionId,
   }) {
     return NavigationContext(
       source: source ?? this.source,
@@ -444,6 +472,8 @@ class NavigationContext {
       groupTitle: groupTitle ?? this.groupTitle,
       groupAccumulatorSessionCount:
           groupAccumulatorSessionCount ?? this.groupAccumulatorSessionCount,
+      language: language ?? this.language,
+      collectionId: collectionId ?? this.collectionId,
     );
   }
 
@@ -455,12 +485,19 @@ class NavigationContext {
         other.planId == planId &&
         other.dayNumber == dayNumber &&
         other.targetSegmentId == targetSegmentId &&
-        other.currentTextIndex == currentTextIndex;
+        other.currentTextIndex == currentTextIndex &&
+        other.language == language;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(source, planId, dayNumber, targetSegmentId, currentTextIndex);
+  int get hashCode => Object.hash(
+        source,
+        planId,
+        dayNumber,
+        targetSegmentId,
+        currentTextIndex,
+        language,
+      );
 
   @override
   String toString() {

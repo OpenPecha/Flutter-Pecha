@@ -154,14 +154,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mala_add_to_practice => '加入我的修持';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => '新增念珠遍數';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => '新增念珠遍數：';
 
   @override
-  String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+  String get mala_add_rounds_message => '新增你在此應用程式之外完成的念珠遍數。';
 
   @override
   String get mala_add_to_bookmark => '書籤';
@@ -495,7 +494,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notification_timer_title => '計時器提醒';
 
   @override
-  String get notification_timer_subtitle_enabled => '每日計時器練習提醒';
+  String get notification_timer_subtitle_enabled => '每日計時修持時段提醒';
 
   @override
   String get notification_timer_subtitle_disabled => '計時器提醒已暫停。點此恢復。';
@@ -673,13 +672,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_tab_posts => '貼文';
 
   @override
-  String get connect_tab_practices => '修持';
+  String get connect_tab_practices => '修持計畫';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => '我的';
+  String get connect_segment_my => '為你';
 
   @override
   String get connect_segment_discover => '探索';
@@ -697,7 +696,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_empty_discover_groups => '沒有可探索的社群';
 
   @override
-  String get connect_empty_discover_practices => '沒有可探索的修持';
+  String get connect_empty_discover_practices => '沒有可探索的修行';
 
   @override
   String get connect_all_groups => '所有社群';
@@ -736,13 +735,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_my_empty_posts_browse => '瀏覽其他貼文';
 
   @override
-  String get connect_my_empty_practices_title => '尚無修持';
+  String get connect_my_empty_practices_title => '尚無修持計畫';
 
   @override
-  String get connect_my_empty_practices_subtitle => '你的社群還沒有開始任何修持。看看其他社群提供什麼。';
+  String get connect_my_empty_practices_subtitle =>
+      '你的社群還沒有發起任何修行活動。看看其他社群提供了什麼。';
 
   @override
-  String get connect_my_empty_practices_browse => '瀏覽其他修持';
+  String get connect_my_empty_practices_browse => '瀏覽其他修行';
 
   @override
   String connect_comment_replying_to(String handle) {
@@ -785,6 +785,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connect_online => '線上';
+
+  @override
+  String get home_group_events => '社群活動';
+
+  @override
+  String get connect_events_filter_all => '全部';
+
+  @override
+  String get connect_events_filter_in_person => '實體';
+
+  @override
+  String get connect_events_filter_empty_online => '沒有線上活動';
+
+  @override
+  String get connect_events_filter_empty_in_person => '沒有實體活動';
 
   @override
   String get connect_open => '開啟';
@@ -844,6 +859,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reader_settings_tooltip => '閱讀器設定';
+
+  @override
+  String get reader_translate_tooltip => '顯示譯文';
+
+  @override
+  String get reader_translate_unavailable => '此文本沒有可用譯文';
 
   @override
   String get reader_font_size_tooltip => '字體大小';
@@ -1215,7 +1236,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get continueWithApple => '使用 Apple 繼續';
 
   @override
-  String get continueWithPhone => '使用手機號碼繼續';
+  String get continueWithPhone => '使用電話繼續';
 
   @override
   String get continueAsGuest => '以訪客身份繼續';
@@ -1753,11 +1774,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get group_change_practice_title => 'Change group practice';
+  String get group_change_practice_title => '改變小組實踐';
 
   @override
-  String get group_change_practice_message =>
-      'You are already practicing this plan with another group. Would you like to change your practice group?';
+  String get group_change_practice_message => '您目前已與其他小組一起練習此計劃。您是否想更換練習小組？';
 
   @override
   String get group_join_to_contribute => '加入以貢獻';
@@ -1834,6 +1854,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_accumulator_session_share_error => '無法分享課誦，請重試';
+
+  @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
 
   @override
   String get share_this_quote => '分享这句话';

@@ -163,14 +163,14 @@ class AppLocalizationsMn extends AppLocalizations {
   String get mala_add_to_practice => 'Миний дадлагад нэмэх';
 
   @override
-  String get mala_add_mala_round => 'Add mala round';
+  String get mala_add_mala_round => 'Эрхийн ээлж нэмэх';
 
   @override
-  String get mala_add_rounds_title => 'Add mala rounds:';
+  String get mala_add_rounds_title => 'Эрхийн ээлж нэмэх:';
 
   @override
   String get mala_add_rounds_message =>
-      'Add the number of mala rounds you did outside this app.';
+      'Энэ аппаас гадуур хийсэн эрхийн ээлжийнхээ тоог нэмнэ үү.';
 
   @override
   String get mala_add_to_bookmark => 'Хавчуурга';
@@ -506,22 +506,22 @@ class AppLocalizationsMn extends AppLocalizations {
       'Уншлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
-  String get notification_practice_title => 'Эрхийн сануулга';
+  String get notification_practice_title => 'Эрхи тоолох сануулга';
 
   @override
   String get notification_practice_subtitle_enabled =>
-      'Таны эрхийн дадлагын өдөр тутмын сануулга';
+      'Таны эрхиний дадлагын өдөр тутмын сануулга';
 
   @override
   String get notification_practice_subtitle_disabled =>
-      'Эрхийн сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
+      'Малагийн сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
-  String get notification_timer_title => 'Цаг хэмжигчийн сануулга';
+  String get notification_timer_title => 'Таймерын сануулга';
 
   @override
   String get notification_timer_subtitle_enabled =>
-      'Таны цаг хэмжигчийн дасгалын өдөр тутмын сануулга';
+      'Таны таймерын сешнүүдийн өдөр тутмын сануулга';
 
   @override
   String get notification_timer_subtitle_disabled =>
@@ -715,13 +715,13 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_tab_posts => 'Нийтлэл';
 
   @override
-  String get connect_tab_practices => 'Practices';
+  String get connect_tab_practices => 'Дадлага';
 
   @override
   String get connect_tab_groups => 'Groups';
 
   @override
-  String get connect_segment_my => 'Миний';
+  String get connect_segment_my => 'Танд';
 
   @override
   String get connect_segment_discover => 'Судлах';
@@ -739,7 +739,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_empty_discover_groups => 'Судлах бүлэг алга';
 
   @override
-  String get connect_empty_discover_practices => 'Судлах дадлага алга';
+  String get connect_empty_discover_practices => 'Судлах бясалгал алга';
 
   @override
   String get connect_all_groups => 'Бүх бүлэг';
@@ -786,10 +786,10 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'Таны бүлгүүд ямар ч дадлага эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.';
+      'Таны бүлгүүд ямар ч бясалгал эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.';
 
   @override
-  String get connect_my_empty_practices_browse => 'Бусад дадлагыг үзэх';
+  String get connect_my_empty_practices_browse => 'Бусад бясалгалыг үзэх';
 
   @override
   String connect_comment_replying_to(String handle) {
@@ -835,6 +835,22 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_online => 'Онлайн';
+
+  @override
+  String get home_group_events => 'Бүлгийн арга хэмжээ';
+
+  @override
+  String get connect_events_filter_all => 'Бүгд';
+
+  @override
+  String get connect_events_filter_in_person => 'Биечлэн';
+
+  @override
+  String get connect_events_filter_empty_online => 'Онлайн арга хэмжээ байхгүй';
+
+  @override
+  String get connect_events_filter_empty_in_person =>
+      'Биечлэн арга хэмжээ байхгүй';
 
   @override
   String get connect_open => 'Нээх';
@@ -899,6 +915,12 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get reader_settings_tooltip => 'Уншигчийн тохиргоо';
+
+  @override
+  String get reader_translate_tooltip => 'Орчуулга харуулах';
+
+  @override
+  String get reader_translate_unavailable => 'Энэ текстэд орчуулга байхгүй';
 
   @override
   String get reader_font_size_tooltip => 'Үсгийн хэмжээ';
@@ -1287,7 +1309,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get continueWithApple => 'Apple-ээр үргэлжлүүлэх';
 
   @override
-  String get continueWithPhone => 'Утасны дугаараар үргэлжлүүлэх';
+  String get continueWithPhone => 'Утсаар үргэлжлүүлэх';
 
   @override
   String get continueAsGuest => 'Зочноор үргэлжлүүлэх';
@@ -1858,11 +1880,11 @@ class AppLocalizationsMn extends AppLocalizations {
   }
 
   @override
-  String get group_change_practice_title => 'Change group practice';
+  String get group_change_practice_title => 'Бүлгийн дадлыг өөрчлөх';
 
   @override
   String get group_change_practice_message =>
-      'You are already practicing this plan with another group. Would you like to change your practice group?';
+      'Та энэ төлөвлөгөөг өөр бүлэгтэй хамт аль хэдийн дадлага хийж байна. Та дадлагын бүлгээ өөрчлөхийг хүсэж байна уу?';
 
   @override
   String get group_join_to_contribute => 'Хувь нэмэр оруулахын тулд нэгдэх';
@@ -1943,6 +1965,28 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get group_accumulator_session_share_error =>
       'Хуралдааныг хуваалцаж чадсангүй. Дахин оролдоно уу';
+
+  @override
+  String group_recitation_collection_share_message(
+    String collection,
+    String group,
+  ) {
+    return 'Check out \"$collection\", a recitation collection by $group on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_share_message_no_group(String collection) {
+    return 'Check out the recitation collection \"$collection\" on WeBuddhist. Join us in practice!';
+  }
+
+  @override
+  String group_recitation_collection_completed_title(String collection) {
+    return '$collection completed';
+  }
+
+  @override
+  String get group_recitation_collection_dedication =>
+      'By this merit, may all beings\nbe free from suffering.';
 
   @override
   String get share_this_quote => 'Энэ ишлэлийг хуваалцах';

@@ -15,6 +15,8 @@ class AppAssets {
       'assets/images/recitation_cover/recitation_05.jpg';
   static const String connect = 'assets/images/connect.png';
   static const String verseOfDayFallback = 'assets/images/buddha.jpeg';
+  static const String collectionCompletion =
+      'assets/images/collection-completion.png';
 
   // ========== AUDIO ==========
   // PCM WAV (not MP3): ExoPlayer's offload path mis-parses the encoded MP3 on

@@ -19,6 +19,7 @@ class GroupAccumulatorCard extends StatelessWidget {
   final String? groupName;
   final String? groupAvatarUrl;
   final String? groupId;
+  final bool fullBleed;
 
   const GroupAccumulatorCard({
     super.key,
@@ -32,6 +33,7 @@ class GroupAccumulatorCard extends StatelessWidget {
     this.groupName,
     this.groupAvatarUrl,
     this.groupId,
+    this.fullBleed = false,
   });
 
   @override
@@ -43,85 +45,83 @@ class GroupAccumulatorCard extends StatelessWidget {
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
     final showJoinOverlay = !hasJoined;
 
+    final cover = Stack(
+      fit: StackFit.expand,
+      children: [
+        accumulator.image != null && !accumulator.image!.isEmpty
+            ? ResponsiveCoverImage(
+              image: accumulator.image,
+              fit: BoxFit.cover,
+            )
+            : ColoredBox(
+              color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+              child: Icon(
+                AppAssets.bookOpenText,
+                size: 40,
+                color: isDark ? AppColors.grey500 : AppColors.grey600,
+              ),
+            ),
+        if (showJoinOverlay)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: isJoining ? null : onTap,
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.55),
+              alignment: Alignment.center,
+              child:
+                  isJoining
+                      ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                      : GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onJoinTap,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            context.l10n.group_join_to_contribute,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+            ),
+          ),
+      ],
+    );
+
     return Material(
       color: cardColor,
-      elevation: isDark ? 0 : 1,
+      elevation: fullBleed || isDark ? 0 : 1,
       shadowColor: Colors.black.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
+      borderRadius: fullBleed ? null : BorderRadius.circular(16),
+      clipBehavior: fullBleed ? Clip.hardEdge : Clip.antiAlias,
       child: InkWell(
         onTap: isJoining ? null : onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 140,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  accumulator.image != null && !accumulator.image!.isEmpty
-                      ? ResponsiveCoverImage(
-                        image: accumulator.image,
-                        fit: BoxFit.cover,
-                      )
-                      : ColoredBox(
-                        color:
-                            isDark
-                                ? AppColors.surfaceVariantDark
-                                : AppColors.grey100,
-                        child: Icon(
-                          AppAssets.bookOpenText,
-                          size: 40,
-                          color: isDark ? AppColors.grey500 : AppColors.grey600,
-                        ),
-                      ),
-                  if (showJoinOverlay)
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: isJoining ? null : onTap,
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        alignment: Alignment.center,
-                        child:
-                            isJoining
-                                ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                : GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: onJoinTap,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      context.l10n.group_join_to_contribute,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+            if (fullBleed)
+              ClipRect(child: AspectRatio(aspectRatio: 2, child: cover))
+            else
+              SizedBox(height: 140, width: double.infinity, child: cover),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, fullBleed ? 14 : 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

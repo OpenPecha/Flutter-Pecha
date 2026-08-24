@@ -6,7 +6,14 @@ import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
 
-enum RoutineItemType { series, recitation, timer, accumulator }
+enum RoutineItemType {
+  plan,
+  series,
+  recitation,
+  timer,
+  accumulator,
+  groupRecitationCollection,
+}
 
 class RoutineItem {
   final String id;
@@ -25,6 +32,10 @@ class RoutineItem {
   /// Preview text for [RoutineItemType.recitation] items (from API or selection).
   final RecitationFirstSegmentModel? firstSegment;
 
+  /// Number of chants — only present for
+  /// [RoutineItemType.groupRecitationCollection] items.
+  final int? itemCount;
+
   const RoutineItem({
     required this.id,
     required this.title,
@@ -37,10 +48,20 @@ class RoutineItem {
     this.currentPlanTitle,
     this.durationMs,
     this.firstSegment,
+    this.itemCount,
   });
 
   /// Smallest cover URL — legacy persistence and notifications.
   String? get imageUrl => coverImage?.displayUrl;
+
+  /// True when this session is the standalone plan [planId].
+  ///
+  /// Older payloads stored a plan as [RoutineItemType.series] with the plan
+  /// id; those still match so duplicate-detection stays correct until refresh.
+  bool representsStandalonePlan(String planId) {
+    if (id != planId) return false;
+    return type == RoutineItemType.plan || type == RoutineItemType.series;
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -55,6 +76,7 @@ class RoutineItem {
     if (currentPlanTitle != null) 'currentPlanTitle': currentPlanTitle,
     if (durationMs != null) 'durationMs': durationMs,
     if (firstSegment != null) 'firstSegment': firstSegment!.toJson(),
+    if (itemCount != null) 'itemCount': itemCount,
   };
 
   /// Safely parses a [RoutineItem] from JSON with null checks and fallbacks.
@@ -81,6 +103,7 @@ class RoutineItem {
       currentPlanTitle: json['currentPlanTitle'] as String?,
       durationMs: (json['durationMs'] as num?)?.toInt(),
       firstSegment: _parseFirstSegment(json),
+      itemCount: (json['itemCount'] as num?)?.toInt(),
     );
   }
 
@@ -116,11 +139,12 @@ class RoutineItem {
   static RoutineItemType _parseRoutineItemType(dynamic value) {
     if (value is! String) return RoutineItemType.series;
     return switch (value) {
-      'plan' => RoutineItemType.series,
+      'plan' => RoutineItemType.plan,
       'series' => RoutineItemType.series,
       'recitation' => RoutineItemType.recitation,
       'timer' => RoutineItemType.timer,
       'accumulator' => RoutineItemType.accumulator,
+      'groupRecitationCollection' => RoutineItemType.groupRecitationCollection,
       _ => RoutineItemType.series,
     };
   }

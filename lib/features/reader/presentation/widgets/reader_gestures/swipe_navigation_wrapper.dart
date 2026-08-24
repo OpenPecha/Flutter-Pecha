@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/providers/group_recitation_completion_service.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_navigation_bottom_bar.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_navigator.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_subtask_completion.dart';
@@ -83,7 +84,10 @@ class _SwipeNavigationWrapperState
                         : null,
                 onFinishedTap:
                     navigationContext != null &&
-                            navigationContext.source == NavigationSource.plan
+                            (navigationContext.source ==
+                                    NavigationSource.plan ||
+                                navigationContext.source ==
+                                    NavigationSource.groupRecitationCollection)
                         ? _finishReading
                         : null,
               ),
@@ -108,7 +112,15 @@ class _SwipeNavigationWrapperState
     if (_isNavigating) return;
 
     if (direction == SwipeDirection.next) {
-      ref.read(planSubtaskCompletionProvider).completeCurrent(currentContext);
+      // Complete the current item based on its source
+      if (currentContext.source == NavigationSource.plan) {
+        ref.read(planSubtaskCompletionProvider).completeCurrent(currentContext);
+      } else if (currentContext.source ==
+          NavigationSource.groupRecitationCollection) {
+        ref
+            .read(groupRecitationCompletionProvider)
+            .completeCurrent(currentContext);
+      }
     }
 
     // Clear UI state before navigation for clean transition
@@ -136,7 +148,15 @@ class _SwipeNavigationWrapperState
     _isNavigating = true;
 
     final navContext = widget.params.navigationContext;
-    await ref.read(planSubtaskCompletionProvider).completeCurrent(navContext);
+    // Complete the current item based on its source
+    if (navContext?.source == NavigationSource.plan) {
+      await ref.read(planSubtaskCompletionProvider).completeCurrent(navContext);
+    } else if (navContext?.source ==
+        NavigationSource.groupRecitationCollection) {
+      await ref
+          .read(groupRecitationCompletionProvider)
+          .completeCurrent(navContext);
+    }
 
     if (!mounted) return;
     context.pop();

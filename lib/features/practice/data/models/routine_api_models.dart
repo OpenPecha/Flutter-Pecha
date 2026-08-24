@@ -3,25 +3,29 @@ import 'package:flutter_pecha/features/recitation/data/models/recitation_model.d
 import 'package:flutter_pecha/shared/domain/value_objects/responsive_image.dart';
 
 enum SessionType {
+  plan,
   series,
   recitation,
   timer,
-  accumulator;
+  accumulator,
+  groupRecitationCollection;
 
   String toJson() => switch (this) {
+    SessionType.plan => 'PLAN',
     SessionType.series => 'SERIES',
     SessionType.recitation => 'RECITATION',
     SessionType.timer => 'TIMER',
     SessionType.accumulator => 'ACCUMULATOR',
+    SessionType.groupRecitationCollection => 'GROUP_RECITATION_COLLECTION',
   };
 
-  static SessionType fromJson(String value) => switch (value) {
+  static SessionType fromJson(String value) => switch (value.toUpperCase()) {
+    'PLAN' => SessionType.plan,
     'SERIES' => SessionType.series,
-    // Legacy API / cached payloads before the PLAN → SERIES rename.
-    'PLAN' => SessionType.series,
     'RECITATION' => SessionType.recitation,
     'TIMER' => SessionType.timer,
     'ACCUMULATOR' => SessionType.accumulator,
+    'GROUP_RECITATION_COLLECTION' => SessionType.groupRecitationCollection,
     _ => throw FormatException('Unknown SessionType: $value'),
   };
 }
@@ -94,6 +98,9 @@ class SessionDTO {
   final String? currentPlanTitle;
   final RecitationFirstSegmentModel? firstSegment;
 
+  /// Number of chants in a chant-collection session.
+  final int? itemCount;
+
   const SessionDTO({
     required this.id,
     required this.sessionType,
@@ -108,6 +115,7 @@ class SessionDTO {
     this.currentPlanId,
     this.currentPlanTitle,
     this.firstSegment,
+    this.itemCount,
   });
 
   String? get imageUrl => image?.displayUrl;
@@ -124,10 +132,7 @@ class SessionDTO {
       id: json['id'] as String,
       sessionType: sessionType,
       sourceId: _sourceIdFromJson(json, sessionType),
-      title:
-          sessionType == SessionType.timer
-              ? ((json['title'] as String?) ?? '')
-              : (json['title'] as String),
+      title: (json['title'] as String?) ?? '',
       language: (json['language'] as String?) ?? '',
       image: ImageModel.fromJsonMap(json),
       displayOrder: json['display_order'] as int,
@@ -148,6 +153,7 @@ class SessionDTO {
                 json['first_segment'] as Map<String, dynamic>,
               )
               : null,
+      itemCount: (json['item_count'] as num?)?.toInt(),
     );
   }
 
@@ -168,6 +174,9 @@ class SessionDTO {
 
     final sourceId = json['source_id'] as String?;
     if (sourceId != null && sourceId.isNotEmpty) return sourceId;
+
+    final planId = json['plan_id'] as String?;
+    if (planId != null && planId.isNotEmpty) return planId;
 
     return json['id'] as String;
   }

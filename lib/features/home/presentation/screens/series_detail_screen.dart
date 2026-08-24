@@ -22,6 +22,7 @@ import 'package:share_plus/share_plus.dart';
 
 class SeriesDetailScreen extends ConsumerWidget {
   final String seriesId;
+  final Series? initialSeries;
   final String? groupId;
   final GroupType? groupType;
   final bool isGroupEnrolled;
@@ -29,6 +30,7 @@ class SeriesDetailScreen extends ConsumerWidget {
   const SeriesDetailScreen({
     super.key,
     required this.seriesId,
+    this.initialSeries,
     this.groupId,
     this.groupType,
     this.isGroupEnrolled = false,
@@ -44,9 +46,10 @@ class SeriesDetailScreen extends ConsumerWidget {
     final seriesAsync = ref.watch(seriesByIdProvider(seriesId));
     final localizations = AppLocalizations.of(context)!;
 
-    final resolvedSeries = seriesAsync.whenOrNull(
+    final fetchedSeries = seriesAsync.whenOrNull(
       data: (either) => either.fold((_) => null, (s) => s),
     );
+    final resolvedSeries = fetchedSeries ?? initialSeries;
 
     final isGroupEnrolledForSeries = _resolveIsGroupEnrolled(ref);
 
@@ -76,6 +79,8 @@ class SeriesDetailScreen extends ConsumerWidget {
               child: RefreshIndicator(
                 onRefresh: () => _onRefresh(ref),
                 child: seriesAsync.when(
+                  skipLoadingOnReload: true,
+                  skipLoadingOnRefresh: true,
                   data: (either) {
                     return either.fold(
                       (failure) => _buildScrollableMessage(
@@ -84,24 +89,28 @@ class SeriesDetailScreen extends ConsumerWidget {
                           onRetry: () => _onRefresh(ref),
                         ),
                       ),
-                      (series) {
-                        if (series.plans.isEmpty) {
-                          return _buildScrollableMessage(
-                            _buildEmptyState(context, localizations, ref),
-                          );
-                        }
-                        return PlanListView(
-                          plans: series.plans,
-                          seriesId: seriesId,
-                          series: series,
-                          groupId: groupId,
-                          groupType: groupType,
-                          isGroupEnrolled: isGroupEnrolledForSeries,
-                        );
-                      },
+                      (series) => _buildSeriesBody(
+                        context,
+                        localizations,
+                        ref,
+                        series,
+                        isGroupEnrolledForSeries,
+                      ),
                     );
                   },
-                  loading: () => const PlanListSkeleton(),
+                  loading: () {
+                    final preview = initialSeries;
+                    if (preview != null && !preview.isPlansPayloadPending) {
+                      return _buildSeriesBody(
+                        context,
+                        localizations,
+                        ref,
+                        preview,
+                        isGroupEnrolledForSeries,
+                      );
+                    }
+                    return const PlanListSkeleton();
+                  },
                   error:
                       (error, stackTrace) => _buildScrollableMessage(
                         ErrorStateWidget(
@@ -202,6 +211,28 @@ class SeriesDetailScreen extends ConsumerWidget {
       return;
     }
     context.pushNamed('edit-routine', extra: {'initialSeries': series});
+  }
+
+  Widget _buildSeriesBody(
+    BuildContext context,
+    AppLocalizations localizations,
+    WidgetRef ref,
+    Series series,
+    bool isGroupEnrolledForSeries,
+  ) {
+    if (series.plans.isEmpty) {
+      return _buildScrollableMessage(
+        _buildEmptyState(context, localizations, ref),
+      );
+    }
+    return PlanListView(
+      plans: series.plans,
+      seriesId: seriesId,
+      series: series,
+      groupId: groupId,
+      groupType: groupType,
+      isGroupEnrolled: isGroupEnrolledForSeries,
+    );
   }
 
   Widget _buildEmptyState(

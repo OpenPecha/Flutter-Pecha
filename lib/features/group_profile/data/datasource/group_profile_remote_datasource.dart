@@ -7,6 +7,10 @@ import 'package:flutter_pecha/features/group_profile/data/models/group_practice_
 import 'package:flutter_pecha/features/group_profile/data/models/group_profile_model.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 
+/// Marker carried by the failure raised when a chant completion is rejected
+/// because the user only follows the group instead of having joined it.
+const String noGroupMembershipCode = 'NO_GROUP_MEMBERSHIP';
+
 class GroupProfileRemoteDatasource {
   final Dio dio;
   final _logger = AppLogger('GroupProfileRemoteDatasource');
@@ -136,6 +140,140 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<GroupRecitationCollectionModel> fetchRecitationCollectionDetail({
+    required String collectionId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/author/groups/recitation-collections/$collectionId',
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return GroupRecitationCollectionModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+
+      _logger.error(
+        'Failed to load recitation collection $collectionId: ${response.statusCode}',
+      );
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load recitation collection',
+      );
+    } on DioException catch (e) {
+      _logger.error('Dio error in fetchRecitationCollectionDetail', e);
+      throw _dioToException(e, 'Failed to load recitation collection');
+    }
+  }
+
+  Future<Set<String>> fetchTodayRecitationCollectionCompletions({
+    required String collectionId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/users/me/groups/recitation-collections/$collectionId/complete/today',
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        return (data['completed_chant_ids'] as List<dynamic>?)
+                ?.whereType<String>()
+                .toSet() ??
+            const {};
+      }
+
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load completed recitations',
+      );
+    } on DioException catch (e) {
+      // Only members may track completions. A follower can still open the
+      // collection, so treat the rejection as "nothing completed" instead of
+      // failing the screen.
+      if (e.response?.statusCode == 403) {
+        _logger.info(
+          'No membership for collection $collectionId — no completion ticks to show',
+        );
+        return const {};
+      }
+
+      _logger.error(
+        'Dio error in fetchTodayRecitationCollectionCompletions',
+        e,
+      );
+      throw _dioToException(e, 'Failed to load completed recitations');
+    }
+  }
+
+  Future<int> fetchRecitationCollectionCompletionDaysCount({
+    required String collectionId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/users/me/groups/recitation-collections/$collectionId/complete/days-count',
+        options: Options(extra: {'no_cache': true}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        return (data['day_count'] as num?)?.toInt() ?? 0;
+      }
+
+      throw _statusToException(
+        response.statusCode,
+        'Failed to load completion day count',
+      );
+    } on DioException catch (e) {
+      _logger.error(
+        'Dio error in fetchRecitationCollectionCompletionDaysCount',
+        e,
+      );
+      throw _dioToException(e, 'Failed to load completion day count');
+    }
+  }
+
+  Future<void> completeRecitationCollectionChant({
+    required String collectionId,
+    required String chantId,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/users/me/groups/recitation-collections/$collectionId/complete',
+        data: {'chant_id': chantId},
+      );
+
+      if (response.statusCode == null ||
+          response.statusCode! < 200 ||
+          response.statusCode! >= 300) {
+        throw _statusToException(
+          response.statusCode,
+          'Failed to complete recitation',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        _logger.info(
+          'Recitation $chantId already completed (409) — treating as success',
+        );
+        return;
+      }
+
+      // Followers can read a collection but only members can log completions.
+      if (e.response?.statusCode == 403) {
+        _logger.info(
+          'Completion rejected for collection $collectionId — membership required',
+        );
+        throw const AuthorizationException(noGroupMembershipCode);
+      }
+
+      _logger.error('Dio error in completeRecitationCollectionChant', e);
+      throw _dioToException(e, 'Failed to complete recitation');
+    }
+  }
+
   Future<GroupMembersPageModel> fetchGroupMembers(
     String groupId, {
     required int skip,
@@ -194,13 +332,8 @@ class GroupProfileRemoteDatasource {
           language: language,
         );
       } else {
-        _logger.error(
-          'Failed to load connect events: ${response.statusCode}',
-        );
-        throw _statusToException(
-          response.statusCode,
-          'Failed to load events',
-        );
+        _logger.error('Failed to load connect events: ${response.statusCode}');
+        throw _statusToException(response.statusCode, 'Failed to load events');
       }
     } on DioException catch (e) {
       _logger.error('Dio error in fetchConnectEvents', e);
