@@ -513,18 +513,18 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get notification_practice_subtitle_disabled =>
-      'ཕྲེང་བ་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
+      'ཕྲེང་བའི་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
 
   @override
-  String get notification_timer_title => 'སྒོམ་ཡུན་གྱི་དྲན་སྐུལ།';
+  String get notification_timer_title => 'དུས་འཛིན་དྲན་སྐུལ།';
 
   @override
   String get notification_timer_subtitle_enabled =>
-      'ཁྱེད་རང་གི་སྒོམ་ཡུན་གྱི་ཉིན་རེའི་དྲན་སྐུལ་རྣམས།';
+      'དུས་འཛིན་ཉམས་ལེན་དུས་མཚམས་ཀྱི་ཉིན་རེའི་དྲན་སྐུལ།';
 
   @override
   String get notification_timer_subtitle_disabled =>
-      'སྒོམ་ཡུན་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
+      'དུས་འཛིན་དྲན་སྐུལ་བཀག་འདུག མུ་མཐུད་དགོས་ན་འདིར་ནོན།';
 
   @override
   String get notification_battery_info_title => 'རྒྱབ་ལྗོངས་དྲན་སྐུལ་གྱི་སྐོར།';
@@ -789,11 +789,11 @@ class AppLocalizationsBo extends AppLocalizations {
   String get connect_my_empty_posts_browse => 'སྤེལ་བ་གཞན་ལ་གཟིགས།';
 
   @override
-  String get connect_my_empty_practices_title => 'ད་དུང་ཉམས་ལེན་མི་འདུག';
+  String get connect_my_empty_practices_title => 'ད་དུང་ཉམས་ལེན་མེད།';
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་ཉམས་ལེན་གང་ཡང་མ་བྱས་འདུག ཚོགས་པ་གཞན་གྱིས་གང་འདོན་བཞིན་པར་གཟིགས།';
+      'ཁྱེད་ཀྱི་ཚོགས་པ་ཁག་གིས་ཉམས་ལེན་གང་ཡང་འགོ་བཙུགས་མི་འདུག ཚོགས་པ་གཞན་གྱིས་གང་འབུལ་བཞིན་ཡོད་པར་གཟིགས།';
 
   @override
   String get connect_my_empty_practices_browse => 'ཉམས་ལེན་གཞན་ལ་གཟིགས།';
@@ -1316,7 +1316,7 @@ class AppLocalizationsBo extends AppLocalizations {
   String get continueWithApple => 'Apple བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
 
   @override
-  String get continueWithPhone => 'ཁ་པར་ཨང་གྲངས་བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
+  String get continueWithPhone => 'ཁ་པར་བརྒྱུད་ནས་མུ་མཐུད་རོགས།';
 
   @override
   String get continueAsGuest => 'མགྲོན་པོའི་ངོ་བོའི་ཐོག་ནས་མུ་མཐུད་རོགས།';

@@ -506,22 +506,22 @@ class AppLocalizationsMn extends AppLocalizations {
       'Уншлагын сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
-  String get notification_practice_title => 'Эрхийн сануулга';
+  String get notification_practice_title => 'Эрхи тоолох сануулга';
 
   @override
   String get notification_practice_subtitle_enabled =>
-      'Таны эрхийн дадлагын өдөр тутмын сануулга';
+      'Таны эрхиний дадлагын өдөр тутмын сануулга';
 
   @override
   String get notification_practice_subtitle_disabled =>
-      'Эрхийн сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
+      'Малагийн сануулга түр зогссон. Үргэлжлүүлэхийн тулд дарна уу.';
 
   @override
-  String get notification_timer_title => 'Цаг хэмжигчийн сануулга';
+  String get notification_timer_title => 'Таймерын сануулга';
 
   @override
   String get notification_timer_subtitle_enabled =>
-      'Таны цаг хэмжигчийн дасгалын өдөр тутмын сануулга';
+      'Таны таймерын сешнүүдийн өдөр тутмын сануулга';
 
   @override
   String get notification_timer_subtitle_disabled =>
@@ -715,7 +715,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_tab_posts => 'Нийтлэл';
 
   @override
-  String get connect_tab_practices => 'Practices';
+  String get connect_tab_practices => 'Дадлага';
 
   @override
   String get connect_tab_groups => 'Groups';
@@ -739,7 +739,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_empty_discover_groups => 'Судлах бүлэг алга';
 
   @override
-  String get connect_empty_discover_practices => 'Судлах дадлага алга';
+  String get connect_empty_discover_practices => 'Судлах бясалгал алга';
 
   @override
   String get connect_all_groups => 'Бүх бүлэг';
@@ -786,10 +786,10 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'Таны бүлгүүд ямар ч дадлага эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.';
+      'Таны бүлгүүд ямар ч бясалгал эхлүүлээгүй байна. Бусад бүлгүүд юу санал болгож байгааг үзээрэй.';
 
   @override
-  String get connect_my_empty_practices_browse => 'Бусад дадлагыг үзэх';
+  String get connect_my_empty_practices_browse => 'Бусад бясалгалыг үзэх';
 
   @override
   String connect_comment_replying_to(String handle) {
@@ -1309,7 +1309,7 @@ class AppLocalizationsMn extends AppLocalizations {
   String get continueWithApple => 'Apple-ээр үргэлжлүүлэх';
 
   @override
-  String get continueWithPhone => 'Утасны дугаараар үргэлжлүүлэх';
+  String get continueWithPhone => 'Утсаар үргэлжлүүлэх';
 
   @override
   String get continueAsGuest => 'Зочноор үргэлжлүүлэх';

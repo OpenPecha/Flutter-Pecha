@@ -506,22 +506,22 @@ class AppLocalizationsNe extends AppLocalizations {
       'पाठ रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
-  String get notification_practice_title => 'माला रिमाइन्डर';
+  String get notification_practice_title => 'माला रिमाइन्डरहरू';
 
   @override
   String get notification_practice_subtitle_enabled =>
-      'तपाईंको माला अभ्यासका लागि दैनिक रिमाइन्डर';
+      'तपाईंको माला अभ्यासका लागि दैनिक रिमाइन्डरहरू';
 
   @override
   String get notification_practice_subtitle_disabled =>
       'माला रिमाइन्डरहरू रोकिएका छन्। पुनः सुरु गर्न ट्याप गर्नुहोस्।';
 
   @override
-  String get notification_timer_title => 'टाइमर रिमाइन्डर';
+  String get notification_timer_title => 'टाइमर रिमाइन्डरहरू';
 
   @override
   String get notification_timer_subtitle_enabled =>
-      'तपाईंको टाइमर सत्रहरूको लागि दैनिक रिमाइन्डर';
+      'तपाईंका टाइमर सत्रहरूका लागि दैनिक रिमाइन्डरहरू';
 
   @override
   String get notification_timer_subtitle_disabled =>
@@ -721,7 +721,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get connect_tab_posts => 'पोस्ट';
 
   @override
-  String get connect_tab_practices => 'Practices';
+  String get connect_tab_practices => 'अभ्यास';
 
   @override
   String get connect_tab_groups => 'Groups';
@@ -793,7 +793,7 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'तपाईंका समूहहरूले कुनै अभ्यास सुरु गरेका छैनन्। अन्य समूहहरूले के प्रस्ताव गरिरहेका छन् हेर्नुहोस्।';
+      'तपाईंका समूहहरूले कुनै अभ्यासहरू सुरु गरेका छैनन्। अन्य समूहहरूले के प्रस्ताव गरिरहेका छन् हेर्नुहोस्।';
 
   @override
   String get connect_my_empty_practices_browse => 'अन्य अभ्यासहरू हेर्नुहोस्';
@@ -1317,7 +1317,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get continueWithApple => 'Apple सँग जारी राख्नुहोस्';
 
   @override
-  String get continueWithPhone => 'फोन नम्बरसँग जारी राख्नुहोस्';
+  String get continueWithPhone => 'फोनसँग जारी राख्नुहोस्';
 
   @override
   String get continueAsGuest => 'अतिथिको रूपमा जारी राख्नुहोस्';
