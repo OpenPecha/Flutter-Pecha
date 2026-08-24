@@ -494,7 +494,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notification_timer_title => '計時器提醒';
 
   @override
-  String get notification_timer_subtitle_enabled => '每日計時器練習提醒';
+  String get notification_timer_subtitle_enabled => '每日計時修持時段提醒';
 
   @override
   String get notification_timer_subtitle_disabled => '計時器提醒已暫停。點此恢復。';
@@ -672,7 +672,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_tab_posts => '貼文';
 
   @override
-  String get connect_tab_practices => '修持';
+  String get connect_tab_practices => '修持計畫';
 
   @override
   String get connect_tab_groups => 'Groups';
@@ -696,7 +696,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_empty_discover_groups => '沒有可探索的社群';
 
   @override
-  String get connect_empty_discover_practices => '沒有可探索的修持';
+  String get connect_empty_discover_practices => '沒有可探索的修行';
 
   @override
   String get connect_all_groups => '所有社群';
@@ -735,13 +735,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_my_empty_posts_browse => '瀏覽其他貼文';
 
   @override
-  String get connect_my_empty_practices_title => '尚無修持';
+  String get connect_my_empty_practices_title => '尚無修持計畫';
 
   @override
-  String get connect_my_empty_practices_subtitle => '你的社群還沒有開始任何修持。看看其他社群提供什麼。';
+  String get connect_my_empty_practices_subtitle =>
+      '你的社群還沒有發起任何修行活動。看看其他社群提供了什麼。';
 
   @override
-  String get connect_my_empty_practices_browse => '瀏覽其他修持';
+  String get connect_my_empty_practices_browse => '瀏覽其他修行';
 
   @override
   String connect_comment_replying_to(String handle) {
@@ -1235,7 +1236,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get continueWithApple => '使用 Apple 繼續';
 
   @override
-  String get continueWithPhone => '使用手機號碼繼續';
+  String get continueWithPhone => '使用電話繼續';
 
   @override
   String get continueAsGuest => '以訪客身份繼續';

@@ -509,7 +509,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get notification_practice_subtitle_enabled =>
-      'आपकी माला साधना के लिए दैनिक रिमाइंडर';
+      'आपके माला अभ्यास के लिए दैनिक रिमाइंडर';
 
   @override
   String get notification_practice_subtitle_disabled =>
@@ -714,7 +714,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get connect_tab_posts => 'पोस्ट';
 
   @override
-  String get connect_tab_practices => 'Practices';
+  String get connect_tab_practices => 'अभ्यास';
 
   @override
   String get connect_tab_groups => 'Groups';
@@ -782,11 +782,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get connect_my_empty_posts_browse => 'अन्य पोस्ट देखें';
 
   @override
-  String get connect_my_empty_practices_title => 'अभी कोई अभ्यास नहीं';
+  String get connect_my_empty_practices_title => 'अभी तक कोई अभ्यास नहीं';
 
   @override
   String get connect_my_empty_practices_subtitle =>
-      'आपके समूहों ने कोई अभ्यास शुरू नहीं किया है। देखें अन्य समूह क्या प्रस्ताव कर रहे हैं।';
+      'आपके समूहों ने कोई अभ्यास शुरू नहीं किया है। देखें अन्य समूह क्या पेश कर रहे हैं।';
 
   @override
   String get connect_my_empty_practices_browse => 'अन्य अभ्यास देखें';
@@ -1311,7 +1311,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get continueWithApple => 'Apple के साथ जारी रखें';
 
   @override
-  String get continueWithPhone => 'फ़ोन नंबर के साथ जारी रखें';
+  String get continueWithPhone => 'फ़ोन के साथ जारी रखें';
 
   @override
   String get continueAsGuest => 'अतिथि के रूप में जारी रखें';
