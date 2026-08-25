@@ -916,6 +916,10 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
   }
 }
 
+/// True when the group profile header title has scrolled out of view.
+final groupProfileAppBarTitleVisibleProvider = StateProvider.autoDispose
+    .family<bool, String>((ref, groupId) => false);
+
 /// True while the group profile members tab is the selected tab.
 final groupMembersTabActiveProvider = StateProvider.autoDispose
     .family<bool, String>((ref, groupId) => false);

@@ -22,6 +22,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_members_tab.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_nested_tab_scroll_view.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -50,11 +51,14 @@ class GroupProfileBody extends ConsumerStatefulWidget {
 
 enum _GroupProfileTab { posts, events, practices, members }
 
+/// Matches the back-button row height in [GroupProfileScreen].
+const _groupProfileAppBarHeight = 56.0;
+
 class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     with TickerProviderStateMixin {
   TabController? _tabController;
   List<_GroupProfileTab> _visibleTabs = const [];
-  final ScrollController _practicesScrollController = ScrollController();
+  final GlobalKey _profileTitleKey = GlobalKey();
   String? _enrollingSeriesId;
   String? _joiningAccumulatorId;
   final Set<String> _localGroupEnrolledSeriesIds = {};
@@ -91,7 +95,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     if (_isCommunityGroup(widget.profile)) {
       // The tab set depends on which sections actually have content, so the
       // controller is created in build() once that data is known.
-      _practicesScrollController.addListener(_onPracticesScroll);
 
       final groupId = widget.profile.id;
       // Keep tab/refresh flags alive while this screen is mounted so join/unjoin
@@ -162,13 +165,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     }
   }
 
-  void _onPracticesScroll() {
-    if (!_practicesScrollController.hasClients) return;
-
-    if (_practicesScrollController.position.pixels >=
-        _practicesScrollController.position.maxScrollExtent - 200) {
-      ref.read(groupPracticesProvider(widget.profile.id).notifier).loadMore();
+  bool _onTabScrollLoadMore(
+    ScrollNotification notification,
+    VoidCallback loadMore,
+  ) {
+    if (notification.metrics.pixels >=
+        notification.metrics.maxScrollExtent - 200) {
+      loadMore();
     }
+    return false;
   }
 
   void _syncPracticeEnrollmentFromList(List<GroupPractice> practices) {
@@ -205,15 +210,46 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   @override
+  void deactivate() {
+    ref
+        .read(
+          groupProfileAppBarTitleVisibleProvider(widget.profile.id).notifier,
+        )
+        .state = false;
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _membersTabActiveSub?.close();
     _membersNeedsRefreshSub?.close();
-    _practicesScrollController.removeListener(_onPracticesScroll);
-    _practicesScrollController.dispose();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     _moreRecognizer.dispose();
     super.dispose();
+  }
+
+  void _syncAppBarTitleVisibility() {
+    if (!mounted) return;
+
+    final titleContext = _profileTitleKey.currentContext;
+    if (titleContext == null) return;
+
+    final renderBox = titleContext.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    final titleBottom =
+        renderBox.localToGlobal(Offset(0, renderBox.size.height)).dy;
+    final collapseThreshold =
+        MediaQuery.paddingOf(titleContext).top + _groupProfileAppBarHeight;
+    final shouldShow = titleBottom <= collapseThreshold;
+
+    final groupId = widget.profile.id;
+    final current = ref.read(groupProfileAppBarTitleVisibleProvider(groupId));
+    if (current != shouldShow) {
+      ref.read(groupProfileAppBarTitleVisibleProvider(groupId).notifier).state =
+          shouldShow;
+    }
   }
 
   @override
@@ -317,9 +353,17 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     if (!isTabDataLoading) _syncTabController(tabs);
     final controller = _tabController;
 
-    return NestedScrollView(
-      headerSliverBuilder:
-          (context, _) => [
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification ||
+            notification is ScrollEndNotification) {
+          _syncAppBarTitleVisibility();
+        }
+        return false;
+      },
+      child: NestedScrollView(
+        headerSliverBuilder: (context, _) {
+          final slivers = <Widget>[
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,21 +384,41 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                   const SizedBox(height: 20),
                   _GroupFollowButton(profile: profile, isDark: isDark),
                   const SizedBox(height: 24),
-                  if (controller != null) _buildTabBar(isDark, profile),
                 ],
               ),
             ),
-          ],
-      body:
-          controller == null
-              ? const Center(child: CircularProgressIndicator())
-              : TabBarView(
-                controller: controller,
-                children: [
-                  for (final tab in _visibleTabs)
-                    _buildTabContent(tab, profile, isDark, lineHeight),
-                ],
+          ];
+
+          if (controller != null) {
+            slivers.add(
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
+                sliver: SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _GroupProfileTabBarDelegate(
+                    tabBar: _buildTabBar(isDark, profile),
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  ),
+                ),
               ),
+            );
+          }
+
+          return slivers;
+        },
+        body:
+            controller == null
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                  controller: controller,
+                  children: [
+                    for (final tab in _visibleTabs)
+                      _buildTabContent(tab, profile, isDark, lineHeight),
+                  ],
+                ),
+      ),
     );
   }
 
@@ -364,27 +428,31 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     bool isDark,
     double? lineHeight,
   ) {
+    final pageStorageKey = '${profile.id}-${tab.name}';
+
     return switch (tab) {
-      _GroupProfileTab.posts => _buildEmptyTab(
-        'No posts yet',
-        isDark,
-        lineHeight,
+      _GroupProfileTab.posts => GroupProfileNestedTabScrollView.centered(
+        pageStorageKey: pageStorageKey,
+        child: _buildEmptyTab('No posts yet', isDark, lineHeight),
       ),
       _GroupProfileTab.events => GroupProfileEventsTab(
         groupId: profile.id,
         isDark: isDark,
         lineHeight: lineHeight,
+        pageStorageKey: pageStorageKey,
       ),
       _GroupProfileTab.practices => _buildPracticesTab(
         profile,
         isDark,
         lineHeight,
+        pageStorageKey: pageStorageKey,
       ),
       _GroupProfileTab.members => GroupProfileMembersTab(
         groupId: profile.id,
         groupType: profile.groupType,
         isDark: isDark,
         lineHeight: lineHeight,
+        pageStorageKey: pageStorageKey,
       ),
     };
   }
@@ -468,6 +536,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                     children: [
                       Text(
                         profile.title,
+                        key: _profileTitleKey,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -689,6 +758,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         TabBar(
           controller: _tabController!,
@@ -728,66 +798,96 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   Widget _buildPracticesTab(
     GroupProfile profile,
     bool isDark,
-    double? lineHeight,
-  ) {
+    double? lineHeight, {
+    required String pageStorageKey,
+  }) {
     final practicesState = ref.watch(groupPracticesProvider(profile.id));
 
     if (practicesState.isLoading && practicesState.practices.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return GroupProfileNestedTabScrollView.centered(
+        pageStorageKey: pageStorageKey,
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (practicesState.practices.isEmpty) {
-      return const SizedBox.shrink();
+      return GroupProfileNestedTabScrollView(
+        pageStorageKey: pageStorageKey,
+        slivers: const [SliverToBoxAdapter(child: SizedBox.shrink())],
+      );
     }
 
     final itemCount =
         practicesState.practices.length +
         (practicesState.isLoadingMore ? 1 : 0);
 
-    return ListView.builder(
-      controller: _practicesScrollController,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        if (index >= practicesState.practices.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+    return NotificationListener<ScrollNotification>(
+      onNotification:
+          (notification) => _onTabScrollLoadMore(
+            notification,
+            () =>
+                ref
+                    .read(groupPracticesProvider(profile.id).notifier)
+                    .loadMore(),
+          ),
+      child: GroupProfileNestedTabScrollView(
+        pageStorageKey: pageStorageKey,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index >= practicesState.practices.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
 
-        final practice = practicesState.practices[index];
-        final isLast = index == practicesState.practices.length - 1;
+                final practice = practicesState.practices[index];
+                final isLast = index == practicesState.practices.length - 1;
 
-        return Padding(
-          padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-          child: switch (practice.type) {
-            GroupPracticeType.series when practice.series != null =>
-              _buildSeriesCard(profile, practice.series!, isDark, lineHeight),
-            GroupPracticeType.accumulator when practice.accumulator != null =>
-              _buildAccumulatorCard(
-                profile,
-                practice.accumulator!,
-                isDark,
-                lineHeight,
-              ),
-            GroupPracticeType.collection when practice.collection != null =>
-              _buildCollectionCard(
-                profile,
-                practice.collection!,
-                isDark,
-                lineHeight,
-              ),
-            GroupPracticeType.plan when practice.plan != null => _buildPlanCard(
-              profile,
-              practice.plan!,
-              isDark,
-              lineHeight,
+                return Padding(
+                  padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+                  child: switch (practice.type) {
+                    GroupPracticeType.series when practice.series != null =>
+                      _buildSeriesCard(
+                        profile,
+                        practice.series!,
+                        isDark,
+                        lineHeight,
+                      ),
+                    GroupPracticeType.accumulator
+                        when practice.accumulator != null =>
+                      _buildAccumulatorCard(
+                        profile,
+                        practice.accumulator!,
+                        isDark,
+                        lineHeight,
+                      ),
+                    GroupPracticeType.collection
+                        when practice.collection != null =>
+                      _buildCollectionCard(
+                        profile,
+                        practice.collection!,
+                        isDark,
+                        lineHeight,
+                      ),
+                    GroupPracticeType.plan when practice.plan != null =>
+                      _buildPlanCard(
+                        profile,
+                        practice.plan!,
+                        isDark,
+                        lineHeight,
+                      ),
+                    _ => const SizedBox.shrink(),
+                  },
+                );
+              }, childCount: itemCount),
             ),
-            _ => const SizedBox.shrink(),
-          },
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 
@@ -1538,5 +1638,38 @@ class _GroupFollowButton extends ConsumerWidget {
     isCurrentlyFollowing
         ? await notifier.unfollow(connectGroup: profile)
         : await notifier.follow(connectGroup: profile);
+  }
+}
+
+class _GroupProfileTabBarDelegate extends SliverPersistentHeaderDelegate {
+  const _GroupProfileTabBarDelegate({
+    required this.tabBar,
+    required this.backgroundColor,
+  });
+
+  final Widget tabBar;
+  final Color backgroundColor;
+
+  static const _extent = kTextTabBarHeight + 1;
+
+  @override
+  double get minExtent => _extent;
+
+  @override
+  double get maxExtent => _extent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return ColoredBox(color: backgroundColor, child: tabBar);
+  }
+
+  @override
+  bool shouldRebuild(covariant _GroupProfileTabBarDelegate oldDelegate) {
+    return tabBar != oldDelegate.tabBar ||
+        backgroundColor != oldDelegate.backgroundColor;
   }
 }
