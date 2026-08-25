@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
@@ -12,13 +13,16 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_filter_utils.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_event_participants_drawer.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -144,6 +148,7 @@ class _GroupEventDetailScreenState
           _EventHeroCard(event: event, isDark: isDark),
           const SizedBox(height: 14),
           _AttendeesRow(
+            eventId: event.id,
             participants: participants,
             totalAttending: totalAttending,
             isDark: isDark,
@@ -388,11 +393,13 @@ class _EventHeroCard extends StatelessWidget {
 }
 
 class _AttendeesRow extends StatelessWidget {
+  final String eventId;
   final List<GroupEventParticipant> participants;
   final int totalAttending;
   final bool isDark;
 
   const _AttendeesRow({
+    required this.eventId,
     required this.participants,
     required this.totalAttending,
     required this.isDark,
@@ -400,6 +407,10 @@ class _AttendeesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (totalAttending <= 0) {
+      return const SizedBox.shrink();
+    }
+
     final shown = participants.take(2).toList();
     final remaining = math.max(0, totalAttending - shown.length);
     final textColor =
@@ -412,7 +423,15 @@ class _AttendeesRow extends StatelessWidget {
     final double stackWidth =
         totalItems == 0 ? 0 : (totalItems - 1) * overlap + avatarSize;
 
-    return Row(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap:
+          () => GroupEventParticipantsDrawer.show(
+            context,
+            eventId: eventId,
+            totalAttending: totalAttending,
+          ),
+      child: Row(
       children: [
         if (totalItems > 0)
           SizedBox(
@@ -476,6 +495,7 @@ class _AttendeesRow extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
@@ -563,6 +583,14 @@ class _EventInfoCard extends StatelessWidget {
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
     final dateText = _formatDateText(context, event);
+    final locationLabel = groupEventLocationLabel(
+      event,
+      context.l10n.connect_online,
+    );
+    final locationIcon =
+        isGroupEventOnline(event)
+            ? AppAssets.globe
+            : PhosphorIconsRegular.mapPin;
 
     return Container(
       width: double.infinity,
@@ -574,17 +602,17 @@ class _EventInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 7),
+          _EventInfoRow(
+            icon: locationIcon,
+            text: locationLabel,
+            iconColor: secondaryColor,
+          ),
+          const SizedBox(height: 12),
           if (dateText != null)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(AppAssets.calendarDots, size: 15, color: secondaryColor),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(dateText, style: const TextStyle(fontSize: 14)),
-                ),
-              ],
+            _EventInfoRow(
+              icon: AppAssets.calendarDots,
+              text: dateText,
+              iconColor: secondaryColor,
             )
           else
             Text(
@@ -610,6 +638,41 @@ class _EventInfoCard extends StatelessWidget {
 
     final endTime = DateFormat.jm(locale).format(end).toLowerCase();
     return '$date · $startTime - $endTime ${start.timeZoneName}';
+  }
+}
+
+class _EventInfoRow extends StatelessWidget {
+  const _EventInfoRow({
+    required this.icon,
+    required this.text,
+    required this.iconColor,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color iconColor;
+
+  static const double _iconSize = 16;
+  static const double _iconSlotWidth = 18;
+  static const TextStyle _textStyle = TextStyle(fontSize: 14, height: 1.35);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: _iconSlotWidth,
+          height: _textStyle.fontSize! * _textStyle.height!,
+          child: Align(
+            alignment: Alignment.center,
+            child: Icon(icon, size: _iconSize, color: iconColor),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text, style: _textStyle)),
+      ],
+    );
   }
 }
 

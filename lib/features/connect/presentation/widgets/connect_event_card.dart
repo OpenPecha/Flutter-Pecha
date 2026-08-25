@@ -8,6 +8,7 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_filter_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
@@ -162,7 +163,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    parts.add(_eventLocationLabel(context, event));
+    parts.add(groupEventLocationLabel(event, context.l10n.connect_online));
 
     if (participantCount > 0) {
       parts.add(
@@ -172,15 +173,6 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
 
     if (parts.isEmpty) return null;
     return parts.join(' · ');
-  }
-
-  String _eventLocationLabel(BuildContext context, GroupEvent event) {
-    final locationId = event.locationId?.trim();
-    if (locationId != null && locationId.isNotEmpty) {
-      final name = event.location?.name.trim();
-      if (name != null && name.isNotEmpty) return name;
-    }
-    return context.l10n.connect_online;
   }
 
   Future<void> _shareEvent(GroupEvent event) async {
