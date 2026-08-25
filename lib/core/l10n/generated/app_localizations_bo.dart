@@ -878,6 +878,9 @@ class AppLocalizationsBo extends AppLocalizations {
   }
 
   @override
+  String get connect_event_participants_empty => 'ད་དུང་ཞུགས་མཁན་མེད།';
+
+  @override
   String get search_groups => 'ཚོགས་པ་འཚོལ།';
 
   @override

@@ -914,6 +914,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "尚無參與者",
   "timer_notification_in_progress": "禪修進行中",
   "timer_notification_paused": "已暫停 · 剩餘 {time}",
   "@timer_notification_paused": {

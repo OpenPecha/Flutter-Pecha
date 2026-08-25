@@ -1660,6 +1660,12 @@ abstract class AppLocalizations {
   /// **'{count} attending'**
   String connect_event_participants_attending(int count);
 
+  /// No description provided for @connect_event_participants_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get connect_event_participants_empty;
+
   /// No description provided for @search_groups.
   ///
   /// In en, this message translates to:
