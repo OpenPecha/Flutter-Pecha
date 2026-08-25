@@ -4443,4 +4443,46 @@ class TolgeeAppLocalizations extends AppLocalizations {
         <String, Object>{'accumulation': accumulation},
         () => _fallback.group_accumulator_share_message_no_group(accumulation),
       );
+
+  @override
+  String get group_chat_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_title',
+    () => _fallback.group_chat_title,
+  );
+
+  @override
+  String get group_chat_coming_soon => TolgeeBridge.get(
+    localeName,
+    'group_chat_coming_soon',
+    () => _fallback.group_chat_coming_soon,
+  );
+
+  @override
+  String get group_chat_inappropriate => TolgeeBridge.get(
+    localeName,
+    'group_chat_inappropriate',
+    () => _fallback.group_chat_inappropriate,
+  );
+
+  @override
+  String get group_chat_not_a_member => TolgeeBridge.get(
+    localeName,
+    'group_chat_not_a_member',
+    () => _fallback.group_chat_not_a_member,
+  );
+
+  @override
+  String get group_chat_open => TolgeeBridge.get(
+    localeName,
+    'group_chat_open',
+    () => _fallback.group_chat_open,
+  );
+
+  @override
+  String get group_chat_message_hint => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_hint',
+    () => _fallback.group_chat_message_hint,
+  );
 }

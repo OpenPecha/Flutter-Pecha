@@ -2306,4 +2306,23 @@ class AppLocalizationsNe extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'म WeBuddhist मा सामूहिक संचय \"$accumulation\" मा भाग लिइरहेको छु। तपाईं पनि मसँग सामेल हुनुहोस्!';
   }
+
+  @override
+  String get group_chat_title => 'च्याट';
+
+  @override
+  String get group_chat_coming_soon => 'समूह च्याट चाँडै आउँदैछ।';
+
+  @override
+  String get group_chat_inappropriate =>
+      'अनुचित भाषा भएकाले यो सन्देश पठाउन सकिएन।';
+
+  @override
+  String get group_chat_not_a_member => 'केवल सदस्यले यो च्याट खोल्न सक्छन्।';
+
+  @override
+  String get group_chat_open => 'च्याट';
+
+  @override
+  String get group_chat_message_hint => 'सन्देश';
 }

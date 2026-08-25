@@ -2167,4 +2167,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return '我正在 WeBuddhist 上參加累積活動「$accumulation」，快來加入我吧！';
   }
+
+  @override
+  String get group_chat_title => '聊天';
+
+  @override
+  String get group_chat_coming_soon => '群組聊天即將推出。';
+
+  @override
+  String get group_chat_inappropriate => '此訊息含有不允許的用語，因此無法發送。';
+
+  @override
+  String get group_chat_not_a_member => '僅限成員開啟此聊天。';
+
+  @override
+  String get group_chat_open => '聊天';
+
+  @override
+  String get group_chat_message_hint => '訊息';
 }

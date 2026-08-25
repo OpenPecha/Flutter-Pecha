@@ -923,5 +923,11 @@
       }
     }
   },
-  "timer_notification_complete": "你的課程已完成"
+  "timer_notification_complete": "你的課程已完成",
+  "group_chat_title": "聊天",
+  "group_chat_coming_soon": "群組聊天即將推出。",
+  "group_chat_inappropriate": "此訊息含有不允許的用語，因此無法發送。",
+  "group_chat_not_a_member": "僅限成員開啟此聊天。",
+  "group_chat_open": "聊天",
+  "group_chat_message_hint": "訊息"
 }

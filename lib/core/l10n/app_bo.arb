@@ -923,5 +923,11 @@
       }
     }
   },
-  "timer_notification_complete": "ཁྱེད་ཀྱི་ཐུན་ཚང་སོང་།"
+  "timer_notification_complete": "ཁྱེད་ཀྱི་ཐུན་ཚང་སོང་།",
+  "group_chat_title": "གླེང་མོལ།",
+  "group_chat_coming_soon": "ཚོགས་པའི་གླེང་མོལ་མྱུར་དུ་འོང་རྒྱུ་ཡིན།",
+  "group_chat_inappropriate": "སྐད་ཆ་འདི་འབྱོར་མི་ཆོག་པས་འཕྲིན་ཐུང་འདི་གཏོང་མ་ཐུབ།",
+  "group_chat_not_a_member": "ཚོགས་མི་ཁོ་ནས་གླེང་མོལ་འདི་ཕྱེ་ཐུབ།",
+  "group_chat_open": "གླེང་མོལ།",
+  "group_chat_message_hint": "འཕྲིན་ཐུང་།"
 }

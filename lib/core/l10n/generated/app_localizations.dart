@@ -4063,6 +4063,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I am taking part in the group accumulation \"{accumulation}\" on WeBuddhist. Come join me!'**
   String group_accumulator_share_message_no_group(String accumulation);
+
+  /// No description provided for @group_chat_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get group_chat_title;
+
+  /// No description provided for @group_chat_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Group chat is coming soon.'**
+  String get group_chat_coming_soon;
+
+  /// No description provided for @group_chat_inappropriate.
+  ///
+  /// In en, this message translates to:
+  /// **'This message couldn\'t be sent because it contains language that isn\'t allowed.'**
+  String get group_chat_inappropriate;
+
+  /// No description provided for @group_chat_not_a_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Only members can open this chat.'**
+  String get group_chat_not_a_member;
+
+  /// No description provided for @group_chat_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get group_chat_open;
+
+  /// No description provided for @group_chat_message_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get group_chat_message_hint;
 }
 
 class _AppLocalizationsDelegate

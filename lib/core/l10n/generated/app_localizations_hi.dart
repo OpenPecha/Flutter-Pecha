@@ -2298,4 +2298,23 @@ class AppLocalizationsHi extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'मैं WeBuddhist पर सामूहिक संचय \"$accumulation\" में भाग ले रहा हूँ। आप भी मेरे साथ जुड़ें!';
   }
+
+  @override
+  String get group_chat_title => 'चैट';
+
+  @override
+  String get group_chat_coming_soon => 'समूह चैट जल्द आ रही है।';
+
+  @override
+  String get group_chat_inappropriate =>
+      'यह संदेश नहीं भेजा जा सका क्योंकि इसमें अनुचित भाषा है।';
+
+  @override
+  String get group_chat_not_a_member => 'केवल सदस्य इस चैट को खोल सकते हैं।';
+
+  @override
+  String get group_chat_open => 'चैट';
+
+  @override
+  String get group_chat_message_hint => 'संदेश';
 }

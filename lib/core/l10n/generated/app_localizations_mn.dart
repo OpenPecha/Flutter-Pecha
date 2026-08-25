@@ -2301,4 +2301,24 @@ class AppLocalizationsMn extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'Би WeBuddhist дээр \"$accumulation\" бүлгийн хуримтлалд оролцож байна. Та ч бас надтай нэгдээрэй!';
   }
+
+  @override
+  String get group_chat_title => 'Чат';
+
+  @override
+  String get group_chat_coming_soon => 'Бүлгийн чат удахгүй нээгдэнэ.';
+
+  @override
+  String get group_chat_inappropriate =>
+      'Зөвшөөрөгдөөгүй үг агуулсан тул энэ мессежийг илгээж чадсангүй.';
+
+  @override
+  String get group_chat_not_a_member =>
+      'Зөвхөн гишүүд энэ чатыг нээх боломжтой.';
+
+  @override
+  String get group_chat_open => 'Чат';
+
+  @override
+  String get group_chat_message_hint => 'Мессеж';
 }

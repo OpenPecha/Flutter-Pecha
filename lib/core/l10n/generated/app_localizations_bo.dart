@@ -2303,4 +2303,24 @@ class AppLocalizationsBo extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'ང་ WeBuddhist ཐོག་ $accumulation གྲངས་གསོག་ནང་མཉམ་ཞུགས་བྱེད་བཞིན་ཡོད། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
   }
+
+  @override
+  String get group_chat_title => 'གླེང་མོལ།';
+
+  @override
+  String get group_chat_coming_soon =>
+      'ཚོགས་པའི་གླེང་མོལ་མྱུར་དུ་འོང་རྒྱུ་ཡིན།';
+
+  @override
+  String get group_chat_inappropriate =>
+      'སྐད་ཆ་འདི་འབྱོར་མི་ཆོག་པས་འཕྲིན་ཐུང་འདི་གཏོང་མ་ཐུབ།';
+
+  @override
+  String get group_chat_not_a_member => 'ཚོགས་མི་ཁོ་ནས་གླེང་མོལ་འདི་ཕྱེ་ཐུབ།';
+
+  @override
+  String get group_chat_open => 'གླེང་མོལ།';
+
+  @override
+  String get group_chat_message_hint => 'འཕྲིན་ཐུང་།';
 }

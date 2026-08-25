@@ -989,5 +989,11 @@
       }
     }
   },
-  "timer_notification_complete": "Таны хуралдаан дууслаа"
+  "timer_notification_complete": "Таны хуралдаан дууслаа",
+  "group_chat_title": "Чат",
+  "group_chat_coming_soon": "Бүлгийн чат удахгүй нээгдэнэ.",
+  "group_chat_inappropriate": "Зөвшөөрөгдөөгүй үг агуулсан тул энэ мессежийг илгээж чадсангүй.",
+  "group_chat_not_a_member": "Зөвхөн гишүүд энэ чатыг нээх боломжтой.",
+  "group_chat_open": "Чат",
+  "group_chat_message_hint": "Мессеж"
 }
