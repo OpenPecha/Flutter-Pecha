@@ -7,7 +7,6 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_practices_providers.dart';
-import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_action_bar.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
@@ -121,10 +120,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
             ),
             ConnectFeedCardSectionDivider(isDark: isDark),
             ConnectFeedCardMediaFrame(
-              bottomSpacing:
-                  isEnrolled
-                      ? ConnectFeedCardLayout.mediaBottomSpacing
-                      : ConnectFeedCardLayout.actionBarTopSpacing,
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Stack(
@@ -147,28 +142,24 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                 isDark ? AppColors.grey500 : AppColors.grey600,
                           ),
                         ),
-                    if (series.enrolledCount > 0)
-                      Positioned(
-                        right: 12,
-                        bottom: 12,
-                        child: _PracticeImageMemberBadge(
-                          count: series.enrolledCount,
-                        ),
-                      ),
+                    _PracticeImageOverlayBar(
+                      leading:
+                          !isEnrolled
+                              ? _PracticeJoinButton(
+                                label: context.l10n.group_practice_with_us,
+                                isLoading: _isEnrollingSeries,
+                                isDark: isDark,
+                                onImage: true,
+                                onTap:
+                                    () => _onPracticeWithUsTap(practice, series),
+                              )
+                              : null,
+                      memberCount: series.enrolledCount,
+                    ),
                   ],
                 ),
               ),
             ),
-            if (!isEnrolled)
-              ConnectFeedActionBar(
-                actions: const [],
-                trailing: _PracticeJoinButton(
-                  label: context.l10n.group_practice_with_us,
-                  isLoading: _isEnrollingSeries,
-                  isDark: isDark,
-                  onTap: () => _onPracticeWithUsTap(practice, series),
-                ),
-              ),
           ],
         ),
       ),
@@ -232,10 +223,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
             ),
             ConnectFeedCardSectionDivider(isDark: isDark),
             ConnectFeedCardMediaFrame(
-              bottomSpacing:
-                  hasJoined
-                      ? ConnectFeedCardLayout.mediaBottomSpacing
-                      : ConnectFeedCardLayout.actionBarTopSpacing,
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Stack(
@@ -258,28 +245,27 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                 isDark ? AppColors.grey500 : AppColors.grey600,
                           ),
                         ),
-                    if (accumulator.memberCount > 0)
-                      Positioned(
-                        right: 12,
-                        bottom: 12,
-                        child: _PracticeImageMemberBadge(
-                          count: accumulator.memberCount,
-                        ),
-                      ),
+                    _PracticeImageOverlayBar(
+                      leading:
+                          !hasJoined
+                              ? _PracticeJoinButton(
+                                label: context.l10n.group_join_to_contribute,
+                                isLoading: isJoining,
+                                isDark: isDark,
+                                onImage: true,
+                                onTap:
+                                    () => _onJoinAccumulatorTap(
+                                      practice,
+                                      accumulator,
+                                    ),
+                              )
+                              : null,
+                      memberCount: accumulator.memberCount,
+                    ),
                   ],
                 ),
               ),
             ),
-            if (!hasJoined)
-              ConnectFeedActionBar(
-                actions: const [],
-                trailing: _PracticeJoinButton(
-                  label: context.l10n.group_join_to_contribute,
-                  isLoading: isJoining,
-                  isDark: isDark,
-                  onTap: () => _onJoinAccumulatorTap(practice, accumulator),
-                ),
-              ),
           ],
         ),
       ),
@@ -578,6 +564,33 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
   }
 }
 
+class _PracticeImageOverlayBar extends StatelessWidget {
+  const _PracticeImageOverlayBar({this.leading, this.memberCount = 0});
+
+  final Widget? leading;
+  final int memberCount;
+
+  @override
+  Widget build(BuildContext context) {
+    if (leading == null && memberCount <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Positioned(
+      left: 12,
+      right: 12,
+      bottom: 12,
+      child: Row(
+        children: [
+          if (leading != null) leading!,
+          const Spacer(),
+          if (memberCount > 0) _PracticeImageMemberBadge(count: memberCount),
+        ],
+      ),
+    );
+  }
+}
+
 class _PracticeImageMemberBadge extends StatelessWidget {
   const _PracticeImageMemberBadge({required this.count});
 
@@ -616,15 +629,27 @@ class _PracticeJoinButton extends StatelessWidget {
     required this.isLoading,
     required this.isDark,
     required this.onTap,
+    this.onImage = false,
   });
 
   final String label;
   final bool isLoading;
   final bool isDark;
   final VoidCallback onTap;
+  final bool onImage;
 
   @override
   Widget build(BuildContext context) {
+    final imageOverlayFill = Colors.black.withValues(alpha: 0.55);
+    final fill =
+        onImage
+            ? imageOverlayFill
+            : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary);
+    final textColor =
+        onImage
+            ? Colors.white
+            : (isDark ? AppColors.textPrimary : AppColors.surfaceWhite);
+
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       behavior: HitTestBehavior.opaque,
@@ -633,7 +658,7 @@ class _PracticeJoinButton extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+          color: fill,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Center(
@@ -644,10 +669,7 @@ class _PracticeJoinButton extends StatelessWidget {
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color:
-                          isDark
-                              ? AppColors.textPrimary
-                              : AppColors.surfaceWhite,
+                      color: textColor,
                     ),
                   )
                   : Text(
@@ -655,10 +677,7 @@ class _PracticeJoinButton extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color:
-                          isDark
-                              ? AppColors.textPrimary
-                              : AppColors.surfaceWhite,
+                      color: textColor,
                     ),
                   ),
         ),
