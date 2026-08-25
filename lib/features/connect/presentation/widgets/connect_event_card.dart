@@ -240,15 +240,18 @@ class _AttendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageOverlayFill = Colors.black.withValues(alpha: 0.55);
     final attendingFill =
         onImage
-            ? Colors.white.withValues(alpha: 0.92)
+            ? imageOverlayFill
             : (isDark ? AppColors.surfaceVariantDark : AppColors.grey100);
     final attendingTextColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+        onImage
+            ? Colors.white
+            : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary);
     final attendFill =
         onImage
-            ? AppColors.textPrimary.withValues(alpha: 0.88)
+            ? imageOverlayFill
             : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary);
     final attendTextColor =
         onImage
@@ -262,16 +265,6 @@ class _AttendButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: isAttending ? attendingFill : attendFill,
         borderRadius: BorderRadius.circular(16),
-        boxShadow:
-            onImage
-                ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-                : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
