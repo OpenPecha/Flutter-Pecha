@@ -873,6 +873,9 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get connect_event_participants_empty => 'अभी तक कोई प्रतिभागी नहीं';
+
+  @override
   String get search_groups => 'समूह खोजें';
 
   @override

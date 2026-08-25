@@ -7,7 +7,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_event
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GroupEventParticipantsDrawer extends ConsumerWidget {
+class GroupEventParticipantsDrawer extends ConsumerStatefulWidget {
   const GroupEventParticipantsDrawer({
     super.key,
     required this.eventId,
@@ -39,9 +39,50 @@ class GroupEventParticipantsDrawer extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GroupEventParticipantsDrawer> createState() =>
+      _GroupEventParticipantsDrawerState();
+}
+
+class _GroupEventParticipantsDrawerState
+    extends ConsumerState<GroupEventParticipantsDrawer> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(groupEventParticipantsProvider(widget.eventId).notifier)
+          .loadInitial();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(groupEventParticipantsProvider(widget.eventId).notifier)
+          .loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final participantsAsync = ref.watch(groupEventParticipantsProvider(eventId));
+    final participantsState = ref.watch(
+      groupEventParticipantsProvider(widget.eventId),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -64,7 +105,7 @@ class GroupEventParticipantsDrawer extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     context.l10n.connect_event_participants_attending(
-                      totalAttending,
+                      widget.totalAttending,
                     ),
                     style: Theme.of(
                       context,
@@ -77,42 +118,43 @@ class GroupEventParticipantsDrawer extends ConsumerWidget {
                 color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
               ),
               Flexible(
-                child: participantsAsync.when(
-                  data:
-                      (either) => either.fold(
-                        (failure) => Center(
-                          child: ErrorStateWidget(
-                            error: failure,
-                            onRetry:
-                                () => ref.invalidate(
-                                  groupEventParticipantsProvider(eventId),
-                                ),
-                          ),
-                        ),
-                        (page) => _ParticipantsList(
-                          participants: page.participants,
-                          isDark: isDark,
-                        ),
-                      ),
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
-                  error:
-                      (error, _) => Center(
-                        child: ErrorStateWidget(
-                          error: error,
-                          onRetry:
-                              () => ref.invalidate(
-                                groupEventParticipantsProvider(eventId),
-                              ),
-                        ),
-                      ),
-                ),
+                child: _buildParticipantsBody(context, participantsState, isDark),
               ),
               const SizedBox(height: 8),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildParticipantsBody(
+    BuildContext context,
+    GroupEventParticipantsState participantsState,
+    bool isDark,
+  ) {
+    if (participantsState.isLoading && participantsState.participants.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (participantsState.error != null &&
+        participantsState.participants.isEmpty) {
+      return Center(
+        child: ErrorStateWidget(
+          error: participantsState.error!,
+          onRetry:
+              () => ref
+                  .read(groupEventParticipantsProvider(widget.eventId).notifier)
+                  .retry(),
+        ),
+      );
+    }
+
+    return _ParticipantsList(
+      participants: participantsState.participants,
+      isDark: isDark,
+      scrollController: _scrollController,
+      isLoadingMore: participantsState.isLoadingMore,
     );
   }
 
@@ -135,10 +177,14 @@ class _ParticipantsList extends StatelessWidget {
   const _ParticipantsList({
     required this.participants,
     required this.isDark,
+    required this.scrollController,
+    required this.isLoadingMore,
   });
 
   final List<GroupEventParticipant> participants;
   final bool isDark;
+  final ScrollController scrollController;
+  final bool isLoadingMore;
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +193,7 @@ class _ParticipantsList extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'No participants yet',
+            context.l10n.connect_event_participants_empty,
             style: TextStyle(
               color:
                   isDark
@@ -159,18 +205,32 @@ class _ParticipantsList extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
+    final itemCount = participants.length + (isLoadingMore ? 1 : 0);
+
+    return ListView.builder(
+      controller: scrollController,
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: participants.length,
-      separatorBuilder:
-          (_, __) => Divider(
-            height: 1,
-            color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
-          ),
+      itemCount: itemCount,
       itemBuilder: (context, index) {
+        if (index >= participants.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
         final participant = participants[index];
-        return _ParticipantTile(participant: participant, isDark: isDark);
+        return Column(
+          children: [
+            if (index > 0)
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+              ),
+            _ParticipantTile(participant: participant, isDark: isDark),
+          ],
+        );
       },
     );
   }

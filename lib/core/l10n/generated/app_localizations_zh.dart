@@ -822,6 +822,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get connect_event_participants_empty => '尚無參與者';
+
+  @override
   String get search_groups => '搜尋社群';
 
   @override

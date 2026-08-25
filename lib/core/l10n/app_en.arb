@@ -338,6 +338,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "No participants yet",
   "search_groups": "Search groups",
   "search_for_groups": "Search for groups",
   "no_groups_found": "No matching groups found",

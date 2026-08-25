@@ -880,6 +880,9 @@ class AppLocalizationsNe extends AppLocalizations {
   }
 
   @override
+  String get connect_event_participants_empty => 'अहिलेसम्म कुनै सहभागी छैन';
+
+  @override
   String get search_groups => 'समूह खोज्नुहोस्';
 
   @override

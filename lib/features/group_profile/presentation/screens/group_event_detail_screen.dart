@@ -43,6 +43,17 @@ class _GroupEventDetailScreenState
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(groupEventParticipantsProvider(widget.eventId).notifier)
+          .loadInitial();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final eventAsync = ref.watch(groupEventDetailProvider(widget.eventId));
@@ -118,14 +129,10 @@ class _GroupEventDetailScreenState
   }
 
   Widget _buildContent(BuildContext context, GroupEvent event, bool isDark) {
-    final participantsAsync = ref.watch(
+    final participantsState = ref.watch(
       groupEventParticipantsProvider(event.id),
     );
-    final participantsPage = participantsAsync.valueOrNull?.fold(
-      (_) => null,
-      (page) => page,
-    );
-    final participants = participantsPage?.participants ?? const [];
+    final participants = participantsState.participants;
 
     // Clear the optimistic override once the server confirms the change,
     // so subsequent state derives purely from `event.isJoined`.
@@ -311,7 +318,7 @@ class _GroupEventDetailScreenState
 
   void _refreshEvent(GroupEvent event) {
     ref.invalidate(groupEventDetailProvider(event.id));
-    ref.invalidate(groupEventParticipantsProvider(event.id));
+    ref.read(groupEventParticipantsProvider(event.id).notifier).refresh();
     if (event.groupId.isNotEmpty) {
       ref.invalidate(groupEventsProvider(event.groupId));
     }
