@@ -33,6 +33,12 @@ class AppRoutes {
   /// Digital prayer-bead mala. Login-gated (see [_protectedBasePaths]).
   static const String mala = '/mala';
 
+  // ========== GROUP CHAT ==========
+  /// Community group chat. Top-level so it is not guest-accessible via `/home`.
+  static const String groupChat = '/groups/:groupId/chat';
+
+  static String groupChatPath(String groupId) => '/groups/$groupId/chat';
+
   // ========== PRACTICE SUB ROUTES ==========
   static const String practiceEditRoutine = '/practice/edit-routine';
   static const String practiceMyPractices = '/practice/my-practices';
