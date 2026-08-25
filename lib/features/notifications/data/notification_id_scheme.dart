@@ -48,6 +48,13 @@ class NotificationIdScheme {
   static const int timerStartBase = 21000000;
   static const int timerStartMax = 21999999;
 
+  // Routine block group-recitation-collection (chants list) daily-repeat. A
+  // block may hold a group collection alongside a single recitation and/or a
+  // mala/timer item, so this lives in its own parallel range to avoid
+  // colliding with any of them.
+  static const int groupCollectionBase = 23000000;
+  static const int groupCollectionMax = 23999999;
+
   /// Stable daily-repeat ID for a mala/accumulator block. Derived from the
   /// block's own notification ID so it survives restarts, but lives in a
   /// range separate from the recitation daily-repeat
@@ -62,6 +69,13 @@ class NotificationIdScheme {
   static int timerStartId(int blockNotificationId) =>
       timerStartBase + (blockNotificationId - routineBlockMin);
 
+  /// Stable daily-repeat ID for a group-recitation-collection (chants list)
+  /// block reminder. Derived from the block's own notification ID (like
+  /// [accumulatorBlockId] / [timerStartId]) but in a separate range so a block
+  /// holding a collection plus other item types never collides.
+  static int groupCollectionId(int blockNotificationId) =>
+      groupCollectionBase + (blockNotificationId - routineBlockMin);
+
   // ── Meditation timer session ────────────────────────────────────────────
   // A running timer session posts an ongoing status notification and, while the
   // app is backgrounded, schedules its completion bell. Only one session can be
@@ -75,13 +89,15 @@ class NotificationIdScheme {
   static const int timerSessionCompleteId = 22000002;
 
   /// True when [id] is a routine daily-repeat: recitation/chants via
-  /// [routineBlockMin]–[routineBlockMax], mala via the accumulator range, or a
-  /// timer start reminder via the timer range. These are the only notification
+  /// [routineBlockMin]–[routineBlockMax], mala via the accumulator range, a
+  /// timer start reminder via the timer range, or a group-recitation-collection
+  /// reminder via the group-collection range. These are the only notification
   /// kinds the engine schedules locally.
   static bool isRoutineDailyRepeat(int id) =>
       (id >= routineBlockMin && id <= routineBlockMax) ||
       (id >= accumulatorBlockBase && id <= accumulatorBlockMax) ||
-      (id >= timerStartBase && id <= timerStartMax);
+      (id >= timerStartBase && id <= timerStartMax) ||
+      (id >= groupCollectionBase && id <= groupCollectionMax);
 
   /// True when [id] was issued by any of the schemes registered here.
   /// Used by the engine to scope reconciliation: it must NEVER cancel an
@@ -94,6 +110,7 @@ class NotificationIdScheme {
     if (id >= planSeriesBase && id <= planSeriesMax) return true;
     if (id >= accumulatorBlockBase && id <= accumulatorBlockMax) return true;
     if (id >= timerStartBase && id <= timerStartMax) return true;
+    if (id >= groupCollectionBase && id <= groupCollectionMax) return true;
     return false;
   }
 }
