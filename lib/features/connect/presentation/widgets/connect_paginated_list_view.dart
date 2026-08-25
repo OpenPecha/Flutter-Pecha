@@ -107,7 +107,17 @@ class ConnectPaginatedListView<T> extends StatelessWidget {
                   color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
                 );
               }
-              return SizedBox(height: separatorHeight);
+              if (separatorHeight <= 0) {
+                return const SizedBox.shrink();
+              }
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return ColoredBox(
+                color:
+                    isDark
+                        ? AppColors.scaffoldBackgroundDark
+                        : AppColors.scaffoldBackgroundLight,
+                child: SizedBox(height: separatorHeight),
+              );
             },
             itemBuilder: (context, index) {
               if (index < leadingItemCount) {

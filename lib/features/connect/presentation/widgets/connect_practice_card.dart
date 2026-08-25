@@ -9,6 +9,7 @@ import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.da
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_practices_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_action_bar.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
@@ -101,7 +102,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               subtitle: dateRange,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                ConnectFeedCardLayout.horizontalPadding,
+                ConnectFeedCardLayout.bodyTopSpacing,
+                ConnectFeedCardLayout.horizontalPadding,
+                0,
+              ),
               child: Text(
                 series.title,
                 style: TextStyle(
@@ -113,8 +119,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 10),
-            ClipRect(
+            ConnectFeedCardSectionDivider(isDark: isDark),
+            ConnectFeedCardMediaFrame(
+              bottomSpacing:
+                  isEnrolled
+                      ? ConnectFeedCardLayout.mediaBottomSpacing
+                      : ConnectFeedCardLayout.actionBarTopSpacing,
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Stack(
@@ -203,7 +213,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               subtitle: dateRange,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                ConnectFeedCardLayout.horizontalPadding,
+                ConnectFeedCardLayout.bodyTopSpacing,
+                ConnectFeedCardLayout.horizontalPadding,
+                0,
+              ),
               child: Text(
                 accumulator.title,
                 style: TextStyle(
@@ -215,8 +230,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 10),
-            ClipRect(
+            ConnectFeedCardSectionDivider(isDark: isDark),
+            ConnectFeedCardMediaFrame(
+              bottomSpacing:
+                  hasJoined
+                      ? ConnectFeedCardLayout.mediaBottomSpacing
+                      : ConnectFeedCardLayout.actionBarTopSpacing,
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Stack(
@@ -295,7 +314,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               subtitle: details.isNotEmpty ? details : null,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                ConnectFeedCardLayout.horizontalPadding,
+                ConnectFeedCardLayout.bodyTopSpacing,
+                ConnectFeedCardLayout.horizontalPadding,
+                0,
+              ),
               child: Text(
                 plan.title,
                 style: TextStyle(
@@ -307,8 +331,8 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 10),
-            ClipRect(
+            ConnectFeedCardSectionDivider(isDark: isDark),
+            ConnectFeedCardMediaFrame(
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child:
@@ -331,7 +355,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                         ),
               ),
             ),
-            const SizedBox(height: 4),
           ],
         ),
       ),
@@ -366,7 +389,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               subtitle: itemCountLabel,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                ConnectFeedCardLayout.horizontalPadding,
+                ConnectFeedCardLayout.bodyTopSpacing,
+                ConnectFeedCardLayout.horizontalPadding,
+                0,
+              ),
               child: Text(
                 collection.name,
                 style: TextStyle(
@@ -378,8 +406,8 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 10),
-            ClipRect(
+            ConnectFeedCardSectionDivider(isDark: isDark),
+            ConnectFeedCardMediaFrame(
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child:
@@ -403,7 +431,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                         ),
               ),
             ),
-            const SizedBox(height: 4),
           ],
         ),
       ),

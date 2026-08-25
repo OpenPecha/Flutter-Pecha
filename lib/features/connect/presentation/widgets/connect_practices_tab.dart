@@ -4,6 +4,7 @@ import 'package:flutter_pecha/features/connect/presentation/providers/connect_pr
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_practice_card.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
@@ -55,6 +56,8 @@ class _ConnectPracticesTabState extends ConsumerState<ConnectPracticesTab>
         return ConnectPaginatedListView<GroupPractice>(
           scrollViewKey: const PageStorageKey<String>('connect_practices_my'),
           header: scrollHeader,
+          useHairlineDividers: false,
+          separatorHeight: ConnectFeedCardLayout.listItemGap,
           items: myState.practices,
           isLoading: myState.isLoading,
           isLoadingMore: myState.isLoadingMore,
@@ -75,6 +78,8 @@ class _ConnectPracticesTabState extends ConsumerState<ConnectPracticesTab>
         return ConnectPaginatedListView<GroupPractice>(
           scrollViewKey: const PageStorageKey<String>('connect_practices_discover'),
           header: scrollHeader,
+          useHairlineDividers: false,
+          separatorHeight: ConnectFeedCardLayout.listItemGap,
           items: discoverState.practices,
           isLoading: discoverState.isLoading,
           isLoadingMore: discoverState.isLoadingMore,

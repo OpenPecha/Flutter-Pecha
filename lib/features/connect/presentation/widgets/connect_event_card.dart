@@ -9,6 +9,7 @@ import 'package:flutter_pecha/features/auth/presentation/providers/state_provide
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,7 +74,12 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                ConnectFeedCardLayout.horizontalPadding,
+                ConnectFeedCardLayout.bodyTopSpacing,
+                ConnectFeedCardLayout.horizontalPadding,
+                0,
+              ),
               child: Text(
                 title,
                 style: const TextStyle(
@@ -85,51 +91,48 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: ClipRect(
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      event.image != null && !event.image!.isEmpty
-                          ? ResponsiveCoverImage(
-                            image: event.image,
-                            fit: BoxFit.cover,
-                          )
-                          : ColoredBox(
+            ConnectFeedCardSectionDivider(isDark: isDark),
+            ConnectFeedCardMediaFrame(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    event.image != null && !event.image!.isEmpty
+                        ? ResponsiveCoverImage(
+                          image: event.image,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.calendarDots,
+                            size: 40,
                             color:
                                 isDark
-                                    ? AppColors.surfaceVariantDark
-                                    : AppColors.grey100,
-                            child: Icon(
-                              AppAssets.calendarDots,
-                              size: 40,
-                              color:
-                                  isDark
-                                      ? AppColors.grey500
-                                      : AppColors.grey600,
-                            ),
-                          ),
-                      if (!isPast)
-                        Positioned(
-                          right: 12,
-                          bottom: 12,
-                          child: GestureDetector(
-                            onTap: () => _toggleAttendance(event, isAttending),
-                            behavior: HitTestBehavior.opaque,
-                            child: _AttendButton(
-                              isAttending: isAttending,
-                              isSubmitting: _isSubmitting,
-                              isDark: isDark,
-                              onImage: true,
-                            ),
+                                    ? AppColors.grey500
+                                    : AppColors.grey600,
                           ),
                         ),
-                    ],
-                  ),
+                    if (!isPast)
+                      Positioned(
+                        right: 12,
+                        bottom: 12,
+                        child: GestureDetector(
+                          onTap: () => _toggleAttendance(event, isAttending),
+                          behavior: HitTestBehavior.opaque,
+                          child: _AttendButton(
+                            isAttending: isAttending,
+                            isSubmitting: _isSubmitting,
+                            isDark: isDark,
+                            onImage: true,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
