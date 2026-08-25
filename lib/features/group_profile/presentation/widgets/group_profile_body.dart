@@ -210,17 +210,22 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   @override
+  void deactivate() {
+    ref
+        .read(
+          groupProfileAppBarTitleVisibleProvider(widget.profile.id).notifier,
+        )
+        .state = false;
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _membersTabActiveSub?.close();
     _membersNeedsRefreshSub?.close();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     _moreRecognizer.dispose();
-    ref
-        .read(
-          groupProfileAppBarTitleVisibleProvider(widget.profile.id).notifier,
-        )
-        .state = false;
     super.dispose();
   }
 
