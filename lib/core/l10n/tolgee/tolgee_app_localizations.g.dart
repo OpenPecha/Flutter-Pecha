@@ -3552,6 +3552,99 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_request_to_join => TolgeeBridge.get(
+    localeName,
+    'group_request_to_join',
+    () => _fallback.group_request_to_join,
+  );
+
+  @override
+  String get group_request_sent => TolgeeBridge.get(
+    localeName,
+    'group_request_sent',
+    () => _fallback.group_request_sent,
+  );
+
+  @override
+  String get group_join_request_title => TolgeeBridge.get(
+    localeName,
+    'group_join_request_title',
+    () => _fallback.group_join_request_title,
+  );
+
+  @override
+  String get group_join_request_message_label => TolgeeBridge.get(
+    localeName,
+    'group_join_request_message_label',
+    () => _fallback.group_join_request_message_label,
+  );
+
+  @override
+  String get group_join_request_message_hint => TolgeeBridge.get(
+    localeName,
+    'group_join_request_message_hint',
+    () => _fallback.group_join_request_message_hint,
+  );
+
+  @override
+  String get group_join_request_send => TolgeeBridge.get(
+    localeName,
+    'group_join_request_send',
+    () => _fallback.group_join_request_send,
+  );
+
+  @override
+  String get group_join_request_success_title => TolgeeBridge.get(
+    localeName,
+    'group_join_request_success_title',
+    () => _fallback.group_join_request_success_title,
+  );
+
+  @override
+  String group_join_request_success_message(String groupName) =>
+      TolgeeBridge.format(
+        localeName,
+        'group_join_request_success_message',
+        <String, Object>{'groupName': groupName},
+        () => _fallback.group_join_request_success_message(groupName),
+      );
+
+  @override
+  String get group_join_request_error => TolgeeBridge.get(
+    localeName,
+    'group_join_request_error',
+    () => _fallback.group_join_request_error,
+  );
+
+  @override
+  String get group_members_only_title => TolgeeBridge.get(
+    localeName,
+    'group_members_only_title',
+    () => _fallback.group_members_only_title,
+  );
+
+  @override
+  String get group_members_only_message => TolgeeBridge.get(
+    localeName,
+    'group_members_only_message',
+    () => _fallback.group_members_only_message,
+  );
+
+  @override
+  String get group_join_request_waiting_title => TolgeeBridge.get(
+    localeName,
+    'group_join_request_waiting_title',
+    () => _fallback.group_join_request_waiting_title,
+  );
+
+  @override
+  String get group_join_request_waiting_message => TolgeeBridge.get(
+    localeName,
+    'group_join_request_waiting_message',
+    () => _fallback.group_join_request_waiting_message,
+  );
+
+  @override
   String get group_members_load_error => TolgeeBridge.get(
     localeName,
     'group_members_load_error',

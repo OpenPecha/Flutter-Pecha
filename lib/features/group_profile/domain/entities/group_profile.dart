@@ -14,6 +14,21 @@ enum GroupType {
   bool get isPage => this == GroupType.page;
 }
 
+enum GroupJoinRequestStatus {
+  pending,
+  approved,
+  rejected;
+
+  static GroupJoinRequestStatus? fromApi(String? value) {
+    return switch (value?.toUpperCase()) {
+      'PENDING' => GroupJoinRequestStatus.pending,
+      'APPROVED' => GroupJoinRequestStatus.approved,
+      'REJECTED' => GroupJoinRequestStatus.rejected,
+      _ => null,
+    };
+  }
+}
+
 class GroupProfileSocialLink {
   final String id;
   final String platform;
@@ -78,6 +93,7 @@ class GroupProfile {
   final int joinerCount;
   final int followerCount;
   final int memberCount;
+  final GroupJoinRequestStatus? myJoinRequestStatus;
 
   const GroupProfile({
     required this.id,
@@ -97,7 +113,10 @@ class GroupProfile {
     this.joinerCount = 0,
     this.followerCount = 0,
     this.memberCount = 0,
+    this.myJoinRequestStatus,
   });
+
+  bool get isPrivateCommunity => groupType == GroupType.community && !isPublic;
 
   int get memberOrFollowerCount =>
       groupType.isPage ? followerCount : joinerCount;
@@ -107,6 +126,7 @@ class GroupProfile {
     int? joinerCount,
     int? followerCount,
     int? memberCount,
+    GroupJoinRequestStatus? myJoinRequestStatus,
   }) {
     return GroupProfile(
       id: id,
@@ -126,6 +146,7 @@ class GroupProfile {
       joinerCount: joinerCount ?? this.joinerCount,
       followerCount: followerCount ?? this.followerCount,
       memberCount: memberCount ?? this.memberCount,
+      myJoinRequestStatus: myJoinRequestStatus ?? this.myJoinRequestStatus,
     );
   }
 

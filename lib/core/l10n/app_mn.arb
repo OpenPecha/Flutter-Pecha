@@ -786,6 +786,26 @@
     }
   },
   "group_invite": "Урих",
+  "group_request_to_join": "Нэгдэх хүсэлт илгээх",
+  "group_request_sent": "Хүсэлт илгээгдсэн",
+  "group_join_request_title": "Нэгдэх хүсэлт",
+  "group_join_request_message_label": "Зурвас (заавал биш)",
+  "group_join_request_message_hint": "Та хэрхэн дадлага хийдэг вэ, эсвэл хэн урисан бэ?",
+  "group_join_request_send": "Хүсэлт илгээх",
+  "group_join_request_success_title": "Хүсэлт илгээгдсэн",
+  "group_join_request_success_message": "{groupName}-ийн админ үүнийг шалгана. Бид тун удахгүй мэдэгдэх болно.",
+  "@group_join_request_success_message": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "group_join_request_error": "Хүсэлт илгээж чадсангүй. Дахин оролдоно уу.",
+  "group_members_only_title": "Зөвхөн гишүүд",
+  "group_members_only_message": "Энэ бүлгийн уншлага, арга хэмжээ, нийтлэлийг харахын тулд нэгдээрэй.",
+  "group_join_request_waiting_title": "Админы хариу хүлээж байна",
+  "group_join_request_waiting_message": "Таны хүсэлт шалгагдмагц бид танд мэдэгдэх болно.",
   "group_members_load_error": "Гишүүдийг ачаалж чадсангүй. Дахин оролдоно уу.",
   "group_followers_load_error": "Дагагчдыг ачаалж чадсангүй. Дахин оролдоно уу.",
   "group_members_empty": "Одоогоор гишүүн байхгүй",

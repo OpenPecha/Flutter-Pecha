@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/providers/grou
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_about_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_join_request_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_events_tab.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_profile_link_utils.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
@@ -63,6 +66,22 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   late final TapGestureRecognizer _moreRecognizer;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
+
+  bool _isGroupMember(GroupProfile profile) {
+    final followKey = GroupFollowKey(
+      groupId: profile.id,
+      groupType: profile.groupType,
+    );
+    final followState = ref.read(groupFollowProvider(followKey));
+    return switch (followState) {
+      GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
+      _ => false,
+    };
+  }
+
+  bool _isContentRestricted(GroupProfile profile) {
+    return profile.isPrivateCommunity && !_isGroupMember(profile);
+  }
 
   /// Posts have no data source yet, so the tab never has content to show.
   bool get _hasPosts => false;
@@ -308,14 +327,16 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     // Wait for both sections before laying out the tabs, otherwise tabs would
     // pop in and out as each request settles.
     final isTabDataLoading = isPracticesLoading || isEventsLoading;
+    final isContentRestricted = _isContentRestricted(profile);
     final tabs = <_GroupProfileTab>[
-      if (_hasPosts) _GroupProfileTab.posts,
-      if (hasEvents) _GroupProfileTab.events,
-      if (hasPractices) _GroupProfileTab.practices,
+      if (_hasPosts || isContentRestricted) _GroupProfileTab.posts,
+      if (hasEvents || isContentRestricted) _GroupProfileTab.events,
+      if (hasPractices || isContentRestricted) _GroupProfileTab.practices,
       _GroupProfileTab.members,
     ];
-    if (!isTabDataLoading) _syncTabController(tabs);
+    if (!isTabDataLoading || isContentRestricted) _syncTabController(tabs);
     final controller = _tabController;
+    final joinRequestStatus = profile.myJoinRequestStatus;
 
     return NestedScrollView(
       headerSliverBuilder:
@@ -340,7 +361,12 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                   const SizedBox(height: 20),
                   _GroupFollowButton(profile: profile, isDark: isDark),
                   const SizedBox(height: 24),
-                  if (controller != null) _buildTabBar(isDark, profile),
+                  if (controller != null)
+                    _buildTabBar(
+                      isDark,
+                      profile,
+                      showLockIcons: isContentRestricted,
+                    ),
                 ],
               ),
             ),
@@ -348,6 +374,13 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       body:
           controller == null
               ? const Center(child: CircularProgressIndicator())
+              : isContentRestricted
+              ? _buildRestrictedTabBody(
+                profile,
+                isDark,
+                lineHeight,
+                joinRequestStatus,
+              )
               : TabBarView(
                 controller: controller,
                 children: [
@@ -355,6 +388,85 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                     _buildTabContent(tab, profile, isDark, lineHeight),
                 ],
               ),
+    );
+  }
+
+  Widget _buildRestrictedTabBody(
+    GroupProfile profile,
+    bool isDark,
+    double? lineHeight,
+    GroupJoinRequestStatus? joinRequestStatus,
+  ) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: IgnorePointer(
+            child: TabBarView(
+              controller: _tabController!,
+              children: [
+                for (final tab in _visibleTabs)
+                  _buildTabContent(tab, profile, isDark, lineHeight),
+              ],
+            ),
+          ),
+        ),
+        _buildRestrictedOverlay(isDark, lineHeight, joinRequestStatus),
+      ],
+    );
+  }
+
+  Widget _buildRestrictedOverlay(
+    bool isDark,
+    double? lineHeight,
+    GroupJoinRequestStatus? joinRequestStatus,
+  ) {
+    final isPending = joinRequestStatus == GroupJoinRequestStatus.pending;
+    final titleColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+
+    return Container(
+      color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.55),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPending ? AppAssets.homeTimer : AppAssets.lock,
+            size: 28,
+            color: titleColor,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            isPending
+                ? context.l10n.group_join_request_waiting_title
+                : context.l10n.group_members_only_title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: titleColor,
+              height: lineHeight,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isPending
+                ? context.l10n.group_join_request_waiting_message
+                : context.l10n.group_members_only_message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: secondaryColor,
+              height: lineHeight,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -683,7 +795,11 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
-  Widget _buildTabBar(bool isDark, GroupProfile profile) {
+  Widget _buildTabBar(
+    bool isDark,
+    GroupProfile profile, {
+    required bool showLockIcons,
+  }) {
     final labelColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
@@ -705,10 +821,34 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             fontWeight: FontWeight.w500,
           ),
           tabs: [
-            for (final tab in _visibleTabs) Tab(text: _tabLabel(tab, profile)),
+            for (final tab in _visibleTabs)
+              Tab(
+                child: _buildTabLabel(
+                  tab,
+                  profile,
+                  showLockIcon: showLockIcons,
+                ),
+              ),
           ],
         ),
         Divider(height: 1, thickness: 1, color: dividerColor),
+      ],
+    );
+  }
+
+  Widget _buildTabLabel(
+    _GroupProfileTab tab,
+    GroupProfile profile, {
+    required bool showLockIcon,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(_tabLabel(tab, profile)),
+        if (showLockIcon) ...[
+          const SizedBox(width: 4),
+          Icon(AppAssets.lock, size: 14),
+        ],
       ],
     );
   }
@@ -1363,20 +1503,321 @@ class _GroupFollowButton extends ConsumerWidget {
     );
   }
 
+  Future<void> _onRequestToJoinPressed(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final authState = ref.read(authProvider);
+    if (authState.isGuest || !authState.isLoggedIn) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+
+    final sent = await GroupJoinRequestDrawer.show(context, profile);
+    if (sent == true && context.mounted) {
+      await GroupJoinRequestSuccessSheet.show(
+        context,
+        groupName: profile.title,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (profile.isPrivateCommunity) {
+      return _buildPrivateCommunityActions(context, ref);
+    }
+
+    return _buildPublicCommunityActions(context, ref);
+  }
+
+  Widget _buildPrivateCommunityActions(BuildContext context, WidgetRef ref) {
     final followKey = GroupFollowKey(
       groupId: profile.id,
       groupType: profile.groupType,
     );
     final followState = ref.watch(groupFollowProvider(followKey));
+    final isFollowing = switch (followState) {
+      GroupFollowSuccess(isFollowing: final f) => f,
+      _ => false,
+    };
+    final isLoading = followState is GroupFollowLoading;
+    final joinRequestStatus = profile.myJoinRequestStatus;
 
+    if (isFollowing) {
+      return _buildJoinedActions(
+        context,
+        ref,
+        followKey,
+        isFollowing,
+        isLoading,
+      );
+    }
+
+    if (joinRequestStatus == GroupJoinRequestStatus.pending) {
+      return _buildRequestSentButton(context);
+    }
+
+    return _buildRequestToJoinButton(context, ref, isLoading);
+  }
+
+  Widget _buildPublicCommunityActions(BuildContext context, WidgetRef ref) {
+    final followKey = GroupFollowKey(
+      groupId: profile.id,
+      groupType: profile.groupType,
+    );
+    final followState = ref.watch(groupFollowProvider(followKey));
     final isFollowing = switch (followState) {
       GroupFollowSuccess(isFollowing: final f) => f,
       _ => false,
     };
     final isLoading = followState is GroupFollowLoading;
     final isPage = profile.groupType.isPage;
+
+    if (isFollowing && !isPage) {
+      return _buildJoinedActions(
+        context,
+        ref,
+        followKey,
+        isFollowing,
+        isLoading,
+      );
+    }
+
+    return _buildPrimaryFollowButton(
+      context,
+      ref,
+      followKey,
+      isFollowing,
+      isLoading,
+      isPage,
+    );
+  }
+
+  Widget _buildJoinedActions(
+    BuildContext context,
+    WidgetRef ref,
+    GroupFollowKey followKey,
+    bool isFollowing,
+    bool isLoading,
+  ) {
+    const fontSize = 16.0;
+    final locale = Localizations.localeOf(context);
+    final isTibetan = context.isTibetanLocale;
+    final buttonHeight = isTibetan ? 52.0 : 48.0;
+    final buttonStyle = ElevatedButton.styleFrom(
+      minimumSize: Size(0, buttonHeight),
+      padding: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: isTibetan ? 10 : 12,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      elevation: 0,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _buildMessageButton(context, isDark, buttonHeight),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed:
+                  isLoading
+                      ? null
+                      : () => _onFollowPressed(
+                        context,
+                        ref,
+                        followKey,
+                        isFollowing,
+                      ),
+              style: buttonStyle.copyWith(
+                backgroundColor: WidgetStatePropertyAll(
+                  isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+                ),
+                foregroundColor: WidgetStatePropertyAll(
+                  isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+                ),
+              ),
+              child:
+                  isLoading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : Text(
+                        context.l10n.joined,
+                        textAlign: TextAlign.center,
+                        strutStyle: context.tibetanStrutStyle(fontSize),
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: getSystemFontFamily(locale.languageCode),
+                        ),
+                      ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _onInvitePressed(context),
+              style: buttonStyle.copyWith(
+                backgroundColor: WidgetStatePropertyAll(
+                  isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+                ),
+                foregroundColor: WidgetStatePropertyAll(
+                  isDark ? AppColors.textPrimary : AppColors.surfaceWhite,
+                ),
+              ),
+              child: Text(
+                context.l10n.group_invite,
+                textAlign: TextAlign.center,
+                strutStyle: context.tibetanStrutStyle(fontSize),
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: getSystemFontFamily(locale.languageCode),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageButton(
+    BuildContext context,
+    bool isDark,
+    double buttonHeight,
+  ) {
+    return SizedBox(
+      width: buttonHeight,
+      height: buttonHeight,
+      child: OutlinedButton(
+        onPressed: () {},
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          side: BorderSide(
+            color: isDark ? AppColors.grey800 : AppColors.grey300,
+          ),
+          shape: const CircleBorder(),
+        ),
+        child: Icon(
+          AppAssets.chatCircle,
+          size: 22,
+          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRequestSentButton(BuildContext context) {
+    const fontSize = 16.0;
+    final locale = Localizations.localeOf(context);
+    final isTibetan = context.isTibetanLocale;
+    final buttonHeight = isTibetan ? 52.0 : 48.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: null,
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size(double.infinity, buttonHeight),
+            padding: EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: isTibetan ? 10 : 12,
+            ),
+            disabledBackgroundColor:
+                isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+            disabledForegroundColor:
+                isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            elevation: 0,
+          ),
+          child: Text(
+            context.l10n.group_request_sent,
+            textAlign: TextAlign.center,
+            strutStyle: context.tibetanStrutStyle(fontSize),
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+              fontFamily: getSystemFontFamily(locale.languageCode),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRequestToJoinButton(
+    BuildContext context,
+    WidgetRef ref,
+    bool isLoading,
+  ) {
+    const fontSize = 16.0;
+    final locale = Localizations.localeOf(context);
+    final isTibetan = context.isTibetanLocale;
+    final buttonHeight = isTibetan ? 52.0 : 48.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed:
+              isLoading ? null : () => _onRequestToJoinPressed(context, ref),
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size(double.infinity, buttonHeight),
+            padding: EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: isTibetan ? 10 : 12,
+            ),
+            backgroundColor:
+                isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+            foregroundColor:
+                isDark ? AppColors.textPrimary : AppColors.surfaceWhite,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            elevation: 0,
+          ),
+          child:
+              isLoading
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : Text(
+                    context.l10n.group_request_to_join,
+                    textAlign: TextAlign.center,
+                    strutStyle: context.tibetanStrutStyle(fontSize),
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: getSystemFontFamily(locale.languageCode),
+                    ),
+                  ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryFollowButton(
+    BuildContext context,
+    WidgetRef ref,
+    GroupFollowKey followKey,
+    bool isFollowing,
+    bool isLoading,
+    bool isPage,
+  ) {
     const fontSize = 16.0;
     final locale = Localizations.localeOf(context);
     final isTibetan = context.isTibetanLocale;

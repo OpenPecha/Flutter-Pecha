@@ -1838,6 +1838,51 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_invite => 'Урих';
 
   @override
+  String get group_request_to_join => 'Нэгдэх хүсэлт илгээх';
+
+  @override
+  String get group_request_sent => 'Хүсэлт илгээгдсэн';
+
+  @override
+  String get group_join_request_title => 'Нэгдэх хүсэлт';
+
+  @override
+  String get group_join_request_message_label => 'Зурвас (заавал биш)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'Та хэрхэн дадлага хийдэг вэ, эсвэл хэн урисан бэ?';
+
+  @override
+  String get group_join_request_send => 'Хүсэлт илгээх';
+
+  @override
+  String get group_join_request_success_title => 'Хүсэлт илгээгдсэн';
+
+  @override
+  String group_join_request_success_message(String groupName) {
+    return '$groupName-ийн админ үүнийг шалгана. Бид тун удахгүй мэдэгдэх болно.';
+  }
+
+  @override
+  String get group_join_request_error =>
+      'Хүсэлт илгээж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get group_members_only_title => 'Зөвхөн гишүүд';
+
+  @override
+  String get group_members_only_message =>
+      'Энэ бүлгийн уншлага, арга хэмжээ, нийтлэлийг харахын тулд нэгдээрэй.';
+
+  @override
+  String get group_join_request_waiting_title => 'Админы хариу хүлээж байна';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'Таны хүсэлт шалгагдмагц бид танд мэдэгдэх болно.';
+
+  @override
   String get group_members_load_error =>
       'Гишүүдийг ачаалж чадсангүй. Дахин оролдоно уу.';
 

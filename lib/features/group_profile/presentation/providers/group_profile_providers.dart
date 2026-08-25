@@ -953,3 +953,20 @@ final groupEventParticipantsProvider = FutureProvider.autoDispose
       final repository = ref.watch(groupProfileRepositoryProvider);
       return repository.getGroupEventParticipants(eventId, skip: 0, limit: 20);
     });
+
+Future<bool> submitGroupJoinRequest({
+  required WidgetRef ref,
+  required String groupId,
+  String message = '',
+}) async {
+  final result = await ref
+      .read(groupProfileRepositoryProvider)
+      .submitJoinRequest(groupId, message: message);
+  return result.fold(
+    (_) => false,
+    (_) {
+      ref.invalidate(groupProfileProvider(groupId));
+      return true;
+    },
+  );
+}

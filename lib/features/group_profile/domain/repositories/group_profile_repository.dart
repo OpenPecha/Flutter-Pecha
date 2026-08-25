@@ -88,4 +88,9 @@ abstract class GroupProfileRepositoryInterface {
   Future<Either<Failure, void>> joinGroupEvent(String eventId);
 
   Future<Either<Failure, void>> leaveGroupEvent(String eventId);
+
+  Future<Either<Failure, void>> submitJoinRequest(
+    String groupId, {
+    required String message,
+  });
 }
