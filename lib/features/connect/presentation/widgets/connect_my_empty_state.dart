@@ -11,11 +11,11 @@ class ConnectMyEmptyState extends StatelessWidget {
   const ConnectMyEmptyState({
     super.key,
     required this.type,
-    required this.onBrowseTap,
+    this.onBrowseTap,
   });
 
   final ConnectMyEmptyStateType type;
-  final VoidCallback onBrowseTap;
+  final VoidCallback? onBrowseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -57,29 +57,31 @@ class ConnectMyEmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, color: subtitleColor, height: 1.5),
           ),
-          const SizedBox(height: 28),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onBrowseTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDark ? Colors.white : Colors.black,
-                foregroundColor: isDark ? Colors.black : Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+          if (onBrowseTap != null) ...[
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onBrowseTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark ? Colors.white : Colors.black,
+                  foregroundColor: isDark ? Colors.black : Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              child: Text(
-                _browseLabel(l10n),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                child: Text(
+                  _browseLabel(l10n),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
