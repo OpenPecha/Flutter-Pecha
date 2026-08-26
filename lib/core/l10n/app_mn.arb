@@ -980,6 +980,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "Одоогоор оролцогч байхгүй",
   "timer_notification_in_progress": "Бясалгал үргэлжилж байна",
   "timer_notification_paused": "Түр зогссон · {time} үлдсэн",
   "@timer_notification_paused": {

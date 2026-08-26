@@ -866,6 +866,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get connect_event_participants_empty => 'No participants yet';
+
+  @override
   String get search_groups => 'Search groups';
 
   @override

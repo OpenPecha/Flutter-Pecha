@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_posts_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +59,8 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
         return ConnectPaginatedListView(
           scrollViewKey: const PageStorageKey<String>('connect_posts_my'),
           header: scrollHeader,
+          useHairlineDividers: false,
+          separatorHeight: ConnectFeedCardLayout.listItemGap,
           items: myState.posts,
           isLoading: myState.isLoading,
           isLoadingMore: myState.isLoadingMore,
@@ -81,6 +83,8 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
         return ConnectPaginatedListView(
           scrollViewKey: const PageStorageKey<String>('connect_posts_discover'),
           header: scrollHeader,
+          useHairlineDividers: false,
+          separatorHeight: ConnectFeedCardLayout.listItemGap,
           items: discoverState.posts,
           isLoading: discoverState.isLoading,
           isLoadingMore: discoverState.isLoadingMore,
@@ -89,7 +93,9 @@ class _ConnectPostsTabState extends ConsumerState<ConnectPostsTab>
           hasLoaded: discoverState.hasLoaded,
           onRetry:
               () => ref.read(discoverConnectPostsProvider.notifier).retry(),
-          emptyDiscoverMessage: context.l10n.connect_empty_discover_posts,
+          myEmptyState: const ConnectMyEmptyState(
+            type: ConnectMyEmptyStateType.posts,
+          ),
           itemBuilder:
               (context, index) => ConnectPostCard(
                 post: discoverState.posts[index],

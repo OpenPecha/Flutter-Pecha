@@ -873,6 +873,9 @@ class AppLocalizationsMn extends AppLocalizations {
   }
 
   @override
+  String get connect_event_participants_empty => 'Одоогоор оролцогч байхгүй';
+
+  @override
   String get search_groups => 'Бүлэг хайх';
 
   @override

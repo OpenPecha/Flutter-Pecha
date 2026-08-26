@@ -8,7 +8,9 @@ import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_attendance_utils.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_filter_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,7 +75,12 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(
+                ConnectFeedCardLayout.horizontalPadding,
+                ConnectFeedCardLayout.bodyTopSpacing,
+                ConnectFeedCardLayout.horizontalPadding,
+                0,
+              ),
               child: Text(
                 title,
                 style: const TextStyle(
@@ -85,51 +92,48 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: ClipRect(
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      event.image != null && !event.image!.isEmpty
-                          ? ResponsiveCoverImage(
-                            image: event.image,
-                            fit: BoxFit.cover,
-                          )
-                          : ColoredBox(
+            ConnectFeedCardSectionDivider(isDark: isDark),
+            ConnectFeedCardMediaFrame(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    event.image != null && !event.image!.isEmpty
+                        ? ResponsiveCoverImage(
+                          image: event.image,
+                          fit: BoxFit.cover,
+                        )
+                        : ColoredBox(
+                          color:
+                              isDark
+                                  ? AppColors.surfaceVariantDark
+                                  : AppColors.grey100,
+                          child: Icon(
+                            AppAssets.calendarDots,
+                            size: 40,
                             color:
                                 isDark
-                                    ? AppColors.surfaceVariantDark
-                                    : AppColors.grey100,
-                            child: Icon(
-                              AppAssets.calendarDots,
-                              size: 40,
-                              color:
-                                  isDark
-                                      ? AppColors.grey500
-                                      : AppColors.grey600,
-                            ),
-                          ),
-                      if (!isPast)
-                        Positioned(
-                          right: 12,
-                          bottom: 12,
-                          child: GestureDetector(
-                            onTap: () => _toggleAttendance(event, isAttending),
-                            behavior: HitTestBehavior.opaque,
-                            child: _AttendButton(
-                              isAttending: isAttending,
-                              isSubmitting: _isSubmitting,
-                              isDark: isDark,
-                              onImage: true,
-                            ),
+                                    ? AppColors.grey500
+                                    : AppColors.grey600,
                           ),
                         ),
-                    ],
-                  ),
+                    if (!isPast)
+                      Positioned(
+                        right: 12,
+                        bottom: 12,
+                        child: GestureDetector(
+                          onTap: () => _toggleAttendance(event, isAttending),
+                          behavior: HitTestBehavior.opaque,
+                          child: _AttendButton(
+                            isAttending: isAttending,
+                            isSubmitting: _isSubmitting,
+                            isDark: isDark,
+                            onImage: true,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -159,7 +163,7 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    parts.add(_eventLocationLabel(context, event));
+    parts.add(groupEventLocationLabel(event, context.l10n.connect_online));
 
     if (participantCount > 0) {
       parts.add(
@@ -169,15 +173,6 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
 
     if (parts.isEmpty) return null;
     return parts.join(' · ');
-  }
-
-  String _eventLocationLabel(BuildContext context, GroupEvent event) {
-    final locationId = event.locationId?.trim();
-    if (locationId != null && locationId.isNotEmpty) {
-      final name = event.location?.name.trim();
-      if (name != null && name.isNotEmpty) return name;
-    }
-    return context.l10n.connect_online;
   }
 
   Future<void> _shareEvent(GroupEvent event) async {
@@ -240,15 +235,18 @@ class _AttendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageOverlayFill = Colors.black.withValues(alpha: 0.55);
     final attendingFill =
         onImage
-            ? Colors.white.withValues(alpha: 0.92)
+            ? imageOverlayFill
             : (isDark ? AppColors.surfaceVariantDark : AppColors.grey100);
     final attendingTextColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+        onImage
+            ? Colors.white
+            : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary);
     final attendFill =
         onImage
-            ? AppColors.textPrimary.withValues(alpha: 0.88)
+            ? imageOverlayFill
             : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary);
     final attendTextColor =
         onImage
@@ -262,16 +260,6 @@ class _AttendButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: isAttending ? attendingFill : attendFill,
         borderRadius: BorderRadius.circular(16),
-        boxShadow:
-            onImage
-                ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-                : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

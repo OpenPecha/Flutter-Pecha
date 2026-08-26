@@ -980,6 +980,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "अभी तक कोई प्रतिभागी नहीं",
   "timer_notification_in_progress": "ध्यान जारी है",
   "timer_notification_paused": "रुका हुआ · {time} शेष",
   "@timer_notification_paused": {

@@ -6,6 +6,7 @@ import 'package:flutter_pecha/features/connect/presentation/widgets/connect_even
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_empty_state.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_practice_card.dart';
@@ -68,6 +69,8 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
         return ConnectPaginatedListView(
           scrollViewKey: const PageStorageKey<String>('connect_feed_my'),
           header: scrollHeader,
+          useHairlineDividers: false,
+          separatorHeight: ConnectFeedCardLayout.listItemGap,
           items: myItems,
           isLoading: myState.isLoading,
           isLoadingMore: myState.isLoadingMore,
@@ -91,6 +94,8 @@ class _ConnectFeedTabState extends ConsumerState<ConnectFeedTab>
         return ConnectPaginatedListView(
           scrollViewKey: const PageStorageKey<String>('connect_feed_discover'),
           header: scrollHeader,
+          useHairlineDividers: false,
+          separatorHeight: ConnectFeedCardLayout.listItemGap,
           items: discoverItems,
           isLoading: discoverState.isLoading,
           isLoadingMore: discoverState.isLoadingMore,

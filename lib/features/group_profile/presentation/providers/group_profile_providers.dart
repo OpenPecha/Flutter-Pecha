@@ -916,6 +916,10 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
   }
 }
 
+/// True when the group profile header title has scrolled out of view.
+final groupProfileAppBarTitleVisibleProvider = StateProvider.autoDispose
+    .family<bool, String>((ref, groupId) => false);
+
 /// True while the group profile members tab is the selected tab.
 final groupMembersTabActiveProvider = StateProvider.autoDispose
     .family<bool, String>((ref, groupId) => false);
@@ -945,11 +949,167 @@ final groupEventDetailProvider = FutureProvider.autoDispose
       return repository.getGroupEventDetail(eventId, language: language);
     });
 
-final groupEventParticipantsProvider = FutureProvider.autoDispose
-    .family<Either<Failure, GroupEventParticipantsPage>, String>((
-      ref,
-      eventId,
-    ) async {
-      final repository = ref.watch(groupProfileRepositoryProvider);
-      return repository.getGroupEventParticipants(eventId, skip: 0, limit: 20);
-    });
+class GroupEventParticipantsState {
+  final List<GroupEventParticipant> participants;
+  final int total;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final String? error;
+  final bool hasMore;
+  final int skip;
+
+  const GroupEventParticipantsState({
+    this.participants = const [],
+    this.total = 0,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.error,
+    this.hasMore = true,
+    this.skip = 0,
+  });
+
+  GroupEventParticipantsState copyWith({
+    List<GroupEventParticipant>? participants,
+    int? total,
+    bool? isLoading,
+    bool? isLoadingMore,
+    String? error,
+    bool? hasMore,
+    int? skip,
+    bool clearError = false,
+  }) {
+    return GroupEventParticipantsState(
+      participants: participants ?? this.participants,
+      total: total ?? this.total,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      error: clearError ? null : error ?? this.error,
+      hasMore: hasMore ?? this.hasMore,
+      skip: skip ?? this.skip,
+    );
+  }
+}
+
+class GroupEventParticipantsNotifier
+    extends StateNotifier<GroupEventParticipantsState> {
+  GroupEventParticipantsNotifier({
+    required GroupProfileRepositoryInterface repository,
+    required String eventId,
+  }) : _repository = repository,
+       _eventId = eventId,
+       super(const GroupEventParticipantsState());
+
+  final GroupProfileRepositoryInterface _repository;
+  final String _eventId;
+  static const int _limit = 20;
+  int _requestGeneration = 0;
+
+  Future<void> loadInitial() async {
+    if (state.isLoading || state.isLoadingMore) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _repository.getGroupEventParticipants(
+      _eventId,
+      skip: 0,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          participants: page.participants,
+          total: page.total,
+          isLoading: false,
+          hasMore: page.hasMore,
+          skip: page.participants.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+
+    final generation = _requestGeneration;
+    state = state.copyWith(isLoadingMore: true, clearError: true);
+
+    final result = await _repository.getGroupEventParticipants(
+      _eventId,
+      skip: state.skip,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoadingMore: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          participants: [...state.participants, ...page.participants],
+          total: page.total,
+          isLoadingMore: false,
+          hasMore: page.hasMore,
+          skip: state.skip + page.participants.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<void> refresh() async {
+    final generation = ++_requestGeneration;
+    state = const GroupEventParticipantsState(isLoading: true);
+
+    final result = await _repository.getGroupEventParticipants(
+      _eventId,
+      skip: 0,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          participants: page.participants,
+          total: page.total,
+          isLoading: false,
+          hasMore: page.hasMore,
+          skip: page.participants.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  void retry() {
+    if (state.participants.isEmpty) {
+      loadInitial();
+    } else {
+      loadMore();
+    }
+  }
+}
+
+final groupEventParticipantsProvider = StateNotifierProvider.autoDispose
+    .family<GroupEventParticipantsNotifier, GroupEventParticipantsState, String>(
+      (ref, eventId) {
+        return GroupEventParticipantsNotifier(
+          repository: ref.watch(groupProfileRepositoryProvider),
+          eventId: eventId,
+        );
+      },
+    );

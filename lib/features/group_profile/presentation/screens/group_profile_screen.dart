@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_body.dart';
@@ -17,13 +18,18 @@ class GroupProfileScreen extends ConsumerWidget {
     final profileAsync = ref.watch(groupProfileProvider(groupId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final profileTitle = profileAsync.maybeWhen(
+      data: (either) => either.fold((_) => null, (profile) => profile.title),
+      orElse: () => null,
+    );
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            _buildAppBar(context),
+            _buildAppBar(context, ref, groupId, profileTitle, isDark),
             Expanded(
               child: profileAsync.when(
                 data: (either) {
@@ -56,7 +62,19 @@ class GroupProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(
+    BuildContext context,
+    WidgetRef ref,
+    String groupId,
+    String? title,
+    bool isDark,
+  ) {
+    final showTitle = ref.watch(groupProfileAppBarTitleVisibleProvider(groupId));
+    final resolvedTitle = title?.trim() ?? '';
+    final hasTitle = resolvedTitle.isNotEmpty;
+    final titleColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Row(
@@ -71,7 +89,22 @@ class GroupProfileScreen extends ConsumerWidget {
               }
             },
           ),
-          const Spacer(),
+          Expanded(
+            child: AnimatedOpacity(
+              opacity: showTitle && hasTitle ? 1 : 0,
+              duration: const Duration(milliseconds: 150),
+              child: Text(
+                resolvedTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: titleColor,
+                ),
+              ),
+            ),
+          ),
           const SizedBox(width: 48, height: 48),
         ],
       ),
