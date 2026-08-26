@@ -339,7 +339,7 @@ class _RoutineBlockSection extends ConsumerStatefulWidget {
 }
 
 class _RoutineBlockSectionState extends ConsumerState<_RoutineBlockSection> {
-  bool _expanded = true;
+  bool _expanded = false;
 
   RoutineBlock get block => widget.block;
 
