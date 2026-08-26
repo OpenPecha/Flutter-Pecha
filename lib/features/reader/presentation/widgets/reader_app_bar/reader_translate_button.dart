@@ -123,31 +123,28 @@ class _ReaderTranslateButtonState extends ConsumerState<ReaderTranslateButton> {
       }
     });
 
-    final isOn = dual.secondaryEnabled && dual.secondary.versionId != null;
-    final l10n = context.l10n;
-    final tooltip =
-        available
-            ? l10n.reader_translate_tooltip
-            : l10n.reader_translate_unavailable;
+    if (!available) {
+      return const SizedBox.shrink();
+    }
 
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap:
-            available
-                ? () => _onPressed(
-                  isOn: isOn,
-                  available: available,
-                  sourceLanguage: sourceLanguage,
-                )
-                : null,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 56,
-          height: 48,
-          child: Center(
-            child: Opacity(
-              opacity: available ? 1 : 0.38,
+    final isOn = dual.secondaryEnabled && dual.secondary.versionId != null;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Tooltip(
+        message: context.l10n.reader_translate_tooltip,
+        child: GestureDetector(
+          onTap:
+              () => _onPressed(
+                isOn: isOn,
+                available: true,
+                sourceLanguage: sourceLanguage,
+              ),
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 56,
+            height: 48,
+            child: Center(
               child: _TranslatePillSwitch(isOn: isOn),
             ),
           ),
