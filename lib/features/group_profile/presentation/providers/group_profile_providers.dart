@@ -453,19 +453,18 @@ class GroupFollowFailure extends GroupFollowState {
   const GroupFollowFailure(this.failure);
 }
 
+/// Whether the initial join-status check for a private group is still in flight.
+bool isPrivateGroupMembershipLoading(GroupFollowState followState) {
+  return followState is GroupFollowLoading && followState.isInitialCheck;
+}
+
 /// Whether the current user is an active member of a private community group.
 ///
-/// Join status from [followState] is the source of truth once resolved. While
-/// the follow check is still loading, a previously [GroupJoinRequestStatus.approved]
-/// request is treated as joined so the UI does not flash locked content.
-bool isPrivateGroupMember({
-  required GroupFollowState followState,
-  GroupJoinRequestStatus? joinRequestStatus,
-}) {
+/// Only a resolved follow check counts; never infer membership from join-request
+/// status alone (avoids flashing joined UI for stale APPROVED responses).
+bool isPrivateGroupMember({required GroupFollowState followState}) {
   return switch (followState) {
     GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
-    GroupFollowLoading(isInitialCheck: true) =>
-      joinRequestStatus == GroupJoinRequestStatus.approved,
     _ => false,
   };
 }

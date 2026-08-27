@@ -72,16 +72,22 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   bool _canAccessPrivateGroupContent(GroupProfile profile) {
     if (!profile.isPrivateCommunity) return true;
 
+    return isPrivateGroupMember(
+      followState: _privateGroupFollowState(profile),
+    );
+  }
+
+  GroupFollowState _privateGroupFollowState(GroupProfile profile) {
     final followKey = GroupFollowKey(
       groupId: profile.id,
       groupType: profile.groupType,
     );
-    final followState = ref.watch(groupFollowProvider(followKey));
+    return ref.watch(groupFollowProvider(followKey));
+  }
 
-    return isPrivateGroupMember(
-      followState: followState,
-      joinRequestStatus: profile.myJoinRequestStatus,
-    );
+  bool _isPrivateMembershipLoading(GroupProfile profile) {
+    if (!profile.isPrivateCommunity) return false;
+    return isPrivateGroupMembershipLoading(_privateGroupFollowState(profile));
   }
 
   bool _isContentRestricted(GroupProfile profile) {
@@ -301,7 +307,9 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final profile = _resolveProfile();
     final isDark = widget.isDark;
 
-    if (_isCommunityGroup(profile) && !_isContentRestricted(profile)) {
+    if (_isCommunityGroup(profile) &&
+        !_isPrivateMembershipLoading(profile) &&
+        !_isContentRestricted(profile)) {
       ref.listen(groupPracticesProvider(widget.profile.id), (previous, next) {
         if (next.isLoading && next.practices.isEmpty) return;
         _syncPracticeEnrollmentFromList(next.practices);
@@ -369,6 +377,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     double? lineHeight,
     List<GroupProfileSocialLink> orderedLinks,
   ) {
+    if (_isPrivateMembershipLoading(profile)) {
+      return _buildPrivateMembershipLoadingProfile(
+        profile,
+        isDark,
+        lineHeight,
+        orderedLinks,
+      );
+    }
+
     if (_isContentRestricted(profile)) {
       return _buildRestrictedCommunityProfile(
         profile,
@@ -509,6 +526,44 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ),
           ),
         ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrivateMembershipLoadingProfile(
+    GroupProfile profile,
+    bool isDark,
+    double? lineHeight,
+    List<GroupProfileSocialLink> orderedLinks,
+  ) {
+    return RefreshIndicator(
+      onRefresh: () => _onRefresh(profile),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollUpdateNotification ||
+              notification is ScrollEndNotification) {
+            _syncAppBarTitleVisibility();
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: _buildCommunityHeaderSection(
+                profile,
+                isDark,
+                lineHeight,
+                orderedLinks,
+                bottomSpacing: 0,
+              ),
+            ),
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ],
         ),
       ),
     );
@@ -1672,12 +1727,12 @@ class _GroupFollowButton extends ConsumerWidget {
     };
     final isLoading = followState is GroupFollowLoading;
     final joinRequestStatus = profile.myJoinRequestStatus;
-    final hasAccess = isPrivateGroupMember(
-      followState: followState,
-      joinRequestStatus: joinRequestStatus,
-    );
 
-    if (hasAccess) {
+    if (isPrivateGroupMembershipLoading(followState)) {
+      return _buildPrivateMembershipLoadingButton(context);
+    }
+
+    if (isPrivateGroupMember(followState: followState)) {
       return _buildJoinedActions(
         context,
         ref,
@@ -1842,6 +1897,35 @@ class _GroupFollowButton extends ConsumerWidget {
           AppAssets.chatCircle,
           size: 22,
           color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrivateMembershipLoadingButton(BuildContext context) {
+    final isTibetan = context.isTibetanLocale;
+    final buttonHeight = isTibetan ? 52.0 : 48.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: buttonHeight,
+        child: ElevatedButton(
+          onPressed: null,
+          style: ElevatedButton.styleFrom(
+            disabledBackgroundColor:
+                isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            elevation: 0,
+          ),
+          child: const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
       ),
     );
