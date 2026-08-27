@@ -16,6 +16,7 @@ class GroupProfileModel {
   final int joinerCount;
   final int followerCount;
   final int memberCount;
+  final GroupJoinRequestStatus? myJoinRequestStatus;
 
   GroupProfileModel({
     required this.id,
@@ -32,6 +33,7 @@ class GroupProfileModel {
     this.joinerCount = 0,
     this.followerCount = 0,
     this.memberCount = 0,
+    this.myJoinRequestStatus,
   });
 
   factory GroupProfileModel.fromJson(Map<String, dynamic> json) {
@@ -60,6 +62,9 @@ class GroupProfileModel {
       joinerCount: (json['joiner_count'] as num?)?.toInt() ?? 0,
       followerCount: (json['follower_count'] as num?)?.toInt() ?? 0,
       memberCount: (json['member_count'] as num?)?.toInt() ?? 0,
+      myJoinRequestStatus: GroupJoinRequestStatus.fromApi(
+        json['my_join_request_status'] as String?,
+      ),
     );
   }
 
@@ -82,6 +87,7 @@ class GroupProfileModel {
       joinerCount: joinerCount,
       followerCount: followerCount,
       memberCount: memberCount,
+      myJoinRequestStatus: myJoinRequestStatus,
     );
   }
 

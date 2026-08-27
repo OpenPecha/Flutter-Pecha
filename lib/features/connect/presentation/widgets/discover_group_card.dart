@@ -9,7 +9,9 @@ import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
+import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_join_request_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,21 +248,41 @@ class _JoinButton extends ConsumerWidget {
   final bool isDark;
   final GroupFollowKey followKey;
 
+  bool get _isPrivateCommunity => group.isPrivateCommunity;
+
+  bool get _isRequestPending =>
+      group.myJoinRequestStatus == GroupJoinRequestStatus.pending;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final followState = ref.watch(groupFollowProvider(followKey));
     final isLoading = followState is GroupFollowLoading;
+    final isPending = _isRequestPending;
+    final label =
+        isPending
+            ? context.l10n.group_request_sent
+            : _isPrivateCommunity
+            ? context.l10n.group_request
+            : context.l10n.join;
 
     return SizedBox(
       height: 32,
       child: TextButton(
         onPressed:
-            isLoading ? null : () => _onJoinPressed(context, ref, followKey),
+            isLoading || isPending
+                ? null
+                : () => _onPressed(context, ref, followKey),
         style: TextButton.styleFrom(
           backgroundColor:
-              isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+              isPending
+                  ? (isDark
+                      ? AppColors.surfaceVariantDark
+                      : AppColors.grey100)
+                  : (isDark ? AppColors.surfaceWhite : AppColors.textPrimary),
           foregroundColor:
-              isDark ? AppColors.textPrimary : AppColors.surfaceWhite,
+              isPending
+                  ? (isDark ? AppColors.surfaceWhite : AppColors.textPrimary)
+                  : (isDark ? AppColors.textPrimary : AppColors.surfaceWhite),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -279,7 +301,7 @@ class _JoinButton extends ConsumerWidget {
                   ),
                 )
                 : Text(
-                  context.l10n.join,
+                  label,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -289,7 +311,7 @@ class _JoinButton extends ConsumerWidget {
     );
   }
 
-  Future<void> _onJoinPressed(
+  Future<void> _onPressed(
     BuildContext context,
     WidgetRef ref,
     GroupFollowKey followKey,
@@ -297,6 +319,23 @@ class _JoinButton extends ConsumerWidget {
     final authState = ref.read(authProvider);
     if (authState.isGuest || !authState.isLoggedIn) {
       LoginDrawer.show(context, ref);
+      return;
+    }
+
+    if (_isPrivateCommunity) {
+      final sent = await GroupJoinRequestDrawer.show(context, group);
+      if (sent == true && context.mounted) {
+        if (ref.exists(discoverGroupsProvider)) {
+          await ref.read(discoverGroupsProvider.notifier).refresh();
+        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.group_join_request_sent_snackbar),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
       return;
     }
 

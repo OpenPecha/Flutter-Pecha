@@ -3334,6 +3334,84 @@ abstract class AppLocalizations {
   /// **'Invite'**
   String get group_invite;
 
+  /// No description provided for @group_request_to_join.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to join'**
+  String get group_request_to_join;
+
+  /// No description provided for @group_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get group_request;
+
+  /// No description provided for @group_request_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get group_request_sent;
+
+  /// No description provided for @group_join_request_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to join'**
+  String get group_join_request_title;
+
+  /// No description provided for @group_join_request_message_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Message (optional)'**
+  String get group_join_request_message_label;
+
+  /// No description provided for @group_join_request_message_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you practice, or who invited you?'**
+  String get group_join_request_message_hint;
+
+  /// No description provided for @group_join_request_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get group_join_request_send;
+
+  /// No description provided for @group_join_request_sent_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent — an admin will review it.'**
+  String get group_join_request_sent_snackbar;
+
+  /// No description provided for @group_join_request_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to send request. Please try again.'**
+  String get group_join_request_error;
+
+  /// No description provided for @group_members_only_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Members only'**
+  String get group_members_only_title;
+
+  /// No description provided for @group_members_only_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Join to see this group\'s chants, events and posts.'**
+  String get group_members_only_message;
+
+  /// No description provided for @group_join_request_waiting_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on an admin'**
+  String get group_join_request_waiting_title;
+
+  /// No description provided for @group_join_request_waiting_message.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll notify you as soon as your request is reviewed.'**
+  String get group_join_request_waiting_message;
+
   /// No description provided for @group_members_load_error.
   ///
   /// In en, this message translates to:

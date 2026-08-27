@@ -33,6 +33,7 @@ class GroupProfileNestedTabScrollView extends StatelessWidget {
       builder: (context) {
         return CustomScrollView(
           key: pageStorageKey != null ? PageStorageKey(pageStorageKey) : null,
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),

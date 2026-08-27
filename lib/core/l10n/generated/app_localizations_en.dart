@@ -1824,6 +1824,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_invite => 'Invite';
 
   @override
+  String get group_request_to_join => 'Request to join';
+
+  @override
+  String get group_request => 'Request';
+
+  @override
+  String get group_request_sent => 'Request sent';
+
+  @override
+  String get group_join_request_title => 'Request to join';
+
+  @override
+  String get group_join_request_message_label => 'Message (optional)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'How do you practice, or who invited you?';
+
+  @override
+  String get group_join_request_send => 'Send request';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'Request sent — an admin will review it.';
+
+  @override
+  String get group_join_request_error =>
+      'Unable to send request. Please try again.';
+
+  @override
+  String get group_members_only_title => 'Members only';
+
+  @override
+  String get group_members_only_message =>
+      'Join to see this group\'s chants, events and posts.';
+
+  @override
+  String get group_join_request_waiting_title => 'Waiting on an admin';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'We\'ll notify you as soon as your request is reviewed.';
+
+  @override
   String get group_members_load_error =>
       'Unable to load members. Please try again.';
 
