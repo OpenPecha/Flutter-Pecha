@@ -159,9 +159,30 @@ void main() {
       await notifier.loadInitial();
 
       final state = container.read(poemsViewerProvider(null));
-      expect(state.hasLoaded, isTrue);
+      expect(state.hasLoaded, isFalse);
       expect(state.poems, isEmpty);
       expect(state.error, 'offline');
+    });
+
+    test('allows retry after an initial load failure', () async {
+      final repo = FakePoemsRepository(
+        allPoems: List.generate(3, (i) => _poem('p$i')),
+      )..nextPageFailure = const NetworkFailure('offline');
+      final container = buildContainer(repo);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(poemsViewerProvider(null).notifier);
+      await notifier.loadInitial();
+
+      expect(container.read(poemsViewerProvider(null)).error, 'offline');
+      expect(container.read(poemsViewerProvider(null)).poems, isEmpty);
+
+      await notifier.loadInitial();
+
+      final state = container.read(poemsViewerProvider(null));
+      expect(state.hasLoaded, isTrue);
+      expect(state.error, isNull);
+      expect(state.poems.map((p) => p.id), ['p0', 'p1', 'p2']);
     });
   });
 
@@ -177,6 +198,34 @@ void main() {
       await notifier.loadInitial();
       expect(container.read(poemsViewerProvider(null)).poems.length, 20);
       expect(container.read(poemsViewerProvider(null)).hasMore, isTrue);
+
+      await notifier.loadMore();
+
+      final state = container.read(poemsViewerProvider(null));
+      expect(state.poems.length, 25);
+      expect(state.hasMore, isFalse);
+    });
+
+    test('keeps hasMore true after a pagination failure so scroll retry works',
+        () async {
+      final repo = FakePoemsRepository(
+        allPoems: List.generate(25, (i) => _poem('p$i')),
+      );
+      final container = buildContainer(repo);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(poemsViewerProvider(null).notifier);
+      await notifier.loadInitial();
+      expect(container.read(poemsViewerProvider(null)).hasMore, isTrue);
+      expect(container.read(poemsViewerProvider(null)).poems.length, 20);
+
+      repo.nextPageFailure = const NetworkFailure('offline');
+      await notifier.loadMore();
+
+      final failedState = container.read(poemsViewerProvider(null));
+      expect(failedState.hasMore, isTrue);
+      expect(failedState.poems.length, 20);
+      expect(failedState.isLoadingMore, isFalse);
 
       await notifier.loadMore();
 

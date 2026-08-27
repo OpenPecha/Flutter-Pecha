@@ -88,7 +88,6 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
       (failure) async {
         state = state.copyWith(
           isLoading: false,
-          hasLoaded: true,
           error: failure.message,
         );
       },
@@ -138,9 +137,9 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
 
     result.fold(
       (failure) {
-        // Keep existing poems visible; just stop the loading indicator so
-        // the reader can retry by scrolling again.
-        state = state.copyWith(isLoadingMore: false, hasMore: false);
+        // Keep existing poems visible; leave hasMore unchanged so the reader
+        // can retry by scrolling near the end again.
+        state = state.copyWith(isLoadingMore: false);
       },
       (page) {
         final existingIds = state.poems.map((p) => p.id).toSet();
