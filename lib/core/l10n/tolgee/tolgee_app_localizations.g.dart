@@ -3566,6 +3566,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_request => TolgeeBridge.get(
+    localeName,
+    'group_request',
+    () => _fallback.group_request,
+  );
+
+  @override
   String get group_request_sent => TolgeeBridge.get(
     localeName,
     'group_request_sent',

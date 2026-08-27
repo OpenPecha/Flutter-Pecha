@@ -868,6 +868,7 @@
   },
   "group_invite": "Invite",
   "group_request_to_join": "Request to join",
+  "group_request": "Request",
   "group_request_sent": "Request sent",
   "group_join_request_title": "Request to join",
   "group_join_request_message_label": "Message (optional)",

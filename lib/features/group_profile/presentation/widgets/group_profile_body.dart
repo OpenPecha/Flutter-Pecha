@@ -72,20 +72,16 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   bool _canAccessPrivateGroupContent(GroupProfile profile) {
     if (!profile.isPrivateCommunity) return true;
 
-    if (profile.myJoinRequestStatus == GroupJoinRequestStatus.approved) {
-      return true;
-    }
-
     final followKey = GroupFollowKey(
       groupId: profile.id,
       groupType: profile.groupType,
     );
     final followState = ref.watch(groupFollowProvider(followKey));
 
-    return switch (followState) {
-      GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
-      _ => false,
-    };
+    return isPrivateGroupMember(
+      followState: followState,
+      joinRequestStatus: profile.myJoinRequestStatus,
+    );
   }
 
   bool _isContentRestricted(GroupProfile profile) {
@@ -1676,9 +1672,10 @@ class _GroupFollowButton extends ConsumerWidget {
     };
     final isLoading = followState is GroupFollowLoading;
     final joinRequestStatus = profile.myJoinRequestStatus;
-    final hasAccess =
-        isFollowing ||
-        joinRequestStatus == GroupJoinRequestStatus.approved;
+    final hasAccess = isPrivateGroupMember(
+      followState: followState,
+      joinRequestStatus: joinRequestStatus,
+    );
 
     if (hasAccess) {
       return _buildJoinedActions(

@@ -1827,6 +1827,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_request_to_join => 'Request to join';
 
   @override
+  String get group_request => 'Request';
+
+  @override
   String get group_request_sent => 'Request sent';
 
   @override

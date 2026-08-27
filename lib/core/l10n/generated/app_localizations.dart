@@ -3340,6 +3340,12 @@ abstract class AppLocalizations {
   /// **'Request to join'**
   String get group_request_to_join;
 
+  /// No description provided for @group_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get group_request;
+
   /// No description provided for @group_request_sent.
   ///
   /// In en, this message translates to:

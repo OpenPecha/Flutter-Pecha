@@ -436,7 +436,9 @@ sealed class GroupFollowState {
 }
 
 class GroupFollowLoading extends GroupFollowState {
-  const GroupFollowLoading();
+  final bool isInitialCheck;
+
+  const GroupFollowLoading({this.isInitialCheck = false});
 }
 
 class GroupFollowSuccess extends GroupFollowState {
@@ -449,6 +451,23 @@ class GroupFollowSuccess extends GroupFollowState {
 class GroupFollowFailure extends GroupFollowState {
   final Failure failure;
   const GroupFollowFailure(this.failure);
+}
+
+/// Whether the current user is an active member of a private community group.
+///
+/// Join status from [followState] is the source of truth once resolved. While
+/// the follow check is still loading, a previously [GroupJoinRequestStatus.approved]
+/// request is treated as joined so the UI does not flash locked content.
+bool isPrivateGroupMember({
+  required GroupFollowState followState,
+  GroupJoinRequestStatus? joinRequestStatus,
+}) {
+  return switch (followState) {
+    GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
+    GroupFollowLoading(isInitialCheck: true) =>
+      joinRequestStatus == GroupJoinRequestStatus.approved,
+    _ => false,
+  };
 }
 
 class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
@@ -468,7 +487,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
        _isAuthenticated = isAuthenticated,
        super(
          key.loadInitialStatus
-             ? const GroupFollowLoading()
+             ? const GroupFollowLoading(isInitialCheck: true)
              : const GroupFollowSuccess(isFollowing: false),
        ) {
     if (key.loadInitialStatus) {

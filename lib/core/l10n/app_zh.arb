@@ -721,6 +721,7 @@
   },
   "group_invite": "邀請",
   "group_request_to_join": "申請加入",
+  "group_request": "申請",
   "group_request_sent": "申請已送出",
   "group_join_request_title": "申請加入",
   "group_join_request_message_label": "訊息（選填）",

@@ -1848,6 +1848,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_request_to_join => 'ཞུགས་པར་རེ་ཞུ།';
 
   @override
+  String get group_request => 'རེ་ཞུ།';
+
+  @override
   String get group_request_sent => 'རེ་ཞུ་བཏང་ཟིན།';
 
   @override

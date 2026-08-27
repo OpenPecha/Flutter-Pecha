@@ -1842,6 +1842,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_request_to_join => 'शामिल होने का अनुरोध';
 
   @override
+  String get group_request => 'अनुरोध';
+
+  @override
   String get group_request_sent => 'अनुरोध भेजा गया';
 
   @override

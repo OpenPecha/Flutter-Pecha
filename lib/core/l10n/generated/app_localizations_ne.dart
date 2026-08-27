@@ -1849,6 +1849,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_request_to_join => 'सामेल हुन अनुरोध';
 
   @override
+  String get group_request => 'अनुरोध';
+
+  @override
   String get group_request_sent => 'अनुरोध पठाइयो';
 
   @override

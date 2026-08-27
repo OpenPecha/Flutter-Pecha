@@ -1740,6 +1740,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_request_to_join => '申請加入';
 
   @override
+  String get group_request => '申請';
+
+  @override
   String get group_request_sent => '申請已送出';
 
   @override

@@ -721,6 +721,7 @@
   },
   "group_invite": "གདན་ཞུ་བྱེད།",
   "group_request_to_join": "ཞུགས་པར་རེ་ཞུ།",
+  "group_request": "རེ་ཞུ།",
   "group_request_sent": "རེ་ཞུ་བཏང་ཟིན།",
   "group_join_request_title": "ཞུགས་པར་རེ་ཞུ།",
   "group_join_request_message_label": "འཕྲིན་ཡིག (འདེམས་རུང་།)",

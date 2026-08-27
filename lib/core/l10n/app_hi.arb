@@ -787,6 +787,7 @@
   },
   "group_invite": "आमंत्रित करें",
   "group_request_to_join": "शामिल होने का अनुरोध",
+  "group_request": "अनुरोध",
   "group_request_sent": "अनुरोध भेजा गया",
   "group_join_request_title": "शामिल होने का अनुरोध",
   "group_join_request_message_label": "संदेश (वैकल्पिक)",

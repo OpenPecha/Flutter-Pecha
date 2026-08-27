@@ -787,6 +787,7 @@
   },
   "group_invite": "निमन्त्रणा",
   "group_request_to_join": "सामेल हुन अनुरोध",
+  "group_request": "अनुरोध",
   "group_request_sent": "अनुरोध पठाइयो",
   "group_join_request_title": "सामेल हुन अनुरोध",
   "group_join_request_message_label": "सन्देश (वैकल्पिक)",

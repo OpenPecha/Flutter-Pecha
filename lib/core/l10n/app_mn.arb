@@ -787,6 +787,7 @@
   },
   "group_invite": "Урих",
   "group_request_to_join": "Нэгдэх хүсэлт илгээх",
+  "group_request": "Хүсэлт",
   "group_request_sent": "Хүсэлт илгээгдсэн",
   "group_join_request_title": "Нэгдэх хүсэлт",
   "group_join_request_message_label": "Зурвас (заавал биш)",

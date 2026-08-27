@@ -1844,6 +1844,9 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_request_to_join => 'Нэгдэх хүсэлт илгээх';
 
   @override
+  String get group_request => 'Хүсэлт';
+
+  @override
   String get group_request_sent => 'Хүсэлт илгээгдсэн';
 
   @override
