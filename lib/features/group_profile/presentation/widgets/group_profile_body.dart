@@ -1807,8 +1807,6 @@ class _GroupFollowButton extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          _buildMessageButton(context, isDark, buttonHeight),
-          const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
               onPressed:
@@ -1872,32 +1870,6 @@ class _GroupFollowButton extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMessageButton(
-    BuildContext context,
-    bool isDark,
-    double buttonHeight,
-  ) {
-    return SizedBox(
-      width: buttonHeight,
-      height: buttonHeight,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          side: BorderSide(
-            color: isDark ? AppColors.grey800 : AppColors.grey300,
-          ),
-          shape: const CircleBorder(),
-        ),
-        child: Icon(
-          AppAssets.chatCircle,
-          size: 22,
-          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-        ),
       ),
     );
   }
