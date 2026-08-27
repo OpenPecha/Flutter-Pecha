@@ -129,9 +129,9 @@ class _MantraSwitcherState extends State<MantraSwitcher> {
 }
 
 /// One carousel page: Tibetan script (when present) above the transliteration,
-/// both centered within the page. Long content scrolls vertically with a
-/// visible scrollbar when it overflows.
-class _MantraPage extends StatefulWidget {
+/// both centered within the page. Long content stays vertically scrollable
+/// without a visible scrollbar so it does not clash with the chevrons.
+class _MantraPage extends StatelessWidget {
   const _MantraPage({
     required this.tibetan,
     required this.tibetanFontFamily,
@@ -145,27 +145,12 @@ class _MantraPage extends StatefulWidget {
   final ThemeData theme;
 
   @override
-  State<_MantraPage> createState() => _MantraPageState();
-}
-
-class _MantraPageState extends State<_MantraPage> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Scrollbar(
-          controller: _scrollController,
-          thumbVisibility: true,
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
-            controller: _scrollController,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
@@ -178,25 +163,24 @@ class _MantraPageState extends State<_MantraPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (widget.tibetan != null) ...[
+                      if (tibetan != null) ...[
                         Semantics(
                           label: context.l10n.mala_mantra_label,
                           child: Text(
-                            widget.tibetan!,
+                            tibetan!,
                             textAlign: TextAlign.center,
-                            style: widget.theme.textTheme.headlineMedium
-                                ?.copyWith(
-                                  fontFamily: widget.tibetanFontFamily,
-                                  height: 1.4,
-                                ),
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontFamily: tibetanFontFamily,
+                              height: 1.4,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
                       Text(
-                        widget.transliteration,
+                        transliteration,
                         textAlign: TextAlign.center,
-                        style: widget.theme.textTheme.titleMedium?.copyWith(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.3,
                         ),
