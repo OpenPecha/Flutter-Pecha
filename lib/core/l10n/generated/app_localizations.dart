@@ -3370,6 +3370,12 @@ abstract class AppLocalizations {
   /// **'Send request'**
   String get group_join_request_send;
 
+  /// No description provided for @group_join_request_sent_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent — an admin will review it.'**
+  String get group_join_request_sent_snackbar;
+
   /// No description provided for @group_join_request_success_title.
   ///
   /// In en, this message translates to:

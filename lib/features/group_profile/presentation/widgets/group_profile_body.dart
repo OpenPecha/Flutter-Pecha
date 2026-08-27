@@ -1646,9 +1646,11 @@ class _GroupFollowButton extends ConsumerWidget {
 
     final sent = await GroupJoinRequestDrawer.show(context, profile);
     if (sent == true && context.mounted) {
-      await GroupJoinRequestSuccessSheet.show(
-        context,
-        groupName: profile.title,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.group_join_request_sent_snackbar),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }

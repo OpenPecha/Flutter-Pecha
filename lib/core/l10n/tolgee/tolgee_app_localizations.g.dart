@@ -3601,6 +3601,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_join_request_sent_snackbar => TolgeeBridge.get(
+    localeName,
+    'group_join_request_sent_snackbar',
+    () => _fallback.group_join_request_sent_snackbar,
+  );
+
+  @override
   String get group_join_request_success_title => TolgeeBridge.get(
     localeName,
     'group_join_request_success_title',

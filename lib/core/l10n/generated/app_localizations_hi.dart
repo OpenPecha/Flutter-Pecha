@@ -1858,6 +1858,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_join_request_send => 'अनुरोध भेजें';
 
   @override
+  String get group_join_request_sent_snackbar =>
+      'अनुरोध भेजा गया — एक व्यवस्थापक इसकी समीक्षा करेगा।';
+
+  @override
   String get group_join_request_success_title => 'अनुरोध भेजा गया';
 
   @override

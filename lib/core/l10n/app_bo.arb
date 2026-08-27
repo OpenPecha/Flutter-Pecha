@@ -726,6 +726,7 @@
   "group_join_request_message_label": "འཕྲིན་ཡིག (འདེམས་རུང་།)",
   "group_join_request_message_hint": "ཁྱེད་ཀྱིས་ཇི་ལྟར་ཉམས་ལེན་བྱེད་དམ། སུ་ཞིག་གིས་ཁྱེད་རང་གདན་འདྲེན་བྱས་སམ།",
   "group_join_request_send": "རེ་ཞུ་བཏང་།",
+  "group_join_request_sent_snackbar": "རེ་ཞུ་བཏང་ཟིན། — དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན།",
   "group_join_request_success_title": "རེ་ཞུ་བཏང་ཟིན།",
   "group_join_request_success_message": "{groupName} ཀྱི་དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན། ང་ཚོས་མྱུར་དུ་ཁྱེད་ལ་གསལ་བརྡ་གནང་རྒྱུ་ཡིན།",
   "@group_join_request_success_message": {

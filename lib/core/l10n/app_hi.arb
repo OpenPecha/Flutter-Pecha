@@ -792,6 +792,7 @@
   "group_join_request_message_label": "संदेश (वैकल्पिक)",
   "group_join_request_message_hint": "आप कैसे अभ्यास करते हैं, या आपको किसने आमंत्रित किया?",
   "group_join_request_send": "अनुरोध भेजें",
+  "group_join_request_sent_snackbar": "अनुरोध भेजा गया — एक व्यवस्थापक इसकी समीक्षा करेगा।",
   "group_join_request_success_title": "अनुरोध भेजा गया",
   "group_join_request_success_message": "{groupName} के व्यवस्थापक इसकी समीक्षा करेंगे। हम जल्द ही आपको सूचित करेंगे।",
   "@group_join_request_success_message": {

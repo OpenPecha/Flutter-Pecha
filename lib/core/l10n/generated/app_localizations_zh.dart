@@ -1755,6 +1755,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_join_request_send => '送出申請';
 
   @override
+  String get group_join_request_sent_snackbar => '申請已送出 — 管理員將會審核。';
+
+  @override
   String get group_join_request_success_title => '申請已送出';
 
   @override

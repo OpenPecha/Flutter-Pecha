@@ -792,6 +792,7 @@
   "group_join_request_message_label": "Зурвас (заавал биш)",
   "group_join_request_message_hint": "Та хэрхэн дадлага хийдэг вэ, эсвэл хэн урисан бэ?",
   "group_join_request_send": "Хүсэлт илгээх",
+  "group_join_request_sent_snackbar": "Хүсэлт илгээгдсэн — админ үүнийг шалгана.",
   "group_join_request_success_title": "Хүсэлт илгээгдсэн",
   "group_join_request_success_message": "{groupName}-ийн админ үүнийг шалгана. Бид тун удахгүй мэдэгдэх болно.",
   "@group_join_request_success_message": {

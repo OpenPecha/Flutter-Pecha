@@ -1843,6 +1843,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_join_request_send => 'Send request';
 
   @override
+  String get group_join_request_sent_snackbar =>
+      'Request sent — an admin will review it.';
+
+  @override
   String get group_join_request_success_title => 'Request sent';
 
   @override

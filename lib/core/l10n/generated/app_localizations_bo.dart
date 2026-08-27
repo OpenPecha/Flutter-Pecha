@@ -1864,6 +1864,10 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_join_request_send => 'རེ་ཞུ་བཏང་།';
 
   @override
+  String get group_join_request_sent_snackbar =>
+      'རེ་ཞུ་བཏང་ཟིན། — དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན།';
+
+  @override
   String get group_join_request_success_title => 'རེ་ཞུ་བཏང་ཟིན།';
 
   @override

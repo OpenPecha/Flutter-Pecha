@@ -873,6 +873,7 @@
   "group_join_request_message_label": "Message (optional)",
   "group_join_request_message_hint": "How do you practice, or who invited you?",
   "group_join_request_send": "Send request",
+  "group_join_request_sent_snackbar": "Request sent — an admin will review it.",
   "group_join_request_success_title": "Request sent",
   "group_join_request_success_message": "An admin at {groupName} will review it. We'll notify you soon.",
   "@group_join_request_success_message": {

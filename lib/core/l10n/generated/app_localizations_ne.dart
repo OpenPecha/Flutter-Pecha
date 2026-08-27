@@ -1865,6 +1865,10 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_join_request_send => 'अनुरोध पठाउनुहोस्';
 
   @override
+  String get group_join_request_sent_snackbar =>
+      'अनुरोध पठाइयो — प्रशासकले यसको समीक्षा गर्नेछ।';
+
+  @override
   String get group_join_request_success_title => 'अनुरोध पठाइयो';
 
   @override

@@ -1860,6 +1860,10 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_join_request_send => 'Хүсэлт илгээх';
 
   @override
+  String get group_join_request_sent_snackbar =>
+      'Хүсэлт илгээгдсэн — админ үүнийг шалгана.';
+
+  @override
   String get group_join_request_success_title => 'Хүсэлт илгээгдсэн';
 
   @override
