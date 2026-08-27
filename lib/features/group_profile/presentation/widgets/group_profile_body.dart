@@ -245,12 +245,18 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
   @override
   void deactivate() {
-    ref
-        .read(
-          groupProfileAppBarTitleVisibleProvider(widget.profile.id).notifier,
-        )
-        .state = false;
     super.deactivate();
+    // Popping this route deactivates the widget during the Navigator rebuild.
+    // Riverpod forbids provider writes in that window, so reset the collapsed
+    // title after the current frame. Capture the container because `ref` is
+    // invalid once dispose() runs at the end of the same frame.
+    final String groupId = widget.profile.id;
+    final ProviderContainer container = ProviderScope.containerOf(context);
+    Future<void>(() {
+      final provider = groupProfileAppBarTitleVisibleProvider(groupId);
+      if (!container.exists(provider)) return;
+      container.read(provider.notifier).state = false;
+    });
   }
 
   @override
