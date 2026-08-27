@@ -934,6 +934,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "ད་དུང་ཞུགས་མཁན་མེད།",
   "timer_notification_in_progress": "སྒོམ་སྒྲུབ་བྱེད་བཞིན་པ།",
   "timer_notification_paused": "བཀག་སོང་། {time} ལྷག་འདུག",
   "@timer_notification_paused": {

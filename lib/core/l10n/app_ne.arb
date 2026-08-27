@@ -1000,6 +1000,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "अहिलेसम्म कुनै सहभागी छैन",
   "timer_notification_in_progress": "ध्यान जारी छ",
   "timer_notification_paused": "रोकिएको · {time} बाँकी",
   "@timer_notification_paused": {

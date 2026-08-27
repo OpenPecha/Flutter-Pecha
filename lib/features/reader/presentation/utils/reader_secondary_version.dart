@@ -20,7 +20,7 @@ bool isReaderTranslateAvailable({
     return false;
   }
   if (readerLanguagesMatch(settingsLanguage, sourceLanguage)) return false;
-  if (languages == null) return true;
+  if (languages == null || languages.isEmpty) return false;
   for (final language in languages) {
     if (readerLanguagesMatch(language.code, settingsLanguage)) return true;
   }

@@ -9,6 +9,15 @@ bool isGroupEventOnline(GroupEvent event) {
 
 bool isGroupEventInPerson(GroupEvent event) => !isGroupEventOnline(event);
 
+String groupEventLocationLabel(GroupEvent event, String onlineLabel) {
+  final locationId = event.locationId?.trim();
+  if (locationId != null && locationId.isNotEmpty) {
+    final name = event.location?.name.trim();
+    if (name != null && name.isNotEmpty) return name;
+  }
+  return onlineLabel;
+}
+
 List<GroupEvent> filterGroupEventsByLocation(
   List<GroupEvent> events,
   ConnectEventLocationFilter filter,

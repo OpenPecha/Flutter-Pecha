@@ -1715,6 +1715,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_event_participants_empty => TolgeeBridge.get(
+    localeName,
+    'connect_event_participants_empty',
+    () => _fallback.connect_event_participants_empty,
+  );
+
+  @override
   String get search_groups => TolgeeBridge.get(
     localeName,
     'search_groups',

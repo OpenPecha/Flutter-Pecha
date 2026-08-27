@@ -30,6 +30,7 @@ class FollowedGroupsRow extends StatelessWidget {
 
   static const double _avatarSize = 48;
   static const double _titleFontSize = 11;
+  static const double _labelHeight = 14;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +82,8 @@ class _FollowedGroupTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final subtitleColor =
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
-    final hasTibetanTitle = _containsTibetan(group.title);
+    final hasTibetanTitle =
+        context.isTibetanLocale || _containsTibetan(group.title);
     final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
       fontSize: FollowedGroupsRow._titleFontSize,
       color: subtitleColor,
@@ -105,26 +107,29 @@ class _FollowedGroupTile extends StatelessWidget {
               hasHighlight: hasHighlight,
             ),
             const SizedBox(height: 4),
-            Text(
-              group.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style:
-                  hasTibetanTitle
-                      ? getContentTextStyle(
-                        AppConfig.tibetanLanguageCode,
-                        titleStyle,
-                      )
-                      : titleStyle,
-              strutStyle:
-                  hasTibetanTitle
-                      ? AppFontConfig.tibetanStrutStyle(
-                        AppConfig.tibetanLanguageCode,
-                        FollowedGroupsRow._titleFontSize,
-                        compact: true,
-                      )
-                      : null,
+            SizedBox(
+              height: FollowedGroupsRow._labelHeight,
+              child: Text(
+                group.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style:
+                    hasTibetanTitle
+                        ? getContentTextStyle(
+                          AppConfig.tibetanLanguageCode,
+                          titleStyle,
+                        )
+                        : titleStyle,
+                strutStyle:
+                    hasTibetanTitle
+                        ? AppFontConfig.tibetanStrutStyle(
+                          AppConfig.tibetanLanguageCode,
+                          FollowedGroupsRow._titleFontSize,
+                          compact: true,
+                        )
+                        : null,
+              ),
             ),
           ],
         ),
@@ -228,26 +233,29 @@ class _AllGroupsTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style:
-                  hasTibetanLabel
-                      ? getContentTextStyle(
-                        AppConfig.tibetanLanguageCode,
-                        titleStyle,
-                      )
-                      : titleStyle,
-              strutStyle:
-                  hasTibetanLabel
-                      ? AppFontConfig.tibetanStrutStyle(
-                        AppConfig.tibetanLanguageCode,
-                        FollowedGroupsRow._titleFontSize,
-                        compact: true,
-                      )
-                      : null,
+            SizedBox(
+              height: FollowedGroupsRow._labelHeight,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style:
+                    hasTibetanLabel
+                        ? getContentTextStyle(
+                          AppConfig.tibetanLanguageCode,
+                          titleStyle,
+                        )
+                        : titleStyle,
+                strutStyle:
+                    hasTibetanLabel
+                        ? AppFontConfig.tibetanStrutStyle(
+                          AppConfig.tibetanLanguageCode,
+                          FollowedGroupsRow._titleFontSize,
+                          compact: true,
+                        )
+                        : null,
+              ),
             ),
           ],
         ),

@@ -60,10 +60,8 @@ class ReaderAppBarOverlay extends ConsumerWidget {
           toolbarHeight: ReaderConstants.appBarToolbarHeight,
           actions: [
             ReaderSearchButton(onPressed: onSearchPressed),
-            if (_showTranslateToggle(params)) ...[
-              const SizedBox(width: 4),
+            if (_showTranslateToggle(params))
               ReaderTranslateButton(params: params),
-            ],
             const SizedBox(width: 4),
             IconButton(
               icon: const Icon(Icons.more_vert),
@@ -128,10 +126,8 @@ class ReaderAppBar extends ConsumerWidget {
         ReaderSearchButton(
           onPressed: onSearchPressed ?? () => _handleSearch(context, ref),
         ),
-        if (_showTranslateToggle(params)) ...[
-          const SizedBox(width: 4),
+        if (_showTranslateToggle(params))
           ReaderTranslateButton(params: params),
-        ],
         const SizedBox(width: 4),
         IconButton(
           icon: const Icon(Icons.more_vert),
