@@ -3376,18 +3376,6 @@ abstract class AppLocalizations {
   /// **'Request sent — an admin will review it.'**
   String get group_join_request_sent_snackbar;
 
-  /// No description provided for @group_join_request_success_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Request sent'**
-  String get group_join_request_success_title;
-
-  /// No description provided for @group_join_request_success_message.
-  ///
-  /// In en, this message translates to:
-  /// **'An admin at {groupName} will review it. We\'ll notify you soon.'**
-  String group_join_request_success_message(String groupName);
-
   /// No description provided for @group_join_request_error.
   ///
   /// In en, this message translates to:

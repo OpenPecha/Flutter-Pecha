@@ -3608,22 +3608,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get group_join_request_success_title => TolgeeBridge.get(
-    localeName,
-    'group_join_request_success_title',
-    () => _fallback.group_join_request_success_title,
-  );
-
-  @override
-  String group_join_request_success_message(String groupName) =>
-      TolgeeBridge.format(
-        localeName,
-        'group_join_request_success_message',
-        <String, Object>{'groupName': groupName},
-        () => _fallback.group_join_request_success_message(groupName),
-      );
-
-  @override
   String get group_join_request_error => TolgeeBridge.get(
     localeName,
     'group_join_request_error',

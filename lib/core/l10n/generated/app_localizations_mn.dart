@@ -1864,14 +1864,6 @@ class AppLocalizationsMn extends AppLocalizations {
       'Хүсэлт илгээгдсэн — админ үүнийг шалгана.';
 
   @override
-  String get group_join_request_success_title => 'Хүсэлт илгээгдсэн';
-
-  @override
-  String group_join_request_success_message(String groupName) {
-    return '$groupName-ийн админ үүнийг шалгана. Бид тун удахгүй мэдэгдэх болно.';
-  }
-
-  @override
   String get group_join_request_error =>
       'Хүсэлт илгээж чадсангүй. Дахин оролдоно уу.';
 

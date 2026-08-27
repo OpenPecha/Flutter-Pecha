@@ -1869,14 +1869,6 @@ class AppLocalizationsNe extends AppLocalizations {
       'अनुरोध पठाइयो — प्रशासकले यसको समीक्षा गर्नेछ।';
 
   @override
-  String get group_join_request_success_title => 'अनुरोध पठाइयो';
-
-  @override
-  String group_join_request_success_message(String groupName) {
-    return '$groupName का प्रशासकले यसको समीक्षा गर्नेछन्। हामी चाँडै तपाईंलाई सूचित गर्नेछौं।';
-  }
-
-  @override
   String get group_join_request_error =>
       'अनुरोध पठाउन सकिएन। कृपया पुनः प्रयास गर्नुहोस्।';
 

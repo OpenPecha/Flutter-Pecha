@@ -1847,14 +1847,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Request sent — an admin will review it.';
 
   @override
-  String get group_join_request_success_title => 'Request sent';
-
-  @override
-  String group_join_request_success_message(String groupName) {
-    return 'An admin at $groupName will review it. We\'ll notify you soon.';
-  }
-
-  @override
   String get group_join_request_error =>
       'Unable to send request. Please try again.';
 

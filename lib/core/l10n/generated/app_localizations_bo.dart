@@ -1868,14 +1868,6 @@ class AppLocalizationsBo extends AppLocalizations {
       'རེ་ཞུ་བཏང་ཟིན། — དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན།';
 
   @override
-  String get group_join_request_success_title => 'རེ་ཞུ་བཏང་ཟིན།';
-
-  @override
-  String group_join_request_success_message(String groupName) {
-    return '$groupName ཀྱི་དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན། ང་ཚོས་མྱུར་དུ་ཁྱེད་ལ་གསལ་བརྡ་གནང་རྒྱུ་ཡིན།';
-  }
-
-  @override
   String get group_join_request_error =>
       'རེ་ཞུ་བཏང་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
 

@@ -727,15 +727,6 @@
   "group_join_request_message_hint": "您如何修行，或是誰邀請您？",
   "group_join_request_send": "送出申請",
   "group_join_request_sent_snackbar": "申請已送出 — 管理員將會審核。",
-  "group_join_request_success_title": "申請已送出",
-  "group_join_request_success_message": "{groupName} 的管理員將會審核。我們會盡快通知您。",
-  "@group_join_request_success_message": {
-    "placeholders": {
-      "groupName": {
-        "type": "String"
-      }
-    }
-  },
   "group_join_request_error": "無法送出申請，請再試一次。",
   "group_members_only_title": "僅限成員",
   "group_members_only_message": "加入後即可查看此群組的誦經、活動和貼文。",

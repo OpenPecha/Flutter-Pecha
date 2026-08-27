@@ -1758,14 +1758,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_join_request_sent_snackbar => '申請已送出 — 管理員將會審核。';
 
   @override
-  String get group_join_request_success_title => '申請已送出';
-
-  @override
-  String group_join_request_success_message(String groupName) {
-    return '$groupName 的管理員將會審核。我們會盡快通知您。';
-  }
-
-  @override
   String get group_join_request_error => '無法送出申請，請再試一次。';
 
   @override
