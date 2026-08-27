@@ -1165,5 +1165,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "group_chat_title": "Chat",
+  "group_chat_coming_soon": "Group chat is coming soon.",
+  "group_chat_inappropriate": "This message couldn't be sent because it contains language that isn't allowed.",
+  "group_chat_not_a_member": "Only members can open this chat.",
+  "group_chat_open": "Chat",
+  "group_chat_message_hint": "Message"
 }

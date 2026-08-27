@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
@@ -1491,12 +1492,38 @@ class _GroupFollowButton extends ConsumerWidget {
       elevation: 0,
     );
 
+    final authState = ref.watch(authProvider);
+    final showChat = isFollowing && authState.isLoggedIn && !authState.isGuest;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child:
           isFollowing
               ? Row(
                 children: [
+                  if (showChat) ...[
+                    IconButton(
+                      onPressed:
+                          () =>
+                              context.push(AppRoutes.groupChatPath(profile.id)),
+                      tooltip: context.l10n.group_chat_open,
+                      icon: const Icon(AppAssets.chatCircleDots),
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            isDark
+                                ? AppColors.surfaceVariantDark
+                                : AppColors.grey100,
+                        foregroundColor:
+                            isDark
+                                ? AppColors.surfaceWhite
+                                : AppColors.textPrimary,
+                        shape: const CircleBorder(),
+                        fixedSize: Size.square(buttonHeight),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Expanded(
                     child: ElevatedButton(
                       onPressed:

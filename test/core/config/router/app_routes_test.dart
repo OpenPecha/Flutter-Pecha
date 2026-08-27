@@ -15,5 +15,13 @@ void main() {
       expect(AppRoutes.isGuestAccessible(AppRoutes.profile), isFalse);
       expect(AppRoutes.isGuestAccessible(AppRoutes.deleteAccount), isFalse);
     });
+
+    test('group chat is not guest-accessible', () {
+      expect(AppRoutes.isGuestAccessible('/groups/abc/chat'), isFalse);
+      expect(
+        AppRoutes.isGuestAccessible(AppRoutes.groupChatPath('abc')),
+        isFalse,
+      );
+    });
   });
 }

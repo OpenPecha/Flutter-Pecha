@@ -11,5 +11,10 @@ void main() {
     test('users/me/language is protected via /users/me/ prefix', () {
       expect(ProtectedRoutes.isProtected('/users/me/language'), isTrue);
     });
+
+    test('community chat REST is protected via /chat/ prefix', () {
+      expect(ProtectedRoutes.isProtected('/chat/rooms'), isTrue);
+      expect(ProtectedRoutes.isProtected('/chat/groups/g1/messages'), isTrue);
+    });
   });
 }

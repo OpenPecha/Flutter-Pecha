@@ -2280,4 +2280,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'I am taking part in the group accumulation \"$accumulation\" on WeBuddhist. Come join me!';
   }
+
+  @override
+  String get group_chat_title => 'Chat';
+
+  @override
+  String get group_chat_coming_soon => 'Group chat is coming soon.';
+
+  @override
+  String get group_chat_inappropriate =>
+      'This message couldn\'t be sent because it contains language that isn\'t allowed.';
+
+  @override
+  String get group_chat_not_a_member => 'Only members can open this chat.';
+
+  @override
+  String get group_chat_open => 'Chat';
+
+  @override
+  String get group_chat_message_hint => 'Message';
 }

@@ -22,7 +22,12 @@ class CacheFailure extends Failure {
 }
 
 class ValidationFailure extends Failure {
-  const ValidationFailure(super.message);
+  final String? code;
+
+  const ValidationFailure(super.message, {this.code});
+
+  @override
+  List<Object> get props => [message, code ?? ''];
 }
 
 class AuthenticationFailure extends Failure {
