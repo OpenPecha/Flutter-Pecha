@@ -69,12 +69,19 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
 
-  bool _isGroupMember(GroupProfile profile) {
+  bool _canAccessPrivateGroupContent(GroupProfile profile) {
+    if (!profile.isPrivateCommunity) return true;
+
+    if (profile.myJoinRequestStatus == GroupJoinRequestStatus.approved) {
+      return true;
+    }
+
     final followKey = GroupFollowKey(
       groupId: profile.id,
       groupType: profile.groupType,
     );
-    final followState = ref.read(groupFollowProvider(followKey));
+    final followState = ref.watch(groupFollowProvider(followKey));
+
     return switch (followState) {
       GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
       _ => false,
@@ -82,7 +89,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   bool _isContentRestricted(GroupProfile profile) {
-    return profile.isPrivateCommunity && !_isGroupMember(profile);
+    return profile.isPrivateCommunity && !_canAccessPrivateGroupContent(profile);
+  }
+
+  Future<void> _onRefresh(GroupProfile profile) {
+    return refreshGroupProfilePage(
+      ref: ref,
+      groupId: profile.id,
+      groupType: profile.groupType,
+    );
   }
 
   /// Posts have no data source yet, so the tab never has content to show.
@@ -317,20 +332,38 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_hasBanner(profile)) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildProfileBanner(profile, isDark),
-          ),
-          const SizedBox(height: 14),
-        ],
-        _buildProfileHeader(profile, isDark, lineHeight, orderedLinks),
-        const SizedBox(height: 20),
-        Expanded(child: _buildDescriptionLongContent(profile)),
-      ],
+    return RefreshIndicator(
+      onRefresh: () => _onRefresh(profile),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_hasBanner(profile)) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildProfileBanner(profile, isDark),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  _buildProfileHeader(
+                    profile,
+                    isDark,
+                    lineHeight,
+                    orderedLinks,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildDescriptionLongContent(profile),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -382,16 +415,19 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     if (!isTabDataLoading) _syncTabController(tabs);
     final controller = _tabController;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollUpdateNotification ||
-            notification is ScrollEndNotification) {
-          _syncAppBarTitleVisibility();
-        }
-        return false;
-      },
-      child: NestedScrollView(
-        headerSliverBuilder: (context, _) {
+    return RefreshIndicator(
+      onRefresh: () => _onRefresh(profile),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollUpdateNotification ||
+              notification is ScrollEndNotification) {
+            _syncAppBarTitleVisibility();
+          }
+          return false;
+        },
+        child: NestedScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          headerSliverBuilder: (context, _) {
           final slivers = <Widget>[
             SliverToBoxAdapter(
               child: _buildCommunityHeaderSection(
@@ -432,6 +468,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                       _buildTabContent(tab, profile, isDark, lineHeight),
                   ],
                 ),
+        ),
       ),
     );
   }
@@ -442,16 +479,19 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     double? lineHeight,
     List<GroupProfileSocialLink> orderedLinks,
   ) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollUpdateNotification ||
-            notification is ScrollEndNotification) {
-          _syncAppBarTitleVisibility();
-        }
-        return false;
-      },
-      child: CustomScrollView(
-        slivers: [
+    return RefreshIndicator(
+      onRefresh: () => _onRefresh(profile),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollUpdateNotification ||
+              notification is ScrollEndNotification) {
+            _syncAppBarTitleVisibility();
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
           SliverToBoxAdapter(
             child: _buildCommunityHeaderSection(
               profile,
@@ -473,6 +513,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -1310,7 +1351,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
     final bodyFontSize = getLocalizedFontSize(AppTextSize.body);
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       child: PlanInlineMarkdownView(content: content, fontSize: bodyFontSize),
     );
@@ -1633,8 +1674,11 @@ class _GroupFollowButton extends ConsumerWidget {
     };
     final isLoading = followState is GroupFollowLoading;
     final joinRequestStatus = profile.myJoinRequestStatus;
+    final hasAccess =
+        isFollowing ||
+        joinRequestStatus == GroupJoinRequestStatus.approved;
 
-    if (isFollowing) {
+    if (hasAccess) {
       return _buildJoinedActions(
         context,
         ref,

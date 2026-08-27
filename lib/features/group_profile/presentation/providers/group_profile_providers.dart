@@ -1130,3 +1130,30 @@ Future<bool> submitGroupJoinRequest({
     },
   );
 }
+
+Future<void> refreshGroupProfilePage({
+  required WidgetRef ref,
+  required String groupId,
+  required GroupType groupType,
+}) async {
+  final followKey = GroupFollowKey(groupId: groupId, groupType: groupType);
+  ref.invalidate(groupFollowProvider(followKey));
+
+  final refreshTasks = <Future<void>>[
+    ref.refresh(groupProfileProvider(groupId).future).then((_) {}),
+  ];
+
+  if (ref.exists(groupPracticesProvider(groupId))) {
+    refreshGroupPractices(ref, groupId);
+  }
+  if (ref.exists(groupEventsProvider(groupId))) {
+    refreshTasks.add(
+      ref.refresh(groupEventsProvider(groupId).future).then((_) {}),
+    );
+  }
+  if (ref.exists(groupMembersProvider(groupId))) {
+    ref.read(groupMembersProvider(groupId).notifier).loadInitial();
+  }
+
+  await Future.wait(refreshTasks);
+}
