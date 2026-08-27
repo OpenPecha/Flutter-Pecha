@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -286,10 +284,18 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         refreshGroupPractices(ref, widget.profile.id);
       }
     });
-    ref.listen(groupPracticesProvider(widget.profile.id), (previous, next) {
-      if (next.isLoading && next.practices.isEmpty) return;
-      _syncPracticeEnrollmentFromList(next.practices);
-    });
+
+    final locale = Localizations.localeOf(context);
+    final lineHeight = getLineHeight(locale.languageCode);
+    final profile = _resolveProfile();
+    final isDark = widget.isDark;
+
+    if (_isCommunityGroup(profile) && !_isContentRestricted(profile)) {
+      ref.listen(groupPracticesProvider(widget.profile.id), (previous, next) {
+        if (next.isLoading && next.practices.isEmpty) return;
+        _syncPracticeEnrollmentFromList(next.practices);
+      });
+    }
 
     final enrollingId = _enrollingSeriesId;
     if (enrollingId != null) {
@@ -297,11 +303,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
       // in flight — otherwise it can be disposed before the API returns.
       ref.watch(seriesEnrollmentProvider(enrollingId));
     }
-
-    final locale = Localizations.localeOf(context);
-    final lineHeight = getLineHeight(locale.languageCode);
-    final profile = _resolveProfile();
-    final isDark = widget.isDark;
 
     final orderedLinks = GroupProfileLinkUtils.orderedLinks(
       profile.socialLinks,
@@ -339,6 +340,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     double? lineHeight,
     List<GroupProfileSocialLink> orderedLinks,
   ) {
+    if (_isContentRestricted(profile)) {
+      return _buildRestrictedCommunityProfile(
+        profile,
+        isDark,
+        lineHeight,
+        orderedLinks,
+      );
+    }
+
     final (hasPractices, isPracticesLoading) = ref.watch(
       groupPracticesProvider(profile.id).select(
         (state) => (
@@ -363,16 +373,14 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     // Wait for both sections before laying out the tabs, otherwise tabs would
     // pop in and out as each request settles.
     final isTabDataLoading = isPracticesLoading || isEventsLoading;
-    final isContentRestricted = _isContentRestricted(profile);
     final tabs = <_GroupProfileTab>[
-      if (_hasPosts || isContentRestricted) _GroupProfileTab.posts,
-      if (hasEvents || isContentRestricted) _GroupProfileTab.events,
-      if (hasPractices || isContentRestricted) _GroupProfileTab.practices,
+      if (_hasPosts) _GroupProfileTab.posts,
+      if (hasEvents) _GroupProfileTab.events,
+      if (hasPractices) _GroupProfileTab.practices,
       _GroupProfileTab.members,
     ];
-    if (!isTabDataLoading || isContentRestricted) _syncTabController(tabs);
+    if (!isTabDataLoading) _syncTabController(tabs);
     final controller = _tabController;
-    final joinRequestStatus = profile.myJoinRequestStatus;
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -386,26 +394,11 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         headerSliverBuilder: (context, _) {
           final slivers = <Widget>[
             SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_hasBanner(profile)) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _buildProfileBanner(profile, isDark),
-                    ),
-                    const SizedBox(height: 14),
-                  ],
-                  _buildProfileHeader(
-                    profile,
-                    isDark,
-                    lineHeight,
-                    orderedLinks,
-                  ),
-                  const SizedBox(height: 20),
-                  _GroupFollowButton(profile: profile, isDark: isDark),
-                  const SizedBox(height: 24),
-                ],
+              child: _buildCommunityHeaderSection(
+                profile,
+                isDark,
+                lineHeight,
+                orderedLinks,
               ),
             ),
           ];
@@ -419,11 +412,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
                 sliver: SliverPersistentHeader(
                   pinned: true,
                   delegate: _GroupProfileTabBarDelegate(
-                    tabBar: _buildTabBar(
-                      isDark,
-                      profile,
-                      showLockIcons: isContentRestricted,
-                    ),
+                    tabBar: _buildTabBar(isDark, profile),
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   ),
                 ),
@@ -436,13 +425,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         body:
             controller == null
                 ? const Center(child: CircularProgressIndicator())
-                : isContentRestricted
-                ? _buildRestrictedTabBody(
-                  profile,
-                  isDark,
-                  lineHeight,
-                  joinRequestStatus,
-                )
                 : TabBarView(
                   controller: controller,
                   children: [
@@ -454,33 +436,73 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
-  Widget _buildRestrictedTabBody(
+  Widget _buildRestrictedCommunityProfile(
     GroupProfile profile,
     bool isDark,
     double? lineHeight,
-    GroupJoinRequestStatus? joinRequestStatus,
+    List<GroupProfileSocialLink> orderedLinks,
   ) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: IgnorePointer(
-            child: TabBarView(
-              controller: _tabController!,
-              children: [
-                for (final tab in _visibleTabs)
-                  _buildTabContent(tab, profile, isDark, lineHeight),
-              ],
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification ||
+            notification is ScrollEndNotification) {
+          _syncAppBarTitleVisibility();
+        }
+        return false;
+      },
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: _buildCommunityHeaderSection(
+              profile,
+              isDark,
+              lineHeight,
+              orderedLinks,
+              bottomSpacing: 0,
             ),
           ),
-        ),
-        _buildRestrictedOverlay(isDark, lineHeight, joinRequestStatus),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: _buildRestrictedMessage(
+                isDark,
+                lineHeight,
+                profile.myJoinRequestStatus,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommunityHeaderSection(
+    GroupProfile profile,
+    bool isDark,
+    double? lineHeight,
+    List<GroupProfileSocialLink> orderedLinks, {
+    double bottomSpacing = 24,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_hasBanner(profile)) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildProfileBanner(profile, isDark),
+          ),
+          const SizedBox(height: 14),
+        ],
+        _buildProfileHeader(profile, isDark, lineHeight, orderedLinks),
+        const SizedBox(height: 20),
+        _GroupFollowButton(profile: profile, isDark: isDark),
+        SizedBox(height: bottomSpacing),
       ],
     );
   }
 
-  Widget _buildRestrictedOverlay(
+  Widget _buildRestrictedMessage(
     bool isDark,
     double? lineHeight,
     GroupJoinRequestStatus? joinRequestStatus,
@@ -491,10 +513,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
 
-    return Container(
-      color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.55),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -863,11 +882,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
-  Widget _buildTabBar(
-    bool isDark,
-    GroupProfile profile, {
-    required bool showLockIcons,
-  }) {
+  Widget _buildTabBar(bool isDark, GroupProfile profile) {
     final labelColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
@@ -890,34 +905,10 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             fontWeight: FontWeight.w500,
           ),
           tabs: [
-            for (final tab in _visibleTabs)
-              Tab(
-                child: _buildTabLabel(
-                  tab,
-                  profile,
-                  showLockIcon: showLockIcons,
-                ),
-              ),
+            for (final tab in _visibleTabs) Tab(text: _tabLabel(tab, profile)),
           ],
         ),
         Divider(height: 1, thickness: 1, color: dividerColor),
-      ],
-    );
-  }
-
-  Widget _buildTabLabel(
-    _GroupProfileTab tab,
-    GroupProfile profile, {
-    required bool showLockIcon,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(_tabLabel(tab, profile)),
-        if (showLockIcon) ...[
-          const SizedBox(width: 4),
-          Icon(AppAssets.lock, size: 14),
-        ],
       ],
     );
   }
