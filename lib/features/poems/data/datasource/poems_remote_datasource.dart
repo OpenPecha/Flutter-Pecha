@@ -44,7 +44,7 @@ class PoemsRemoteDatasource {
       );
 
       if (response.statusCode == 200) {
-        return _parsePage(response.data, limit: limit);
+        return _parsePage(response.data, skip: skip, limit: limit);
       }
       _logger.error('Failed to load poems: ${response.statusCode}');
       throw _statusToException(response.statusCode, 'Failed to load poems');
@@ -74,7 +74,11 @@ class PoemsRemoteDatasource {
   /// Tolerates a bare array (`[...]`) or a wrapped envelope
   /// (`{ "poems"|"items"|"results"|"data": [...], "total"?: n }`) since the
   /// exact list envelope isn't guaranteed by the contract.
-  PoemsPageResult _parsePage(Object? data, {required int limit}) {
+  PoemsPageResult _parsePage(
+    Object? data, {
+    required int skip,
+    required int limit,
+  }) {
     List<dynamic> list;
     int? total;
 
@@ -100,7 +104,9 @@ class PoemsRemoteDatasource {
             .map(PoemModel.fromJson)
             .toList();
 
-    final hasMore = total != null ? poems.length < total : poems.length >= limit;
+    final loadedThrough = skip + poems.length;
+    final hasMore =
+        total != null ? loadedThrough < total : poems.length >= limit;
 
     return PoemsPageResult(poems: poems, hasMore: hasMore);
   }
