@@ -160,20 +160,36 @@ class _ConnectMainTabBar extends StatelessWidget {
         indicatorWeight: 2,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
         labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
         ),
         tabs: [
-          Tab(text: context.l10n.connect_tab_feed),
-          Tab(text: context.l10n.connect_tab_events),
-          Tab(text: context.l10n.connect_tab_posts),
-          Tab(text: context.l10n.connect_tab_practices),
-          Tab(text: context.l10n.connect_tab_groups),
+          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_feed)),
+          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_events)),
+          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_posts)),
+          Tab(
+            child: _ConnectTabLabel(text: context.l10n.connect_tab_practices),
+          ),
+          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_groups)),
         ],
       ),
+    );
+  }
+}
+
+class _ConnectTabLabel extends StatelessWidget {
+  const _ConnectTabLabel({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(text, maxLines: 1, textAlign: TextAlign.center),
     );
   }
 }
