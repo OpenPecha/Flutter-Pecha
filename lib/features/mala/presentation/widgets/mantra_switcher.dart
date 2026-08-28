@@ -109,6 +109,7 @@ class _MantraSwitcherState extends State<MantraSwitcher> {
             itemBuilder: (context, page) {
               final mantra = widget.mantras[_logical(page)];
               return _MantraPage(
+                key: ValueKey<int>(page),
                 tibetan: mantra.tibetan,
                 tibetanFontFamily: widget.tibetanFontFamily,
                 transliteration:
@@ -131,8 +132,14 @@ class _MantraSwitcherState extends State<MantraSwitcher> {
 /// One carousel page: Tibetan script (when present) above the transliteration,
 /// both centered within the page. Long content stays vertically scrollable
 /// without a visible scrollbar so it does not clash with the chevrons.
-class _MantraPage extends StatelessWidget {
+///
+/// Each page owns a [ScrollController] and sets `primary: false`. A
+/// controller-less vertical [SingleChildScrollView] would otherwise inherit
+/// the Scaffold's [PrimaryScrollController] on mobile, so scrolling one
+/// mantra would move the next page after a horizontal swipe.
+class _MantraPage extends StatefulWidget {
   const _MantraPage({
+    super.key,
     required this.tibetan,
     required this.tibetanFontFamily,
     required this.transliteration,
@@ -145,12 +152,27 @@ class _MantraPage extends StatelessWidget {
   final ThemeData theme;
 
   @override
+  State<_MantraPage> createState() => _MantraPageState();
+}
+
+class _MantraPageState extends State<_MantraPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
+            controller: _scrollController,
+            primary: false,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
@@ -163,24 +185,25 @@ class _MantraPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (tibetan != null) ...[
+                      if (widget.tibetan != null) ...[
                         Semantics(
                           label: context.l10n.mala_mantra_label,
                           child: Text(
-                            tibetan!,
+                            widget.tibetan!,
                             textAlign: TextAlign.center,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontFamily: tibetanFontFamily,
-                              height: 1.4,
-                            ),
+                            style: widget.theme.textTheme.headlineMedium
+                                ?.copyWith(
+                                  fontFamily: widget.tibetanFontFamily,
+                                  height: 1.4,
+                                ),
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
                       Text(
-                        transliteration,
+                        widget.transliteration,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        style: widget.theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.3,
                         ),
