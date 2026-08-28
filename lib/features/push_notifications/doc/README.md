@@ -58,7 +58,9 @@ push_notifications/
 | PLAN | My Practices + pending nav seed |
 | SERIES | Series detail by `source_id` |
 | TIMER | Timers screen |
-| RECITATION / COLLECTION / ACCUMULATION | respective flows |
+| RECITATION / COLLECTION / ACCUMULATION | Practice tab |
+| VERSE_OF_DAY (and aliases) | Home tab (verse card) |
+| Empty / unknown | Home tab |
 
 Post-frame scheduling (`_schedule`) — defer navigation until tree ready.
 

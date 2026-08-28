@@ -41,9 +41,8 @@ class NotificationService {
 
   /// Delegate for push (FCM) payloads. Foreground push notifications are shown
   /// through this same shared plugin, so their taps land in [_onNotificationTapped].
-  /// When the tapped payload is push-shaped (carries `session_type`), it is
-  /// forwarded here instead of the routine deep-link logic, keeping push and
-  /// local-notification taps routed by their own owners.
+  /// Push-shaped payloads (and any non-routine payload, including verse of the
+  /// day) are forwarded here instead of the routine deep-link logic.
   static void Function(Map<String, dynamic> data)? _pushTapHandler;
 
   // Method to set the router reference
@@ -380,8 +379,6 @@ class NotificationService {
       return;
     }
 
-    // Parse payload and store as pending navigation — RoutineFilledState will
-    // consume it once it renders and plan data is available.
     final payload = response.payload;
     if (payload != null && payload.isNotEmpty) {
       try {
@@ -396,47 +393,64 @@ class NotificationService {
           return;
         }
 
-        // Foreground push (FCM) notifications are shown through this shared
-        // plugin. Forward push-shaped payloads to the push navigator so they
-        // route the same way as background/terminated taps.
-        if (data.containsKey('session_type')) {
-          _logger.info('Forwarding push payload to push tap handler');
-          _pushTapHandler?.call(data);
+        final itemId = data['itemId'] as String?;
+        final itemTypeStr = data['itemType'] as String?;
+        final isLocalRoutine =
+            itemId != null &&
+            itemTypeStr != null &&
+            !data.containsKey('session_type');
+
+        if (!isLocalRoutine) {
+          // Foreground FCM (verse of the day, plan, series, unknown). Route
+          // through the push navigator so it matches background/terminated taps.
+          _logger.info('Forwarding non-routine payload to push tap handler');
+          if (_pushTapHandler != null) {
+            _pushTapHandler!(data);
+          } else {
+            _openHomeTab();
+          }
           return;
         }
 
-        final itemId = data['itemId'] as String?;
-        final itemTypeStr = data['itemType'] as String?;
-        if (itemId != null && itemTypeStr != null) {
-          final planId = data['planId'] as String?;
-          final durationMs = (data['durationMs'] as num?)?.toInt();
-          _logger.info(
-            'Storing pending notification nav: $itemTypeStr $itemId '
-            'planId=$planId durationMs=$durationMs',
-          );
-          _container!.read(pendingNotificationNavProvider.notifier).state =
-              NotificationNav(
-                itemId: itemId,
-                itemType: itemTypeStr,
-                planId: planId,
-                durationMs: durationMs,
-              );
-        }
+        final planId = data['planId'] as String?;
+        final durationMs = (data['durationMs'] as num?)?.toInt();
+        _logger.info(
+          'Storing pending notification nav: $itemTypeStr $itemId '
+          'planId=$planId durationMs=$durationMs',
+        );
+        _container!.read(pendingNotificationNavProvider.notifier).state =
+            NotificationNav(
+              itemId: itemId,
+              itemType: itemTypeStr,
+              planId: planId,
+              durationMs: durationMs,
+            );
+        _openMyPractices();
+        return;
       } catch (e) {
         _logger.warning('Failed to parse notification payload: $e');
       }
     }
 
-    // Navigate to the practice tab, then push the My Practices screen.
-    // Since the main-navigation refactor, RoutineFilledState — which consumes
-    // the pending nav and pushes the chant (reader) / mala / plan detail —
-    // only mounts on /practice/my-practices; the Practice tab itself shows the
-    // explore screen and consumes nothing. Without this push the tap lands on
-    // /home and the detail never opens. Mirrors PushMessageNavigator's plan path.
+    // Empty / unparseable payload (typical of verse-of-day notification-only
+    // FCM). Land on Home rather than My Practices.
+    _openHomeTab();
+  }
+
+  void _openMyPractices() {
+    // RoutineFilledState — which consumes the pending nav and pushes the
+    // chant / mala / plan detail — only mounts on /practice/my-practices; the
+    // Practice tab itself shows the explore screen and consumes nothing.
     _container!.read(mainNavigationIndexProvider.notifier).state =
         MainTab.practice.index;
     _router!.go('/home');
     _router!.push('/practice/my-practices');
+  }
+
+  void _openHomeTab() {
+    _container!.read(mainNavigationIndexProvider.notifier).state =
+        MainTab.home.index;
+    _router!.go('/home');
   }
 }
 

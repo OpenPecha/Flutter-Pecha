@@ -19,6 +19,66 @@ class PushSessionType {
   static const String recitationCollection = 'RECITATION_COLLECTION';
   static const String accumulation = 'ACCUMULATION';
   static const String timer = 'TIMER';
+  static const String verseOfDay = 'VERSE_OF_DAY';
+  static const String verse = 'VERSE';
+  static const String quote = 'QUOTE';
+  static const String dailyVerse = 'DAILY_VERSE';
+  static const String verseOfTheDay = 'VERSE_OF_THE_DAY';
+
+  static bool isVerseOfDay(String sessionType) =>
+      sessionType == verseOfDay ||
+      sessionType == verse ||
+      sessionType == quote ||
+      sessionType == dailyVerse ||
+      sessionType == verseOfTheDay;
+}
+
+/// Where a push-notification tap should land.
+enum PushTapTarget { home, practice, practiceMyPractices, seriesDetail, timers }
+
+/// Result of mapping an FCM data payload to a navigation target.
+class PushTapResolution {
+  const PushTapResolution(this.target, {this.sourceId});
+
+  final PushTapTarget target;
+  final String? sourceId;
+}
+
+/// Maps an FCM data map to a [PushTapResolution] without touching the router.
+///
+/// Isolated so routing can be unit-tested. Verse-of-day and unknown/empty
+/// payloads land on Home (the verse card lives there). Practice is reserved
+/// for recitation / accumulation until those have dedicated screens.
+PushTapResolution resolvePushTap(Map<String, dynamic> data) {
+  final sessionType = _sessionTypeOf(data);
+  final sourceId = (data['source_id'] as String?)?.trim() ?? '';
+
+  switch (sessionType) {
+    case PushSessionType.plan when sourceId.isNotEmpty:
+      return PushTapResolution(
+        PushTapTarget.practiceMyPractices,
+        sourceId: sourceId,
+      );
+    case PushSessionType.series when sourceId.isNotEmpty:
+      return PushTapResolution(PushTapTarget.seriesDetail, sourceId: sourceId);
+    case PushSessionType.timer:
+      return const PushTapResolution(PushTapTarget.timers);
+    case PushSessionType.recitation:
+    case PushSessionType.recitationCollection:
+    case PushSessionType.accumulation:
+      return const PushTapResolution(PushTapTarget.practice);
+    default:
+      return const PushTapResolution(PushTapTarget.home);
+  }
+}
+
+String _sessionTypeOf(Map<String, dynamic> data) {
+  final fromSession = (data['session_type'] as String?)?.trim();
+  if (fromSession != null && fromSession.isNotEmpty) {
+    return fromSession.toUpperCase();
+  }
+  final fromType = (data['type'] as String?)?.trim();
+  return fromType?.toUpperCase() ?? '';
 }
 
 /// Single entry point for navigating after a push notification is opened.
@@ -49,16 +109,12 @@ class PushMessageNavigator {
   }
 
   void _route(Map<String, dynamic> data) {
-    // Normalise: FCM values are strings, but stay defensive about case/space.
-    final sessionType =
-        (data['session_type'] as String?)?.trim().toUpperCase() ?? '';
-    final sourceId = (data['source_id'] as String?)?.trim() ?? '';
-
+    final resolution = resolvePushTap(data);
     final router = _ref.read(appRouterProvider);
+    final sourceId = resolution.sourceId ?? '';
 
-    switch (sessionType) {
-      case PushSessionType.plan when sourceId.isNotEmpty:
-        // For PLAN pushes the backend sends `source_id` = the enrolled plan id,
+    switch (resolution.target) {
+      case PushTapTarget.practiceMyPractices:
         // For PLAN pushes the backend sends `source_id` = the enrolled plan id,
         // so it maps straight onto NotificationNav.planId (same field local
         // routine notifications use). RoutineFilledState then resolves the plan
@@ -77,34 +133,30 @@ class PushMessageNavigator {
         router.go(AppRoutes.home);
         router.push(AppRoutes.practiceMyPractices);
 
-      case PushSessionType.series when sourceId.isNotEmpty:
-        // Series detail accepts a null series object and fetches by id.
+      case PushTapTarget.seriesDetail:
         router.go(AppRoutes.home);
         router.push('/home/series/$sourceId');
 
-      case PushSessionType.timer:
-        // Timer sessions carry no source_id — open the timers screen.
+      case PushTapTarget.timers:
         router.go(AppRoutes.home);
         router.push('/home/timers');
 
-      // No dedicated detail screens exist for these yet, so fall back to the
-      // Practice tab. When the screens land, deep-link here instead:
-      //   RECITATION            -> router.push('/reader/$sourceId')
-      //   RECITATION_COLLECTION -> recitation collection screen for $sourceId
-      //   ACCUMULATION          -> accumulation screen for $sourceId
-      case PushSessionType.recitation:
-      case PushSessionType.recitationCollection:
-      case PushSessionType.accumulation:
-      default:
-        // Also covers empty/unknown session types and PLAN/SERIES with a
-        // missing source_id.
+      case PushTapTarget.practice:
         _openPracticeTab(router);
+
+      case PushTapTarget.home:
+        _openHomeTab(router);
     }
   }
 
   void _openPracticeTab(GoRouter router) {
     _ref.read(mainNavigationIndexProvider.notifier).state =
         MainTab.practice.index;
+    router.go(AppRoutes.home);
+  }
+
+  void _openHomeTab(GoRouter router) {
+    _ref.read(mainNavigationIndexProvider.notifier).state = MainTab.home.index;
     router.go(AppRoutes.home);
   }
 }
