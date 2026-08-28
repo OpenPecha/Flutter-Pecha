@@ -24,6 +24,16 @@ GoRouter _buildTestRouter() {
               'accumulator:${state.pathParameters['accumulatorId']}',
             ),
           ),
+          GoRoute(
+            path: 'poems',
+            builder: (_, state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final poemId =
+                  extra?['initialPoemId'] as String? ??
+                  state.uri.queryParameters['poemId'];
+              return Text('poems:${poemId ?? ''}');
+            },
+          ),
         ],
       ),
     ],
@@ -105,6 +115,28 @@ void main() {
 
       expect(routed, isTrue);
       expect(find.text('group:grp-9'), findsOneWidget);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('home'), findsOneWidget);
+    });
+
+    testWidgets('poem link opens poems viewer on the shared poem', (
+      tester,
+    ) async {
+      final router = _buildTestRouter();
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+      final routed = DeepLinkRouter.route(
+        Uri.parse('https://webuddhist.com/open/poem/poem-7'),
+        router,
+        source: 'test',
+        baseLocation: '/home',
+      );
+      await tester.pumpAndSettle();
+
+      expect(routed, isTrue);
+      expect(find.text('poems:poem-7'), findsOneWidget);
 
       router.pop();
       await tester.pumpAndSettle();

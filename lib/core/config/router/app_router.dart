@@ -142,6 +142,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/home/series/$seriesId';
         },
       ),
+      GoRoute(
+        path: '/open/poem/:poemId',
+        name: 'open-poem',
+        redirect: (_, state) {
+          final poemId = state.pathParameters['poemId'] ?? '';
+          return Uri(
+            path: '/home/poems',
+            queryParameters: {'poemId': poemId},
+          ).toString();
+        },
+      ),
       // Compatibility fallback in case a platform sends the first-party app
       // link directly to go_router instead of through AppLinksDeepLinkService.
       GoRoute(
@@ -326,7 +337,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 parentNavigatorKey: rootNavigatorKey,
                 builder: (context, state) {
                   final extra = state.extra as Map<String, dynamic>?;
-                  final initialPoemId = extra?['initialPoemId'] as String?;
+                  final initialPoemId =
+                      extra?['initialPoemId'] as String? ??
+                      state.uri.queryParameters['poemId'];
                   return PoemsViewerScreen(initialPoemId: initialPoemId);
                 },
               ),

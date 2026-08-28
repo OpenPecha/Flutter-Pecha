@@ -25,4 +25,18 @@ void main() {
       expect(DeepLinkRouter.isFirstPartyAppLink(uri), isTrue);
     });
   });
+
+  group('DeepLinkUrlBuilder.poemLink', () {
+    test('builds poem link with poem id', () {
+      final uri = DeepLinkUrlBuilder.poemLink(poemId: 'poem-42');
+
+      expect(uri.toString(), 'https://webuddhist.com/open/poem/poem-42');
+    });
+
+    test('is recognized as a first-party app link', () {
+      final uri = DeepLinkUrlBuilder.poemLink(poemId: 'poem-42');
+
+      expect(DeepLinkRouter.isFirstPartyAppLink(uri), isTrue);
+    });
+  });
 }
