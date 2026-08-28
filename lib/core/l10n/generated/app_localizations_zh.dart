@@ -790,6 +790,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_group_events => '社群活動';
 
   @override
+  String get home_poems => '詩歌';
+
+  @override
+  String get poems_load_error => '無法載入詩歌。\n請檢查您的連線並再試一次';
+
+  @override
+  String get poems_empty => '尚無詩歌，請稍後再來。';
+
+  @override
   String get connect_events_filter_all => '全部';
 
   @override
@@ -1903,6 +1912,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get share_quote_message =>
       '我喜欢WeBuddhist上的这段引语，想和你分享。在WeBuddhist应用上阅读更多深刻的引语。';
+
+  @override
+  String get share_poem_message => '我喜欢WeBuddhist上的这首诗，想和你分享。';
 
   @override
   String get share_mala_message =>

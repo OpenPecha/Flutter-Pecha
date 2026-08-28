@@ -840,6 +840,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get home_group_events => 'समूह कार्यक्रम';
 
   @override
+  String get home_poems => 'कविताएँ';
+
+  @override
+  String get poems_load_error =>
+      'कविताएँ लोड नहीं हो सकीं।\nअपना कनेक्शन जाँचें और फिर से प्रयास करें';
+
+  @override
+  String get poems_empty => 'अभी कोई कविता नहीं है। जल्द वापस देखें।';
+
+  @override
   String get connect_events_filter_all => 'सभी';
 
   @override
@@ -2014,6 +2024,10 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get share_quote_message =>
       'मुझे WeBuddhist का यह उद्धरण पसंद आया और मैं इसे आपके साथ साझा करना चाहता था। WeBuddhist ऐप पर और अधिक ऐसे ज्ञानवर्धक उद्धरण पढ़ें।';
+
+  @override
+  String get share_poem_message =>
+      'मुझे WeBuddhist की यह कविता पसंद आई और मैं इसे आपके साथ साझा करना चाहता था।';
 
   @override
   String get share_mala_message =>

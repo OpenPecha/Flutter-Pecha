@@ -1644,6 +1644,21 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get home_poems =>
+      TolgeeBridge.get(localeName, 'home_poems', () => _fallback.home_poems);
+
+  @override
+  String get poems_load_error => TolgeeBridge.get(
+    localeName,
+    'poems_load_error',
+    () => _fallback.poems_load_error,
+  );
+
+  @override
+  String get poems_empty =>
+      TolgeeBridge.get(localeName, 'poems_empty', () => _fallback.poems_empty);
+
+  @override
   String get connect_events_filter_all => TolgeeBridge.get(
     localeName,
     'connect_events_filter_all',
@@ -3905,6 +3920,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'share_quote_message',
     () => _fallback.share_quote_message,
+  );
+
+  @override
+  String get share_poem_message => TolgeeBridge.get(
+    localeName,
+    'share_poem_message',
+    () => _fallback.share_poem_message,
   );
 
   @override
