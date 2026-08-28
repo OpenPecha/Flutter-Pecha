@@ -137,6 +137,10 @@ class _ConnectMainTabBar extends StatelessWidget {
   final TabController controller;
   final bool isDark;
 
+  static const _tabCount = 5;
+  static const _labelStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.w700);
+  static const _labelPadding = EdgeInsets.symmetric(horizontal: 4);
+
   @override
   Widget build(BuildContext context) {
     final labelColor =
@@ -144,52 +148,68 @@ class _ConnectMainTabBar extends StatelessWidget {
     final unselectedColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
     final dividerColor = isDark ? AppColors.grey800 : AppColors.grey300;
+    final labels = [
+      context.l10n.connect_tab_feed,
+      context.l10n.connect_tab_events,
+      context.l10n.connect_tab_posts,
+      context.l10n.connect_tab_practices,
+      context.l10n.connect_tab_groups,
+    ];
 
     return Container(
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: dividerColor)),
       ),
-      child: TabBar(
-        controller: controller,
-        tabAlignment: TabAlignment.fill,
-        labelColor: labelColor,
-        unselectedLabelColor: unselectedColor,
-        indicatorColor: labelColor,
-        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        splashFactory: NoSplash.splashFactory,
-        indicatorWeight: 2,
-        indicatorSize: TabBarIndicatorSize.label,
-        dividerColor: Colors.transparent,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-        labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: [
-          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_feed)),
-          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_events)),
-          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_posts)),
-          Tab(
-            child: _ConnectTabLabel(text: context.l10n.connect_tab_practices),
-          ),
-          Tab(child: _ConnectTabLabel(text: context.l10n.connect_tab_groups)),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final textScaler = MediaQuery.textScalerOf(context);
+          final textDirection = Directionality.of(context);
+          final slotWidth = constraints.maxWidth / _tabCount;
+          final horizontalPadding = _labelPadding.horizontal;
+          final needsScroll = labels.any(
+            (label) =>
+                _measureLabelWidth(label, textScaler, textDirection) +
+                    horizontalPadding >
+                slotWidth,
+          );
+
+          return TabBar(
+            controller: controller,
+            isScrollable: needsScroll,
+            tabAlignment:
+                needsScroll ? TabAlignment.start : TabAlignment.fill,
+            labelColor: labelColor,
+            unselectedLabelColor: unselectedColor,
+            indicatorColor: labelColor,
+            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+            splashFactory: NoSplash.splashFactory,
+            indicatorWeight: 2,
+            indicatorSize: TabBarIndicatorSize.label,
+            dividerColor: Colors.transparent,
+            labelPadding: _labelPadding,
+            labelStyle: _labelStyle,
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+            tabs: [for (final label in labels) Tab(text: label)],
+          );
+        },
       ),
     );
   }
-}
 
-class _ConnectTabLabel extends StatelessWidget {
-  const _ConnectTabLabel({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Text(text, maxLines: 1, textAlign: TextAlign.center),
-    );
+  static double _measureLabelWidth(
+    String text,
+    TextScaler textScaler,
+    TextDirection textDirection,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: _labelStyle),
+      textDirection: textDirection,
+      textScaler: textScaler,
+      maxLines: 1,
+    )..layout();
+    return painter.width;
   }
 }
