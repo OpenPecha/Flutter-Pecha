@@ -169,10 +169,24 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     );
   }
 
+  /// Connects the socket. Never throws: every caller — the send flow, the
+  /// lifecycle observer and the reconnect timer itself — invokes this without
+  /// an error handler, so a failure here must degrade to a retry rather than
+  /// escape as an unhandled async error.
   Future<void> _ensureLiveConnected() async {
     if (_live != null || _joinState != _JoinState.joined) return;
-    final token = await ref.read(authServiceProvider).getValidAccessToken();
+
+    final String? token;
+    try {
+      token = await ref.read(authServiceProvider).getValidAccessToken();
+    } catch (_) {
+      // A renewal can fail transiently; back off and try the whole thing again
+      // instead of leaving live updates silently disconnected.
+      _scheduleReconnect();
+      return;
+    }
     if (!mounted || token == null) return;
+
     final uri = ChatLiveClient.liveUri(
       restBaseUrl: ref.read(apiConfigProvider).baseUrl,
       token: token,
@@ -184,14 +198,22 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     final reconnected = _hadLiveSession;
     _hadLiveSession = true;
 
-    _liveSub = client
-        .connect(uri)
-        .listen(
-          _onLiveEvent,
-          onError: (_) => _scheduleReconnect(),
-          onDone: _scheduleReconnect,
-          cancelOnError: true,
-        );
+    try {
+      _liveSub = client
+          .connect(uri)
+          .listen(
+            _onLiveEvent,
+            onError: (_) => _scheduleReconnect(),
+            onDone: _scheduleReconnect,
+            cancelOnError: true,
+          );
+    } catch (_) {
+      // Clear the client first: the guard above treats a non-null _live as
+      // "already connected" and would wedge live updates for good.
+      _live = null;
+      _scheduleReconnect();
+      return;
+    }
 
     // Anything missed while the socket was down is merged in by id.
     if (reconnected) await _refreshThread();
