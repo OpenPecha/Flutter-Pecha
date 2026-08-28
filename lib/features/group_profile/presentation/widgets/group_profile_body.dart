@@ -1810,10 +1810,31 @@ class _GroupFollowButton extends ConsumerWidget {
       elevation: 0,
     );
 
+    final authState = ref.watch(authProvider);
+    final showChat = isFollowing && authState.isLoggedIn && !authState.isGuest;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
+          if (showChat) ...[
+            IconButton(
+              onPressed:
+                  () => context.push(AppRoutes.groupChatPath(profile.id)),
+              tooltip: context.l10n.group_chat_open,
+              icon: const Icon(AppAssets.chatCircleDots),
+              style: IconButton.styleFrom(
+                backgroundColor:
+                    isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+                foregroundColor:
+                    isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
+                shape: const CircleBorder(),
+                fixedSize: Size.square(buttonHeight),
+                padding: EdgeInsets.zero,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: ElevatedButton(
               onPressed:

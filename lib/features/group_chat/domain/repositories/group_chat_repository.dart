@@ -23,4 +23,18 @@ abstract class GroupChatRepository {
     required String body,
     String? parentMessageId,
   });
+
+  Future<Either<Failure, ChatRoomMembersPage>> listRoomMembers(
+    String roomId, {
+    int skip = 0,
+    int limit = 100,
+  });
+
+  Future<Either<Failure, ChatPeoplePage>> listGroupPeople(
+    String groupId, {
+    int skip = 0,
+    int limit = 100,
+  });
+
+  Future<Either<Failure, Unit>> markRoomRead(String roomId);
 }

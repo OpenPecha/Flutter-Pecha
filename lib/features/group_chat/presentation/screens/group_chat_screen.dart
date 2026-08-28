@@ -9,11 +9,16 @@ import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_live_client.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/chat_send_error.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_thread_providers.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_header.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_join_banner.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_thread.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,24 +36,54 @@ class GroupChatScreen extends ConsumerStatefulWidget {
   ConsumerState<GroupChatScreen> createState() => _GroupChatScreenState();
 }
 
-class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
+class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
+    with WidgetsBindingObserver {
   final _bodyController = TextEditingController();
   final _bodyFocusNode = FocusNode();
   ChatLiveClient? _live;
   StreamSubscription<ChatLiveEvent>? _liveSub;
+  Timer? _reconnectTimer;
+  int _reconnectAttempt = 0;
+  bool _hadLiveSession = false;
   bool _redirecting = false;
   bool _sending = false;
   bool _bootstrapped = false;
   bool _composerUnlocked = false;
   _JoinState _joinState = _JoinState.checking;
   String? _roomId;
+  String _currentUserId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _reconnectTimer?.cancel();
     unawaited(_tearDownLive());
     _bodyController.dispose();
     _bodyFocusNode.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_joinState != _JoinState.joined) return;
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        _reconnectTimer?.cancel();
+        unawaited(_tearDownLive());
+      case AppLifecycleState.resumed:
+        unawaited(_ensureLiveConnected());
+        unawaited(_markRoomRead());
+      case AppLifecycleState.inactive:
+        break;
+    }
   }
 
   Future<void> _tearDownLive() async {
@@ -89,10 +124,14 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
   }
 
   Future<String> _userId() async {
-    return await ref
+    if (_currentUserId.isNotEmpty) return _currentUserId;
+    final userId =
+        await ref
             .read(storageServiceProvider)
             .get<String>(StorageKeys.currentUserId) ??
         '';
+    _currentUserId = userId;
+    return userId;
   }
 
   Future<void> _bootstrapJoinState() async {
@@ -125,6 +164,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
           _composerUnlocked = true;
         });
         await _ensureLiveConnected();
+        await _markRoomRead();
       },
     );
   }
@@ -141,12 +181,97 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     );
     final client = ChatLiveClient();
     _live = client;
-    _liveSub = client.connect(uri).listen((event) {
-      if (!mounted) return;
-      if (event is ChatLiveError) {
+    final reconnected = _hadLiveSession;
+    _hadLiveSession = true;
+
+    _liveSub = client
+        .connect(uri)
+        .listen(
+          _onLiveEvent,
+          onError: (_) => _scheduleReconnect(),
+          onDone: _scheduleReconnect,
+          cancelOnError: true,
+        );
+
+    // Anything missed while the socket was down is merged in by id.
+    if (reconnected) await _refreshThread();
+  }
+
+  void _onLiveEvent(ChatLiveEvent event) {
+    if (!mounted) return;
+    // A frame on a fresh socket means the connection is healthy again.
+    _reconnectAttempt = 0;
+
+    switch (event) {
+      case ChatLiveRoomInfo(roomId: final roomId):
+        _adoptRoomId(roomId);
+      case ChatLiveMessageCreated(message: final json):
+        _onMessageCreated(json);
+      case ChatLiveError():
         presentChatSendError(context, event);
-      }
+      case ChatLiveReactionsUpdated():
+      case ChatLiveTyping():
+      case ChatLivePresence():
+      case ChatLiveUnknown():
+        break;
+    }
+  }
+
+  /// Adopts a room the server reports over the socket — covers a room someone
+  /// else created while this screen was open.
+  void _adoptRoomId(String roomId) {
+    if (roomId.isEmpty || _roomId == roomId) return;
+    setState(() {
+      _roomId = roomId;
+      _joinState = _JoinState.joined;
+      _composerUnlocked = true;
     });
+    unawaited(_persistRoomId(roomId));
+    unawaited(_markRoomRead());
+  }
+
+  void _onMessageCreated(Map<String, dynamic> json) {
+    final roomId = _roomId;
+    if (roomId == null || json.isEmpty) return;
+    final message = ChatMessageDTO.fromJson(json);
+    if (message.id.isEmpty) return;
+    ref.read(groupChatThreadProvider(roomId).notifier).appendLive(message);
+    unawaited(_markRoomRead());
+  }
+
+  Future<void> _refreshThread() async {
+    final roomId = _roomId;
+    if (roomId == null) return;
+    await ref.read(groupChatThreadProvider(roomId).notifier).refreshLatest();
+  }
+
+  void _scheduleReconnect() {
+    if (!mounted || _joinState != _JoinState.joined) return;
+    _reconnectTimer?.cancel();
+    _reconnectAttempt++;
+    _reconnectTimer = Timer(chatReconnectDelay(_reconnectAttempt), () async {
+      if (!mounted) return;
+      await _tearDownLive();
+      await _ensureLiveConnected();
+    });
+  }
+
+  /// Best-effort: a failed read receipt never surfaces to the user.
+  Future<void> _markRoomRead() async {
+    final roomId = _roomId;
+    if (roomId == null) return;
+    await ref.read(groupChatRepositoryProvider).markRoomRead(roomId);
+  }
+
+  Future<void> _persistRoomId(String roomId) async {
+    try {
+      final userId = await _userId();
+      await ref
+          .read(groupChatRoomCacheProvider)
+          .write(userId: userId, groupId: widget.groupId, roomId: roomId);
+    } catch (_) {
+      // Cache is best-effort; join is already committed on the server.
+    }
   }
 
   void _onJoinBannerTap() {
@@ -171,18 +296,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
           presentChatSendError(context, failure);
         },
         (message) async {
-          try {
-            final userId = await _userId();
-            await ref
-                .read(groupChatRoomCacheProvider)
-                .write(
-                  userId: userId,
-                  groupId: widget.groupId,
-                  roomId: message.roomId,
-                );
-          } catch (_) {
-            // Cache is best-effort; join is already committed on the server.
-          }
+          await _persistRoomId(message.roomId);
           if (!mounted) return;
           _bodyController.clear();
           setState(() {
@@ -191,6 +305,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
             _joinState = _JoinState.joined;
             _composerUnlocked = true;
           });
+          // The POST returns the created message, so it is inserted directly
+          // and the `message_created` echo dedupes against it by id.
+          ref
+              .read(groupChatThreadProvider(message.roomId).notifier)
+              .appendLive(message);
           await _ensureLiveConnected();
         },
       );
@@ -260,14 +379,23 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     final composerEnabled =
         _joinState == _JoinState.joined || _composerUnlocked;
     final showBanner = _joinState == _JoinState.preJoin && !_composerUnlocked;
+    final roomId = _roomId;
 
     return _buildShell(
       context,
       profile: profile,
-      body:
-          _joinState == _JoinState.checking
+      body: switch (_joinState) {
+        _JoinState.checking => _buildLoading(),
+        _JoinState.preJoin => const SizedBox.expand(),
+        _JoinState.joined =>
+          roomId == null
               ? _buildLoading()
-              : const SizedBox.expand(),
+              : GroupChatThread(
+                roomId: roomId,
+                groupId: widget.groupId,
+                currentUserId: _currentUserId,
+              ),
+      },
       showComposer: showComposer,
       composerEnabled: composerEnabled,
       showBanner: showBanner,
@@ -283,6 +411,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     bool showBanner = false,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = ref.watch(userProvider).user;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -293,13 +422,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
         child: Column(
           children: [
             GroupChatHeader(isDark: isDark, onBack: _goBack, profile: profile),
-            Expanded(
-              child: MediaQuery.removeViewInsets(
-                context: context,
-                removeBottom: true,
-                child: body,
-              ),
-            ),
+            Expanded(child: body),
             if (showBanner) GroupChatJoinBanner(onJoin: _onJoinBannerTap),
             if (showComposer)
               GroupChatComposer(
@@ -309,6 +432,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                 isSending: _sending,
                 enabled: composerEnabled,
                 onSubmit: _send,
+                avatarUrl: user?.avatarUrl,
+                displayName:
+                    joinChatName(user?.firstName, user?.lastName) ??
+                    user?.email,
               ),
           ],
         ),
