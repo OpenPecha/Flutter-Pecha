@@ -2214,9 +2214,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_chat_title => '聊天';
 
   @override
-  String get group_chat_coming_soon => '群組聊天即將推出。';
-
-  @override
   String get group_chat_inappropriate => '此訊息含有不允許的用語，因此無法發送。';
 
   @override
@@ -2230,4 +2227,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_chat_join_to_send => '加入聊天後即可傳送訊息。';
+
+  @override
+  String get group_chat_today => '今天';
+
+  @override
+  String get group_chat_yesterday => '昨天';
+
+  @override
+  String get group_chat_empty_title => '暫無訊息';
+
+  @override
+  String get group_chat_empty_body => '與你的群組開始對話吧。';
+
+  @override
+  String get group_chat_load_failed => '無法載入訊息。';
+
+  @override
+  String get group_chat_retry => '重試';
+
+  @override
+  String get group_chat_unknown_sender => '成員';
 }

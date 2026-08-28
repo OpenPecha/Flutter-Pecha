@@ -1180,10 +1180,16 @@
     }
   },
   "group_chat_title": "Chat",
-  "group_chat_coming_soon": "Group chat is coming soon.",
   "group_chat_inappropriate": "This message couldn't be sent because it contains language that isn't allowed.",
   "group_chat_not_a_member": "Only members can open this chat.",
   "group_chat_open": "Chat",
   "group_chat_message_hint": "Message",
-  "group_chat_join_to_send": "Join chat to send message."
+  "group_chat_join_to_send": "Join chat to send message.",
+  "group_chat_today": "Today",
+  "group_chat_yesterday": "Yesterday",
+  "group_chat_empty_title": "No messages yet",
+  "group_chat_empty_body": "Start the conversation with your group.",
+  "group_chat_load_failed": "Messages couldn't be loaded.",
+  "group_chat_retry": "Retry",
+  "group_chat_unknown_sender": "Member"
 }

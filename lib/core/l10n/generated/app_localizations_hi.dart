@@ -2350,9 +2350,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_chat_title => 'चैट';
 
   @override
-  String get group_chat_coming_soon => 'समूह चैट जल्द आ रही है।';
-
-  @override
   String get group_chat_inappropriate =>
       'यह संदेश नहीं भेजा जा सका क्योंकि इसमें अनुचित भाषा है।';
 
@@ -2367,4 +2364,25 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_chat_join_to_send => 'संदेश भेजने के लिए चैट से जुड़ें।';
+
+  @override
+  String get group_chat_today => 'आज';
+
+  @override
+  String get group_chat_yesterday => 'कल';
+
+  @override
+  String get group_chat_empty_title => 'अभी तक कोई संदेश नहीं';
+
+  @override
+  String get group_chat_empty_body => 'अपने समूह के साथ बातचीत शुरू करें।';
+
+  @override
+  String get group_chat_load_failed => 'संदेश लोड नहीं हो सके।';
+
+  @override
+  String get group_chat_retry => 'पुनः प्रयास करें';
+
+  @override
+  String get group_chat_unknown_sender => 'सदस्य';
 }

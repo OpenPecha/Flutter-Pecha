@@ -4154,12 +4154,6 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get group_chat_title;
 
-  /// No description provided for @group_chat_coming_soon.
-  ///
-  /// In en, this message translates to:
-  /// **'Group chat is coming soon.'**
-  String get group_chat_coming_soon;
-
   /// No description provided for @group_chat_inappropriate.
   ///
   /// In en, this message translates to:
@@ -4189,6 +4183,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Join chat to send message.'**
   String get group_chat_join_to_send;
+
+  /// No description provided for @group_chat_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get group_chat_today;
+
+  /// No description provided for @group_chat_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get group_chat_yesterday;
+
+  /// No description provided for @group_chat_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get group_chat_empty_title;
+
+  /// No description provided for @group_chat_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the conversation with your group.'**
+  String get group_chat_empty_body;
+
+  /// No description provided for @group_chat_load_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages couldn\'t be loaded.'**
+  String get group_chat_load_failed;
+
+  /// No description provided for @group_chat_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get group_chat_retry;
+
+  /// No description provided for @group_chat_unknown_sender.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get group_chat_unknown_sender;
 }
 
 class _AppLocalizationsDelegate
