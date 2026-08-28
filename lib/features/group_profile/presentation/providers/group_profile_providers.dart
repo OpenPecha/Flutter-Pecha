@@ -436,7 +436,9 @@ sealed class GroupFollowState {
 }
 
 class GroupFollowLoading extends GroupFollowState {
-  const GroupFollowLoading();
+  final bool isInitialCheck;
+
+  const GroupFollowLoading({this.isInitialCheck = false});
 }
 
 class GroupFollowSuccess extends GroupFollowState {
@@ -449,6 +451,22 @@ class GroupFollowSuccess extends GroupFollowState {
 class GroupFollowFailure extends GroupFollowState {
   final Failure failure;
   const GroupFollowFailure(this.failure);
+}
+
+/// Whether the initial join-status check for a private group is still in flight.
+bool isPrivateGroupMembershipLoading(GroupFollowState followState) {
+  return followState is GroupFollowLoading && followState.isInitialCheck;
+}
+
+/// Whether the current user is an active member of a private community group.
+///
+/// Only a resolved follow check counts; never infer membership from join-request
+/// status alone (avoids flashing joined UI for stale APPROVED responses).
+bool isPrivateGroupMember({required GroupFollowState followState}) {
+  return switch (followState) {
+    GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
+    _ => false,
+  };
 }
 
 class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
@@ -468,7 +486,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
        _isAuthenticated = isAuthenticated,
        super(
          key.loadInitialStatus
-             ? const GroupFollowLoading()
+             ? const GroupFollowLoading(isInitialCheck: true)
              : const GroupFollowSuccess(isFollowing: false),
        ) {
     if (key.loadInitialStatus) {
@@ -1113,3 +1131,47 @@ final groupEventParticipantsProvider = StateNotifierProvider.autoDispose
         );
       },
     );
+
+Future<bool> submitGroupJoinRequest({
+  required WidgetRef ref,
+  required String groupId,
+  String message = '',
+}) async {
+  final result = await ref
+      .read(groupProfileRepositoryProvider)
+      .submitJoinRequest(groupId, message: message);
+  return result.fold(
+    (_) => false,
+    (_) {
+      ref.invalidate(groupProfileProvider(groupId));
+      return true;
+    },
+  );
+}
+
+Future<void> refreshGroupProfilePage({
+  required WidgetRef ref,
+  required String groupId,
+  required GroupType groupType,
+}) async {
+  final followKey = GroupFollowKey(groupId: groupId, groupType: groupType);
+  ref.invalidate(groupFollowProvider(followKey));
+
+  final refreshTasks = <Future<void>>[
+    ref.refresh(groupProfileProvider(groupId).future).then((_) {}),
+  ];
+
+  if (ref.exists(groupPracticesProvider(groupId))) {
+    refreshGroupPractices(ref, groupId);
+  }
+  if (ref.exists(groupEventsProvider(groupId))) {
+    refreshTasks.add(
+      ref.refresh(groupEventsProvider(groupId).future).then((_) {}),
+    );
+  }
+  if (ref.exists(groupMembersProvider(groupId))) {
+    ref.read(groupMembersProvider(groupId).notifier).loadInitial();
+  }
+
+  await Future.wait(refreshTasks);
+}

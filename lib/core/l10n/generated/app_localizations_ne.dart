@@ -1846,6 +1846,50 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_invite => 'निमन्त्रणा';
 
   @override
+  String get group_request_to_join => 'सामेल हुन अनुरोध';
+
+  @override
+  String get group_request => 'अनुरोध';
+
+  @override
+  String get group_request_sent => 'अनुरोध पठाइयो';
+
+  @override
+  String get group_join_request_title => 'सामेल हुन अनुरोध';
+
+  @override
+  String get group_join_request_message_label => 'सन्देश (वैकल्पिक)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'तपाईं कसरी अभ्यास गर्नुहुन्छ, वा तपाईंलाई कसले निमन्त्रणा गर्‍यो?';
+
+  @override
+  String get group_join_request_send => 'अनुरोध पठाउनुहोस्';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'अनुरोध पठाइयो — प्रशासकले यसको समीक्षा गर्नेछ।';
+
+  @override
+  String get group_join_request_error =>
+      'अनुरोध पठाउन सकिएन। कृपया पुनः प्रयास गर्नुहोस्।';
+
+  @override
+  String get group_members_only_title => 'सदस्यहरू मात्र';
+
+  @override
+  String get group_members_only_message =>
+      'यो समूहका मन्त्र, कार्यक्रम र पोस्ट हेर्न सामेल हुनुहोस्।';
+
+  @override
+  String get group_join_request_waiting_title => 'प्रशासकको प्रतीक्षामा';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'तपाईंको अनुरोध समीक्षा भएपछि हामी तपाईंलाई सूचित गर्नेछौं।';
+
+  @override
   String get group_members_load_error =>
       'सदस्यहरू लोड गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्।';
 

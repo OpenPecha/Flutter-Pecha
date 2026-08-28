@@ -1737,6 +1737,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_invite => '邀請';
 
   @override
+  String get group_request_to_join => '申請加入';
+
+  @override
+  String get group_request => '申請';
+
+  @override
+  String get group_request_sent => '申請已送出';
+
+  @override
+  String get group_join_request_title => '申請加入';
+
+  @override
+  String get group_join_request_message_label => '訊息（選填）';
+
+  @override
+  String get group_join_request_message_hint => '您如何修行，或是誰邀請您？';
+
+  @override
+  String get group_join_request_send => '送出申請';
+
+  @override
+  String get group_join_request_sent_snackbar => '申請已送出 — 管理員將會審核。';
+
+  @override
+  String get group_join_request_error => '無法送出申請，請再試一次。';
+
+  @override
+  String get group_members_only_title => '僅限成員';
+
+  @override
+  String get group_members_only_message => '加入後即可查看此群組的誦經、活動和貼文。';
+
+  @override
+  String get group_join_request_waiting_title => '等待管理員審核';
+
+  @override
+  String get group_join_request_waiting_message => '您的申請審核完成後，我們會立即通知您。';
+
+  @override
   String get group_members_load_error => '無法載入成員，請再試一次。';
 
   @override

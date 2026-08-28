@@ -1845,6 +1845,50 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_invite => 'གདན་ཞུ་བྱེད།';
 
   @override
+  String get group_request_to_join => 'ཞུགས་པར་རེ་ཞུ།';
+
+  @override
+  String get group_request => 'རེ་ཞུ།';
+
+  @override
+  String get group_request_sent => 'རེ་ཞུ་བཏང་ཟིན།';
+
+  @override
+  String get group_join_request_title => 'ཞུགས་པར་རེ་ཞུ།';
+
+  @override
+  String get group_join_request_message_label => 'འཕྲིན་ཡིག (འདེམས་རུང་།)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'ཁྱེད་ཀྱིས་ཇི་ལྟར་ཉམས་ལེན་བྱེད་དམ། སུ་ཞིག་གིས་ཁྱེད་རང་གདན་འདྲེན་བྱས་སམ།';
+
+  @override
+  String get group_join_request_send => 'རེ་ཞུ་བཏང་།';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'རེ་ཞུ་བཏང་ཟིན། — དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན།';
+
+  @override
+  String get group_join_request_error =>
+      'རེ་ཞུ་བཏང་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
+
+  @override
+  String get group_members_only_title => 'ཚོགས་མི་ཁོ་ན།';
+
+  @override
+  String get group_members_only_message =>
+      'ཚོགས་པ་འདིའི་བཟླས་བརྗོད་དང་བྱེད་སྒོ། སྤེལ་ཡིག་བལྟ་ཆེད་ཞུགས་རོགས།';
+
+  @override
+  String get group_join_request_waiting_title => 'དོ་དམ་པའི་བརྡར་སྒུག';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'ཁྱེད་ཀྱི་རེ་ཞུ་བརྟག་དཔྱད་ཚར་རྗེས་ང་ཚོས་ཁྱེད་ལ་གསལ་བརྡ་གནང་རྒྱུ་ཡིན།';
+
+  @override
   String get group_members_load_error =>
       'ཚོགས་མི་སྟོན་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
 

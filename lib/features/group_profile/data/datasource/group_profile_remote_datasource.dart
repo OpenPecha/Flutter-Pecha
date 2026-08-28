@@ -467,6 +467,26 @@ class GroupProfileRemoteDatasource {
     }
   }
 
+  Future<void> submitJoinRequest(String groupId, {required String message}) async {
+    try {
+      final response = await dio.post(
+        '/author/groups/$groupId/join-requests',
+        data: {'message': message},
+      );
+      if (response.statusCode != 200 &&
+          response.statusCode != 201 &&
+          response.statusCode != 204) {
+        throw _statusToException(
+          response.statusCode,
+          'Failed to submit join request',
+        );
+      }
+    } on DioException catch (e) {
+      _logger.error('Dio error in submitJoinRequest', e);
+      throw _dioToException(e, 'Failed to submit join request');
+    }
+  }
+
   Future<void> unfollowGroup(String groupId, GroupType groupType) async {
     final action = groupType.isPage ? 'follow' : 'join';
     try {
