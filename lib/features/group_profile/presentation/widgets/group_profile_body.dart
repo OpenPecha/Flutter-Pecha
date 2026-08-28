@@ -71,9 +71,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   bool _canAccessPrivateGroupContent(GroupProfile profile) {
     if (!profile.isPrivateCommunity) return true;
 
-    return isPrivateGroupMember(
-      followState: _privateGroupFollowState(profile),
-    );
+    return isPrivateGroupMember(followState: _privateGroupFollowState(profile));
   }
 
   GroupFollowState _privateGroupFollowState(GroupProfile profile) {
@@ -90,7 +88,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   }
 
   bool _isContentRestricted(GroupProfile profile) {
-    return profile.isPrivateCommunity && !_canAccessPrivateGroupContent(profile);
+    return profile.isPrivateCommunity &&
+        !_canAccessPrivateGroupContent(profile);
   }
 
   Future<void> _onRefresh(GroupProfile profile) {
@@ -444,46 +443,47 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         child: NestedScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           headerSliverBuilder: (context, _) {
-          final slivers = <Widget>[
-            SliverToBoxAdapter(
-              child: _buildCommunityHeaderSection(
-                profile,
-                isDark,
-                lineHeight,
-                orderedLinks,
-              ),
-            ),
-          ];
-
-          if (controller != null) {
-            slivers.add(
-              SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
+            final slivers = <Widget>[
+              SliverToBoxAdapter(
+                child: _buildCommunityHeaderSection(
+                  profile,
+                  isDark,
+                  lineHeight,
+                  orderedLinks,
                 ),
-                sliver: SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _GroupProfileTabBarDelegate(
-                    tabBar: _buildTabBar(isDark, profile),
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              ),
+            ];
+
+            if (controller != null) {
+              slivers.add(
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                    context,
+                  ),
+                  sliver: SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _GroupProfileTabBarDelegate(
+                      tabBar: _buildTabBar(isDark, profile),
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return slivers;
-        },
-        body:
-            controller == null
-                ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                  controller: controller,
-                  children: [
-                    for (final tab in _visibleTabs)
-                      _buildTabContent(tab, profile, isDark, lineHeight),
-                  ],
-                ),
+            return slivers;
+          },
+          body:
+              controller == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : TabBarView(
+                    controller: controller,
+                    children: [
+                      for (final tab in _visibleTabs)
+                        _buildTabContent(tab, profile, isDark, lineHeight),
+                    ],
+                  ),
         ),
       ),
     );
@@ -508,27 +508,27 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-          SliverToBoxAdapter(
-            child: _buildCommunityHeaderSection(
-              profile,
-              isDark,
-              lineHeight,
-              orderedLinks,
-              bottomSpacing: 0,
-            ),
-          ),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: _buildRestrictedMessage(
+            SliverToBoxAdapter(
+              child: _buildCommunityHeaderSection(
+                profile,
                 isDark,
                 lineHeight,
-                profile.myJoinRequestStatus,
+                orderedLinks,
+                bottomSpacing: 0,
               ),
             ),
-          ),
-        ],
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: _buildRestrictedMessage(
+                  isDark,
+                  lineHeight,
+                  profile.myJoinRequestStatus,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -826,7 +826,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   ) {
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
-    final actionColor = isDark ? AppColors.grey500 : AppColors.grey500;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -862,14 +861,15 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           );
         }
 
-        Widget tappableDescription(InlineSpan span) {
+        Widget tappableDescription({required bool truncate}) {
           return GestureDetector(
             onTap: openAboutScreen,
             behavior: HitTestBehavior.opaque,
-            child: Text.rich(
-              span,
+            child: Text(
+              description,
               maxLines: 2,
-              overflow: TextOverflow.clip,
+              overflow: truncate ? TextOverflow.ellipsis : TextOverflow.clip,
+              style: style,
               textScaler: textScaler,
             ),
           );
@@ -877,47 +877,10 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
         final textSpan = TextSpan(text: description, style: style);
         if (!exceedsTwoLines(textSpan)) {
-          return tappableDescription(textSpan);
+          return tappableDescription(truncate: false);
         }
 
-        final moreSpan = TextSpan(
-          text: '... ',
-          style: style,
-          children: [
-            TextSpan(
-              text: context.l10n.more,
-              style: style.copyWith(
-                color: actionColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        );
-
-        int endIndex = description.length;
-        int startIndex = 0;
-
-        while (startIndex < endIndex) {
-          final mid = startIndex + ((endIndex - startIndex) ~/ 2);
-          final testSpan = TextSpan(
-            text: description.substring(0, mid),
-            style: style,
-            children: [moreSpan],
-          );
-
-          if (exceedsTwoLines(testSpan)) {
-            endIndex = mid;
-          } else {
-            startIndex = mid + 1;
-          }
-        }
-
-        final validLength = (startIndex - 1).clamp(0, description.length);
-        final truncatedText = description.substring(0, validLength).trimRight();
-
-        return tappableDescription(
-          TextSpan(text: truncatedText, style: style, children: [moreSpan]),
-        );
+        return tappableDescription(truncate: true);
       },
     );
   }
