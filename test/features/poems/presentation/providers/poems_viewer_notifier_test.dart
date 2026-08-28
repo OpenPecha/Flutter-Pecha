@@ -24,6 +24,7 @@ class FakePoemsRepository implements PoemsRepositoryInterface {
   final List<Poem> _allPoems;
   int fetchPagesCalled = 0;
   Failure? nextPageFailure;
+  Failure? nextPoemFailure;
 
   @override
   Future<Either<Failure, PoemsPage>> getPoems({
@@ -52,6 +53,11 @@ class FakePoemsRepository implements PoemsRepositoryInterface {
 
   @override
   Future<Either<Failure, Poem>> getPoem(String poemId) async {
+    if (nextPoemFailure != null) {
+      final failure = nextPoemFailure!;
+      nextPoemFailure = null;
+      return Left(failure);
+    }
     for (final poem in _allPoems) {
       if (poem.id == poemId) return Right(poem);
     }
@@ -130,7 +136,7 @@ void main() {
     );
 
     test(
-      'keeps the loaded page when a requested poem id does not exist',
+      'surfaces an error when a requested poem id does not exist',
       () async {
         final repo = FakePoemsRepository(
           allPoems: List.generate(5, (i) => _poem('p$i')),
@@ -143,8 +149,62 @@ void main() {
         await notifier.loadInitial();
 
         final state = container.read(poemsViewerProvider('missing-id'));
+        expect(state.hasLoaded, isFalse);
+        expect(state.poems, isEmpty);
+        expect(state.error, 'Poem not found');
+      },
+    );
+
+    test(
+      'surfaces an error when a missing first-page poem lookup fails',
+      () async {
+        final repo = FakePoemsRepository(
+          allPoems: [
+            ...List.generate(20, (i) => _poem('p$i')),
+            _poem('later-poem'),
+          ],
+        )..nextPoemFailure = const NetworkFailure('offline');
+        final container = buildContainer(repo);
+        addTearDown(container.dispose);
+
+        final notifier =
+            container.read(poemsViewerProvider('later-poem').notifier);
+        await notifier.loadInitial();
+
+        final state = container.read(poemsViewerProvider('later-poem'));
+        expect(state.hasLoaded, isFalse);
+        expect(state.poems, isEmpty);
+        expect(state.error, 'offline');
+      },
+    );
+
+    test(
+      'allows retry after a selected poem lookup failure',
+      () async {
+        final repo = FakePoemsRepository(
+          allPoems: [
+            ...List.generate(20, (i) => _poem('p$i')),
+            _poem('later-poem'),
+          ],
+        )..nextPoemFailure = const NetworkFailure('offline');
+        final container = buildContainer(repo);
+        addTearDown(container.dispose);
+
+        final notifier =
+            container.read(poemsViewerProvider('later-poem').notifier);
+        await notifier.loadInitial();
+
+        expect(
+          container.read(poemsViewerProvider('later-poem')).error,
+          'offline',
+        );
+
+        await notifier.loadInitial();
+
+        final state = container.read(poemsViewerProvider('later-poem'));
         expect(state.hasLoaded, isTrue);
-        expect(state.poems.map((p) => p.id), ['p0', 'p1', 'p2', 'p3', 'p4']);
+        expect(state.error, isNull);
+        expect(state.poems.first.id, 'later-poem');
         expect(state.initialIndex, 0);
       },
     );

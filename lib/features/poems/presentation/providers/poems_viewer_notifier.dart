@@ -102,10 +102,21 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
             initialIndex = matchedIndex;
           } else {
             final single = await repository.getPoem(targetId);
-            single.fold((_) {}, (poem) {
-              poems = [poem, ...poems.where((p) => p.id != poem.id)];
-            });
-            initialIndex = 0;
+            final lookupFailed = single.fold(
+              (failure) {
+                state = state.copyWith(
+                  isLoading: false,
+                  error: failure.message,
+                );
+                return true;
+              },
+              (poem) {
+                poems = [poem, ...poems.where((p) => p.id != poem.id)];
+                initialIndex = 0;
+                return false;
+              },
+            );
+            if (lookupFailed) return;
           }
         }
 
