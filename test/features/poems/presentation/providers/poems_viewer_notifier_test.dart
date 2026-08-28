@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/utils/local_storage_service.dart';
@@ -375,13 +377,10 @@ void main() {
   });
 
   group('PoemsViewerNotifier language changes', () {
-    test('reloads when content language changes', () async {
-      final repo = FakePoemsRepository(
-        allPoems: List.generate(3, (i) => _poem('p$i')),
-      );
-      final container = ProviderContainer(
+    ProviderContainer buildLanguageContainer(PoemsRepositoryInterface repository) {
+      return ProviderContainer(
         overrides: [
-          poemsRepositoryProvider.overrideWithValue(repo),
+          poemsRepositoryProvider.overrideWithValue(repository),
           contentLanguageProvider.overrideWith((ref) {
             final notifier = ContentLanguageNotifier(
               localStorageService: _InMemoryStorage(),
@@ -391,6 +390,13 @@ void main() {
           }),
         ],
       );
+    }
+
+    test('reloads when content language changes', () async {
+      final repo = FakePoemsRepository(
+        allPoems: List.generate(3, (i) => _poem('p$i')),
+      );
+      final container = buildLanguageContainer(repo);
       addTearDown(container.dispose);
 
       container.read(poemsViewerProvider(null));
@@ -407,5 +413,69 @@ void main() {
       expect(container.read(poemsViewerProvider(null)).hasLoaded, isTrue);
       expect(container.read(poemsViewerProvider(null)).poems, isNotEmpty);
     });
+
+    test(
+      'does not throw when content language changes during an in-flight load',
+      () async {
+        final pageCompleter = Completer<Either<Failure, PoemsPage>>();
+        final repo = _DelayedPoemsRepository(
+          allPoems: List.generate(3, (i) => _poem('p$i')),
+          pageCompleter: pageCompleter,
+        );
+        final container = buildLanguageContainer(repo);
+        addTearDown(container.dispose);
+
+        container.read(poemsViewerProvider(null));
+        await Future<void>.delayed(Duration.zero);
+        expect(container.read(poemsViewerProvider(null)).isLoading, isTrue);
+
+        await container
+            .read(contentLanguageProvider.notifier)
+            .setContentLanguage('bo');
+
+        pageCompleter.complete(
+          Right(
+            PoemsPage(
+              poems: List.generate(3, (i) => _poem('p$i')),
+              skip: 0,
+              limit: 20,
+              hasMore: false,
+            ),
+          ),
+        );
+        await pumpUntilSettled(container, null);
+
+        expect(container.read(poemsViewerProvider(null)).hasLoaded, isTrue);
+        expect(container.read(poemsViewerProvider(null)).poems, isNotEmpty);
+      },
+    );
   });
+}
+
+/// Holds [getPoems] until [pageCompleter] is completed so tests can change
+/// language mid-request.
+class _DelayedPoemsRepository extends FakePoemsRepository {
+  _DelayedPoemsRepository({
+    required super.allPoems,
+    required this.pageCompleter,
+  });
+
+  final Completer<Either<Failure, PoemsPage>> pageCompleter;
+
+  @override
+  Future<Either<Failure, PoemsPage>> getPoems({
+    required String language,
+    int skip = 0,
+    int limit = 20,
+    String? chapterName,
+    String? authorName,
+  }) async {
+    fetchPagesCalled++;
+    if (nextPageFailure != null) {
+      final failure = nextPageFailure!;
+      nextPageFailure = null;
+      return Left(failure);
+    }
+    return pageCompleter.future;
+  }
 }
