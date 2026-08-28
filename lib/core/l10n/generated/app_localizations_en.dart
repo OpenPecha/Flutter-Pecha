@@ -2299,4 +2299,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'Message';
+
+  @override
+  String get group_chat_join_to_send => 'Join chat to send message.';
 }

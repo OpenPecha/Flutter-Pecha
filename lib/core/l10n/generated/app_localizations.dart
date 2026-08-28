@@ -4105,6 +4105,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Message'**
   String get group_chat_message_hint;
+
+  /// No description provided for @group_chat_join_to_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Join chat to send message.'**
+  String get group_chat_join_to_send;
 }
 
 class _AppLocalizationsDelegate

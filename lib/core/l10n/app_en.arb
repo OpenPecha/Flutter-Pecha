@@ -1171,5 +1171,6 @@
   "group_chat_inappropriate": "This message couldn't be sent because it contains language that isn't allowed.",
   "group_chat_not_a_member": "Only members can open this chat.",
   "group_chat_open": "Chat",
-  "group_chat_message_hint": "Message"
+  "group_chat_message_hint": "Message",
+  "group_chat_join_to_send": "Join chat to send message."
 }

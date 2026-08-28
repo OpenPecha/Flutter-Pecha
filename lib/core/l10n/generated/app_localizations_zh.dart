@@ -2188,4 +2188,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => '訊息';
+
+  @override
+  String get group_chat_join_to_send => '加入聊天後即可傳送訊息。';
 }

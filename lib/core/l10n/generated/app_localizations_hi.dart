@@ -2320,4 +2320,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'संदेश';
+
+  @override
+  String get group_chat_join_to_send => 'संदेश भेजने के लिए चैट से जुड़ें।';
 }

@@ -2326,4 +2326,7 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'འཕྲིན་ཐུང་།';
+
+  @override
+  String get group_chat_join_to_send => 'འཕྲིན་ཐུང་གཏོང་བར་གླེང་མོལ་ལ་ཞུགས།';
 }

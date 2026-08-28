@@ -996,5 +996,6 @@
   "group_chat_inappropriate": "यह संदेश नहीं भेजा जा सका क्योंकि इसमें अनुचित भाषा है।",
   "group_chat_not_a_member": "केवल सदस्य इस चैट को खोल सकते हैं।",
   "group_chat_open": "चैट",
-  "group_chat_message_hint": "संदेश"
+  "group_chat_message_hint": "संदेश",
+  "group_chat_join_to_send": "संदेश भेजने के लिए चैट से जुड़ें।"
 }

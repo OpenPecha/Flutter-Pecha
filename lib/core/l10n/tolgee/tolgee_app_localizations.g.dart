@@ -4492,4 +4492,11 @@ class TolgeeAppLocalizations extends AppLocalizations {
     'group_chat_message_hint',
     () => _fallback.group_chat_message_hint,
   );
+
+  @override
+  String get group_chat_join_to_send => TolgeeBridge.get(
+    localeName,
+    'group_chat_join_to_send',
+    () => _fallback.group_chat_join_to_send,
+  );
 }

@@ -2324,4 +2324,8 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'Мессеж';
+
+  @override
+  String get group_chat_join_to_send =>
+      'Мессеж илгээхийн тулд чатад нэгдээрэй.';
 }

@@ -13,6 +13,7 @@ class GroupChatComposer extends StatelessWidget {
     required this.hintText,
     required this.isSending,
     required this.onSubmit,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -20,6 +21,7 @@ class GroupChatComposer extends StatelessWidget {
   final String hintText;
   final bool isSending;
   final VoidCallback onSubmit;
+  final bool enabled;
 
   static const double _fieldHeight = 44;
   static const double _sendButtonSize = 44;
@@ -48,6 +50,7 @@ class GroupChatComposer extends StatelessWidget {
               focusNode: focusNode,
               isDark: isDark,
               hintText: hintText,
+              enabled: enabled,
               onSubmit: onSubmit,
             ),
           ),
@@ -55,7 +58,8 @@ class GroupChatComposer extends StatelessWidget {
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, _) {
-              final canSend = value.text.trim().isNotEmpty && !isSending;
+              final canSend =
+                  enabled && value.text.trim().isNotEmpty && !isSending;
               return _SendButton(
                 canSend: canSend,
                 isSending: isSending,
@@ -76,6 +80,7 @@ class _MessageField extends StatelessWidget {
     required this.focusNode,
     required this.isDark,
     required this.hintText,
+    required this.enabled,
     required this.onSubmit,
   });
 
@@ -83,6 +88,7 @@ class _MessageField extends StatelessWidget {
   final FocusNode focusNode;
   final bool isDark;
   final String hintText;
+  final bool enabled;
   final VoidCallback onSubmit;
 
   @override
@@ -95,10 +101,13 @@ class _MessageField extends StatelessWidget {
     return TextField(
       controller: controller,
       focusNode: focusNode,
+      enabled: enabled,
       minLines: 1,
       maxLines: 4,
       textInputAction: TextInputAction.send,
-      onSubmitted: (_) => onSubmit(),
+      onSubmitted: (_) {
+        if (enabled) onSubmit();
+      },
       style: TextStyle(
         fontSize: 15,
         height: 1.2,
@@ -123,6 +132,10 @@ class _MessageField extends StatelessWidget {
           borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radius),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
           borderSide: BorderSide(color: borderColor),
         ),

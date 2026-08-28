@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/di/core_providers.dart';
+import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_live_client.dart';
@@ -11,13 +13,15 @@ import 'package:flutter_pecha/features/group_chat/presentation/chat_send_error.d
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_header.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_join_banner.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 
-/// Member-gated chat shell. The message thread ships in a later task.
+enum _JoinState { checking, preJoin, joined }
+
+/// Member-gated chat shell. Pre-join until the first successful send.
 class GroupChatScreen extends ConsumerStatefulWidget {
   final String groupId;
 
@@ -34,7 +38,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
   StreamSubscription<ChatLiveEvent>? _liveSub;
   bool _redirecting = false;
   bool _sending = false;
-  bool _liveStarted = false;
+  bool _bootstrapped = false;
+  bool _composerUnlocked = false;
+  _JoinState _joinState = _JoinState.checking;
+  String? _roomId;
 
   @override
   void dispose() {
@@ -61,9 +68,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     }
   }
 
-  /// Leaves the chat once membership is denied or the session is not eligible.
-  /// [notAMember] is reserved for a confirmed non-member; a failed profile load
-  /// leaves silently because the cause is unknown.
+  /// Leaves the chat once group membership is denied or the session is not
+  /// eligible. [notAMember] is reserved for a confirmed non-follower.
   void _leaveChat({required bool toHome, bool notAMember = false}) {
     if (_redirecting) return;
     _redirecting = true;
@@ -82,14 +88,56 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     });
   }
 
+  Future<String> _userId() async {
+    return await ref
+            .read(storageServiceProvider)
+            .get<String>(StorageKeys.currentUserId) ??
+        '';
+  }
+
+  Future<void> _bootstrapJoinState() async {
+    if (_bootstrapped) return;
+    _bootstrapped = true;
+    final userId = await _userId();
+    if (!mounted) return;
+    final cache = ref.read(groupChatRoomCacheProvider);
+    final cached = await cache.read(userId: userId, groupId: widget.groupId);
+    if (!mounted) return;
+    if (cached == null) {
+      setState(() => _joinState = _JoinState.preJoin);
+      return;
+    }
+
+    final result = await ref.read(groupChatRepositoryProvider).getRoom(cached);
+    if (!mounted) return;
+    await result.fold(
+      (failure) async {
+        if (failure is NotFoundFailure) {
+          await cache.clear(userId: userId, groupId: widget.groupId);
+        }
+        if (!mounted) return;
+        setState(() => _joinState = _JoinState.preJoin);
+      },
+      (room) async {
+        setState(() {
+          _roomId = room.id;
+          _joinState = _JoinState.joined;
+          _composerUnlocked = true;
+        });
+        await _ensureLiveConnected();
+      },
+    );
+  }
+
   Future<void> _ensureLiveConnected() async {
-    if (_live != null) return;
+    if (_live != null || _joinState != _JoinState.joined) return;
     final token = await ref.read(authServiceProvider).getValidAccessToken();
     if (!mounted || token == null) return;
     final uri = ChatLiveClient.liveUri(
       restBaseUrl: ref.read(apiConfigProvider).baseUrl,
       token: token,
       groupId: widget.groupId,
+      roomId: _roomId,
     );
     final client = ChatLiveClient();
     _live = client;
@@ -101,18 +149,46 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     });
   }
 
+  void _onJoinBannerTap() {
+    setState(() => _composerUnlocked = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _bodyFocusNode.requestFocus();
+    });
+  }
+
   Future<void> _send() async {
     final body = _bodyController.text.trim();
-    if (body.isEmpty || _sending) return;
+    if (body.isEmpty || _sending || !_composerUnlocked) return;
     setState(() => _sending = true);
     final result = await ref
         .read(groupChatRepositoryProvider)
         .sendGroupMessage(widget.groupId, body: body);
     if (!mounted) return;
-    setState(() => _sending = false);
-    result.fold((failure) => presentChatSendError(context, failure), (_) {
-      _bodyController.clear();
-    });
+    await result.fold(
+      (failure) async {
+        setState(() => _sending = false);
+        presentChatSendError(context, failure);
+      },
+      (message) async {
+        final userId = await _userId();
+        await ref
+            .read(groupChatRoomCacheProvider)
+            .write(
+              userId: userId,
+              groupId: widget.groupId,
+              roomId: message.roomId,
+            );
+        if (!mounted) return;
+        _bodyController.clear();
+        setState(() {
+          _sending = false;
+          _roomId = message.roomId;
+          _joinState = _JoinState.joined;
+          _composerUnlocked = true;
+        });
+        await _ensureLiveConnected();
+      },
+    );
   }
 
   @override
@@ -168,31 +244,39 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _liveStarted) return;
-      _liveStarted = true;
-      unawaited(_ensureLiveConnected());
+      if (!mounted) return;
+      unawaited(_bootstrapJoinState());
     });
+
+    final showComposer = _joinState != _JoinState.checking;
+    final composerEnabled =
+        _joinState == _JoinState.joined || _composerUnlocked;
+    final showBanner = _joinState == _JoinState.preJoin && !_composerUnlocked;
 
     return _buildShell(
       context,
       profile: profile,
-      body: _buildEmptyThread(context),
-      showComposer: true,
+      body:
+          _joinState == _JoinState.checking
+              ? _buildLoading()
+              : const SizedBox.expand(),
+      showComposer: showComposer,
+      composerEnabled: composerEnabled,
+      showBanner: showBanner,
     );
   }
 
-  /// Every state shares this frame so the header does not shift or restyle
-  /// between loading, denial, and the live chat.
   Widget _buildShell(
     BuildContext context, {
     required Widget body,
     GroupProfile? profile,
     bool showComposer = false,
+    bool composerEnabled = false,
+    bool showBanner = false,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      // The composer pads itself past the keyboard instead.
       resizeToAvoidBottomInset: false,
       backgroundColor:
           isDark ? AppColors.scaffoldBackgroundDark : AppColors.surfaceLight,
@@ -208,12 +292,14 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                 child: body,
               ),
             ),
+            if (showBanner) GroupChatJoinBanner(onJoin: _onJoinBannerTap),
             if (showComposer)
               GroupChatComposer(
                 controller: _bodyController,
                 focusNode: _bodyFocusNode,
                 hintText: context.l10n.group_chat_message_hint,
                 isSending: _sending,
+                enabled: composerEnabled,
                 onSubmit: _send,
               ),
           ],
@@ -224,26 +310,5 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
 
   Widget _buildLoading() {
     return const Center(child: CircularProgressIndicator());
-  }
-
-  Widget _buildEmptyThread(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final locale = Localizations.localeOf(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Text(
-          context.l10n.group_chat_coming_soon,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15,
-            color:
-                isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
-            height: getLineHeight(locale.languageCode),
-          ),
-        ),
-      ),
-    );
   }
 }

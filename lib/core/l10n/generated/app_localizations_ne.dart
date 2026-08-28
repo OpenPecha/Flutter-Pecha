@@ -2328,4 +2328,7 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'सन्देश';
+
+  @override
+  String get group_chat_join_to_send => 'सन्देश पठाउन च्याटमा जोडिनुहोस्।';
 }
