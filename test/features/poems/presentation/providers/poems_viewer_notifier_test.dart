@@ -1,4 +1,6 @@
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
+import 'package:flutter_pecha/core/utils/local_storage_service.dart';
 import 'package:flutter_pecha/features/poems/domain/entities/poem.dart';
 import 'package:flutter_pecha/features/poems/domain/entities/poems_page.dart';
 import 'package:flutter_pecha/features/poems/domain/repositories/poems_repository.dart';
@@ -7,6 +9,43 @@ import 'package:flutter_pecha/features/poems/presentation/providers/poems_viewer
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+
+class _InMemoryStorage implements LocalStorageService {
+  final Map<String, Object?> _store = {};
+
+  @override
+  Future<T?> get<T>(String key) async => _store[key] as T?;
+
+  @override
+  Future<bool> set<T>(String key, T value) async {
+    _store[key] = value;
+    return true;
+  }
+
+  @override
+  Future<bool> remove(String key) async {
+    _store.remove(key);
+    return true;
+  }
+
+  @override
+  Future<bool> clear() async {
+    _store.clear();
+    return true;
+  }
+
+  @override
+  Future<bool> containsKey(String key) async => _store.containsKey(key);
+
+  @override
+  Future<void> setUserData(Map<String, dynamic> userData) async {}
+
+  @override
+  Future<Map<String, dynamic>?> getUserData() async => null;
+
+  @override
+  Future<void> clearUserData() async {}
+}
 
 Poem _poem(String id, {String title = 'Title'}) => Poem(
   id: id,
@@ -66,6 +105,27 @@ class FakePoemsRepository implements PoemsRepositoryInterface {
 }
 
 void main() {
+  Future<void> pumpUntilSettled(
+    ProviderContainer container,
+    String? initialPoemId,
+  ) async {
+    final sub = container.listen(
+      poemsViewerProvider(initialPoemId),
+      (_, __) {},
+      fireImmediately: true,
+    );
+    addTearDown(sub.close);
+
+    for (var i = 0; i < 100; i++) {
+      final state = container.read(poemsViewerProvider(initialPoemId));
+      if (!state.isLoading && (state.hasLoaded || state.error != null)) {
+        return;
+      }
+      await Future<void>.delayed(Duration.zero);
+    }
+    fail('Timed out waiting for poems viewer to settle');
+  }
+
   ProviderContainer buildContainer(PoemsRepositoryInterface repository) {
     return ProviderContainer(
       overrides: [poemsRepositoryProvider.overrideWithValue(repository)],
@@ -80,8 +140,8 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
-      final notifier = container.read(poemsViewerProvider(null).notifier);
-      await notifier.loadInitial();
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
 
       final state = container.read(poemsViewerProvider(null));
       expect(state.hasLoaded, isTrue);
@@ -97,8 +157,8 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
-      final notifier = container.read(poemsViewerProvider('p2').notifier);
-      await notifier.loadInitial();
+      container.read(poemsViewerProvider('p2'));
+      await pumpUntilSettled(container, 'p2');
 
       final state = container.read(poemsViewerProvider('p2'));
       expect(state.initialIndex, 2);
@@ -123,9 +183,8 @@ void main() {
         final container = buildContainer(repo);
         addTearDown(container.dispose);
 
-        final notifier =
-            container.read(poemsViewerProvider('later-poem').notifier);
-        await notifier.loadInitial();
+        container.read(poemsViewerProvider('later-poem'));
+        await pumpUntilSettled(container, 'later-poem');
 
         final state = container.read(poemsViewerProvider('later-poem'));
         expect(state.poems.first.id, 'later-poem');
@@ -144,9 +203,8 @@ void main() {
         final container = buildContainer(repo);
         addTearDown(container.dispose);
 
-        final notifier =
-            container.read(poemsViewerProvider('missing-id').notifier);
-        await notifier.loadInitial();
+        container.read(poemsViewerProvider('missing-id'));
+        await pumpUntilSettled(container, 'missing-id');
 
         final state = container.read(poemsViewerProvider('missing-id'));
         expect(state.hasLoaded, isFalse);
@@ -167,9 +225,8 @@ void main() {
         final container = buildContainer(repo);
         addTearDown(container.dispose);
 
-        final notifier =
-            container.read(poemsViewerProvider('later-poem').notifier);
-        await notifier.loadInitial();
+        container.read(poemsViewerProvider('later-poem'));
+        await pumpUntilSettled(container, 'later-poem');
 
         final state = container.read(poemsViewerProvider('later-poem'));
         expect(state.hasLoaded, isFalse);
@@ -190,16 +247,18 @@ void main() {
         final container = buildContainer(repo);
         addTearDown(container.dispose);
 
-        final notifier =
-            container.read(poemsViewerProvider('later-poem').notifier);
-        await notifier.loadInitial();
+        container.read(poemsViewerProvider('later-poem'));
+        await pumpUntilSettled(container, 'later-poem');
 
         expect(
           container.read(poemsViewerProvider('later-poem')).error,
           'offline',
         );
 
-        await notifier.loadInitial();
+        await container
+            .read(poemsViewerProvider('later-poem').notifier)
+            .loadInitial();
+        await pumpUntilSettled(container, 'later-poem');
 
         final state = container.read(poemsViewerProvider('later-poem'));
         expect(state.hasLoaded, isTrue);
@@ -215,8 +274,8 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
-      final notifier = container.read(poemsViewerProvider(null).notifier);
-      await notifier.loadInitial();
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
 
       final state = container.read(poemsViewerProvider(null));
       expect(state.hasLoaded, isFalse);
@@ -231,13 +290,14 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
-      final notifier = container.read(poemsViewerProvider(null).notifier);
-      await notifier.loadInitial();
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
 
       expect(container.read(poemsViewerProvider(null)).error, 'offline');
       expect(container.read(poemsViewerProvider(null)).poems, isEmpty);
 
-      await notifier.loadInitial();
+      await container.read(poemsViewerProvider(null).notifier).loadInitial();
+      await pumpUntilSettled(container, null);
 
       final state = container.read(poemsViewerProvider(null));
       expect(state.hasLoaded, isTrue);
@@ -254,8 +314,9 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
       final notifier = container.read(poemsViewerProvider(null).notifier);
-      await notifier.loadInitial();
       expect(container.read(poemsViewerProvider(null)).poems.length, 20);
       expect(container.read(poemsViewerProvider(null)).hasMore, isTrue);
 
@@ -274,8 +335,9 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
       final notifier = container.read(poemsViewerProvider(null).notifier);
-      await notifier.loadInitial();
       expect(container.read(poemsViewerProvider(null)).hasMore, isTrue);
       expect(container.read(poemsViewerProvider(null)).poems.length, 20);
 
@@ -301,13 +363,49 @@ void main() {
       final container = buildContainer(repo);
       addTearDown(container.dispose);
 
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
       final notifier = container.read(poemsViewerProvider(null).notifier);
-      await notifier.loadInitial();
       expect(container.read(poemsViewerProvider(null)).hasMore, isFalse);
 
       final callsBefore = repo.fetchPagesCalled;
       await notifier.loadMore();
       expect(repo.fetchPagesCalled, callsBefore);
+    });
+  });
+
+  group('PoemsViewerNotifier language changes', () {
+    test('reloads when content language changes', () async {
+      final repo = FakePoemsRepository(
+        allPoems: List.generate(3, (i) => _poem('p$i')),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          poemsRepositoryProvider.overrideWithValue(repo),
+          contentLanguageProvider.overrideWith((ref) {
+            final notifier = ContentLanguageNotifier(
+              localStorageService: _InMemoryStorage(),
+            );
+            notifier.ensureInitialized();
+            return notifier;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(poemsViewerProvider(null));
+      await pumpUntilSettled(container, null);
+      expect(container.read(poemsViewerProvider(null)).hasLoaded, isTrue);
+      final callsAfterFirstLoad = repo.fetchPagesCalled;
+
+      await container
+          .read(contentLanguageProvider.notifier)
+          .setContentLanguage('bo');
+      await pumpUntilSettled(container, null);
+
+      expect(repo.fetchPagesCalled, greaterThan(callsAfterFirstLoad));
+      expect(container.read(poemsViewerProvider(null)).hasLoaded, isTrue);
+      expect(container.read(poemsViewerProvider(null)).poems, isNotEmpty);
     });
   });
 }

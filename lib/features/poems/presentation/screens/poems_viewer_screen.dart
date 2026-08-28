@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
@@ -34,16 +35,6 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
   bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(poemsViewerProvider(widget.initialPoemId).notifier)
-          .loadInitial();
-    });
-  }
-
-  @override
   void dispose() {
     _pageController?.dispose();
     super.dispose();
@@ -75,8 +66,21 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
     }
   }
 
+  void _resetForLanguageChange() {
+    _pageController?.dispose();
+    _pageController = null;
+    _initialized = false;
+    _currentIndex = 0;
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(contentLanguageProvider, (previous, next) {
+      if (previous != null && previous != next) {
+        _resetForLanguageChange();
+      }
+    });
+
     final state = ref.watch(poemsViewerProvider(widget.initialPoemId));
 
     if (!_initialized && state.hasLoaded && state.poems.isNotEmpty) {

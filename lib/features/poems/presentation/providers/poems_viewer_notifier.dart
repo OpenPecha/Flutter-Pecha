@@ -174,10 +174,13 @@ final poemsViewerProvider = StateNotifierProvider.autoDispose
       ref,
       initialPoemId,
     ) {
-      final language = poemsApiLanguageCode(ref.watch(contentLanguageProvider));
-      return PoemsViewerNotifier(
+      ref.watch(contentLanguageProvider);
+      final language = poemsApiLanguageCode(ref.read(contentLanguageProvider));
+      final notifier = PoemsViewerNotifier(
         ref: ref,
         language: language,
         initialPoemId: initialPoemId,
       );
+      notifier.loadInitial();
+      return notifier;
     });
