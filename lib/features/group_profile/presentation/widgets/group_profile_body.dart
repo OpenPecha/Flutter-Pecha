@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
@@ -66,7 +65,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   final Set<String> _localGroupEnrolledSeriesIds = {};
   ProviderSubscription<bool>? _membersTabActiveSub;
   ProviderSubscription<bool>? _membersNeedsRefreshSub;
-  late final TapGestureRecognizer _moreRecognizer;
 
   bool _isCommunityGroup(GroupProfile profile) => !profile.groupType.isPage;
 
@@ -126,7 +124,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
   @override
   void initState() {
     super.initState();
-    _moreRecognizer = TapGestureRecognizer();
     if (_isCommunityGroup(widget.profile)) {
       // The tab set depends on which sections actually have content, so the
       // controller is created in build() once that data is known.
@@ -266,7 +263,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     _membersNeedsRefreshSub?.close();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
-    _moreRecognizer.dispose();
     super.dispose();
   }
 
@@ -839,15 +835,19 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           color: secondaryColor,
           height: lineHeight,
         );
+        final textDirection = Directionality.of(context);
+        final textScaler = MediaQuery.textScalerOf(context);
 
-        final textSpan = TextSpan(text: description, style: style);
-        final textPainter = TextPainter(
-          text: textSpan,
-          maxLines: 2,
-          textDirection: Directionality.of(context),
-        );
-
-        textPainter.layout(maxWidth: constraints.maxWidth);
+        bool exceedsTwoLines(InlineSpan span) {
+          final painter = TextPainter(
+            text: span,
+            maxLines: 2,
+            textDirection: textDirection,
+            textScaler: textScaler,
+          );
+          painter.layout(maxWidth: constraints.maxWidth);
+          return painter.didExceedMaxLines;
+        }
 
         void openAboutScreen() {
           Navigator.of(context).push(
@@ -862,45 +862,50 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           );
         }
 
-        _moreRecognizer.onTap = openAboutScreen;
+        Widget tappableDescription(InlineSpan span) {
+          return GestureDetector(
+            onTap: openAboutScreen,
+            behavior: HitTestBehavior.opaque,
+            child: Text.rich(
+              span,
+              maxLines: 2,
+              overflow: TextOverflow.clip,
+              textScaler: textScaler,
+            ),
+          );
+        }
 
-        final moreTapSpan = TextSpan(
-          text: context.l10n.more,
-          style: style.copyWith(
-            color: actionColor,
-            fontWeight: FontWeight.w500,
-          ),
-          recognizer: _moreRecognizer,
-        );
-
-        if (!textPainter.didExceedMaxLines) {
-          return Text.rich(textSpan);
+        final textSpan = TextSpan(text: description, style: style);
+        if (!exceedsTwoLines(textSpan)) {
+          return tappableDescription(textSpan);
         }
 
         final moreSpan = TextSpan(
           text: '... ',
           style: style,
-          children: [moreTapSpan],
+          children: [
+            TextSpan(
+              text: context.l10n.more,
+              style: style.copyWith(
+                color: actionColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         );
 
         int endIndex = description.length;
         int startIndex = 0;
 
         while (startIndex < endIndex) {
-          int mid = startIndex + ((endIndex - startIndex) ~/ 2);
+          final mid = startIndex + ((endIndex - startIndex) ~/ 2);
           final testSpan = TextSpan(
             text: description.substring(0, mid),
             style: style,
             children: [moreSpan],
           );
-          final testPainter = TextPainter(
-            text: testSpan,
-            maxLines: 2,
-            textDirection: Directionality.of(context),
-          );
-          testPainter.layout(maxWidth: constraints.maxWidth);
 
-          if (testPainter.didExceedMaxLines) {
+          if (exceedsTwoLines(testSpan)) {
             endIndex = mid;
           } else {
             startIndex = mid + 1;
@@ -910,7 +915,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         final validLength = (startIndex - 1).clamp(0, description.length);
         final truncatedText = description.substring(0, validLength).trimRight();
 
-        return Text.rich(
+        return tappableDescription(
           TextSpan(text: truncatedText, style: style, children: [moreSpan]),
         );
       },
