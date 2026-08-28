@@ -160,35 +160,43 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     final body = _bodyController.text.trim();
     if (body.isEmpty || _sending || !_composerUnlocked) return;
     setState(() => _sending = true);
-    final result = await ref
-        .read(groupChatRepositoryProvider)
-        .sendGroupMessage(widget.groupId, body: body);
-    if (!mounted) return;
-    await result.fold(
-      (failure) async {
-        setState(() => _sending = false);
-        presentChatSendError(context, failure);
-      },
-      (message) async {
-        final userId = await _userId();
-        await ref
-            .read(groupChatRoomCacheProvider)
-            .write(
-              userId: userId,
-              groupId: widget.groupId,
-              roomId: message.roomId,
-            );
-        if (!mounted) return;
-        _bodyController.clear();
-        setState(() {
-          _sending = false;
-          _roomId = message.roomId;
-          _joinState = _JoinState.joined;
-          _composerUnlocked = true;
-        });
-        await _ensureLiveConnected();
-      },
-    );
+    try {
+      final result = await ref
+          .read(groupChatRepositoryProvider)
+          .sendGroupMessage(widget.groupId, body: body);
+      if (!mounted) return;
+      await result.fold(
+        (failure) async {
+          setState(() => _sending = false);
+          presentChatSendError(context, failure);
+        },
+        (message) async {
+          try {
+            final userId = await _userId();
+            await ref
+                .read(groupChatRoomCacheProvider)
+                .write(
+                  userId: userId,
+                  groupId: widget.groupId,
+                  roomId: message.roomId,
+                );
+          } catch (_) {
+            // Cache is best-effort; join is already committed on the server.
+          }
+          if (!mounted) return;
+          _bodyController.clear();
+          setState(() {
+            _sending = false;
+            _roomId = message.roomId;
+            _joinState = _JoinState.joined;
+            _composerUnlocked = true;
+          });
+          await _ensureLiveConnected();
+        },
+      );
+    } finally {
+      if (mounted && _sending) setState(() => _sending = false);
+    }
   }
 
   @override
