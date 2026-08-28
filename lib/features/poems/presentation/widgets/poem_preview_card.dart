@@ -53,6 +53,7 @@ class PoemPreviewCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
             child: Text(
               poem.title,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -76,36 +77,38 @@ class PoemPreviewCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 4, 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Expanded(
-                  child: Text(
-                    poem.authorName,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: primaryColor,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                Text(
+                  poem.authorName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor,
+                    height: 1.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    AppAssets.readerShare,
-                    size: 20,
-                    color: secondaryColor,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      AppAssets.readerShare,
+                      size: 20,
+                      color: secondaryColor,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    tooltip: context.l10n.share,
                   ),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
-                  ),
-                  tooltip: context.l10n.share,
                 ),
               ],
             ),
@@ -139,7 +142,11 @@ class _PoemPreviewExcerpt extends StatelessWidget {
         )..layout(maxWidth: constraints.maxWidth);
 
         if (!textPainter.didExceedMaxLines) {
-          return Text(content, style: style);
+          return Text(
+            content,
+            style: style,
+            textAlign: TextAlign.center,
+          );
         }
 
         final ellipsisSpan = TextSpan(text: _ellipsis, style: style);
@@ -175,6 +182,7 @@ class _PoemPreviewExcerpt extends StatelessWidget {
             style: style,
             children: [ellipsisSpan],
           ),
+          textAlign: TextAlign.center,
         );
       },
     );
