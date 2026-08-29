@@ -137,9 +137,7 @@ class _ConnectMainTabBar extends StatelessWidget {
   final TabController controller;
   final bool isDark;
 
-  static const _tabCount = 5;
   static const _labelStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.w700);
-  static const _labelPadding = EdgeInsets.symmetric(horizontal: 4);
 
   @override
   Widget build(BuildContext context) {
@@ -160,56 +158,35 @@ class _ConnectMainTabBar extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: dividerColor)),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final textScaler = MediaQuery.textScalerOf(context);
-          final textDirection = Directionality.of(context);
-          final slotWidth = constraints.maxWidth / _tabCount;
-          final horizontalPadding = _labelPadding.horizontal;
-          final needsScroll = labels.any(
-            (label) =>
-                _measureLabelWidth(label, textScaler, textDirection) +
-                    horizontalPadding >
-                slotWidth,
-          );
-
-          return TabBar(
-            controller: controller,
-            isScrollable: needsScroll,
-            tabAlignment:
-                needsScroll ? TabAlignment.start : TabAlignment.fill,
-            labelColor: labelColor,
-            unselectedLabelColor: unselectedColor,
-            indicatorColor: labelColor,
-            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-            splashFactory: NoSplash.splashFactory,
-            indicatorWeight: 2,
-            indicatorSize: TabBarIndicatorSize.label,
-            dividerColor: Colors.transparent,
-            labelPadding: _labelPadding,
-            labelStyle: _labelStyle,
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
+      child: TabBar(
+        controller: controller,
+        isScrollable: false,
+        tabAlignment: TabAlignment.fill,
+        padding: EdgeInsets.zero,
+        labelColor: labelColor,
+        unselectedLabelColor: unselectedColor,
+        indicatorColor: labelColor,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
+        indicatorWeight: 2,
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: Colors.transparent,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+        labelStyle: _labelStyle,
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+        tabs: [
+          for (final label in labels)
+            Tab(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(label),
+              ),
             ),
-            tabs: [for (final label in labels) Tab(text: label)],
-          );
-        },
+        ],
       ),
     );
-  }
-
-  static double _measureLabelWidth(
-    String text,
-    TextScaler textScaler,
-    TextDirection textDirection,
-  ) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: _labelStyle),
-      textDirection: textDirection,
-      textScaler: textScaler,
-      maxLines: 1,
-    )..layout();
-    return painter.width;
   }
 }
