@@ -845,6 +845,16 @@ class AppLocalizationsBo extends AppLocalizations {
   String get home_group_events => 'ཚོགས་པའི་བྱེད་སྒོ།';
 
   @override
+  String get home_poems => 'སྙན་ངག';
+
+  @override
+  String get poems_load_error =>
+      'སྙན་ངག་སྟོན་ཐུབ་མ་སོང་།\nཁྱེད་ཀྱིས་རང་གི་དྲ་རྒྱར་བསྐྱར་ཞིབ་བྱས་ཏེ་བསྐྱར་དུ་ཚོད་ལྟ་བྱོས།';
+
+  @override
+  String get poems_empty => 'ད་ལྟ་སྙན་ངག་མེད། ཡང་བསྐྱར་ཤོག';
+
+  @override
   String get connect_events_filter_all => 'ཡོངས།';
 
   @override
@@ -2065,6 +2075,10 @@ class AppLocalizationsBo extends AppLocalizations {
   @override
   String get share_quote_message =>
       'ངས་ WeBuddhist ཐོག་གི་ལེགས་བཤད་འདི་ཡག་པོ་མཐོང་སོང་བས་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། WeBuddhist མཉེན་ཆས་ཐོག་འདི་ལྟ་བུའི་ལེགས་བཤད་མང་ཙམ་ཀློགས།';
+
+  @override
+  String get share_poem_message =>
+      'ངས་ WeBuddhist ཐོག་གི་སྙན་ངག་འདི་ཡག་པོ་མཐོང་སོང་བས་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་།';
 
   @override
   String get share_mala_message =>

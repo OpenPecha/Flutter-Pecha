@@ -160,7 +160,7 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Unable to load poems.\nCheck your connection and try again',
+                context.l10n.poems_load_error,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 15, color: secondaryColor, height: 1.5),
               ),
@@ -170,7 +170,7 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
                     () => ref
                         .read(poemsViewerProvider(widget.initialPoemId).notifier)
                         .loadInitial(),
-                child: const Text('Retry'),
+                child: Text(context.l10n.retry),
               ),
             ],
           ),
@@ -181,7 +181,7 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
     if (state.hasLoaded && state.poems.isEmpty) {
       return Center(
         child: Text(
-          'No poems yet. Check back soon.',
+          context.l10n.poems_empty,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 15, color: secondaryColor, height: 1.5),
         ),

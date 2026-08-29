@@ -834,6 +834,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_group_events => 'Group Events';
 
   @override
+  String get home_poems => 'Poems';
+
+  @override
+  String get poems_load_error =>
+      'Unable to load poems.\nCheck your connection and try again';
+
+  @override
+  String get poems_empty => 'No poems yet. Check back soon.';
+
+  @override
   String get connect_events_filter_all => 'All';
 
   @override
@@ -2042,6 +2052,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get share_quote_message =>
       'I liked this quote from WeBuddhist and wanted to share it with you. Read more such insightful quotes on the WeBuddhist App';
+
+  @override
+  String get share_poem_message =>
+      'I liked this poem from WeBuddhist and wanted to share it with you.';
 
   @override
   String get share_mala_message =>

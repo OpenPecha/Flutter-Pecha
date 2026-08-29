@@ -840,6 +840,16 @@ class AppLocalizationsMn extends AppLocalizations {
   String get home_group_events => 'Бүлгийн арга хэмжээ';
 
   @override
+  String get home_poems => 'Шүлгүүд';
+
+  @override
+  String get poems_load_error =>
+      'Шүлгүүдийг ачаалах боломжгүй.\nХолболтоо шалгаад дахин оролдоно уу';
+
+  @override
+  String get poems_empty => 'Одоогоор шүлэг байхгүй. Удахгүй дахин шалгаарай.';
+
+  @override
   String get connect_events_filter_all => 'Бүгд';
 
   @override
@@ -2060,6 +2070,10 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get share_quote_message =>
       'Надад WeBuddhist дээрх энэ ишлэл таалагдсан тул тантай хуваалцахыг хүссэн. WeBuddhist аппликейшн дээр ийм мэдлэгтэй ишлэлүүдийг уншаарай.';
+
+  @override
+  String get share_poem_message =>
+      'Надад WeBuddhist дээрх энэ шүлэг таалагдсан тул тантай хуваалцахыг хүссэн.';
 
   @override
   String get share_mala_message =>

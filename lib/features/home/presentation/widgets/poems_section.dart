@@ -68,6 +68,7 @@ class _PoemsContentState extends State<_PoemsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isTibetan = context.isTibetanLocale;
@@ -98,7 +99,7 @@ class _PoemsContentState extends State<_PoemsContent> {
             children: [
               Expanded(
                 child: Text(
-                  'Poems',
+                  l10n.home_poems,
                   strutStyle: context.tibetanStrutStyle(
                     sectionTitleSize,
                     compact: true,
@@ -124,7 +125,7 @@ class _PoemsContentState extends State<_PoemsContent> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  'See all',
+                  l10n.see_all,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,

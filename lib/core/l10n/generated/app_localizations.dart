@@ -1600,6 +1600,24 @@ abstract class AppLocalizations {
   /// **'Group Events'**
   String get home_group_events;
 
+  /// No description provided for @home_poems.
+  ///
+  /// In en, this message translates to:
+  /// **'Poems'**
+  String get home_poems;
+
+  /// No description provided for @poems_load_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load poems.\nCheck your connection and try again'**
+  String get poems_load_error;
+
+  /// No description provided for @poems_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No poems yet. Check back soon.'**
+  String get poems_empty;
+
   /// No description provided for @connect_events_filter_all.
   ///
   /// In en, this message translates to:
@@ -3691,6 +3709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I liked this quote from WeBuddhist and wanted to share it with you. Read more such insightful quotes on the WeBuddhist App'**
   String get share_quote_message;
+
+  /// No description provided for @share_poem_message.
+  ///
+  /// In en, this message translates to:
+  /// **'I liked this poem from WeBuddhist and wanted to share it with you.'**
+  String get share_poem_message;
 
   /// No description provided for @share_mala_message.
   ///
