@@ -34,6 +34,7 @@ import 'package:flutter_pecha/features/more/presentation/privacy_policy_screen.d
 import 'package:flutter_pecha/features/more/presentation/delete_account_screen.dart';
 import 'package:flutter_pecha/features/more/presentation/terms_of_service_screen.dart';
 import 'package:flutter_pecha/features/onboarding/presentation/screens/onboarding_wrapper.dart';
+import 'package:flutter_pecha/features/poems/presentation/screens/poems_viewer_screen.dart';
 import 'package:flutter_pecha/features/plans/domain/entities/plan.dart';
 import 'package:flutter_pecha/features/plans/data/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/presentation/screens/plan_text_screen.dart';
@@ -326,6 +327,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) {
                   final eventId = state.pathParameters['eventId'] ?? '';
                   return GroupEventDetailScreen(eventId: eventId);
+                },
+              ),
+              GoRoute(
+                path: "poems",
+                name: "home-poems",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final initialPoemId = extra?['initialPoemId'] as String?;
+                  return PoemsViewerScreen(initialPoemId: initialPoemId);
                 },
               ),
               GoRoute(
