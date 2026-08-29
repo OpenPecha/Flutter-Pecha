@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/poems/presentation/providers/poems_providers.dart';
 import 'package:flutter_pecha/features/poems/presentation/providers/poems_viewer_notifier.dart';
 import 'package:flutter_pecha/features/poems/presentation/widgets/poem_dots_indicator.dart';
+import 'package:flutter_pecha/features/poems/presentation/utils/poem_share.dart';
 import 'package:flutter_pecha/features/poems/presentation/widgets/poem_story_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,16 +33,6 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
   PageController? _pageController;
   int _currentIndex = 0;
   bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(poemsViewerProvider(widget.initialPoemId).notifier)
-          .loadInitial();
-    });
-  }
 
   @override
   void dispose() {
@@ -74,8 +66,21 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
     }
   }
 
+  void _resetForLanguageChange() {
+    _pageController?.dispose();
+    _pageController = null;
+    _initialized = false;
+    _currentIndex = 0;
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(contentLanguageProvider, (previous, next) {
+      if (previous != null && previous != next) {
+        _resetForLanguageChange();
+      }
+    });
+
     final state = ref.watch(poemsViewerProvider(widget.initialPoemId));
 
     if (!_initialized && state.hasLoaded && state.poems.isNotEmpty) {
@@ -112,6 +117,10 @@ class _PoemsViewerScreenState extends ConsumerState<PoemsViewerScreen> {
               title: currentPoem?.title,
               showTitle: showTitleInAppBar,
               onBack: () => context.canPop() ? context.pop() : context.go('/home'),
+              onShare:
+                  currentPoem != null
+                      ? () => sharePoem(context, currentPoem)
+                      : null,
             ),
             Expanded(child: _buildBody(context, state, isDark)),
             if (_pageController != null && state.poems.isNotEmpty)
@@ -198,12 +207,14 @@ class _TopBar extends StatelessWidget {
     required this.onBack,
     this.title,
     this.showTitle = false,
+    this.onShare,
   });
 
   final Color iconColor;
   final VoidCallback onBack;
   final String? title;
   final bool showTitle;
+  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +247,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: onShare,
             icon: Icon(AppAssets.readerShare, color: iconColor),
             tooltip: context.l10n.share,
           ),

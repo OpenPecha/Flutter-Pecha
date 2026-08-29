@@ -141,4 +141,15 @@ class DeepLinkUrlBuilder {
       pathSegments: ['open', 'group', groupId, 'recitation-collections', collectionId],
     );
   }
+
+  /// Returns a link that opens the poems viewer on a specific poem.
+  ///
+  /// Format: https://webuddhist.com/open/poem/{poemId}
+  static Uri poemLink({required String poemId}) {
+    return Uri(
+      scheme: 'https',
+      host: _host,
+      pathSegments: ['open', 'poem', poemId],
+    );
+  }
 }

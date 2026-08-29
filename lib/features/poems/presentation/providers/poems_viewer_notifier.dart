@@ -83,9 +83,11 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
       skip: 0,
       limit: _pageSize,
     );
+    if (!mounted) return;
 
     await result.fold(
       (failure) async {
+        if (!mounted) return;
         state = state.copyWith(
           isLoading: false,
           error: failure.message,
@@ -102,8 +104,10 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
             initialIndex = matchedIndex;
           } else {
             final single = await repository.getPoem(targetId);
+            if (!mounted) return;
             final lookupFailed = single.fold(
               (failure) {
+                if (!mounted) return true;
                 state = state.copyWith(
                   isLoading: false,
                   error: failure.message,
@@ -120,6 +124,7 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
           }
         }
 
+        if (!mounted) return;
         state = state.copyWith(
           poems: poems,
           isLoading: false,
@@ -145,14 +150,17 @@ class PoemsViewerNotifier extends StateNotifier<PoemsViewerState> {
       skip: state.skip,
       limit: _pageSize,
     );
+    if (!mounted) return;
 
     result.fold(
       (failure) {
+        if (!mounted) return;
         // Keep existing poems visible; leave hasMore unchanged so the reader
         // can retry by scrolling near the end again.
         state = state.copyWith(isLoadingMore: false);
       },
       (page) {
+        if (!mounted) return;
         final existingIds = state.poems.map((p) => p.id).toSet();
         final newPoems =
             page.poems.where((p) => !existingIds.contains(p.id)).toList();
@@ -174,10 +182,13 @@ final poemsViewerProvider = StateNotifierProvider.autoDispose
       ref,
       initialPoemId,
     ) {
-      final language = poemsApiLanguageCode(ref.watch(contentLanguageProvider));
-      return PoemsViewerNotifier(
+      ref.watch(contentLanguageProvider);
+      final language = poemsApiLanguageCode(ref.read(contentLanguageProvider));
+      final notifier = PoemsViewerNotifier(
         ref: ref,
         language: language,
         initialPoemId: initialPoemId,
       );
+      notifier.loadInitial();
+      return notifier;
     });

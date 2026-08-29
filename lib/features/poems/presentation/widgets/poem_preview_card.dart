@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/poems/domain/entities/poem.dart';
+import 'package:flutter_pecha/features/poems/presentation/utils/poem_share.dart';
 
 /// A single poem preview shown on the home page — cover image, title, a
 /// truncated excerpt, and the author, matching the "Poems" home section.
@@ -77,38 +78,35 @@ class PoemPreviewCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 4, 4),
-            child: Stack(
-              alignment: Alignment.center,
+            child: Row(
               children: [
-                Text(
-                  poem.authorName,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: primaryColor,
-                    height: 1.2,
+                Expanded(
+                  child: Text(
+                    poem.authorName,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      AppAssets.readerShare,
-                      size: 20,
-                      color: secondaryColor,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
-                    ),
-                    tooltip: context.l10n.share,
+                IconButton(
+                  onPressed: () => sharePoem(context, poem),
+                  icon: Icon(
+                    AppAssets.readerShare,
+                    size: 20,
+                    color: secondaryColor,
                   ),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  tooltip: context.l10n.share,
                 ),
               ],
             ),
