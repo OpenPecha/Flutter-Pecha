@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/extensions/context_ext.dart';
-import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_thread_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_thread_rows.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_date_separator.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_empty_state.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_error_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_message_bubble.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -82,7 +81,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     }
 
     if (state.error != null && state.messages.isEmpty) {
-      return _ThreadError(onRetry: notifier.retry);
+      return GroupChatErrorState(onRetry: notifier.retry);
     }
 
     if (state.messages.isEmpty) return const GroupChatEmptyState();
@@ -140,45 +139,6 @@ class _LoadingMoreFooter extends StatelessWidget {
           width: 20,
           height: 20,
           child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-    );
-  }
-}
-
-class _ThreadError extends StatelessWidget {
-  const _ThreadError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.l10n.group_chat_load_failed,
-              textAlign: TextAlign.center,
-              strutStyle: context.tibetanStrutStyle(14),
-              style: TextStyle(
-                fontSize: 14,
-                color:
-                    isDark
-                        ? AppColors.textTertiaryDark
-                        : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(context.l10n.group_chat_retry),
-            ),
-          ],
         ),
       ),
     );
