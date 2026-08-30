@@ -168,7 +168,40 @@ class PushMessageNavigator {
   void handleData(Map<String, dynamic> data) => _schedule(data);
 
   void _schedule(Map<String, dynamic> data) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _route(data));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _routeWhenSettled(data),
+    );
+  }
+
+  /// Defers routing until the router has left `/splash`.
+  ///
+  /// A cold start via notification tap (`getInitialMessage`) races auth
+  /// restoration: [RouteGuard] sends every destination to `/splash` while
+  /// [AuthState.isLoading] is true and does not remember it — the pending-route
+  /// mechanism in [RouteGuard] only captures unauthenticated attempts, not
+  /// loading ones — so pushing the real destination now would just get
+  /// redirected away and lost, landing the user on Home once auth settles.
+  /// Mirrors `AppLinksDeepLinkService._dispatchWhenRouterSettled`, which
+  /// solves the identical race for app-link cold starts.
+  void _routeWhenSettled(Map<String, dynamic> data) {
+    final router = _ref.read(appRouterProvider);
+    final delegate = router.routerDelegate;
+
+    bool isSettled() =>
+        delegate.currentConfiguration.uri.path != AppRoutes.splash;
+
+    if (isSettled()) {
+      _route(data);
+      return;
+    }
+
+    void onRouterChanged() {
+      if (!isSettled()) return;
+      delegate.removeListener(onRouterChanged);
+      _route(data);
+    }
+
+    delegate.addListener(onRouterChanged);
   }
 
   void _route(Map<String, dynamic> data) {
