@@ -45,6 +45,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   Timer? _reconnectTimer;
   int _reconnectAttempt = 0;
   bool _hadLiveSession = false;
+  bool _connectingLive = false;
   bool _redirecting = false;
   bool _sending = false;
   bool _bootstrapped = false;
@@ -174,7 +175,13 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// an error handler, so a failure here must degrade to a retry rather than
   /// escape as an unhandled async error.
   Future<void> _ensureLiveConnected() async {
-    if (_live != null || _joinState != _JoinState.joined) return;
+    if (_live != null || _connectingLive || _joinState != _JoinState.joined) {
+      return;
+    }
+    // Set synchronously, before the first await, so a second caller racing in
+    // before token retrieval resolves sees this and backs off instead of
+    // opening a second socket that would silently orphan this one.
+    _connectingLive = true;
 
     final String? token;
     try {
@@ -182,10 +189,14 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     } catch (_) {
       // A renewal can fail transiently; back off and try the whole thing again
       // instead of leaving live updates silently disconnected.
+      _connectingLive = false;
       _scheduleReconnect();
       return;
     }
-    if (!mounted || token == null) return;
+    if (!mounted || token == null) {
+      _connectingLive = false;
+      return;
+    }
 
     final uri = ChatLiveClient.liveUri(
       restBaseUrl: ref.read(apiConfigProvider).baseUrl,
@@ -195,6 +206,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     );
     final client = ChatLiveClient();
     _live = client;
+    _connectingLive = false;
     final reconnected = _hadLiveSession;
     _hadLiveSession = true;
 
@@ -373,18 +385,23 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
       ),
     );
 
+    // A failed re-check is not a confirmed non-member — it means the cause is
+    // unknown, so fall back to the last known-good state instead of evicting
+    // someone who is very likely still a member.
     final isMember = switch (followState) {
       GroupFollowSuccess(isFollowing: final following) => following,
       GroupFollowLoading() => profile.isFollowing,
-      GroupFollowFailure() => false,
+      GroupFollowFailure() => profile.isFollowing,
     };
+    final confirmedNonMember =
+        followState is GroupFollowSuccess && !followState.isFollowing;
 
     if (followState is GroupFollowLoading && !profile.isFollowing) {
       return _buildShell(context, profile: profile, body: _buildLoading());
     }
 
     if (!isMember) {
-      _leaveChat(toHome: false, notAMember: true);
+      _leaveChat(toHome: false, notAMember: confirmedNonMember);
       return _buildShell(
         context,
         profile: profile,
