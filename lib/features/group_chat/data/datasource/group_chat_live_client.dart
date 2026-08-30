@@ -66,6 +66,7 @@ class ChatLiveClient {
     required String restBaseUrl,
     required String token,
     required String groupId,
+    String? roomId,
   }) {
     final rest = Uri.parse(restBaseUrl);
     final scheme = rest.scheme == 'http' ? 'ws' : 'wss';
@@ -73,7 +74,11 @@ class ChatLiveClient {
     return rest.replace(
       scheme: scheme,
       path: '$basePath/chat/live',
-      queryParameters: {'token': token, 'group_id': groupId},
+      queryParameters: {
+        'token': token,
+        'group_id': groupId,
+        if (roomId != null && roomId.isNotEmpty) 'room_id': roomId,
+      },
     );
   }
 

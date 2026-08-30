@@ -2343,9 +2343,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_chat_title => 'Chat';
 
   @override
-  String get group_chat_coming_soon => 'Group chat is coming soon.';
-
-  @override
   String get group_chat_inappropriate =>
       'This message couldn\'t be sent because it contains language that isn\'t allowed.';
 
@@ -2357,4 +2354,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'Message';
+
+  @override
+  String get group_chat_join_to_send => 'Join chat to send message.';
+
+  @override
+  String get group_chat_today => 'Today';
+
+  @override
+  String get group_chat_yesterday => 'Yesterday';
+
+  @override
+  String get group_chat_empty_title => 'No messages yet';
+
+  @override
+  String get group_chat_empty_body => 'Start the conversation with your group.';
+
+  @override
+  String get group_chat_load_failed => 'Messages couldn\'t be loaded.';
+
+  @override
+  String get group_chat_retry => 'Retry';
+
+  @override
+  String get group_chat_unknown_sender => 'Member';
 }

@@ -20,11 +20,16 @@ class GroupChatHeader extends StatelessWidget {
     required this.isDark,
     required this.onBack,
     this.profile,
+    this.onOverflow,
   });
 
   final bool isDark;
   final VoidCallback onBack;
   final GroupProfile? profile;
+
+  /// Notification toggle. Null keeps the button inert but present, so wiring
+  /// mute later needs no layout change.
+  final VoidCallback? onOverflow;
 
   static const double _avatarSize = 40;
 
@@ -44,7 +49,10 @@ class GroupChatHeader extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(child: _Identity(profile: group, isDark: isDark)),
           ],
-          const SizedBox(width: 48, height: 48),
+          IconButton(
+            icon: const Icon(AppAssets.bellSlash),
+            onPressed: onOverflow,
+          ),
         ],
       ),
     );

@@ -2369,10 +2369,6 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_chat_title => 'གླེང་མོལ།';
 
   @override
-  String get group_chat_coming_soon =>
-      'ཚོགས་པའི་གླེང་མོལ་མྱུར་དུ་འོང་རྒྱུ་ཡིན།';
-
-  @override
   String get group_chat_inappropriate =>
       'སྐད་ཆ་འདི་འབྱོར་མི་ཆོག་པས་འཕྲིན་ཐུང་འདི་གཏོང་མ་ཐུབ།';
 
@@ -2384,4 +2380,29 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'འཕྲིན་ཐུང་།';
+
+  @override
+  String get group_chat_join_to_send => 'འཕྲིན་ཐུང་གཏོང་བར་གླེང་མོལ་ལ་ཞུགས།';
+
+  @override
+  String get group_chat_today => 'དེ་རིང་།';
+
+  @override
+  String get group_chat_yesterday => 'ཁ་སང་།';
+
+  @override
+  String get group_chat_empty_title => 'ད་དུང་འཕྲིན་ཐུང་མེད།';
+
+  @override
+  String get group_chat_empty_body =>
+      'ཁྱེད་ཀྱི་ཚོགས་པ་དང་མཉམ་དུ་གླེང་མོལ་འགོ་འཛུགས།';
+
+  @override
+  String get group_chat_load_failed => 'འཕྲིན་ཐུང་སྣོན་འཇུག་བྱེད་མ་ཐུབ།';
+
+  @override
+  String get group_chat_retry => 'བསྐྱར་དུ་འབད།';
+
+  @override
+  String get group_chat_unknown_sender => 'ཚོགས་མི།';
 }

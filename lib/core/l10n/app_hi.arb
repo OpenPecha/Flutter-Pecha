@@ -1009,9 +1009,16 @@
   },
   "timer_notification_complete": "आपका सत्र पूरा हुआ",
   "group_chat_title": "चैट",
-  "group_chat_coming_soon": "समूह चैट जल्द आ रही है।",
   "group_chat_inappropriate": "यह संदेश नहीं भेजा जा सका क्योंकि इसमें अनुचित भाषा है।",
   "group_chat_not_a_member": "केवल सदस्य इस चैट को खोल सकते हैं।",
   "group_chat_open": "चैट",
-  "group_chat_message_hint": "संदेश"
+  "group_chat_message_hint": "संदेश",
+  "group_chat_join_to_send": "संदेश भेजने के लिए चैट से जुड़ें।",
+  "group_chat_today": "आज",
+  "group_chat_yesterday": "कल",
+  "group_chat_empty_title": "अभी तक कोई संदेश नहीं",
+  "group_chat_empty_body": "अपने समूह के साथ बातचीत शुरू करें।",
+  "group_chat_load_failed": "संदेश लोड नहीं हो सके।",
+  "group_chat_retry": "पुनः प्रयास करें",
+  "group_chat_unknown_sender": "सदस्य"
 }

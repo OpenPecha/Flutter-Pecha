@@ -66,4 +66,44 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
       return Left(ExceptionMapper.map(e, context: 'sendGroupMessage'));
     }
   }
+
+  @override
+  Future<Either<Failure, ChatRoomMembersPage>> listRoomMembers(
+    String roomId, {
+    int skip = 0,
+    int limit = 100,
+  }) async {
+    try {
+      return Right(
+        await _remote.listRoomMembers(roomId, skip: skip, limit: limit),
+      );
+    } catch (e) {
+      return Left(ExceptionMapper.map(e, context: 'listRoomMembers'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ChatPeoplePage>> listGroupPeople(
+    String groupId, {
+    int skip = 0,
+    int limit = 100,
+  }) async {
+    try {
+      return Right(
+        await _remote.listGroupPeople(groupId, skip: skip, limit: limit),
+      );
+    } catch (e) {
+      return Left(ExceptionMapper.map(e, context: 'listGroupPeople'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> markRoomRead(String roomId) async {
+    try {
+      await _remote.markRoomRead(roomId);
+      return const Right(unit);
+    } catch (e) {
+      return Left(ExceptionMapper.map(e, context: 'markRoomRead'));
+    }
+  }
 }

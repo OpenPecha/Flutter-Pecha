@@ -69,5 +69,6 @@ DEVELOPER_ARCHITECTURE_GUIDE.docx
 lib/features/practice/specs/routines-openapi.yaml
 
 # claude
+.claude
 CLAUDE.md
 /docs/notification/notification.md

@@ -2367,9 +2367,6 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_chat_title => 'Чат';
 
   @override
-  String get group_chat_coming_soon => 'Бүлгийн чат удахгүй нээгдэнэ.';
-
-  @override
   String get group_chat_inappropriate =>
       'Зөвшөөрөгдөөгүй үг агуулсан тул энэ мессежийг илгээж чадсангүй.';
 
@@ -2382,4 +2379,29 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_chat_message_hint => 'Мессеж';
+
+  @override
+  String get group_chat_join_to_send =>
+      'Мессеж илгээхийн тулд чатад нэгдээрэй.';
+
+  @override
+  String get group_chat_today => 'Өнөөдөр';
+
+  @override
+  String get group_chat_yesterday => 'Өчигдөр';
+
+  @override
+  String get group_chat_empty_title => 'Одоогоор мессеж алга';
+
+  @override
+  String get group_chat_empty_body => 'Бүлгээрээ яриа эхлүүлээрэй.';
+
+  @override
+  String get group_chat_load_failed => 'Мессежийг ачаалж чадсангүй.';
+
+  @override
+  String get group_chat_retry => 'Дахин оролдох';
+
+  @override
+  String get group_chat_unknown_sender => 'Гишүүн';
 }

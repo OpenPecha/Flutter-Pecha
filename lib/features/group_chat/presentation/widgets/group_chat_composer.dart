@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 
 /// Message composer pinned to the bottom of the chat.
 ///
-/// Geometry follows the connect comment composer: a pill field with a circular
-/// send button, padded past the keyboard so the screen itself does not resize.
+/// Own avatar on the left, then a pill field. The send button only exists once
+/// something has been typed — an empty field is avatar plus field, full width.
 class GroupChatComposer extends StatelessWidget {
   const GroupChatComposer({
     super.key,
@@ -13,6 +16,9 @@ class GroupChatComposer extends StatelessWidget {
     required this.hintText,
     required this.isSending,
     required this.onSubmit,
+    this.enabled = true,
+    this.avatarUrl,
+    this.displayName,
   });
 
   final TextEditingController controller;
@@ -20,9 +26,15 @@ class GroupChatComposer extends StatelessWidget {
   final String hintText;
   final bool isSending;
   final VoidCallback onSubmit;
+  final bool enabled;
+
+  /// Own avatar and name for the leading circle.
+  final String? avatarUrl;
+  final String? displayName;
 
   static const double _fieldHeight = 44;
   static const double _sendButtonSize = 44;
+  static const double _avatarSize = 36;
 
   @override
   Widget build(BuildContext context) {
@@ -42,29 +54,94 @@ class GroupChatComposer extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          _OwnAvatar(
+            avatarUrl: avatarUrl,
+            displayName: displayName,
+            isDark: isDark,
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: _MessageField(
               controller: controller,
               focusNode: focusNode,
               isDark: isDark,
               hintText: hintText,
+              enabled: enabled,
               onSubmit: onSubmit,
             ),
           ),
-          const SizedBox(width: 10),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, _) {
-              final canSend = value.text.trim().isNotEmpty && !isSending;
-              return _SendButton(
-                canSend: canSend,
-                isSending: isSending,
-                isDark: isDark,
-                onPressed: canSend ? onSubmit : null,
+              final hasText = value.text.trim().isNotEmpty;
+              // Nothing typed, nothing to send: the button is absent rather
+              // than disabled, and the field takes the full width.
+              if (!hasText && !isSending) return const SizedBox.shrink();
+              final canSend = enabled && hasText && !isSending;
+              return Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: _SendButton(
+                  canSend: canSend,
+                  isSending: isSending,
+                  isDark: isDark,
+                  onPressed: canSend ? onSubmit : null,
+                ),
               );
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OwnAvatar extends StatelessWidget {
+  const _OwnAvatar({
+    required this.avatarUrl,
+    required this.displayName,
+    required this.isDark,
+  });
+
+  final String? avatarUrl;
+  final String? displayName;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = avatarUrl;
+    final hasUrl = url != null && url.isNotEmpty;
+
+    return ClipOval(
+      child: SizedBox(
+        width: GroupChatComposer._avatarSize,
+        height: GroupChatComposer._avatarSize,
+        child:
+            hasUrl
+                ? CachedNetworkImageWidget(
+                  key: ValueKey(url),
+                  imageUrl: url,
+                  width: GroupChatComposer._avatarSize,
+                  height: GroupChatComposer._avatarSize,
+                  fit: BoxFit.cover,
+                  errorWidget: _initials(),
+                )
+                : _initials(),
+      ),
+    );
+  }
+
+  Widget _initials() {
+    return ColoredBox(
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+      child: Center(
+        child: Text(
+          chatSenderInitials(displayName),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.grey500 : AppColors.grey600,
+          ),
+        ),
       ),
     );
   }
@@ -76,6 +153,7 @@ class _MessageField extends StatelessWidget {
     required this.focusNode,
     required this.isDark,
     required this.hintText,
+    required this.enabled,
     required this.onSubmit,
   });
 
@@ -83,6 +161,7 @@ class _MessageField extends StatelessWidget {
   final FocusNode focusNode;
   final bool isDark;
   final String hintText;
+  final bool enabled;
   final VoidCallback onSubmit;
 
   @override
@@ -95,10 +174,13 @@ class _MessageField extends StatelessWidget {
     return TextField(
       controller: controller,
       focusNode: focusNode,
+      enabled: enabled,
       minLines: 1,
       maxLines: 4,
       textInputAction: TextInputAction.send,
-      onSubmitted: (_) => onSubmit(),
+      onSubmitted: (_) {
+        if (enabled) onSubmit();
+      },
       style: TextStyle(
         fontSize: 15,
         height: 1.2,
@@ -123,6 +205,10 @@ class _MessageField extends StatelessWidget {
           borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radius),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
           borderSide: BorderSide(color: borderColor),
         ),
@@ -153,9 +239,9 @@ class _SendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final backgroundColor =
-        canSend
-            ? (isDark ? AppColors.grey600 : AppColors.grey800)
-            : (isDark ? AppColors.grey800 : AppColors.grey300);
+        isDark ? AppColors.surfaceWhite : AppColors.textPrimary;
+    final foregroundColor =
+        isDark ? AppColors.textPrimary : AppColors.surfaceWhite;
 
     return Material(
       color: backgroundColor,
@@ -175,21 +261,13 @@ class _SendButton extends StatelessWidget {
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color:
-                            isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.surfaceWhite,
+                        color: foregroundColor,
                       ),
                     )
                     : Icon(
-                      Icons.arrow_upward_rounded,
+                      AppAssets.paperPlaneRight,
                       size: 20,
-                      color:
-                          canSend
-                              ? AppColors.surfaceWhite
-                              : (isDark
-                                  ? AppColors.textTertiaryDark
-                                  : AppColors.surfaceWhite),
+                      color: foregroundColor,
                     ),
           ),
         ),

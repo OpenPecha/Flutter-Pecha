@@ -19,6 +19,18 @@ void main() {
       expect(uri.path, '/api/v1/chat/live');
       expect(uri.queryParameters['token'], 'tok');
       expect(uri.queryParameters['group_id'], 'g1');
+      expect(uri.queryParameters.containsKey('room_id'), isFalse);
+    });
+
+    test('liveUri includes room_id when provided', () {
+      final uri = ChatLiveClient.liveUri(
+        restBaseUrl: 'https://api.example.com/api/v1',
+        token: 'tok',
+        groupId: 'g1',
+        roomId: 'r9',
+      );
+      expect(uri.queryParameters['group_id'], 'g1');
+      expect(uri.queryParameters['room_id'], 'r9');
     });
 
     test('liveUri maps http to ws', () {
