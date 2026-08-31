@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/core/widgets/skeletons/skeletons.dart';
@@ -189,12 +190,15 @@ class SeriesDetailScreen extends ConsumerWidget {
       seriesId: series.id,
       seriesName: series.title,
       onAddToPractices: () => _onAddToPractices(context, ref, series),
-      onShare: () => _onShare(context, series),
+      onShare: () => _onShare(context, ref, series),
     );
   }
 
-  Future<void> _onShare(BuildContext context, Series series) async {
-    final url = DeepLinkUrlBuilder.seriesLink(seriesId: series.id).toString();
+  Future<void> _onShare(BuildContext context, WidgetRef ref, Series series) async {
+    final longUrl = DeepLinkUrlBuilder.seriesLink(seriesId: series.id).toString();
+    final url = await resolveShareUrlRef(ref, longUrl);
+    if (!context.mounted) return;
+
     final message = context.l10n.series_share_message(series.title, url);
     await SharePlus.instance.share(ShareParams(text: message));
   }

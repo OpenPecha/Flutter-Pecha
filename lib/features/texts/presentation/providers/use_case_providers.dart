@@ -1,19 +1,15 @@
 import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/features/texts/data/datasource/collections_remote_datasource.dart';
 import 'package:flutter_pecha/features/texts/data/datasource/segment_remote_datasource.dart';
-import 'package:flutter_pecha/features/texts/data/datasource/share_remote_datasource.dart';
 import 'package:flutter_pecha/features/texts/data/datasource/text_remote_datasource.dart';
 import 'package:flutter_pecha/features/texts/data/models/segment_detail_with_text.dart';
 import 'package:flutter_pecha/features/texts/data/repositories/collections_repository.dart';
 import 'package:flutter_pecha/features/texts/data/repositories/segment_repository.dart';
-import 'package:flutter_pecha/features/texts/data/repositories/share_repository.dart';
 import 'package:flutter_pecha/features/texts/data/repositories/texts_repository.dart';
 import 'package:flutter_pecha/features/texts/domain/repositories/collections_repository.dart';
 import 'package:flutter_pecha/features/texts/domain/repositories/segment_repository.dart';
-import 'package:flutter_pecha/features/texts/domain/repositories/share_repository.dart';
 import 'package:flutter_pecha/features/texts/domain/usecases/collections_usecases.dart';
 import 'package:flutter_pecha/features/texts/domain/usecases/segment_usecases.dart';
-import 'package:flutter_pecha/features/texts/domain/usecases/share_usecases.dart';
 import 'package:flutter_pecha/features/texts/domain/usecases/text_content_usecases.dart';
 import 'package:flutter_pecha/features/texts/domain/usecases/text_search_usecases.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,14 +38,6 @@ final collectionsDomainRepositoryProvider =
     Provider<CollectionsRepositoryInterface>((ref) {
   return CollectionsRepository(
     remoteDatasource: CollectionsRemoteDatasource(dio: ref.watch(dioProvider)),
-  );
-});
-
-/// Provider for the ShareRepository implementation (domain interface).
-final shareDomainRepositoryProvider =
-    Provider<ShareRepositoryInterface>((ref) {
-  return ShareRepository(
-    remoteDatasource: ShareRemoteDatasource(dio: ref.watch(dioProvider)),
   );
 });
 
@@ -133,13 +121,6 @@ final getSegmentTranslationsUseCaseProvider =
 /// Provider for GetCollectionsUseCase.
 final getCollectionsUseCaseProvider = Provider<GetCollectionsUseCase>((ref) {
   return GetCollectionsUseCase(ref.watch(collectionsDomainRepositoryProvider));
-});
-
-// ========== Share Use Case Providers ==========
-
-/// Provider for GetShareUrlUseCase.
-final getShareUrlUseCaseProvider = Provider<GetShareUrlUseCase>((ref) {
-  return GetShareUrlUseCase(ref.watch(shareDomainRepositoryProvider));
 });
 
 // ========== Segment Detail Provider ==========
