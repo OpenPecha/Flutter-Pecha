@@ -845,6 +845,16 @@ class AppLocalizationsBo extends AppLocalizations {
   String get home_group_events => 'ཚོགས་པའི་བྱེད་སྒོ།';
 
   @override
+  String get home_poems => 'སྙན་ངག';
+
+  @override
+  String get poems_load_error =>
+      'སྙན་ངག་སྟོན་ཐུབ་མ་སོང་།\nཁྱེད་ཀྱིས་རང་གི་དྲ་རྒྱར་བསྐྱར་ཞིབ་བྱས་ཏེ་བསྐྱར་དུ་ཚོད་ལྟ་བྱོས།';
+
+  @override
+  String get poems_empty => 'ད་ལྟ་སྙན་ངག་མེད། ཡང་བསྐྱར་ཤོག';
+
+  @override
   String get connect_events_filter_all => 'ཡོངས།';
 
   @override
@@ -876,6 +886,9 @@ class AppLocalizationsBo extends AppLocalizations {
   String connect_event_participants_attending(int count) {
     return 'ཞུགས་མཁན་ $count';
   }
+
+  @override
+  String get connect_event_participants_empty => 'ད་དུང་ཞུགས་མཁན་མེད།';
 
   @override
   String get search_groups => 'ཚོགས་པ་འཚོལ།';
@@ -1842,6 +1855,50 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_invite => 'གདན་ཞུ་བྱེད།';
 
   @override
+  String get group_request_to_join => 'ཞུགས་པར་རེ་ཞུ།';
+
+  @override
+  String get group_request => 'རེ་ཞུ།';
+
+  @override
+  String get group_request_sent => 'རེ་ཞུ་བཏང་ཟིན།';
+
+  @override
+  String get group_join_request_title => 'ཞུགས་པར་རེ་ཞུ།';
+
+  @override
+  String get group_join_request_message_label => 'འཕྲིན་ཡིག (འདེམས་རུང་།)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'ཁྱེད་ཀྱིས་ཇི་ལྟར་ཉམས་ལེན་བྱེད་དམ། སུ་ཞིག་གིས་ཁྱེད་རང་གདན་འདྲེན་བྱས་སམ།';
+
+  @override
+  String get group_join_request_send => 'རེ་ཞུ་བཏང་།';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'རེ་ཞུ་བཏང་ཟིན། — དོ་དམ་པས་བརྟག་དཔྱད་གནང་རྒྱུ་ཡིན།';
+
+  @override
+  String get group_join_request_error =>
+      'རེ་ཞུ་བཏང་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
+
+  @override
+  String get group_members_only_title => 'ཚོགས་མི་ཁོ་ན།';
+
+  @override
+  String get group_members_only_message =>
+      'ཚོགས་པ་འདིའི་བཟླས་བརྗོད་དང་བྱེད་སྒོ། སྤེལ་ཡིག་བལྟ་ཆེད་ཞུགས་རོགས།';
+
+  @override
+  String get group_join_request_waiting_title => 'དོ་དམ་པའི་བརྡར་སྒུག';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'ཁྱེད་ཀྱི་རེ་ཞུ་བརྟག་དཔྱད་ཚར་རྗེས་ང་ཚོས་ཁྱེད་ལ་གསལ་བརྡ་གནང་རྒྱུ་ཡིན།';
+
+  @override
   String get group_members_load_error =>
       'ཚོགས་མི་སྟོན་ཐུབ་མ་སོང་། ཡང་བསྐྱར་ཚོད་ལྟ་གནང་རོགས།';
 
@@ -2018,6 +2075,10 @@ class AppLocalizationsBo extends AppLocalizations {
   @override
   String get share_quote_message =>
       'ངས་ WeBuddhist ཐོག་གི་ལེགས་བཤད་འདི་ཡག་པོ་མཐོང་སོང་བས་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་། WeBuddhist མཉེན་ཆས་ཐོག་འདི་ལྟ་བུའི་ལེགས་བཤད་མང་ཙམ་ཀློགས།';
+
+  @override
+  String get share_poem_message =>
+      'ངས་ WeBuddhist ཐོག་གི་སྙན་ངག་འདི་ཡག་པོ་མཐོང་སོང་བས་ཁྱེད་ལ་མཉམ་སྤྱོད་བྱེད་འདོད་བྱུང་།';
 
   @override
   String get share_mala_message =>
@@ -2303,4 +2364,45 @@ class AppLocalizationsBo extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'ང་ WeBuddhist ཐོག་ $accumulation གྲངས་གསོག་ནང་མཉམ་ཞུགས་བྱེད་བཞིན་ཡོད། ཁྱེད་ཀྱང་ང་དང་མཉམ་དུ་ཞུགས་རོགས།';
   }
+
+  @override
+  String get group_chat_title => 'གླེང་མོལ།';
+
+  @override
+  String get group_chat_inappropriate =>
+      'སྐད་ཆ་འདི་འབྱོར་མི་ཆོག་པས་འཕྲིན་ཐུང་འདི་གཏོང་མ་ཐུབ།';
+
+  @override
+  String get group_chat_not_a_member => 'ཚོགས་མི་ཁོ་ནས་གླེང་མོལ་འདི་ཕྱེ་ཐུབ།';
+
+  @override
+  String get group_chat_open => 'གླེང་མོལ།';
+
+  @override
+  String get group_chat_message_hint => 'འཕྲིན་ཐུང་།';
+
+  @override
+  String get group_chat_join_to_send => 'འཕྲིན་ཐུང་གཏོང་བར་གླེང་མོལ་ལ་ཞུགས།';
+
+  @override
+  String get group_chat_today => 'དེ་རིང་།';
+
+  @override
+  String get group_chat_yesterday => 'ཁ་སང་།';
+
+  @override
+  String get group_chat_empty_title => 'ད་དུང་འཕྲིན་ཐུང་མེད།';
+
+  @override
+  String get group_chat_empty_body =>
+      'ཁྱེད་ཀྱི་ཚོགས་པ་དང་མཉམ་དུ་གླེང་མོལ་འགོ་འཛུགས།';
+
+  @override
+  String get group_chat_load_failed => 'འཕྲིན་ཐུང་སྣོན་འཇུག་བྱེད་མ་ཐུབ།';
+
+  @override
+  String get group_chat_retry => 'བསྐྱར་དུ་འབད།';
+
+  @override
+  String get group_chat_unknown_sender => 'ཚོགས་མི།';
 }

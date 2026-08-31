@@ -786,6 +786,19 @@
     }
   },
   "group_invite": "Урих",
+  "group_request_to_join": "Нэгдэх хүсэлт илгээх",
+  "group_request": "Хүсэлт",
+  "group_request_sent": "Хүсэлт илгээгдсэн",
+  "group_join_request_title": "Нэгдэх хүсэлт",
+  "group_join_request_message_label": "Зурвас (заавал биш)",
+  "group_join_request_message_hint": "Та хэрхэн дадлага хийдэг вэ, эсвэл хэн урисан бэ?",
+  "group_join_request_send": "Хүсэлт илгээх",
+  "group_join_request_sent_snackbar": "Хүсэлт илгээгдсэн — админ үүнийг шалгана.",
+  "group_join_request_error": "Хүсэлт илгээж чадсангүй. Дахин оролдоно уу.",
+  "group_members_only_title": "Зөвхөн гишүүд",
+  "group_members_only_message": "Энэ бүлгийн уншлага, арга хэмжээ, нийтлэлийг харахын тулд нэгдээрэй.",
+  "group_join_request_waiting_title": "Админы хариу хүлээж байна",
+  "group_join_request_waiting_message": "Таны хүсэлт шалгагдмагц бид танд мэдэгдэх болно.",
   "group_members_load_error": "Гишүүдийг ачаалж чадсангүй. Дахин оролдоно уу.",
   "group_followers_load_error": "Дагагчдыг ачаалж чадсангүй. Дахин оролдоно уу.",
   "group_members_empty": "Одоогоор гишүүн байхгүй",
@@ -827,6 +840,7 @@
   "share_streak_message": "Би өдөр тутмын дадлагын зуршил хэлбэрийг бүрдүүлж байгаа бөгөөд үүнийгээ танд хуваалцахыг хүссэн. Найзтайгаа хамт хэвшлээ хадгалахад илүү хялбар байдаг. WeBuddhist дээр надтай нэгдээрэй.",
   "share_chant_message": "Би энэ дуулалыг тантай хуваалцахыг хүссэн. Та үүнийг дадлагажуулж, WeBuddhist дээр бусад дуулал болон судруудын бүтэн номын санг олж болно.",
   "share_quote_message": "Надад WeBuddhist дээрх энэ ишлэл таалагдсан тул тантай хуваалцахыг хүссэн. WeBuddhist аппликейшн дээр ийм мэдлэгтэй ишлэлүүдийг уншаарай.",
+  "share_poem_message": "Надад WeBuddhist дээрх энэ шүлэг таалагдсан тул тантай хуваалцахыг хүссэн.",
   "share_mala_message": "Би WeBuddhist дээрх энэ тоолуурыг ашиглаж байгаа бөгөөд тантай хуваалцахыг хүссэн. Хаана ч байсан дадлагажуулахад хялбар арга юм.",
   "share_passage_message": "Надад энэ хэсэг таалагдсан тул тантай хуваалцахыг хүссэн. WeBuddhist дээр бүтэн ишлэлийг уншиж болно.",
   "share_timer_message": "Би WeBuddhist дээрх энэ бясалгалын таймерыг тантай хуваалцахыг хүссэн. Бясалгалын дадлага хийхэд хялбар болгодог.",
@@ -963,6 +977,9 @@
   "connect_caption_more": "Илүү",
   "connect_online": "Онлайн",
   "home_group_events": "Бүлгийн арга хэмжээ",
+  "home_poems": "Шүлгүүд",
+  "poems_load_error": "Шүлгүүдийг ачаалах боломжгүй.\nХолболтоо шалгаад дахин оролдоно уу",
+  "poems_empty": "Одоогоор шүлэг байхгүй. Удахгүй дахин шалгаарай.",
   "connect_events_filter_all": "Бүгд",
   "connect_events_filter_in_person": "Биечлэн",
   "connect_events_filter_empty_online": "Онлайн арга хэмжээ байхгүй",
@@ -980,6 +997,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "Одоогоор оролцогч байхгүй",
   "timer_notification_in_progress": "Бясалгал үргэлжилж байна",
   "timer_notification_paused": "Түр зогссон · {time} үлдсэн",
   "@timer_notification_paused": {
@@ -989,5 +1007,18 @@
       }
     }
   },
-  "timer_notification_complete": "Таны хуралдаан дууслаа"
+  "timer_notification_complete": "Таны хуралдаан дууслаа",
+  "group_chat_title": "Чат",
+  "group_chat_inappropriate": "Зөвшөөрөгдөөгүй үг агуулсан тул энэ мессежийг илгээж чадсангүй.",
+  "group_chat_not_a_member": "Зөвхөн гишүүд энэ чатыг нээх боломжтой.",
+  "group_chat_open": "Чат",
+  "group_chat_message_hint": "Мессеж",
+  "group_chat_join_to_send": "Мессеж илгээхийн тулд чатад нэгдээрэй.",
+  "group_chat_today": "Өнөөдөр",
+  "group_chat_yesterday": "Өчигдөр",
+  "group_chat_empty_title": "Одоогоор мессеж алга",
+  "group_chat_empty_body": "Бүлгээрээ яриа эхлүүлээрэй.",
+  "group_chat_load_failed": "Мессежийг ачаалж чадсангүй.",
+  "group_chat_retry": "Дахин оролдох",
+  "group_chat_unknown_sender": "Гишүүн"
 }

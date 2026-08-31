@@ -834,6 +834,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_group_events => 'Group Events';
 
   @override
+  String get home_poems => 'Poems';
+
+  @override
+  String get poems_load_error =>
+      'Unable to load poems.\nCheck your connection and try again';
+
+  @override
+  String get poems_empty => 'No poems yet. Check back soon.';
+
+  @override
   String get connect_events_filter_all => 'All';
 
   @override
@@ -864,6 +874,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String connect_event_participants_attending(int count) {
     return '$count attending';
   }
+
+  @override
+  String get connect_event_participants_empty => 'No participants yet';
 
   @override
   String get search_groups => 'Search groups';
@@ -1821,6 +1834,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_invite => 'Invite';
 
   @override
+  String get group_request_to_join => 'Request to join';
+
+  @override
+  String get group_request => 'Request';
+
+  @override
+  String get group_request_sent => 'Request sent';
+
+  @override
+  String get group_join_request_title => 'Request to join';
+
+  @override
+  String get group_join_request_message_label => 'Message (optional)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'How do you practice, or who invited you?';
+
+  @override
+  String get group_join_request_send => 'Send request';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'Request sent — an admin will review it.';
+
+  @override
+  String get group_join_request_error =>
+      'Unable to send request. Please try again.';
+
+  @override
+  String get group_members_only_title => 'Members only';
+
+  @override
+  String get group_members_only_message =>
+      'Join to see this group\'s chants, events and posts.';
+
+  @override
+  String get group_join_request_waiting_title => 'Waiting on an admin';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'We\'ll notify you as soon as your request is reviewed.';
+
+  @override
   String get group_members_load_error =>
       'Unable to load members. Please try again.';
 
@@ -1995,6 +2052,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get share_quote_message =>
       'I liked this quote from WeBuddhist and wanted to share it with you. Read more such insightful quotes on the WeBuddhist App';
+
+  @override
+  String get share_poem_message =>
+      'I liked this poem from WeBuddhist and wanted to share it with you.';
 
   @override
   String get share_mala_message =>
@@ -2277,4 +2338,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'I am taking part in the group accumulation \"$accumulation\" on WeBuddhist. Come join me!';
   }
+
+  @override
+  String get group_chat_title => 'Chat';
+
+  @override
+  String get group_chat_inappropriate =>
+      'This message couldn\'t be sent because it contains language that isn\'t allowed.';
+
+  @override
+  String get group_chat_not_a_member => 'Only members can open this chat.';
+
+  @override
+  String get group_chat_open => 'Chat';
+
+  @override
+  String get group_chat_message_hint => 'Message';
+
+  @override
+  String get group_chat_join_to_send => 'Join chat to send message.';
+
+  @override
+  String get group_chat_today => 'Today';
+
+  @override
+  String get group_chat_yesterday => 'Yesterday';
+
+  @override
+  String get group_chat_empty_title => 'No messages yet';
+
+  @override
+  String get group_chat_empty_body => 'Start the conversation with your group.';
+
+  @override
+  String get group_chat_load_failed => 'Messages couldn\'t be loaded.';
+
+  @override
+  String get group_chat_retry => 'Retry';
+
+  @override
+  String get group_chat_unknown_sender => 'Member';
 }

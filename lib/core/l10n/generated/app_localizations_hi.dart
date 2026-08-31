@@ -840,6 +840,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get home_group_events => 'समूह कार्यक्रम';
 
   @override
+  String get home_poems => 'कविताएँ';
+
+  @override
+  String get poems_load_error =>
+      'कविताएँ लोड नहीं हो सकीं।\nअपना कनेक्शन जाँचें और फिर से प्रयास करें';
+
+  @override
+  String get poems_empty => 'अभी कोई कविता नहीं है। जल्द वापस देखें।';
+
+  @override
   String get connect_events_filter_all => 'सभी';
 
   @override
@@ -871,6 +881,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String connect_event_participants_attending(int count) {
     return '$count शामिल';
   }
+
+  @override
+  String get connect_event_participants_empty => 'अभी तक कोई प्रतिभागी नहीं';
 
   @override
   String get search_groups => 'समूह खोजें';
@@ -1836,6 +1849,50 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_invite => 'आमंत्रित करें';
 
   @override
+  String get group_request_to_join => 'शामिल होने का अनुरोध';
+
+  @override
+  String get group_request => 'अनुरोध';
+
+  @override
+  String get group_request_sent => 'अनुरोध भेजा गया';
+
+  @override
+  String get group_join_request_title => 'शामिल होने का अनुरोध';
+
+  @override
+  String get group_join_request_message_label => 'संदेश (वैकल्पिक)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'आप कैसे अभ्यास करते हैं, या आपको किसने आमंत्रित किया?';
+
+  @override
+  String get group_join_request_send => 'अनुरोध भेजें';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'अनुरोध भेजा गया — एक व्यवस्थापक इसकी समीक्षा करेगा।';
+
+  @override
+  String get group_join_request_error =>
+      'अनुरोध भेजने में असमर्थ। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get group_members_only_title => 'केवल सदस्य';
+
+  @override
+  String get group_members_only_message =>
+      'इस समूह के मंत्र, कार्यक्रम और पोस्ट देखने के लिए शामिल हों।';
+
+  @override
+  String get group_join_request_waiting_title => 'व्यवस्थापक की प्रतीक्षा';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'आपके अनुरोध की समीक्षा होते ही हम आपको सूचित करेंगे।';
+
+  @override
   String get group_members_load_error =>
       'सदस्य लोड नहीं हो सके। कृपया पुनः प्रयास करें।';
 
@@ -2011,6 +2068,10 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get share_quote_message =>
       'मुझे WeBuddhist का यह उद्धरण पसंद आया और मैं इसे आपके साथ साझा करना चाहता था। WeBuddhist ऐप पर और अधिक ऐसे ज्ञानवर्धक उद्धरण पढ़ें।';
+
+  @override
+  String get share_poem_message =>
+      'मुझे WeBuddhist की यह कविता पसंद आई और मैं इसे आपके साथ साझा करना चाहता था।';
 
   @override
   String get share_mala_message =>
@@ -2298,4 +2359,44 @@ class AppLocalizationsHi extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'मैं WeBuddhist पर सामूहिक संचय \"$accumulation\" में भाग ले रहा हूँ। आप भी मेरे साथ जुड़ें!';
   }
+
+  @override
+  String get group_chat_title => 'चैट';
+
+  @override
+  String get group_chat_inappropriate =>
+      'यह संदेश नहीं भेजा जा सका क्योंकि इसमें अनुचित भाषा है।';
+
+  @override
+  String get group_chat_not_a_member => 'केवल सदस्य इस चैट को खोल सकते हैं।';
+
+  @override
+  String get group_chat_open => 'चैट';
+
+  @override
+  String get group_chat_message_hint => 'संदेश';
+
+  @override
+  String get group_chat_join_to_send => 'संदेश भेजने के लिए चैट से जुड़ें।';
+
+  @override
+  String get group_chat_today => 'आज';
+
+  @override
+  String get group_chat_yesterday => 'कल';
+
+  @override
+  String get group_chat_empty_title => 'अभी तक कोई संदेश नहीं';
+
+  @override
+  String get group_chat_empty_body => 'अपने समूह के साथ बातचीत शुरू करें।';
+
+  @override
+  String get group_chat_load_failed => 'संदेश लोड नहीं हो सके।';
+
+  @override
+  String get group_chat_retry => 'पुनः प्रयास करें';
+
+  @override
+  String get group_chat_unknown_sender => 'सदस्य';
 }

@@ -6,6 +6,7 @@ import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_nested_tab_scroll_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -14,11 +15,13 @@ class GroupProfileEventsTab extends ConsumerWidget {
   final String groupId;
   final bool isDark;
   final double? lineHeight;
+  final String pageStorageKey;
 
   const GroupProfileEventsTab({
     super.key,
     required this.groupId,
     required this.isDark,
+    required this.pageStorageKey,
     this.lineHeight,
   });
 
@@ -29,7 +32,8 @@ class GroupProfileEventsTab extends ConsumerWidget {
     return eventsAsync.when(
       data: (either) {
         return either.fold(
-          (failure) => Center(
+          (failure) => GroupProfileNestedTabScrollView.centered(
+            pageStorageKey: pageStorageKey,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: ErrorStateWidget(
@@ -41,48 +45,64 @@ class GroupProfileEventsTab extends ConsumerWidget {
           ),
           (page) {
             if (page.events.isEmpty) {
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
-                children: [
-                  Text(
-                    'No events yet',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color:
-                          isDark
-                              ? AppColors.textTertiaryDark
-                              : AppColors.textSecondary,
-                      height: lineHeight,
+              return GroupProfileNestedTabScrollView(
+                pageStorageKey: pageStorageKey,
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+                    sliver: SliverToBoxAdapter(
+                      child: Text(
+                        'No events yet',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color:
+                              isDark
+                                  ? AppColors.textTertiaryDark
+                                  : AppColors.textSecondary,
+                          height: lineHeight,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              itemCount: page.events.length,
-              itemBuilder: (context, index) {
-                final event = page.events[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: index == page.events.length - 1 ? 0 : 16,
+            return GroupProfileNestedTabScrollView(
+              pageStorageKey: pageStorageKey,
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final event = page.events[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index == page.events.length - 1 ? 0 : 16,
+                        ),
+                        child: _GroupEventCard(
+                          event: event,
+                          isDark: isDark,
+                          lineHeight: lineHeight,
+                          onTap: () => context.push('/home/events/${event.id}'),
+                        ),
+                      );
+                    }, childCount: page.events.length),
                   ),
-                  child: _GroupEventCard(
-                    event: event,
-                    isDark: isDark,
-                    lineHeight: lineHeight,
-                    onTap: () => context.push('/home/events/${event.id}'),
-                  ),
-                );
-              },
+                ),
+              ],
             );
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading:
+          () => GroupProfileNestedTabScrollView.centered(
+            pageStorageKey: pageStorageKey,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
       error:
-          (error, _) => Center(
+          (error, _) => GroupProfileNestedTabScrollView.centered(
+            pageStorageKey: pageStorageKey,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: ErrorStateWidget(

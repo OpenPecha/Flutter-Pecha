@@ -260,6 +260,17 @@ class DeepLinkRouter {
       );
     }
 
+    if (segments.length >= 3 &&
+        segments[0] == 'open' &&
+        segments[1] == 'poem') {
+      final poemId = segments[2];
+      return _DeepLinkDestination(
+        '/home/poems',
+        extra: {'initialPoemId': poemId},
+        opensOnTop: true,
+      );
+    }
+
     return const _DeepLinkDestination(AppRoutes.home);
   }
 

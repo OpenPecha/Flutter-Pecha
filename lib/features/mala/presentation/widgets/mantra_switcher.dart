@@ -109,6 +109,7 @@ class _MantraSwitcherState extends State<MantraSwitcher> {
             itemBuilder: (context, page) {
               final mantra = widget.mantras[_logical(page)];
               return _MantraPage(
+                key: ValueKey<int>(page),
                 tibetan: mantra.tibetan,
                 tibetanFontFamily: widget.tibetanFontFamily,
                 transliteration:
@@ -129,10 +130,16 @@ class _MantraSwitcherState extends State<MantraSwitcher> {
 }
 
 /// One carousel page: Tibetan script (when present) above the transliteration,
-/// both centered within the page. Long content scrolls vertically with a
-/// visible scrollbar when it overflows.
+/// both centered within the page. Long content stays vertically scrollable
+/// without a visible scrollbar so it does not clash with the chevrons.
+///
+/// Each page owns a [ScrollController] and sets `primary: false`. A
+/// controller-less vertical [SingleChildScrollView] would otherwise inherit
+/// the Scaffold's [PrimaryScrollController] on mobile, so scrolling one
+/// mantra would move the next page after a horizontal swipe.
 class _MantraPage extends StatefulWidget {
   const _MantraPage({
+    super.key,
     required this.tibetan,
     required this.tibetanFontFamily,
     required this.transliteration,
@@ -161,11 +168,11 @@ class _MantraPageState extends State<_MantraPage> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Scrollbar(
-          controller: _scrollController,
-          thumbVisibility: true,
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
             controller: _scrollController,
+            primary: false,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(

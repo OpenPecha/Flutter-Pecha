@@ -7,6 +7,7 @@ import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_member.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_nested_tab_scroll_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GroupProfileMembersTab extends ConsumerStatefulWidget {
@@ -14,12 +15,14 @@ class GroupProfileMembersTab extends ConsumerStatefulWidget {
   final GroupType groupType;
   final bool isDark;
   final double? lineHeight;
+  final String pageStorageKey;
 
   const GroupProfileMembersTab({
     super.key,
     required this.groupId,
     required this.groupType,
     required this.isDark,
+    required this.pageStorageKey,
     this.lineHeight,
   });
 
@@ -30,21 +33,12 @@ class GroupProfileMembersTab extends ConsumerStatefulWidget {
 
 class _GroupProfileMembersTabState
     extends ConsumerState<GroupProfileMembersTab> {
-  final ScrollController _scrollController = ScrollController();
   bool _hasRequestedInitialLoad = false;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     _loadInitialIfNeeded();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
   }
 
   void _loadInitialIfNeeded() {
@@ -56,13 +50,12 @@ class _GroupProfileMembersTabState
     });
   }
 
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+  bool _onScrollLoadMore(ScrollNotification notification) {
+    if (notification.metrics.pixels >=
+        notification.metrics.maxScrollExtent - 200) {
       ref.read(groupMembersProvider(widget.groupId).notifier).loadMore();
     }
+    return false;
   }
 
   String _membersHeading(BuildContext context, int count) {
@@ -76,11 +69,15 @@ class _GroupProfileMembersTabState
     final membersState = ref.watch(groupMembersProvider(widget.groupId));
 
     if (membersState.isLoading && membersState.members.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return GroupProfileNestedTabScrollView.centered(
+        pageStorageKey: widget.pageStorageKey,
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (membersState.error != null && membersState.members.isEmpty) {
-      return Center(
+      return GroupProfileNestedTabScrollView.centered(
+        pageStorageKey: widget.pageStorageKey,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: ErrorStateWidget(
@@ -100,30 +97,39 @@ class _GroupProfileMembersTabState
     }
 
     if (membersState.members.isEmpty) {
-      return ListView(
-        controller: _scrollController,
-        padding: const EdgeInsets.only(top: 16, bottom: 32),
-        children: [
-          if (!membersState.isLoading)
-            _MembersHeading(
-              title: _membersHeading(context, membersState.totalMembers),
-              isDark: widget.isDark,
-              lineHeight: widget.lineHeight,
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Text(
-              widget.groupType.isPage
-                  ? context.l10n.group_followers_empty
-                  : context.l10n.group_members_empty,
-              style: TextStyle(
-                fontSize: 15,
-                color:
-                    widget.isDark
-                        ? AppColors.textTertiaryDark
-                        : AppColors.textSecondary,
-                height: widget.lineHeight,
-              ),
+      return GroupProfileNestedTabScrollView(
+        pageStorageKey: widget.pageStorageKey,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 16, bottom: 32),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                if (!membersState.isLoading)
+                  _MembersHeading(
+                    title: _membersHeading(context, membersState.totalMembers),
+                    isDark: widget.isDark,
+                    lineHeight: widget.lineHeight,
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  child: Text(
+                    widget.groupType.isPage
+                        ? context.l10n.group_followers_empty
+                        : context.l10n.group_members_empty,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color:
+                          widget.isDark
+                              ? AppColors.textTertiaryDark
+                              : AppColors.textSecondary,
+                      height: widget.lineHeight,
+                    ),
+                  ),
+                ),
+              ]),
             ),
           ),
         ],
@@ -133,33 +139,41 @@ class _GroupProfileMembersTabState
     final itemCount =
         1 + membersState.members.length + (membersState.isLoadingMore ? 1 : 0);
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.only(top: 16, bottom: 32),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return _MembersHeading(
-            title: _membersHeading(context, membersState.totalMembers),
-            isDark: widget.isDark,
-            lineHeight: widget.lineHeight,
-          );
-        }
+    return NotificationListener<ScrollNotification>(
+      onNotification: _onScrollLoadMore,
+      child: GroupProfileNestedTabScrollView(
+        pageStorageKey: widget.pageStorageKey,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 16, bottom: 32),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == 0) {
+                  return _MembersHeading(
+                    title: _membersHeading(context, membersState.totalMembers),
+                    isDark: widget.isDark,
+                    lineHeight: widget.lineHeight,
+                  );
+                }
 
-        final memberIndex = index - 1;
-        if (memberIndex < membersState.members.length) {
-          return _GroupMemberRow(
-            member: membersState.members[memberIndex],
-            isDark: widget.isDark,
-            lineHeight: widget.lineHeight,
-          );
-        }
+                final memberIndex = index - 1;
+                if (memberIndex < membersState.members.length) {
+                  return _GroupMemberRow(
+                    member: membersState.members[memberIndex],
+                    isDark: widget.isDark,
+                    lineHeight: widget.lineHeight,
+                  );
+                }
 
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Center(child: CircularProgressIndicator()),
-        );
-      },
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }, childCount: itemCount),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

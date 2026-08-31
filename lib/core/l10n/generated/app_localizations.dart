@@ -1600,6 +1600,24 @@ abstract class AppLocalizations {
   /// **'Group Events'**
   String get home_group_events;
 
+  /// No description provided for @home_poems.
+  ///
+  /// In en, this message translates to:
+  /// **'Poems'**
+  String get home_poems;
+
+  /// No description provided for @poems_load_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load poems.\nCheck your connection and try again'**
+  String get poems_load_error;
+
+  /// No description provided for @poems_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No poems yet. Check back soon.'**
+  String get poems_empty;
+
   /// No description provided for @connect_events_filter_all.
   ///
   /// In en, this message translates to:
@@ -1659,6 +1677,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} attending'**
   String connect_event_participants_attending(int count);
+
+  /// No description provided for @connect_event_participants_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get connect_event_participants_empty;
 
   /// No description provided for @search_groups.
   ///
@@ -3328,6 +3352,84 @@ abstract class AppLocalizations {
   /// **'Invite'**
   String get group_invite;
 
+  /// No description provided for @group_request_to_join.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to join'**
+  String get group_request_to_join;
+
+  /// No description provided for @group_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get group_request;
+
+  /// No description provided for @group_request_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get group_request_sent;
+
+  /// No description provided for @group_join_request_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to join'**
+  String get group_join_request_title;
+
+  /// No description provided for @group_join_request_message_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Message (optional)'**
+  String get group_join_request_message_label;
+
+  /// No description provided for @group_join_request_message_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you practice, or who invited you?'**
+  String get group_join_request_message_hint;
+
+  /// No description provided for @group_join_request_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get group_join_request_send;
+
+  /// No description provided for @group_join_request_sent_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent — an admin will review it.'**
+  String get group_join_request_sent_snackbar;
+
+  /// No description provided for @group_join_request_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to send request. Please try again.'**
+  String get group_join_request_error;
+
+  /// No description provided for @group_members_only_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Members only'**
+  String get group_members_only_title;
+
+  /// No description provided for @group_members_only_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Join to see this group\'s chants, events and posts.'**
+  String get group_members_only_message;
+
+  /// No description provided for @group_join_request_waiting_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on an admin'**
+  String get group_join_request_waiting_title;
+
+  /// No description provided for @group_join_request_waiting_message.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll notify you as soon as your request is reviewed.'**
+  String get group_join_request_waiting_message;
+
   /// No description provided for @group_members_load_error.
   ///
   /// In en, this message translates to:
@@ -3607,6 +3709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I liked this quote from WeBuddhist and wanted to share it with you. Read more such insightful quotes on the WeBuddhist App'**
   String get share_quote_message;
+
+  /// No description provided for @share_poem_message.
+  ///
+  /// In en, this message translates to:
+  /// **'I liked this poem from WeBuddhist and wanted to share it with you.'**
+  String get share_poem_message;
 
   /// No description provided for @share_mala_message.
   ///
@@ -4063,6 +4171,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I am taking part in the group accumulation \"{accumulation}\" on WeBuddhist. Come join me!'**
   String group_accumulator_share_message_no_group(String accumulation);
+
+  /// No description provided for @group_chat_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get group_chat_title;
+
+  /// No description provided for @group_chat_inappropriate.
+  ///
+  /// In en, this message translates to:
+  /// **'This message couldn\'t be sent because it contains language that isn\'t allowed.'**
+  String get group_chat_inappropriate;
+
+  /// No description provided for @group_chat_not_a_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Only members can open this chat.'**
+  String get group_chat_not_a_member;
+
+  /// No description provided for @group_chat_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get group_chat_open;
+
+  /// No description provided for @group_chat_message_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get group_chat_message_hint;
+
+  /// No description provided for @group_chat_join_to_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Join chat to send message.'**
+  String get group_chat_join_to_send;
+
+  /// No description provided for @group_chat_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get group_chat_today;
+
+  /// No description provided for @group_chat_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get group_chat_yesterday;
+
+  /// No description provided for @group_chat_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get group_chat_empty_title;
+
+  /// No description provided for @group_chat_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the conversation with your group.'**
+  String get group_chat_empty_body;
+
+  /// No description provided for @group_chat_load_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages couldn\'t be loaded.'**
+  String get group_chat_load_failed;
+
+  /// No description provided for @group_chat_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get group_chat_retry;
+
+  /// No description provided for @group_chat_unknown_sender.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get group_chat_unknown_sender;
 }
 
 class _AppLocalizationsDelegate

@@ -39,7 +39,14 @@ class CacheException extends AppException {
 }
 
 class ValidationException extends AppException {
-  const ValidationException(super.message, {super.requestId, super.timestamp});
+  final String? code;
+
+  const ValidationException(
+    super.message, {
+    this.code,
+    super.requestId,
+    super.timestamp,
+  });
 
   @override
   String toString() {
@@ -48,7 +55,11 @@ class ValidationException extends AppException {
 }
 
 class AuthenticationException extends AppException {
-  const AuthenticationException(super.message, {super.requestId, super.timestamp});
+  const AuthenticationException(
+    super.message, {
+    super.requestId,
+    super.timestamp,
+  });
 
   @override
   String toString() {
@@ -57,7 +68,11 @@ class AuthenticationException extends AppException {
 }
 
 class AuthorizationException extends AppException {
-  const AuthorizationException(super.message, {super.requestId, super.timestamp});
+  const AuthorizationException(
+    super.message, {
+    super.requestId,
+    super.timestamp,
+  });
 
   @override
   String toString() {

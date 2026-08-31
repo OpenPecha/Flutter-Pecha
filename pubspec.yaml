@@ -68,6 +68,7 @@ dependencies:
   # Networking
   http: ^1.3.0
   dio: ^5.7.0
+  web_socket_channel: ^3.0.2
 
   # Secure Storage
   flutter_secure_storage: ^10.3.1

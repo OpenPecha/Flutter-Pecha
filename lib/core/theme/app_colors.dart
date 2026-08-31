@@ -23,6 +23,9 @@ class AppColors {
   static const Color accentGoldContainer = Color(0xFFFAE6E6);
   static const Color accentGoldSurface = Color(0xFFFCF2F2);
 
+  /// Poem author name accent.
+  static const Color poemAuthor = Color(0xFFC17600);
+
   // ============ Surface Colors ============
   static const Color surfaceLight = Color(0xFFFBF9F4); // Light BG
   static const Color surfaceWhite = Color(0xFFFFFFFF);

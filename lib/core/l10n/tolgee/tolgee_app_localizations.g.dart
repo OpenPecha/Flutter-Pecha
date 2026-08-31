@@ -1644,6 +1644,21 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get home_poems =>
+      TolgeeBridge.get(localeName, 'home_poems', () => _fallback.home_poems);
+
+  @override
+  String get poems_load_error => TolgeeBridge.get(
+    localeName,
+    'poems_load_error',
+    () => _fallback.poems_load_error,
+  );
+
+  @override
+  String get poems_empty =>
+      TolgeeBridge.get(localeName, 'poems_empty', () => _fallback.poems_empty);
+
+  @override
   String get connect_events_filter_all => TolgeeBridge.get(
     localeName,
     'connect_events_filter_all',
@@ -1712,6 +1727,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
     'connect_event_participants_attending',
     <String, Object>{'count': count},
     () => _fallback.connect_event_participants_attending(count),
+  );
+
+  @override
+  String get connect_event_participants_empty => TolgeeBridge.get(
+    localeName,
+    'connect_event_participants_empty',
+    () => _fallback.connect_event_participants_empty,
   );
 
   @override
@@ -3552,6 +3574,97 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_request_to_join => TolgeeBridge.get(
+    localeName,
+    'group_request_to_join',
+    () => _fallback.group_request_to_join,
+  );
+
+  @override
+  String get group_request => TolgeeBridge.get(
+    localeName,
+    'group_request',
+    () => _fallback.group_request,
+  );
+
+  @override
+  String get group_request_sent => TolgeeBridge.get(
+    localeName,
+    'group_request_sent',
+    () => _fallback.group_request_sent,
+  );
+
+  @override
+  String get group_join_request_title => TolgeeBridge.get(
+    localeName,
+    'group_join_request_title',
+    () => _fallback.group_join_request_title,
+  );
+
+  @override
+  String get group_join_request_message_label => TolgeeBridge.get(
+    localeName,
+    'group_join_request_message_label',
+    () => _fallback.group_join_request_message_label,
+  );
+
+  @override
+  String get group_join_request_message_hint => TolgeeBridge.get(
+    localeName,
+    'group_join_request_message_hint',
+    () => _fallback.group_join_request_message_hint,
+  );
+
+  @override
+  String get group_join_request_send => TolgeeBridge.get(
+    localeName,
+    'group_join_request_send',
+    () => _fallback.group_join_request_send,
+  );
+
+  @override
+  String get group_join_request_sent_snackbar => TolgeeBridge.get(
+    localeName,
+    'group_join_request_sent_snackbar',
+    () => _fallback.group_join_request_sent_snackbar,
+  );
+
+  @override
+  String get group_join_request_error => TolgeeBridge.get(
+    localeName,
+    'group_join_request_error',
+    () => _fallback.group_join_request_error,
+  );
+
+  @override
+  String get group_members_only_title => TolgeeBridge.get(
+    localeName,
+    'group_members_only_title',
+    () => _fallback.group_members_only_title,
+  );
+
+  @override
+  String get group_members_only_message => TolgeeBridge.get(
+    localeName,
+    'group_members_only_message',
+    () => _fallback.group_members_only_message,
+  );
+
+  @override
+  String get group_join_request_waiting_title => TolgeeBridge.get(
+    localeName,
+    'group_join_request_waiting_title',
+    () => _fallback.group_join_request_waiting_title,
+  );
+
+  @override
+  String get group_join_request_waiting_message => TolgeeBridge.get(
+    localeName,
+    'group_join_request_waiting_message',
+    () => _fallback.group_join_request_waiting_message,
+  );
+
+  @override
   String get group_members_load_error => TolgeeBridge.get(
     localeName,
     'group_members_load_error',
@@ -3898,6 +4011,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'share_quote_message',
     () => _fallback.share_quote_message,
+  );
+
+  @override
+  String get share_poem_message => TolgeeBridge.get(
+    localeName,
+    'share_poem_message',
+    () => _fallback.share_poem_message,
   );
 
   @override
@@ -4443,4 +4563,95 @@ class TolgeeAppLocalizations extends AppLocalizations {
         <String, Object>{'accumulation': accumulation},
         () => _fallback.group_accumulator_share_message_no_group(accumulation),
       );
+
+  @override
+  String get group_chat_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_title',
+    () => _fallback.group_chat_title,
+  );
+
+  @override
+  String get group_chat_inappropriate => TolgeeBridge.get(
+    localeName,
+    'group_chat_inappropriate',
+    () => _fallback.group_chat_inappropriate,
+  );
+
+  @override
+  String get group_chat_not_a_member => TolgeeBridge.get(
+    localeName,
+    'group_chat_not_a_member',
+    () => _fallback.group_chat_not_a_member,
+  );
+
+  @override
+  String get group_chat_open => TolgeeBridge.get(
+    localeName,
+    'group_chat_open',
+    () => _fallback.group_chat_open,
+  );
+
+  @override
+  String get group_chat_message_hint => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_hint',
+    () => _fallback.group_chat_message_hint,
+  );
+
+  @override
+  String get group_chat_join_to_send => TolgeeBridge.get(
+    localeName,
+    'group_chat_join_to_send',
+    () => _fallback.group_chat_join_to_send,
+  );
+
+  @override
+  String get group_chat_today => TolgeeBridge.get(
+    localeName,
+    'group_chat_today',
+    () => _fallback.group_chat_today,
+  );
+
+  @override
+  String get group_chat_yesterday => TolgeeBridge.get(
+    localeName,
+    'group_chat_yesterday',
+    () => _fallback.group_chat_yesterday,
+  );
+
+  @override
+  String get group_chat_empty_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_empty_title',
+    () => _fallback.group_chat_empty_title,
+  );
+
+  @override
+  String get group_chat_empty_body => TolgeeBridge.get(
+    localeName,
+    'group_chat_empty_body',
+    () => _fallback.group_chat_empty_body,
+  );
+
+  @override
+  String get group_chat_load_failed => TolgeeBridge.get(
+    localeName,
+    'group_chat_load_failed',
+    () => _fallback.group_chat_load_failed,
+  );
+
+  @override
+  String get group_chat_retry => TolgeeBridge.get(
+    localeName,
+    'group_chat_retry',
+    () => _fallback.group_chat_retry,
+  );
+
+  @override
+  String get group_chat_unknown_sender => TolgeeBridge.get(
+    localeName,
+    'group_chat_unknown_sender',
+    () => _fallback.group_chat_unknown_sender,
+  );
 }

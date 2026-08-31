@@ -786,6 +786,19 @@
     }
   },
   "group_invite": "निमन्त्रणा",
+  "group_request_to_join": "सामेल हुन अनुरोध",
+  "group_request": "अनुरोध",
+  "group_request_sent": "अनुरोध पठाइयो",
+  "group_join_request_title": "सामेल हुन अनुरोध",
+  "group_join_request_message_label": "सन्देश (वैकल्पिक)",
+  "group_join_request_message_hint": "तपाईं कसरी अभ्यास गर्नुहुन्छ, वा तपाईंलाई कसले निमन्त्रणा गर्‍यो?",
+  "group_join_request_send": "अनुरोध पठाउनुहोस्",
+  "group_join_request_sent_snackbar": "अनुरोध पठाइयो — प्रशासकले यसको समीक्षा गर्नेछ।",
+  "group_join_request_error": "अनुरोध पठाउन सकिएन। कृपया पुनः प्रयास गर्नुहोस्।",
+  "group_members_only_title": "सदस्यहरू मात्र",
+  "group_members_only_message": "यो समूहका मन्त्र, कार्यक्रम र पोस्ट हेर्न सामेल हुनुहोस्।",
+  "group_join_request_waiting_title": "प्रशासकको प्रतीक्षामा",
+  "group_join_request_waiting_message": "तपाईंको अनुरोध समीक्षा भएपछि हामी तपाईंलाई सूचित गर्नेछौं।",
   "group_members_load_error": "सदस्यहरू लोड गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्।",
   "group_followers_load_error": "अनुयायीहरू लोड गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्।",
   "group_members_empty": "अहिलेसम्म कुनै सदस्य छैन",
@@ -827,6 +840,7 @@
   "share_streak_message": "म दैनिक अभ्यासको बानी बनाउँदैछु र यो तपाईंसँग साझा गर्न चाहन्थें। साथीसँग मिलेर यसलाई जारी राख्न सजिलो हुन्छ। WeBuddhist मा मसँग सामेल हुनुहोस्।",
   "share_chant_message": "म यो जप तपाईंसँग साझा गर्न चाहन्थें। तपाईंले यसको अभ्यास गर्न र WeBuddhist मा अन्य जप र ग्रन्थहरूको पूर्ण पुस्तकालय फेला पार्न सक्नुहुन्छ।",
   "share_quote_message": "मलाई WeBuddhist को यो उद्धरण मन पर्यो र तपाईंसँग साझा गर्न चाहन्थें। WeBuddhist एपमा यस्ता थप ज्ञानवर्धक उद्धरणहरू पढ्नुहोस्।",
+  "share_poem_message": "मलाई WeBuddhist को यो कविता मन पर्यो र तपाईंसँग साझा गर्न चाहन्थें।",
   "share_mala_message": "म WeBuddhist मा यो डिजिटल माला प्रयोग गर्दैछु र तपाईंसँग साझा गर्न चाहन्थें। जहाँ जानुभए पनि अभ्यास गर्न सजिलो तरिका हो।",
   "share_passage_message": "मलाई यो अंश मन पर्यो र तपाईंसँग साझा गर्न चाहन्थें। तपाईं WeBuddhist मा पूरा सन्दर्भ पढ्न सक्नुहुन्छ।",
   "share_timer_message": "म WeBuddhist को यो ध्यान टाइमर तपाईंसँग साझा गर्न चाहन्थें। यसले ध्यान अभ्यास निर्माण गर्न सजिलो बनाउँछ।",
@@ -963,6 +977,9 @@
   "connect_caption_more": "थप",
   "connect_online": "अनलाइन",
   "home_group_events": "समूह कार्यक्रम",
+  "home_poems": "कविताहरू",
+  "poems_load_error": "कविताहरू लोड गर्न सकिएन।\nआफ्नो जडान जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस्",
+  "poems_empty": "अहिले कुनै कविता छैन। चाँडै फर्किएर हेर्नुहोस्।",
   "connect_events_filter_all": "सबै",
   "connect_events_filter_in_person": "प्रत्यक्ष",
   "connect_events_filter_empty_online": "कुनै अनलाइन कार्यक्रम छैन",
@@ -980,6 +997,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "अहिलेसम्म कुनै सहभागी छैन",
   "timer_notification_in_progress": "ध्यान जारी छ",
   "timer_notification_paused": "रोकिएको · {time} बाँकी",
   "@timer_notification_paused": {
@@ -989,5 +1007,18 @@
       }
     }
   },
-  "timer_notification_complete": "तपाईंको सत्र पूरा भयो"
+  "timer_notification_complete": "तपाईंको सत्र पूरा भयो",
+  "group_chat_title": "च्याट",
+  "group_chat_inappropriate": "अनुचित भाषा भएकाले यो सन्देश पठाउन सकिएन।",
+  "group_chat_not_a_member": "केवल सदस्यले यो च्याट खोल्न सक्छन्।",
+  "group_chat_open": "च्याट",
+  "group_chat_message_hint": "सन्देश",
+  "group_chat_join_to_send": "सन्देश पठाउन च्याटमा जोडिनुहोस्।",
+  "group_chat_today": "आज",
+  "group_chat_yesterday": "हिजो",
+  "group_chat_empty_title": "अहिलेसम्म कुनै सन्देश छैन",
+  "group_chat_empty_body": "आफ्नो समूहसँग कुराकानी सुरु गर्नुहोस्।",
+  "group_chat_load_failed": "सन्देशहरू लोड गर्न सकिएन।",
+  "group_chat_retry": "पुनः प्रयास गर्नुहोस्",
+  "group_chat_unknown_sender": "सदस्य"
 }

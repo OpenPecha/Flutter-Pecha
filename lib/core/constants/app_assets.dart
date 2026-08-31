@@ -88,6 +88,7 @@ class AppAssets {
   static const IconData heart = PhosphorIconsRegular.heart;
   static const IconData heartFill = PhosphorIconsFill.heart;
   static const IconData chatCircle = PhosphorIconsRegular.chatCircle;
+  static const IconData chatCircleDots = PhosphorIconsRegular.chatCircleDots;
   static const IconData x = PhosphorIconsRegular.x;
   static const IconData dotsThreeVertical = PhosphorIconsRegular.dotsThreeVertical;
   static const IconData paperPlaneRight = PhosphorIconsRegular.paperPlaneRight;

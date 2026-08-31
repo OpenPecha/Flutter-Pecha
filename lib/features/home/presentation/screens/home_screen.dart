@@ -19,6 +19,8 @@ import 'package:flutter_pecha/features/home/presentation/widgets/group_events_se
 import 'package:flutter_pecha/features/home/presentation/widgets/home_header.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/home_share_prompt.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/home_shortcuts_row.dart';
+import 'package:flutter_pecha/features/home/presentation/providers/home_poems_preview_provider.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/poems_section.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/my_practices_stats_card.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/my_practices_stats_card_skeleton.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_of_day_card.dart';
@@ -212,6 +214,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.invalidate(seriesListFutureProvider);
     ref.invalidate(featuredSeriesFutureProvider);
     ref.invalidate(homeGroupEventsPreviewProvider);
+    ref.invalidate(homePoemsPreviewProvider);
     ref.invalidate(verseOfDayFutureProvider);
     ref.invalidate(todayEventsFutureProvider);
     ref.invalidate(routineInfoFutureProvider);
@@ -220,6 +223,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(seriesListFutureProvider.future),
       ref.read(featuredSeriesFutureProvider.future),
       ref.read(homeGroupEventsPreviewProvider.future),
+      ref.read(homePoemsPreviewProvider.future),
       ref.read(verseOfDayFutureProvider.future),
       ref.read(todayEventsFutureProvider.future),
       ref.read(routineInfoFutureProvider.future),
@@ -331,6 +335,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: HomeScreenConstants.cardSpacing),
                   const GroupEventsSection(),
+                  const SizedBox(height: HomeScreenConstants.cardSpacing),
+                  const PoemsSection(),
                 ],
               ),
             ),

@@ -17,6 +17,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_pract
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/screens/group_chat_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_profile_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_recitation_collection_screen.dart';
 import 'package:flutter_pecha/features/home/domain/entities/series.dart';
@@ -33,6 +34,7 @@ import 'package:flutter_pecha/features/more/presentation/privacy_policy_screen.d
 import 'package:flutter_pecha/features/more/presentation/delete_account_screen.dart';
 import 'package:flutter_pecha/features/more/presentation/terms_of_service_screen.dart';
 import 'package:flutter_pecha/features/onboarding/presentation/screens/onboarding_wrapper.dart';
+import 'package:flutter_pecha/features/poems/presentation/screens/poems_viewer_screen.dart';
 import 'package:flutter_pecha/features/plans/domain/entities/plan.dart';
 import 'package:flutter_pecha/features/plans/data/models/user/user_plans_model.dart';
 import 'package:flutter_pecha/features/plans/presentation/screens/plan_text_screen.dart';
@@ -141,6 +143,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/home/series/$seriesId';
         },
       ),
+      GoRoute(
+        path: '/open/poem/:poemId',
+        name: 'open-poem',
+        redirect: (_, state) {
+          final poemId = state.pathParameters['poemId'] ?? '';
+          return Uri(
+            path: '/home/poems',
+            queryParameters: {'poemId': poemId},
+          ).toString();
+        },
+      ),
       // Compatibility fallback in case a platform sends the first-party app
       // link directly to go_router instead of through AppLinksDeepLinkService.
       GoRoute(
@@ -176,6 +189,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: "/onboarding",
         name: "onboarding",
         builder: (context, state) => const OnboardingWrapper(),
+      ),
+      GoRoute(
+        path: AppRoutes.groupChat,
+        name: 'group-chat',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId'] ?? '';
+          return GroupChatScreen(groupId: groupId);
+        },
       ),
       ShellRoute(
         navigatorKey: shellNavigatorKey,
@@ -317,6 +338,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) {
                   final eventId = state.pathParameters['eventId'] ?? '';
                   return GroupEventDetailScreen(eventId: eventId);
+                },
+              ),
+              GoRoute(
+                path: "poems",
+                name: "home-poems",
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  final initialPoemId =
+                      extra?['initialPoemId'] as String? ??
+                      state.uri.queryParameters['poemId'];
+                  return PoemsViewerScreen(initialPoemId: initialPoemId);
                 },
               ),
               GoRoute(

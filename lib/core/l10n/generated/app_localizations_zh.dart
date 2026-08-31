@@ -790,6 +790,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_group_events => '社群活動';
 
   @override
+  String get home_poems => '詩歌';
+
+  @override
+  String get poems_load_error => '無法載入詩歌。\n請檢查您的連線並再試一次';
+
+  @override
+  String get poems_empty => '尚無詩歌，請稍後再來。';
+
+  @override
   String get connect_events_filter_all => '全部';
 
   @override
@@ -820,6 +829,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String connect_event_participants_attending(int count) {
     return '$count 人參加';
   }
+
+  @override
+  String get connect_event_participants_empty => '尚無參與者';
 
   @override
   String get search_groups => '搜尋社群';
@@ -1734,6 +1746,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_invite => '邀請';
 
   @override
+  String get group_request_to_join => '申請加入';
+
+  @override
+  String get group_request => '申請';
+
+  @override
+  String get group_request_sent => '申請已送出';
+
+  @override
+  String get group_join_request_title => '申請加入';
+
+  @override
+  String get group_join_request_message_label => '訊息（選填）';
+
+  @override
+  String get group_join_request_message_hint => '您如何修行，或是誰邀請您？';
+
+  @override
+  String get group_join_request_send => '送出申請';
+
+  @override
+  String get group_join_request_sent_snackbar => '申請已送出 — 管理員將會審核。';
+
+  @override
+  String get group_join_request_error => '無法送出申請，請再試一次。';
+
+  @override
+  String get group_members_only_title => '僅限成員';
+
+  @override
+  String get group_members_only_message => '加入後即可查看此群組的誦經、活動和貼文。';
+
+  @override
+  String get group_join_request_waiting_title => '等待管理員審核';
+
+  @override
+  String get group_join_request_waiting_message => '您的申請審核完成後，我們會立即通知您。';
+
+  @override
   String get group_members_load_error => '無法載入成員，請再試一次。';
 
   @override
@@ -1900,6 +1951,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get share_quote_message =>
       '我喜欢WeBuddhist上的这段引语，想和你分享。在WeBuddhist应用上阅读更多深刻的引语。';
+
+  @override
+  String get share_poem_message => '我喜欢WeBuddhist上的这首诗，想和你分享。';
 
   @override
   String get share_mala_message =>
@@ -2167,4 +2221,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return '我正在 WeBuddhist 上參加累積活動「$accumulation」，快來加入我吧！';
   }
+
+  @override
+  String get group_chat_title => '聊天';
+
+  @override
+  String get group_chat_inappropriate => '此訊息含有不允許的用語，因此無法發送。';
+
+  @override
+  String get group_chat_not_a_member => '僅限成員開啟此聊天。';
+
+  @override
+  String get group_chat_open => '聊天';
+
+  @override
+  String get group_chat_message_hint => '訊息';
+
+  @override
+  String get group_chat_join_to_send => '加入聊天後即可傳送訊息。';
+
+  @override
+  String get group_chat_today => '今天';
+
+  @override
+  String get group_chat_yesterday => '昨天';
+
+  @override
+  String get group_chat_empty_title => '暫無訊息';
+
+  @override
+  String get group_chat_empty_body => '與你的群組開始對話吧。';
+
+  @override
+  String get group_chat_load_failed => '無法載入訊息。';
+
+  @override
+  String get group_chat_retry => '重試';
+
+  @override
+  String get group_chat_unknown_sender => '成員';
 }

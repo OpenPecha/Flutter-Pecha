@@ -10,6 +10,7 @@ import 'package:flutter_pecha/features/connect/presentation/providers/connect_po
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_action_bar.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_detail_drawer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -67,7 +68,12 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
             ),
             if (caption.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(
+                  ConnectFeedCardLayout.horizontalPadding,
+                  ConnectFeedCardLayout.bodyTopSpacing,
+                  ConnectFeedCardLayout.horizontalPadding,
+                  0,
+                ),
                 child: Text(
                   caption,
                   style: const TextStyle(
@@ -80,11 +86,17 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
                 ),
               ),
             if (imageMedia.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              _PostMediaGallery(
-                media: imageMedia,
-                isDark: isDark,
-                onDoubleTapLike: _toggleLike,
+              if (caption.isNotEmpty)
+                ConnectFeedCardSectionDivider(isDark: isDark)
+              else
+                const SizedBox(height: ConnectFeedCardLayout.bodyToMediaSpacing),
+              ConnectFeedCardMediaFrame(
+                bottomSpacing: ConnectFeedCardLayout.actionBarTopSpacing,
+                child: _PostMediaGallery(
+                  media: imageMedia,
+                  isDark: isDark,
+                  onDoubleTapLike: _toggleLike,
+                ),
               ),
             ],
             ConnectFeedActionBar(
@@ -214,7 +226,8 @@ class _PostMediaGallery extends StatelessWidget {
     return Row(
       children: [
         for (var i = 0; i < visibleMedia.length; i++) ...[
-          if (i > 0) const SizedBox(width: 2),
+          if (i > 0)
+            SizedBox(width: ConnectFeedCardLayout.mediaTileGap),
           Expanded(
             child: _PostMediaTile(
               media: visibleMedia[i],

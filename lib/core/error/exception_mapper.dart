@@ -21,7 +21,10 @@ class ExceptionMapper {
       NotFoundException e => NotFoundFailure('$prefix${e.message}'),
       NetworkException e => NetworkFailure('$prefix${e.message}'),
       ServerException e => ServerFailure('$prefix${e.message}'),
-      ValidationException e => ValidationFailure('$prefix${e.message}'),
+      ValidationException e => ValidationFailure(
+        '$prefix${e.message}',
+        code: e.code,
+      ),
       RateLimitException e => RateLimitFailure('$prefix${e.message}'),
       CacheException e => CacheFailure('$prefix${e.message}'),
       PairingException e => PairingFailure('$prefix${e.message}'),

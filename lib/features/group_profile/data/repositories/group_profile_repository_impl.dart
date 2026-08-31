@@ -421,6 +421,25 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
   }
 
   @override
+  Future<Either<Failure, void>> submitJoinRequest(
+    String groupId, {
+    required String message,
+  }) async {
+    try {
+      await remote.submitJoinRequest(groupId, message: message);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure('Failed to submit join request: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> unfollowGroup(
     String groupId,
     GroupType groupType,

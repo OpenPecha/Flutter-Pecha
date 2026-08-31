@@ -840,6 +840,16 @@ class AppLocalizationsMn extends AppLocalizations {
   String get home_group_events => 'Бүлгийн арга хэмжээ';
 
   @override
+  String get home_poems => 'Шүлгүүд';
+
+  @override
+  String get poems_load_error =>
+      'Шүлгүүдийг ачаалах боломжгүй.\nХолболтоо шалгаад дахин оролдоно уу';
+
+  @override
+  String get poems_empty => 'Одоогоор шүлэг байхгүй. Удахгүй дахин шалгаарай.';
+
+  @override
   String get connect_events_filter_all => 'Бүгд';
 
   @override
@@ -871,6 +881,9 @@ class AppLocalizationsMn extends AppLocalizations {
   String connect_event_participants_attending(int count) {
     return '$count оролцогч';
   }
+
+  @override
+  String get connect_event_participants_empty => 'Одоогоор оролцогч байхгүй';
 
   @override
   String get search_groups => 'Бүлэг хайх';
@@ -1838,6 +1851,50 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_invite => 'Урих';
 
   @override
+  String get group_request_to_join => 'Нэгдэх хүсэлт илгээх';
+
+  @override
+  String get group_request => 'Хүсэлт';
+
+  @override
+  String get group_request_sent => 'Хүсэлт илгээгдсэн';
+
+  @override
+  String get group_join_request_title => 'Нэгдэх хүсэлт';
+
+  @override
+  String get group_join_request_message_label => 'Зурвас (заавал биш)';
+
+  @override
+  String get group_join_request_message_hint =>
+      'Та хэрхэн дадлага хийдэг вэ, эсвэл хэн урисан бэ?';
+
+  @override
+  String get group_join_request_send => 'Хүсэлт илгээх';
+
+  @override
+  String get group_join_request_sent_snackbar =>
+      'Хүсэлт илгээгдсэн — админ үүнийг шалгана.';
+
+  @override
+  String get group_join_request_error =>
+      'Хүсэлт илгээж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get group_members_only_title => 'Зөвхөн гишүүд';
+
+  @override
+  String get group_members_only_message =>
+      'Энэ бүлгийн уншлага, арга хэмжээ, нийтлэлийг харахын тулд нэгдээрэй.';
+
+  @override
+  String get group_join_request_waiting_title => 'Админы хариу хүлээж байна';
+
+  @override
+  String get group_join_request_waiting_message =>
+      'Таны хүсэлт шалгагдмагц бид танд мэдэгдэх болно.';
+
+  @override
   String get group_members_load_error =>
       'Гишүүдийг ачаалж чадсангүй. Дахин оролдоно уу.';
 
@@ -2013,6 +2070,10 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get share_quote_message =>
       'Надад WeBuddhist дээрх энэ ишлэл таалагдсан тул тантай хуваалцахыг хүссэн. WeBuddhist аппликейшн дээр ийм мэдлэгтэй ишлэлүүдийг уншаарай.';
+
+  @override
+  String get share_poem_message =>
+      'Надад WeBuddhist дээрх энэ шүлэг таалагдсан тул тантай хуваалцахыг хүссэн.';
 
   @override
   String get share_mala_message =>
@@ -2301,4 +2362,46 @@ class AppLocalizationsMn extends AppLocalizations {
   String group_accumulator_share_message_no_group(String accumulation) {
     return 'Би WeBuddhist дээр \"$accumulation\" бүлгийн хуримтлалд оролцож байна. Та ч бас надтай нэгдээрэй!';
   }
+
+  @override
+  String get group_chat_title => 'Чат';
+
+  @override
+  String get group_chat_inappropriate =>
+      'Зөвшөөрөгдөөгүй үг агуулсан тул энэ мессежийг илгээж чадсангүй.';
+
+  @override
+  String get group_chat_not_a_member =>
+      'Зөвхөн гишүүд энэ чатыг нээх боломжтой.';
+
+  @override
+  String get group_chat_open => 'Чат';
+
+  @override
+  String get group_chat_message_hint => 'Мессеж';
+
+  @override
+  String get group_chat_join_to_send =>
+      'Мессеж илгээхийн тулд чатад нэгдээрэй.';
+
+  @override
+  String get group_chat_today => 'Өнөөдөр';
+
+  @override
+  String get group_chat_yesterday => 'Өчигдөр';
+
+  @override
+  String get group_chat_empty_title => 'Одоогоор мессеж алга';
+
+  @override
+  String get group_chat_empty_body => 'Бүлгээрээ яриа эхлүүлээрэй.';
+
+  @override
+  String get group_chat_load_failed => 'Мессежийг ачаалж чадсангүй.';
+
+  @override
+  String get group_chat_retry => 'Дахин оролдох';
+
+  @override
+  String get group_chat_unknown_sender => 'Гишүүн';
 }

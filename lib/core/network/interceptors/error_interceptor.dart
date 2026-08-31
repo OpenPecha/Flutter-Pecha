@@ -12,10 +12,7 @@ class ErrorInterceptor extends Interceptor {
   final AppLogger _logger;
 
   @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
     final requestId = err.requestOptions.extra['requestId'] ?? 'unknown';
     final exception = _convertDioException(err);
 
@@ -74,15 +71,13 @@ class ErrorInterceptor extends Interceptor {
   Exception _handleBadResponse(DioException error) {
     final statusCode = error.response?.statusCode;
     final responseData = error.response?.data;
-    final message =
-        (responseData is Map<String, dynamic>
-            ? responseData['message'] as String?
-            : null) ??
-        'Server error';
+    final body = responseData is Map<String, dynamic> ? responseData : null;
+    final message = body?['message'] as String? ?? 'Server error';
+    final code = body?['code'] as String?;
 
     switch (statusCode) {
       case 400:
-        return ValidationException(message);
+        return ValidationException(message, code: code);
       case 401:
         return const AuthenticationException('Unauthorized');
       case 403:
@@ -90,7 +85,7 @@ class ErrorInterceptor extends Interceptor {
       case 404:
         return const NotFoundException('Resource not found');
       case 409:
-        return ValidationException(message);
+        return ValidationException(message, code: code);
       case 429:
         return const RateLimitException('Too many requests');
       case 500:

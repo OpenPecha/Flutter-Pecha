@@ -436,7 +436,9 @@ sealed class GroupFollowState {
 }
 
 class GroupFollowLoading extends GroupFollowState {
-  const GroupFollowLoading();
+  final bool isInitialCheck;
+
+  const GroupFollowLoading({this.isInitialCheck = false});
 }
 
 class GroupFollowSuccess extends GroupFollowState {
@@ -449,6 +451,22 @@ class GroupFollowSuccess extends GroupFollowState {
 class GroupFollowFailure extends GroupFollowState {
   final Failure failure;
   const GroupFollowFailure(this.failure);
+}
+
+/// Whether the initial join-status check for a private group is still in flight.
+bool isPrivateGroupMembershipLoading(GroupFollowState followState) {
+  return followState is GroupFollowLoading && followState.isInitialCheck;
+}
+
+/// Whether the current user is an active member of a private community group.
+///
+/// Only a resolved follow check counts; never infer membership from join-request
+/// status alone (avoids flashing joined UI for stale APPROVED responses).
+bool isPrivateGroupMember({required GroupFollowState followState}) {
+  return switch (followState) {
+    GroupFollowSuccess(isFollowing: final isFollowing) => isFollowing,
+    _ => false,
+  };
 }
 
 class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
@@ -468,7 +486,7 @@ class GroupFollowNotifier extends StateNotifier<GroupFollowState> {
        _isAuthenticated = isAuthenticated,
        super(
          key.loadInitialStatus
-             ? const GroupFollowLoading()
+             ? const GroupFollowLoading(isInitialCheck: true)
              : const GroupFollowSuccess(isFollowing: false),
        ) {
     if (key.loadInitialStatus) {
@@ -916,6 +934,10 @@ class GroupMembersNotifier extends StateNotifier<GroupMembersState> {
   }
 }
 
+/// True when the group profile header title has scrolled out of view.
+final groupProfileAppBarTitleVisibleProvider = StateProvider.autoDispose
+    .family<bool, String>((ref, groupId) => false);
+
 /// True while the group profile members tab is the selected tab.
 final groupMembersTabActiveProvider = StateProvider.autoDispose
     .family<bool, String>((ref, groupId) => false);
@@ -945,11 +967,211 @@ final groupEventDetailProvider = FutureProvider.autoDispose
       return repository.getGroupEventDetail(eventId, language: language);
     });
 
-final groupEventParticipantsProvider = FutureProvider.autoDispose
-    .family<Either<Failure, GroupEventParticipantsPage>, String>((
-      ref,
-      eventId,
-    ) async {
-      final repository = ref.watch(groupProfileRepositoryProvider);
-      return repository.getGroupEventParticipants(eventId, skip: 0, limit: 20);
-    });
+class GroupEventParticipantsState {
+  final List<GroupEventParticipant> participants;
+  final int total;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final String? error;
+  final bool hasMore;
+  final int skip;
+
+  const GroupEventParticipantsState({
+    this.participants = const [],
+    this.total = 0,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.error,
+    this.hasMore = true,
+    this.skip = 0,
+  });
+
+  GroupEventParticipantsState copyWith({
+    List<GroupEventParticipant>? participants,
+    int? total,
+    bool? isLoading,
+    bool? isLoadingMore,
+    String? error,
+    bool? hasMore,
+    int? skip,
+    bool clearError = false,
+  }) {
+    return GroupEventParticipantsState(
+      participants: participants ?? this.participants,
+      total: total ?? this.total,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      error: clearError ? null : error ?? this.error,
+      hasMore: hasMore ?? this.hasMore,
+      skip: skip ?? this.skip,
+    );
+  }
+}
+
+class GroupEventParticipantsNotifier
+    extends StateNotifier<GroupEventParticipantsState> {
+  GroupEventParticipantsNotifier({
+    required GroupProfileRepositoryInterface repository,
+    required String eventId,
+  }) : _repository = repository,
+       _eventId = eventId,
+       super(const GroupEventParticipantsState());
+
+  final GroupProfileRepositoryInterface _repository;
+  final String _eventId;
+  static const int _limit = 20;
+  int _requestGeneration = 0;
+
+  Future<void> loadInitial() async {
+    if (state.isLoading || state.isLoadingMore) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _repository.getGroupEventParticipants(
+      _eventId,
+      skip: 0,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          participants: page.participants,
+          total: page.total,
+          isLoading: false,
+          hasMore: page.hasMore,
+          skip: page.participants.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+
+    final generation = _requestGeneration;
+    state = state.copyWith(isLoadingMore: true, clearError: true);
+
+    final result = await _repository.getGroupEventParticipants(
+      _eventId,
+      skip: state.skip,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoadingMore: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          participants: [...state.participants, ...page.participants],
+          total: page.total,
+          isLoadingMore: false,
+          hasMore: page.hasMore,
+          skip: state.skip + page.participants.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  Future<void> refresh() async {
+    final generation = ++_requestGeneration;
+    state = const GroupEventParticipantsState(isLoading: true);
+
+    final result = await _repository.getGroupEventParticipants(
+      _eventId,
+      skip: 0,
+      limit: _limit,
+    );
+
+    if (!mounted || generation != _requestGeneration) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (page) {
+        state = state.copyWith(
+          participants: page.participants,
+          total: page.total,
+          isLoading: false,
+          hasMore: page.hasMore,
+          skip: page.participants.length,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  void retry() {
+    if (state.participants.isEmpty) {
+      loadInitial();
+    } else {
+      loadMore();
+    }
+  }
+}
+
+final groupEventParticipantsProvider = StateNotifierProvider.autoDispose
+    .family<GroupEventParticipantsNotifier, GroupEventParticipantsState, String>(
+      (ref, eventId) {
+        return GroupEventParticipantsNotifier(
+          repository: ref.watch(groupProfileRepositoryProvider),
+          eventId: eventId,
+        );
+      },
+    );
+
+Future<bool> submitGroupJoinRequest({
+  required WidgetRef ref,
+  required String groupId,
+  String message = '',
+}) async {
+  final result = await ref
+      .read(groupProfileRepositoryProvider)
+      .submitJoinRequest(groupId, message: message);
+  return result.fold(
+    (_) => false,
+    (_) {
+      ref.invalidate(groupProfileProvider(groupId));
+      return true;
+    },
+  );
+}
+
+Future<void> refreshGroupProfilePage({
+  required WidgetRef ref,
+  required String groupId,
+  required GroupType groupType,
+}) async {
+  final followKey = GroupFollowKey(groupId: groupId, groupType: groupType);
+  ref.invalidate(groupFollowProvider(followKey));
+
+  final refreshTasks = <Future<void>>[
+    ref.refresh(groupProfileProvider(groupId).future).then((_) {}),
+  ];
+
+  if (ref.exists(groupPracticesProvider(groupId))) {
+    refreshGroupPractices(ref, groupId);
+  }
+  if (ref.exists(groupEventsProvider(groupId))) {
+    refreshTasks.add(
+      ref.refresh(groupEventsProvider(groupId).future).then((_) {}),
+    );
+  }
+  if (ref.exists(groupMembersProvider(groupId))) {
+    ref.read(groupMembersProvider(groupId).notifier).loadInitial();
+  }
+
+  await Future.wait(refreshTasks);
+}

@@ -321,6 +321,9 @@
   "connect_caption_more": "More",
   "connect_online": "Online",
   "home_group_events": "Group Events",
+  "home_poems": "Poems",
+  "poems_load_error": "Unable to load poems.\nCheck your connection and try again",
+  "poems_empty": "No poems yet. Check back soon.",
   "connect_events_filter_all": "All",
   "connect_events_filter_in_person": "In person",
   "connect_events_filter_empty_online": "No online events",
@@ -338,6 +341,7 @@
       }
     }
   },
+  "connect_event_participants_empty": "No participants yet",
   "search_groups": "Search groups",
   "search_for_groups": "Search for groups",
   "no_groups_found": "No matching groups found",
@@ -866,6 +870,19 @@
     }
   },
   "group_invite": "Invite",
+  "group_request_to_join": "Request to join",
+  "group_request": "Request",
+  "group_request_sent": "Request sent",
+  "group_join_request_title": "Request to join",
+  "group_join_request_message_label": "Message (optional)",
+  "group_join_request_message_hint": "How do you practice, or who invited you?",
+  "group_join_request_send": "Send request",
+  "group_join_request_sent_snackbar": "Request sent — an admin will review it.",
+  "group_join_request_error": "Unable to send request. Please try again.",
+  "group_members_only_title": "Members only",
+  "group_members_only_message": "Join to see this group's chants, events and posts.",
+  "group_join_request_waiting_title": "Waiting on an admin",
+  "group_join_request_waiting_message": "We'll notify you as soon as your request is reviewed.",
   "group_members_load_error": "Unable to load members. Please try again.",
   "group_followers_load_error": "Unable to load followers. Please try again.",
   "group_members_empty": "No members yet",
@@ -986,6 +1003,7 @@
   "share_streak_message": "I've been building a daily practice habit and wanted to share it with you. It's easier to keep it up with a friend. Join me on WeBuddhist.",
   "share_chant_message": "I wanted to share this chant with you. You can practice it and find a whole library of other chants and texts on WeBuddhist.",
   "share_quote_message": "I liked this quote from WeBuddhist and wanted to share it with you. Read more such insightful quotes on the WeBuddhist App",
+  "share_poem_message": "I liked this poem from WeBuddhist and wanted to share it with you.",
   "share_mala_message": "I've been using this digital mala on WeBuddhist and wanted to share it with you. It's an easy way to practice wherever you go.",
   "share_passage_message": "I liked this passage and wanted to share it with you. You can read the whole quote in context on WeBuddhist.",
   "share_timer_message": "I wanted to share this meditation timer from WeBuddhist with you. It makes it easy to build a meditation practice.",
@@ -1164,5 +1182,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "group_chat_title": "Chat",
+  "group_chat_inappropriate": "This message couldn't be sent because it contains language that isn't allowed.",
+  "group_chat_not_a_member": "Only members can open this chat.",
+  "group_chat_open": "Chat",
+  "group_chat_message_hint": "Message",
+  "group_chat_join_to_send": "Join chat to send message.",
+  "group_chat_today": "Today",
+  "group_chat_yesterday": "Yesterday",
+  "group_chat_empty_title": "No messages yet",
+  "group_chat_empty_body": "Start the conversation with your group.",
+  "group_chat_load_failed": "Messages couldn't be loaded.",
+  "group_chat_retry": "Retry",
+  "group_chat_unknown_sender": "Member"
 }
