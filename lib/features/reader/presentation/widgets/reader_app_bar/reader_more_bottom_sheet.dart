@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
 import 'package:flutter_pecha/features/practice/presentation/controllers/bookmark_controller.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/bookmark_providers.dart';
@@ -69,8 +70,9 @@ class _ReaderMoreBottomSheetState extends ConsumerState<ReaderMoreBottomSheet> {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     try {
-      final shareUrl =
+      final longUrl =
           DeepLinkUrlBuilder.readerLink(textId: widget.textId).toString();
+      final shareUrl = await resolveShareUrlRef(ref, longUrl);
       if (!mounted) return;
       final sharePositionOrigin = getSharePositionOrigin(context: context);
       final shareMessage = context.l10n.share_chant_message;

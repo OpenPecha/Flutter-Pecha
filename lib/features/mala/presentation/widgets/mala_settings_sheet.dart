@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/network/connectivity_service.dart'
     show connectivityNotifierProvider;
 import 'package:flutter_pecha/core/theme/app_colors.dart';
@@ -156,7 +157,9 @@ class MalaSettingsSheet extends ConsumerWidget {
   Future<void> _onShare(BuildContext context) async {
     final navigator = Navigator.of(context);
     final sharePositionOrigin = getSharePositionOrigin(context: context);
-    final shareUrl = DeepLinkUrlBuilder.malaLink(presetId: mantra.presetId).toString();
+    final longUrl =
+        DeepLinkUrlBuilder.malaLink(presetId: mantra.presetId).toString();
+    final shareUrl = await resolveShareUrl(context, longUrl);
     final shareMessage = context.l10n.share_mala_message;
     navigator.pop();
     await SharePlus.instance.share(

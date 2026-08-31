@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -47,12 +48,13 @@ Future<void> sharePlanDayImage({
     );
 
     final shareMessage = context.l10n.day_completion_share_message;
-    final planLink =
+    final longUrl =
         DeepLinkUrlBuilder.planDayLink(
           planId: planId,
           dayNumber: dayNumber,
           language: planLanguage,
         ).toString();
+    final planLink = await resolveShareUrl(context, longUrl);
 
     await SharePlus.instance.share(
       ShareParams(

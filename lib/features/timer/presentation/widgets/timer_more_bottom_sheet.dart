@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
 import 'package:flutter_pecha/features/practice/presentation/controllers/bookmark_controller.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/bookmark_providers.dart';
@@ -44,7 +45,9 @@ class _TimerMoreBottomSheetState extends ConsumerState<TimerMoreBottomSheet> {
     setState(() => _isSharing = true);
     try {
       final nav = Navigator.of(context);
-      final shareUrl = DeepLinkUrlBuilder.timerLink(timerId: widget.timer.id).toString();
+      final longUrl =
+          DeepLinkUrlBuilder.timerLink(timerId: widget.timer.id).toString();
+      final shareUrl = await resolveShareUrlRef(ref, longUrl);
       final shareMessage = context.l10n.share_timer_message;
       nav.pop();
       await SharePlus.instance.share(

@@ -5,6 +5,7 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
@@ -1647,9 +1648,10 @@ class _GroupFollowButton extends ConsumerWidget {
 
   const _GroupFollowButton({required this.profile, required this.isDark});
 
-  Future<void> _onInvitePressed(BuildContext context) async {
-    final shareUrl =
+  Future<void> _onInvitePressed(BuildContext context, WidgetRef ref) async {
+    final longUrl =
         DeepLinkUrlBuilder.groupLink(groupId: profile.id).toString();
+    final shareUrl = await resolveShareUrlRef(ref, longUrl);
     final shareMessage = context.l10n.share_group_invite_message;
     final sharePositionOrigin = getSharePositionOrigin(context: context);
     await SharePlus.instance.share(
@@ -1844,7 +1846,7 @@ class _GroupFollowButton extends ConsumerWidget {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () => _onInvitePressed(context),
+              onPressed: () => _onInvitePressed(context, ref),
               style: buttonStyle.copyWith(
                 backgroundColor: WidgetStatePropertyAll(
                   isDark ? AppColors.surfaceWhite : AppColors.textPrimary,
@@ -2100,7 +2102,7 @@ class _GroupFollowButton extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => _onInvitePressed(context),
+                      onPressed: () => _onInvitePressed(context, ref),
                       style: buttonStyle.copyWith(
                         backgroundColor: WidgetStatePropertyAll(
                           isDark
