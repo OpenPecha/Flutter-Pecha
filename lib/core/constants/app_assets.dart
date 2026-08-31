@@ -92,6 +92,8 @@ class AppAssets {
   static const IconData x = PhosphorIconsRegular.x;
   static const IconData dotsThreeVertical = PhosphorIconsRegular.dotsThreeVertical;
   static const IconData paperPlaneRight = PhosphorIconsRegular.paperPlaneRight;
+  static const IconData arrowBendUpLeft = PhosphorIconsRegular.arrowBendUpLeft;
+  static const IconData copy = PhosphorIconsRegular.copy;
 
   // ========== ACTION ICONS ==========
   static const IconData plus = PhosphorIconsRegular.plus;
@@ -118,6 +120,7 @@ class AppAssets {
   // ========== STATUS ICONS ==========
   static const IconData checkCircle = PhosphorIconsRegular.checkCircle;
   static const IconData warningCircle = PhosphorIconsRegular.warningCircle;
+  static const IconData warning = PhosphorIconsRegular.warning;
   static const IconData check = PhosphorIconsBold.check;
 
   // ========== SOCIAL MEDIA ICONS ==========

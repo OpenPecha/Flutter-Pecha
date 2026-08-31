@@ -1020,5 +1020,23 @@
   "group_chat_empty_body": "अपने समूह के साथ बातचीत शुरू करें।",
   "group_chat_load_failed": "संदेश लोड नहीं हो सके।",
   "group_chat_retry": "पुनः प्रयास करें",
-  "group_chat_unknown_sender": "सदस्य"
+  "group_chat_unknown_sender": "सदस्य",
+  "group_chat_reactions_all": "सभी",
+  "group_chat_reacted": "प्रतिक्रिया दी",
+  "group_chat_reply": "उत्तर दें",
+  "group_chat_copy": "कॉपी करें",
+  "group_chat_copied": "संदेश कॉपी किया गया",
+  "group_chat_report": "रिपोर्ट करें",
+  "group_chat_delete": "हटाएँ",
+  "group_chat_reaction_failed": "आपकी प्रतिक्रिया सहेजी नहीं जा सकी।",
+  "group_chat_reactions_count": "{count, plural, =1{1 प्रतिक्रिया} other{{count} प्रतिक्रियाएँ}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "आप",
+  "group_chat_tap_to_remove": "हटाने के लिए टैप करें"
 }

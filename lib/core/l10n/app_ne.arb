@@ -1020,5 +1020,23 @@
   "group_chat_empty_body": "आफ्नो समूहसँग कुराकानी सुरु गर्नुहोस्।",
   "group_chat_load_failed": "सन्देशहरू लोड गर्न सकिएन।",
   "group_chat_retry": "पुनः प्रयास गर्नुहोस्",
-  "group_chat_unknown_sender": "सदस्य"
+  "group_chat_unknown_sender": "सदस्य",
+  "group_chat_reactions_all": "सबै",
+  "group_chat_reacted": "प्रतिक्रिया दिनुभयो",
+  "group_chat_reply": "जवाफ दिनुहोस्",
+  "group_chat_copy": "प्रतिलिपि गर्नुहोस्",
+  "group_chat_copied": "सन्देश प्रतिलिपि गरियो",
+  "group_chat_report": "रिपोर्ट गर्नुहोस्",
+  "group_chat_delete": "मेटाउनुहोस्",
+  "group_chat_reaction_failed": "तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।",
+  "group_chat_reactions_count": "{count, plural, =1{1 प्रतिक्रिया} other{{count} प्रतिक्रियाहरू}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "तपाईं",
+  "group_chat_tap_to_remove": "हटाउन ट्याप गर्नुहोस्"
 }

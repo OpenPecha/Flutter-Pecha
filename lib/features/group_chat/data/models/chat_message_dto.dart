@@ -45,6 +45,24 @@ class ChatMessageDTO extends Equatable {
     );
   }
 
+  /// Additive: only the fields a live update rewrites are parameterised, so
+  /// the task 0 round-trip tests are untouched.
+  ChatMessageDTO copyWith({
+    String? body,
+    List<ChatMessageReactionDTO>? reactions,
+  }) {
+    return ChatMessageDTO(
+      id: id,
+      roomId: roomId,
+      senderId: senderId,
+      senderEmail: senderEmail,
+      body: body ?? this.body,
+      createdAt: createdAt,
+      parent: parent,
+      reactions: reactions ?? this.reactions,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -2378,4 +2378,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'Member';
+
+  @override
+  String get group_chat_reactions_all => 'All';
+
+  @override
+  String get group_chat_reacted => 'Reacted';
+
+  @override
+  String get group_chat_reply => 'Reply';
+
+  @override
+  String get group_chat_copy => 'Copy';
+
+  @override
+  String get group_chat_copied => 'Message copied';
+
+  @override
+  String get group_chat_report => 'Report';
+
+  @override
+  String get group_chat_delete => 'Delete';
+
+  @override
+  String get group_chat_reaction_failed => 'Your reaction couldn\'t be saved.';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reactions',
+      one: '1 reaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'You';
+
+  @override
+  String get group_chat_tap_to_remove => 'Tap to remove';
 }

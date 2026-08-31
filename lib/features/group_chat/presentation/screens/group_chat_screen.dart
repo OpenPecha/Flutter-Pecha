@@ -9,6 +9,7 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_live_client.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/domain/usecases/resolve_group_chat_room.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/chat_send_error.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
@@ -250,7 +251,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
         _onMessageCreated(json);
       case ChatLiveError():
         presentChatSendError(context, event);
-      case ChatLiveReactionsUpdated():
+      case ChatLiveReactionsUpdated(
+        messageId: final messageId,
+        reactions: final raw,
+      ):
+        _onReactionsUpdated(messageId, raw);
       case ChatLiveTyping():
       case ChatLivePresence():
       case ChatLiveUnknown():
@@ -282,6 +287,25 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
         .read(groupChatThreadProvider(message.roomId).notifier)
         .appendLive(message);
     unawaited(_markRoomRead());
+  }
+
+  /// Applies a reaction broadcast. The payload is shared by every member, so
+  /// `reacted_by_me` on it is not viewer-specific — the notifier re-derives
+  /// own state from the identity we hold.
+  void _onReactionsUpdated(String messageId, List<dynamic> raw) {
+    final roomId = _roomId;
+    if (roomId == null || messageId.isEmpty) return;
+    ref
+        .read(groupChatThreadProvider(roomId).notifier)
+        .replaceReactions(
+          messageId,
+          raw
+              .whereType<Map<String, dynamic>>()
+              .map(ChatMessageReactionDTO.fromJson)
+              .toList(),
+          currentUserId: _currentUserId,
+          currentUserEmail: ref.read(userProvider).user?.email,
+        );
   }
 
   Future<void> _refreshThread() async {

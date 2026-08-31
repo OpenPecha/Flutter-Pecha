@@ -2,6 +2,8 @@ import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/chat_link_preview_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_user_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/domain/repositories/group_chat_repository.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
@@ -9,6 +11,9 @@ import 'package:flutter_pecha/features/group_chat/presentation/providers/group_c
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+
+const thumbsUp = '\u{1F44D}';
+const heart = '\u{2764}\u{FE0F}';
 
 ChatMessageDTO _message(String id, {String senderId = 'a'}) {
   return ChatMessageDTO(
@@ -28,6 +33,11 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   List<ChatMessageDTO> history;
   Failure? listFailure;
   int listCallCount = 0;
+
+  /// Reaction summaries handed back, in call order.
+  List<List<ChatMessageReactionDTO>> reactionResponses = const [];
+  Failure? reactionFailure;
+  final List<String> reactionCalls = [];
 
   @override
   Future<Either<Failure, ChatMessagesPage>> listMessages(
@@ -88,6 +98,31 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   @override
   Future<Either<Failure, Unit>> markRoomRead(String roomId) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async => _reaction('POST $emoji');
+
+  @override
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> removeReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async => _reaction('DELETE $emoji');
+
+  Either<Failure, List<ChatMessageReactionDTO>> _reaction(String call) {
+    reactionCalls.add(call);
+    final failure = reactionFailure;
+    if (failure != null) return Left(failure);
+    final index = reactionCalls.length - 1;
+    if (index < reactionResponses.length) {
+      return Right(reactionResponses[index]);
+    }
+    return const Right([]);
+  }
 }
 
 /// autoDispose tears the provider down the moment nothing listens, so tests
@@ -216,6 +251,230 @@ void main() {
         'm2',
         'm1',
       ]);
+    });
+  });
+
+  group('reactions', () {
+    ChatMessageDTO reacted(String id, List<ChatMessageReactionDTO> reactions) {
+      return _message(id).copyWith(reactions: reactions);
+    }
+
+    test('replaceReactions rewrites one message and leaves the rest', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      notifier.replaceReactions('m1', const [
+        ChatMessageReactionDTO(emoji: thumbsUp, count: 1),
+      ]);
+
+      final byId = {for (final m in notifier.state.messages) m.id: m};
+      expect(byId['m1']!.reactions.single.emoji, thumbsUp);
+      expect(byId['m2']!.reactions, isEmpty);
+    });
+
+    test('replaceReactions ignores a message outside the window', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      notifier.replaceReactions('gone', const [
+        ChatMessageReactionDTO(emoji: thumbsUp, count: 1),
+      ]);
+
+      expect(notifier.state.messages.single.reactions, isEmpty);
+    });
+
+    test('replaceReactions re-derives reactedByMe for this viewer', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // A broadcast flag that is about somebody else.
+      notifier.replaceReactions(
+        'm1',
+        const [
+          ChatMessageReactionDTO(
+            emoji: thumbsUp,
+            count: 1,
+            reactedByMe: true,
+            users: [
+              ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
+            ],
+          ),
+        ],
+        currentUserEmail: 'rena@example.com',
+      );
+
+      expect(notifier.state.messages.single.reactions.single.reactedByMe,
+          isFalse);
+    });
+
+    test('toggleReaction posts and adopts the returned summary', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      repository.reactionResponses = const [
+        [ChatMessageReactionDTO(emoji: thumbsUp, count: 4)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.toggleReaction(
+        'm1',
+        thumbsUp,
+        roomIdForCall: 'room-1',
+      );
+
+      expect(failure, isNull);
+      expect(repository.reactionCalls, ['POST $thumbsUp']);
+      expect(notifier.state.messages.single.reactions.single.count, 4);
+    });
+
+    test('toggleReaction on my own emoji deletes it', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.toggleReaction('m1', thumbsUp, roomIdForCall: 'room-1');
+
+      expect(repository.reactionCalls, ['DELETE $thumbsUp']);
+    });
+
+    test('swapping posts the new emoji before deleting the old', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.toggleReaction('m1', heart, roomIdForCall: 'room-1');
+
+      // Post first, so the message never flickers through zero reactions.
+      expect(repository.reactionCalls, ['POST $heart', 'DELETE $thumbsUp']);
+    });
+
+    test('a swap never shows both emoji, even mid-flight', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      // The POST response legitimately carries both: the DELETE has not run.
+      repository.reactionResponses = const [
+        [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1),
+          ChatMessageReactionDTO(emoji: heart, count: 1),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // A broadcast arriving mid-swap carries the same two.
+      final seen = <int>[];
+      container.listen(groupChatThreadProvider('room-1'), (_, next) {
+        final message = next.messages.firstWhere((m) => m.id == 'm1');
+        seen.add(message.reactions.length);
+      });
+
+      await notifier.toggleReaction('m1', heart, roomIdForCall: 'room-1');
+
+      expect(notifier.state.messages.single.reactions.single.emoji, heart);
+      // Never two entries at any point the UI could have rendered.
+      expect(seen, everyElement(lessThanOrEqualTo(1)));
+    });
+
+    test('a broadcast mid-swap is ignored', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      repository.reactionResponses = const [
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final pending = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+      );
+      // reactions_updated for the POST, before the DELETE lands.
+      notifier.replaceReactions('m1', const [
+        ChatMessageReactionDTO(emoji: thumbsUp, count: 1),
+        ChatMessageReactionDTO(emoji: heart, count: 1),
+      ]);
+      expect(notifier.state.messages.single.reactions, hasLength(1));
+
+      await pending;
+      expect(notifier.state.messages.single.reactions.single.emoji, heart);
+    });
+
+    test('a failed call rolls back to the previous reactions', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(emoji: thumbsUp, count: 2),
+          ]),
+        ],
+      );
+      repository.reactionFailure = const NetworkFailure('offline');
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.toggleReaction(
+        'm1',
+        thumbsUp,
+        roomIdForCall: 'room-1',
+      );
+
+      expect(failure, isA<NetworkFailure>());
+      final reactions = notifier.state.messages.single.reactions;
+      expect(reactions.single.count, 2);
+      expect(reactions.single.reactedByMe, isFalse);
     });
   });
 

@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/chat_link_preview_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reactions.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,6 +80,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   final Ref ref;
   final String roomId;
   static const int _limit = 30;
+
+  /// Messages mid-swap. Between the POST of the new emoji and the DELETE of
+  /// the old one the server legitimately holds **both**, and so does any
+  /// `reactions_updated` broadcast in that window. Adopting either would show
+  /// two emoji for the ~600ms the round trip takes, so summaries for these
+  /// messages are ignored until the swap settles.
+  final Set<String> _swapping = {};
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -187,6 +197,185 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         appendLive(message);
       }
     });
+  }
+
+  /// Rewrites one message's reactions from an authoritative summary — the
+  /// REST response to our own call, or a `reactions_updated` broadcast.
+  ///
+  /// A message that has scrolled out of the loaded window is simply absent;
+  /// dropping the update is correct, since `loadMore` refetches with current
+  /// counts.
+  void replaceReactions(
+    String messageId,
+    List<ChatMessageReactionDTO> reactions, {
+    String? currentUserId,
+    String? currentUserEmail,
+  }) {
+    if (_swapping.contains(messageId)) return;
+    _applyReactions(
+      messageId,
+      reactions,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
+  }
+
+  void _applyReactions(
+    String messageId,
+    List<ChatMessageReactionDTO> reactions, {
+    String? currentUserId,
+    String? currentUserEmail,
+  }) {
+    if (messageId.isEmpty) return;
+    if (!state.messages.any((message) => message.id == messageId)) return;
+
+    final resolved = chatReactionsForViewer(
+      reactions,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
+
+    state = state.copyWith(
+      messages:
+          state.messages
+              .map(
+                (message) =>
+                    message.id == messageId
+                        ? message.copyWith(reactions: resolved)
+                        : message,
+              )
+              .toList(),
+    );
+  }
+
+  /// Applies a reaction with WhatsApp semantics: a member holds **one**
+  /// reaction per message, so tapping a different emoji swaps it.
+  ///
+  /// The API does not enforce that — add and remove are per-emoji and
+  /// idempotent — so the swap is the client's job. The POST goes first so the
+  /// message never flickers through a zero-reaction state, and only the
+  /// **final** summary is adopted: the one in between has both emoji on it.
+  /// Rolls back to the pre-toggle reactions if the first call fails.
+  Future<Failure?> toggleReaction(
+    String messageId,
+    String emoji, {
+    required String roomIdForCall,
+    String? currentUserId,
+    String? currentUserEmail,
+  }) async {
+    final index = state.messages.indexWhere(
+      (message) => message.id == messageId,
+    );
+    if (index < 0) return null;
+
+    final previousReactions = state.messages[index].reactions;
+    final previousEmoji = currentChatReactionEmoji(previousReactions);
+    final isRemoval = previousEmoji == emoji;
+    final isSwap = !isRemoval && previousEmoji != null;
+    if (isSwap) _swapping.add(messageId);
+
+    // Optimistic: the acceptance criterion is that this reads as instant.
+    _setReactions(
+      messageId,
+      toggleChatReaction(
+        previousReactions,
+        emoji,
+        previousEmoji: previousEmoji,
+      ),
+    );
+
+    final repository = ref.read(groupChatRepositoryProvider);
+    final result =
+        isRemoval
+            ? await repository.removeReaction(
+              roomIdForCall,
+              messageId: messageId,
+              emoji: emoji,
+            )
+            : await repository.addReaction(
+              roomIdForCall,
+              messageId: messageId,
+              emoji: emoji,
+            );
+
+    if (!mounted) {
+      _swapping.remove(messageId);
+      return null;
+    }
+
+    // On a swap the optimistic state is already right and this summary is not
+    // — it still carries the emoji the DELETE is about to drop.
+    final failure = result.fold<Failure?>((failure) => failure, (reactions) {
+      if (!isSwap) {
+        _applyReactions(
+          messageId,
+          reactions,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
+        );
+      }
+      return null;
+    });
+
+    if (failure != null) {
+      _swapping.remove(messageId);
+      _setReactions(messageId, previousReactions);
+      return failure;
+    }
+
+    if (!isSwap) return null;
+
+    // Drop the emoji this one replaced. Idempotent, so it is a harmless no-op
+    // if the backend already enforces one reaction per member.
+    final dropped = await repository.removeReaction(
+      roomIdForCall,
+      messageId: messageId,
+      emoji: previousEmoji,
+    );
+    _swapping.remove(messageId);
+    if (!mounted) return null;
+
+    dropped.fold(
+      (_) {
+        // The old emoji is still on the server. Say so rather than showing a
+        // state the next fetch would contradict.
+        result.fold((_) {}, (reactions) {
+          _applyReactions(
+            messageId,
+            reactions,
+            currentUserId: currentUserId,
+            currentUserEmail: currentUserEmail,
+          );
+        });
+      },
+      (reactions) {
+        _applyReactions(
+          messageId,
+          reactions,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
+        );
+      },
+    );
+
+    return null;
+  }
+
+  void _setReactions(
+    String messageId,
+    List<ChatMessageReactionDTO> reactions,
+  ) {
+    state = state.copyWith(
+      messages:
+          state.messages
+              .map(
+                (message) =>
+                    message.id == messageId
+                        ? message.copyWith(reactions: reactions)
+                        : message,
+              )
+              .toList(),
+    );
   }
 
   void retry() {

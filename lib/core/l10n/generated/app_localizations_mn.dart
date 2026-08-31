@@ -2404,4 +2404,46 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'Гишүүн';
+
+  @override
+  String get group_chat_reactions_all => 'Бүгд';
+
+  @override
+  String get group_chat_reacted => 'Хариу үйлдэл үзүүлсэн';
+
+  @override
+  String get group_chat_reply => 'Хариулах';
+
+  @override
+  String get group_chat_copy => 'Хуулах';
+
+  @override
+  String get group_chat_copied => 'Мессежийг хуулсан';
+
+  @override
+  String get group_chat_report => 'Мэдэгдэх';
+
+  @override
+  String get group_chat_delete => 'Устгах';
+
+  @override
+  String get group_chat_reaction_failed =>
+      'Таны хариу үйлдлийг хадгалж чадсангүй.';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count хариу үйлдэл',
+      one: '1 хариу үйлдэл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'Та';
+
+  @override
+  String get group_chat_tap_to_remove => 'Устгахын тулд товшино уу';
 }

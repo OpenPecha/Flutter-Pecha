@@ -7,6 +7,7 @@ import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.d
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_spans.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_link_preview_card.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_reaction_badges.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// One message row: self on the right in a dark bubble, everyone else on the
@@ -23,6 +24,8 @@ class GroupChatMessageBubble extends StatelessWidget {
     this.sender,
     this.selfAvatarUrl,
     this.selfDisplayName,
+    this.onLongPress,
+    this.onShowReactions,
   });
 
   final ChatMessageDTO message;
@@ -34,6 +37,11 @@ class GroupChatMessageBubble extends StatelessWidget {
   /// people endpoint excludes the caller.
   final String? selfAvatarUrl;
   final String? selfDisplayName;
+
+  /// Opens the long-press menu. The thread measures the row itself, so the
+  /// bubble only reports the gesture.
+  final VoidCallback? onLongPress;
+  final VoidCallback? onShowReactions;
 
   static const double _avatarSize = 32;
   static const double _gutter = 40;
@@ -75,7 +83,10 @@ class GroupChatMessageBubble extends StatelessWidget {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
-              child: _bubble(context, isDark, displayName),
+              child: GestureDetector(
+                onLongPress: onLongPress,
+                child: _bubble(context, isDark, displayName),
+              ),
             ),
           ),
           if (isSelf)
@@ -145,6 +156,12 @@ class GroupChatMessageBubble extends StatelessWidget {
               url: previewUrl,
               isSelf: isSelf,
               onOpen: _openUrl,
+            ),
+          if (message.reactions.isNotEmpty)
+            GroupChatReactionBadges(
+              reactions: message.reactions,
+              isSelf: isSelf,
+              onShowAll: onShowReactions ?? () {},
             ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -37,4 +38,16 @@ abstract class GroupChatRepository {
   });
 
   Future<Either<Failure, Unit>> markRoomRead(String roomId);
+
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  });
+
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> removeReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  });
 }

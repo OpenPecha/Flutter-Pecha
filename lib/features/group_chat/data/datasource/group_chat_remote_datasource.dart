@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_person_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_member_dto.dart';
@@ -205,6 +206,53 @@ class GroupChatRemoteDatasource {
     } on DioException catch (e) {
       throw _unwrap(e);
     }
+  }
+
+  /// Reacts to a message. Idempotent, and returns the message's full updated
+  /// reaction summary rather than an ack.
+  Future<List<ChatMessageReactionDTO>> addReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/chat/rooms/$roomId/messages/$messageId/reactions',
+        data: {'emoji': emoji},
+      );
+      return _readReactions(response.data);
+    } on DioException catch (e) {
+      throw _unwrap(e);
+    }
+  }
+
+  /// Removes the caller's reaction. Idempotent, and returns the same full
+  /// summary as [addReaction].
+  ///
+  /// The emoji travels in the path, so it must be percent-encoded — several of
+  /// the quick reactions are multi-code-point sequences.
+  Future<List<ChatMessageReactionDTO>> removeReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async {
+    try {
+      final encoded = Uri.encodeComponent(emoji);
+      final response = await _dio.delete(
+        '/chat/rooms/$roomId/messages/$messageId/reactions/$encoded',
+      );
+      return _readReactions(response.data);
+    } on DioException catch (e) {
+      throw _unwrap(e);
+    }
+  }
+
+  static List<ChatMessageReactionDTO> _readReactions(Object? data) {
+    return (data as List<dynamic>?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(ChatMessageReactionDTO.fromJson)
+            .toList() ??
+        const [];
   }
 
   /// Bumps the caller's `last_read_at`. Returns 204 with no body.

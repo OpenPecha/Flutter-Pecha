@@ -2,6 +2,7 @@ import 'package:flutter_pecha/core/error/exception_mapper.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/domain/repositories/group_chat_repository.dart';
 import 'package:fpdart/fpdart.dart';
@@ -104,6 +105,44 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
       return const Right(unit);
     } catch (e) {
       return Left(ExceptionMapper.map(e, context: 'markRoomRead'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async {
+    try {
+      return Right(
+        await _remote.addReaction(
+          roomId,
+          messageId: messageId,
+          emoji: emoji,
+        ),
+      );
+    } catch (e) {
+      return Left(ExceptionMapper.map(e, context: 'addReaction'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> removeReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async {
+    try {
+      return Right(
+        await _remote.removeReaction(
+          roomId,
+          messageId: messageId,
+          emoji: emoji,
+        ),
+      );
+    } catch (e) {
+      return Left(ExceptionMapper.map(e, context: 'removeReaction'));
     }
   }
 }

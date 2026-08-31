@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/storage/storage_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_room_cache.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/domain/repositories/group_chat_repository.dart';
 import 'package:flutter_pecha/features/group_chat/domain/usecases/resolve_group_chat_room.dart';
@@ -101,6 +102,20 @@ class _FakeGroupChatRepository implements GroupChatRepository {
     required String body,
     String? parentMessageId,
   }) async => const Left(NotFoundFailure('not used'));
+
+  @override
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async => const Right([]);
+
+  @override
+  Future<Either<Failure, List<ChatMessageReactionDTO>>> removeReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async => const Right([]);
 
   @override
   Future<Either<Failure, ChatRoomMembersPage>> listRoomMembers(

@@ -2407,4 +2407,46 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'सदस्य';
+
+  @override
+  String get group_chat_reactions_all => 'सबै';
+
+  @override
+  String get group_chat_reacted => 'प्रतिक्रिया दिनुभयो';
+
+  @override
+  String get group_chat_reply => 'जवाफ दिनुहोस्';
+
+  @override
+  String get group_chat_copy => 'प्रतिलिपि गर्नुहोस्';
+
+  @override
+  String get group_chat_copied => 'सन्देश प्रतिलिपि गरियो';
+
+  @override
+  String get group_chat_report => 'रिपोर्ट गर्नुहोस्';
+
+  @override
+  String get group_chat_delete => 'मेटाउनुहोस्';
+
+  @override
+  String get group_chat_reaction_failed =>
+      'तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count प्रतिक्रियाहरू',
+      one: '1 प्रतिक्रिया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'तपाईं';
+
+  @override
+  String get group_chat_tap_to_remove => 'हटाउन ट्याप गर्नुहोस्';
 }

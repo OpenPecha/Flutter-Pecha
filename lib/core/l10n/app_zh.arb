@@ -954,5 +954,23 @@
   "group_chat_empty_body": "與你的群組開始對話吧。",
   "group_chat_load_failed": "無法載入訊息。",
   "group_chat_retry": "重試",
-  "group_chat_unknown_sender": "成員"
+  "group_chat_unknown_sender": "成員",
+  "group_chat_reactions_all": "全部",
+  "group_chat_reacted": "已回應",
+  "group_chat_reply": "回覆",
+  "group_chat_copy": "複製",
+  "group_chat_copied": "已複製訊息",
+  "group_chat_report": "檢舉",
+  "group_chat_delete": "刪除",
+  "group_chat_reaction_failed": "無法儲存你的回應。",
+  "group_chat_reactions_count": "{count, plural, =1{1 個回應} other{{count} 個回應}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "你",
+  "group_chat_tap_to_remove": "點按以移除"
 }
