@@ -180,6 +180,8 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
     final title = event.title.trim();
     final longUrl = DeepLinkUrlBuilder.eventLink(eventId: event.id).toString();
     final shareUrl = await resolveShareUrlRef(ref, longUrl);
+    if (!mounted) return;
+
     final message = title.isNotEmpty ? '$title\n\n$shareUrl' : shareUrl;
     await SharePlus.instance.share(ShareParams(text: message));
   }

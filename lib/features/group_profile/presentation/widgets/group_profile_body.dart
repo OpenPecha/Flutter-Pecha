@@ -1649,10 +1649,12 @@ class _GroupFollowButton extends ConsumerWidget {
   const _GroupFollowButton({required this.profile, required this.isDark});
 
   Future<void> _onInvitePressed(BuildContext context, WidgetRef ref) async {
+    final shareMessage = context.l10n.share_group_invite_message;
     final longUrl =
         DeepLinkUrlBuilder.groupLink(groupId: profile.id).toString();
     final shareUrl = await resolveShareUrlRef(ref, longUrl);
-    final shareMessage = context.l10n.share_group_invite_message;
+    if (!context.mounted) return;
+
     final sharePositionOrigin = getSharePositionOrigin(context: context);
     await SharePlus.instance.share(
       ShareParams(

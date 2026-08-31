@@ -220,6 +220,8 @@ class _GroupRecitationCollectionScreenState
           collectionId: collection.id,
         ).toString();
     final shareUrl = await resolveShareUrlRef(ref, longUrl);
+    if (!mounted) return;
+
     final sharePositionOrigin = getSharePositionOrigin(context: context);
 
     await SharePlus.instance.share(

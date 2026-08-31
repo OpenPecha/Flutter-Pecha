@@ -55,6 +55,7 @@ Future<void> sharePlanDayImage({
           language: planLanguage,
         ).toString();
     final planLink = await resolveShareUrl(context, longUrl);
+    if (!context.mounted) return;
 
     await SharePlus.instance.share(
       ShareParams(

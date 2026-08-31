@@ -245,6 +245,7 @@ Future<void> shareGroupAccumulatorSession(
       accumulatorId: accumulatorId,
       groupId: groupId,
     );
+    if (!context.mounted) return;
 
     await SharePlus.instance.share(
       ShareParams(

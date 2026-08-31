@@ -233,6 +233,8 @@ class _ConnectPostDetailPanelState extends ConsumerState<ConnectPostDetailPanel>
             : '';
     final shareUrl =
         longUrl.isNotEmpty ? await resolveShareUrlRef(ref, longUrl) : '';
+    if (!mounted) return;
+
     final message =
         caption.isNotEmpty && shareUrl.isNotEmpty
             ? '$caption\n\n$shareUrl'

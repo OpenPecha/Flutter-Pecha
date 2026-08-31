@@ -72,10 +72,11 @@ class _ReaderMoreBottomSheetState extends ConsumerState<ReaderMoreBottomSheet> {
     try {
       final longUrl =
           DeepLinkUrlBuilder.readerLink(textId: widget.textId).toString();
+      final shareMessage = context.l10n.share_chant_message;
       final shareUrl = await resolveShareUrlRef(ref, longUrl);
       if (!mounted) return;
+
       final sharePositionOrigin = getSharePositionOrigin(context: context);
-      final shareMessage = context.l10n.share_chant_message;
       await SharePlus.instance.share(
         ShareParams(
           text: '$shareMessage\n\n$shareUrl',

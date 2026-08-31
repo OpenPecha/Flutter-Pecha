@@ -7,16 +7,17 @@ import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> sharePoem(BuildContext context, Poem poem) async {
+  final shareMessage = context.l10n.share_poem_message;
+  final sharePositionOrigin = getSharePositionOrigin(context: context);
   final longUrl = DeepLinkUrlBuilder.poemLink(poemId: poem.id).toString();
   final shareUrl = await resolveShareUrl(context, longUrl);
-  final shareMessage = context.l10n.share_poem_message;
+  if (!context.mounted) return;
+
   final title = poem.title.trim();
   final message =
       title.isNotEmpty
           ? '$shareMessage\n\n$title\n\n$shareUrl'
           : '$shareMessage\n\n$shareUrl';
-  final sharePositionOrigin = getSharePositionOrigin(context: context);
-
   await SharePlus.instance.share(
     ShareParams(
       text: message,

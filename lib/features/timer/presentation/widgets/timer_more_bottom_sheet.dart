@@ -44,12 +44,12 @@ class _TimerMoreBottomSheetState extends ConsumerState<TimerMoreBottomSheet> {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     try {
-      final nav = Navigator.of(context);
       final longUrl =
           DeepLinkUrlBuilder.timerLink(timerId: widget.timer.id).toString();
-      final shareUrl = await resolveShareUrlRef(ref, longUrl);
       final shareMessage = context.l10n.share_timer_message;
-      nav.pop();
+      final shareUrl = await resolveShareUrlRef(ref, longUrl);
+      if (!mounted) return;
+      Navigator.of(context).pop();
       await SharePlus.instance.share(
         ShareParams(text: '$shareMessage\n\n$shareUrl'),
       );

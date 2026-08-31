@@ -98,8 +98,9 @@ Future<void> shareStreakQuote(
     );
 
     final longUrl = DeepLinkUrlBuilder.moreLink().toString();
-    final moreLink = await resolveShareUrl(context, longUrl);
     final shareMessage = AppLocalizations.of(context)!.share_streak_message;
+    final moreLink = await resolveShareUrl(context, longUrl);
+    if (!context.mounted) return;
 
     await SharePlus.instance.share(
       ShareParams(

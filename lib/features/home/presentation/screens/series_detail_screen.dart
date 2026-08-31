@@ -197,6 +197,8 @@ class SeriesDetailScreen extends ConsumerWidget {
   Future<void> _onShare(BuildContext context, WidgetRef ref, Series series) async {
     final longUrl = DeepLinkUrlBuilder.seriesLink(seriesId: series.id).toString();
     final url = await resolveShareUrlRef(ref, longUrl);
+    if (!context.mounted) return;
+
     final message = context.l10n.series_share_message(series.title, url);
     await SharePlus.instance.share(ShareParams(text: message));
   }

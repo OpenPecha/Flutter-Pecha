@@ -357,6 +357,8 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
           groupId: detail.groupId,
         ).toString();
     final shareUrl = await resolveShareUrlRef(ref, longUrl);
+    if (!mounted) return;
+
     final sharePositionOrigin = getSharePositionOrigin(context: context);
 
     await SharePlus.instance.share(

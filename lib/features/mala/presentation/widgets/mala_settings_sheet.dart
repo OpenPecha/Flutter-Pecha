@@ -155,13 +155,14 @@ class MalaSettingsSheet extends ConsumerWidget {
   }
 
   Future<void> _onShare(BuildContext context) async {
-    final navigator = Navigator.of(context);
+    final shareMessage = context.l10n.share_mala_message;
     final sharePositionOrigin = getSharePositionOrigin(context: context);
     final longUrl =
         DeepLinkUrlBuilder.malaLink(presetId: mantra.presetId).toString();
     final shareUrl = await resolveShareUrl(context, longUrl);
-    final shareMessage = context.l10n.share_mala_message;
-    navigator.pop();
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop();
     await SharePlus.instance.share(
       ShareParams(
         text: '$shareMessage\n\n$shareUrl',

@@ -193,6 +193,8 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
             : '';
     final shareUrl =
         longUrl.isNotEmpty ? await resolveShareUrlRef(ref, longUrl) : '';
+    if (!mounted) return;
+
     final message =
         caption.isNotEmpty && shareUrl.isNotEmpty
             ? '$caption\n\n$shareUrl'

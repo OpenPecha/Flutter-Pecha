@@ -329,6 +329,8 @@ class _GroupEventDetailScreenState
     final longUrl =
         DeepLinkUrlBuilder.eventLink(eventId: widget.eventId).toString();
     final shareUrl = await resolveShareUrlRef(ref, longUrl);
+    if (!mounted) return;
+
     await SharePlus.instance.share(
       ShareParams(
         text: shareUrl,
