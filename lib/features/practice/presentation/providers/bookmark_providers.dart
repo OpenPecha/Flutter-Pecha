@@ -293,16 +293,29 @@ class BookmarksState {
 }
 
 class BookmarksNotifier extends StateNotifier<BookmarksState> {
-  BookmarksNotifier(this._repository, this._language)
-    : super(const BookmarksState(isLoading: true)) {
-    load();
+  BookmarksNotifier(
+    this._repository,
+    this._language, {
+    required bool isAuthenticated,
+  }) : _isAuthenticated = isAuthenticated,
+       super(BookmarksState(isLoading: isAuthenticated)) {
+    if (isAuthenticated) load();
   }
 
   final BookmarkRepository _repository;
   final String _language;
+
+  /// Guests and signed-out users have no bookmarks to fetch. `/users/me/*` is
+  /// bearer-only, so calling it anyway just yields an error screen where the
+  /// empty state belongs.
+  final bool _isAuthenticated;
   final _logger = AppLogger('BookmarksNotifier');
 
   Future<void> load() async {
+    if (!_isAuthenticated) {
+      state = const BookmarksState();
+      return;
+    }
     state = state.copyWith(isLoading: true, clearError: true);
     final result = await _repository.fetchBookmarks(language: _language);
     if (!mounted) return;
@@ -345,10 +358,17 @@ class BookmarksNotifier extends StateNotifier<BookmarksState> {
 
 final bookmarksProvider =
     StateNotifierProvider.autoDispose<BookmarksNotifier, BookmarksState>((ref) {
+      // `select` narrows to a single bool: AuthState has no `==`, so watching it
+      // whole would rebuild the notifier — and refetch — on every auth emission.
+      final isAuthenticated = ref.watch(
+        authProvider.select((auth) => auth.isLoggedIn && !auth.isGuest),
+      );
+
       // Watch the content language so changing locale refetches localized
       // bookmark titles/metadata.
       return BookmarksNotifier(
         ref.watch(bookmarkRepositoryProvider),
         ref.watch(contentLanguageProvider),
+        isAuthenticated: isAuthenticated,
       );
     });
