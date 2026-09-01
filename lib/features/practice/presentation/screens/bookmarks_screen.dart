@@ -259,7 +259,7 @@ class _BookmarkTabView extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (state.error != null && state.bookmarks.isEmpty) {
-      return _BookmarkErrorState(message: state.error!, onRetry: onRetry);
+      return _BookmarkErrorState(onRetry: onRetry);
     }
 
     final items = state.forTab(tab);
@@ -355,10 +355,14 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+/// Failure state for a tab.
+///
+/// Deliberately shows only the localized message, never [BookmarksState.error]:
+/// that string carries backend detail like "Server error (500)", which belongs
+/// in the logs ([BookmarksNotifier.load] records it) and not on screen.
 class _BookmarkErrorState extends StatelessWidget {
-  const _BookmarkErrorState({required this.message, required this.onRetry});
+  const _BookmarkErrorState({required this.onRetry});
 
-  final String message;
   final VoidCallback onRetry;
 
   @override
@@ -373,7 +377,7 @@ class _BookmarkErrorState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              message,
+              context.l10n.unableToLoad,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 15, color: textColor, height: 1.5),
             ),
