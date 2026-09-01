@@ -79,6 +79,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   final String roomId;
   static const int _limit = 30;
 
+  /// Per message, the sequence number of the most recent toggle and the tail
+  /// of its in-flight work. Overlapping taps on one message would otherwise
+  /// each derive a baseline from the other's optimistic state, then roll back
+  /// or apply a summary that no longer matches what the user last chose.
+  final Map<String, int> _toggleSeq = {};
+  final Map<String, Future<void>> _toggleChain = {};
+
   /// Messages mid-swap. Between the POST of the new emoji and the DELETE of
   /// the old one the server legitimately holds **both**, and so does any
   /// `reactions_updated` broadcast in that window. Adopting either would show
@@ -170,7 +177,10 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
 
   /// Re-reads the newest page after a reconnect and merges by id, so anything
   /// missed while the socket was down lands without duplicating what is held.
-  Future<void> refreshLatest() async {
+  Future<void> refreshLatest({
+    String? currentUserId,
+    String? currentUserEmail,
+  }) async {
     final result = await ref
         .read(groupChatRepositoryProvider)
         .listMessages(roomId, skip: 0, limit: _limit);
@@ -178,20 +188,51 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     if (!mounted) return;
 
     result.fold((_) {}, (page) {
+      ChatMessageDTO forViewer(ChatMessageDTO message) {
+        if (message.reactions.isEmpty) return message;
+        return message.copyWith(
+          reactions: chatReactionsForViewer(
+            message.reactions,
+            currentUserId: currentUserId,
+            currentUserEmail: currentUserEmail,
+          ),
+        );
+      }
+
+      final fetched = page.messages.map(forViewer).toList();
+
       if (state.messages.isEmpty) {
         state = state.copyWith(
-          messages: page.messages,
+          messages: fetched,
           hasLoaded: true,
-          hasMore: page.messages.length < page.total,
-          skip: page.messages.length,
+          hasMore: fetched.length < page.total,
+          skip: fetched.length,
           total: page.total,
           clearError: true,
         );
         return;
       }
+
+      // Refresh what is already held rather than skipping it. A reaction that
+      // changed while the socket was down arrives on a message whose id we
+      // already have, and `appendLive` alone would drop that update on the
+      // floor. A message mid-swap is left alone — its optimistic state is
+      // newer than this page.
+      final fetchedById = {for (final message in fetched) message.id: message};
+      state = state.copyWith(
+        messages:
+            state.messages.map((existing) {
+              final fresh = fetchedById[existing.id];
+              if (fresh == null || _swapping.contains(existing.id)) {
+                return existing;
+              }
+              return fresh;
+            }).toList(),
+      );
+
       // Oldest first, so each insert lands above the previous one and the
       // newest-first order is preserved.
-      for (final message in page.messages.reversed) {
+      for (final message in fetched.reversed) {
         appendLive(message);
       }
     });
@@ -266,21 +307,73 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     );
     if (index < 0) return null;
 
-    final previousReactions = state.messages[index].reactions;
-    final previousEmoji = currentChatReactionEmoji(previousReactions);
+    final seq = (_toggleSeq[messageId] ?? 0) + 1;
+    _toggleSeq[messageId] = seq;
+
+    final baseline = state.messages[index].reactions;
+    final previousEmoji = currentChatReactionEmoji(baseline);
     final isRemoval = previousEmoji == emoji;
     final isSwap = !isRemoval && previousEmoji != null;
     if (isSwap) _swapping.add(messageId);
 
-    // Optimistic: the acceptance criterion is that this reads as instant.
+    // Optimistic, and synchronously so: the tap has to read as instant, and a
+    // broadcast arriving in the same frame must not overwrite it.
     _setReactions(
       messageId,
-      toggleChatReaction(
-        previousReactions,
-        emoji,
-        previousEmoji: previousEmoji,
-      ),
+      toggleChatReaction(baseline, emoji, previousEmoji: previousEmoji),
     );
+
+    // Only the requests are chained, per message, so the server sees the taps
+    // in the order they were made and a rollback can never undo a later
+    // choice.
+    final queued = _toggleChain[messageId] ?? Future<void>.value();
+    Failure? failure;
+    final run = queued.then((_) async {
+      failure = await _runToggle(
+        messageId,
+        emoji,
+        seq: seq,
+        baseline: baseline,
+        previousEmoji: previousEmoji,
+        isRemoval: isRemoval,
+        isSwap: isSwap,
+        roomIdForCall: roomIdForCall,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+    });
+    _toggleChain[messageId] = run.catchError((Object _) {});
+
+    await _toggleChain[messageId];
+    if (_toggleSeq[messageId] == seq) {
+      _toggleSeq.remove(messageId);
+      _toggleChain.remove(messageId);
+      // The last operation for this message owns the cleanup, whichever one
+      // opened the swap guard.
+      _swapping.remove(messageId);
+    }
+    return failure;
+  }
+
+  /// Whether this operation is still the newest one for its message. A
+  /// superseded toggle neither applies its summary nor rolls back — the newer
+  /// one owns the state.
+  bool _isCurrent(String messageId, int seq) => _toggleSeq[messageId] == seq;
+
+  Future<Failure?> _runToggle(
+    String messageId,
+    String emoji, {
+    required int seq,
+    required List<ChatMessageReactionDTO> baseline,
+    required String? previousEmoji,
+    required bool isRemoval,
+    required bool isSwap,
+    required String roomIdForCall,
+    String? currentUserId,
+    String? currentUserEmail,
+  }) async {
+    if (!mounted) return null;
+    final previousReactions = baseline;
 
     final repository = ref.read(groupChatRepositoryProvider);
     final result =
@@ -296,15 +389,12 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
               emoji: emoji,
             );
 
-    if (!mounted) {
-      _swapping.remove(messageId);
-      return null;
-    }
+    if (!mounted) return null;
 
     // On a swap the optimistic state is already right and this summary is not
     // — it still carries the emoji the DELETE is about to drop.
     final failure = result.fold<Failure?>((failure) => failure, (reactions) {
-      if (!isSwap) {
+      if (!isSwap && _isCurrent(messageId, seq)) {
         _applyReactions(
           messageId,
           reactions,
@@ -316,22 +406,25 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     });
 
     if (failure != null) {
-      _swapping.remove(messageId);
-      _setReactions(messageId, previousReactions);
+      // Rolling back to this operation's baseline would wipe a newer tap.
+      if (_isCurrent(messageId, seq)) {
+        _setReactions(messageId, previousReactions);
+      }
       return failure;
     }
 
-    if (!isSwap) return null;
+    // isSwap implies a previous emoji; bind it so the type says as much.
+    final replaced = previousEmoji;
+    if (!isSwap || replaced == null) return null;
 
     // Drop the emoji this one replaced. Idempotent, so it is a harmless no-op
     // if the backend already enforces one reaction per member.
     final dropped = await repository.removeReaction(
       roomIdForCall,
       messageId: messageId,
-      emoji: previousEmoji,
+      emoji: replaced,
     );
-    _swapping.remove(messageId);
-    if (!mounted) return null;
+    if (!mounted || !_isCurrent(messageId, seq)) return null;
 
     dropped.fold(
       (_) {
@@ -359,10 +452,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     return null;
   }
 
-  void _setReactions(
-    String messageId,
-    List<ChatMessageReactionDTO> reactions,
-  ) {
+  void _setReactions(String messageId, List<ChatMessageReactionDTO> reactions) {
     state = state.copyWith(
       messages:
           state.messages
@@ -435,7 +525,9 @@ final chatLinkPreviewProvider = FutureProvider.autoDispose
       final cache = ref.watch(chatLinkPreviewCacheProvider);
       if (cache.contains(url)) return cache.read(url);
 
-      final preview = await ref.watch(chatLinkPreviewServiceProvider).fetch(url);
+      final preview = await ref
+          .watch(chatLinkPreviewServiceProvider)
+          .fetch(url);
       cache.write(url, preview);
       return preview;
     });

@@ -37,6 +37,7 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   /// Reaction summaries handed back, in call order.
   List<List<ChatMessageReactionDTO>> reactionResponses = const [];
   Failure? reactionFailure;
+  bool failFirstReaction = false;
   final List<String> reactionCalls = [];
 
   @override
@@ -107,6 +108,9 @@ class _FakeGroupChatRepository implements GroupChatRepository {
 
   Either<Failure, List<ChatMessageReactionDTO>> _reaction(String call) {
     reactionCalls.add(call);
+    if (failFirstReaction && reactionCalls.length == 1) {
+      return const Left(NetworkFailure('offline'));
+    }
     final failure = reactionFailure;
     if (failure != null) return Left(failure);
     final index = reactionCalls.length - 1;
@@ -442,6 +446,90 @@ void main() {
 
       await pending;
       expect(notifier.state.messages.single.reactions.single.emoji, heart);
+    });
+
+    test('overlapping toggles do not undo the newer choice', () async {
+      repository = _FakeGroupChatRepository(
+        history: [reacted('m1', const [])],
+      );
+      // The first call fails; the second succeeds.
+      repository.failFirstReaction = true;
+      repository.reactionResponses = const [
+        [],
+        [ChatMessageReactionDTO(emoji: heart, count: 1, reactedByMe: true)],
+        // The swap's trailing DELETE of the phantom thumbs-up.
+        [ChatMessageReactionDTO(emoji: heart, count: 1, reactedByMe: true)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final first = notifier.toggleReaction(
+        'm1',
+        thumbsUp,
+        roomIdForCall: 'room-1',
+      );
+      final second = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+      );
+      await Future.wait([first, second]);
+
+      // The superseded failure must not roll the newer heart away.
+      final reactions = notifier.state.messages.single.reactions;
+      expect(reactions.map((r) => r.emoji), [heart]);
+    });
+
+    test('refreshLatest updates reactions on messages already held', () async {
+      repository = _FakeGroupChatRepository(
+        history: [reacted('m1', const [])],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(notifier.state.messages.single.reactions, isEmpty);
+
+      // A reaction landed while the socket was down.
+      repository.history = [
+        reacted('m1', const [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 2),
+        ]),
+      ];
+      await notifier.refreshLatest();
+
+      expect(notifier.state.messages.single.reactions.single.count, 2);
+    });
+
+    test('refreshLatest derives reactedByMe for this viewer', () async {
+      repository = _FakeGroupChatRepository(
+        history: [reacted('m1', const [])],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      repository.history = [
+        reacted('m1', const [
+          ChatMessageReactionDTO(
+            emoji: thumbsUp,
+            count: 1,
+            users: [
+              ChatMessageReactionUserDTO(
+                userId: 'u1',
+                email: 'rena@example.com',
+              ),
+            ],
+          ),
+        ]),
+      ];
+      await notifier.refreshLatest(currentUserEmail: 'rena@example.com');
+
+      expect(
+        notifier.state.messages.single.reactions.single.reactedByMe,
+        isTrue,
+      );
     });
 
     test('a failed call rolls back to the previous reactions', () async {

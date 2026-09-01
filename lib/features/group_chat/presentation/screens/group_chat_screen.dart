@@ -311,7 +311,12 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   Future<void> _refreshThread() async {
     final roomId = _roomId;
     if (roomId == null) return;
-    await ref.read(groupChatThreadProvider(roomId).notifier).refreshLatest();
+    await ref
+        .read(groupChatThreadProvider(roomId).notifier)
+        .refreshLatest(
+          currentUserId: _currentUserId,
+          currentUserEmail: ref.read(userProvider).user?.email,
+        );
   }
 
   void _scheduleReconnect() {
