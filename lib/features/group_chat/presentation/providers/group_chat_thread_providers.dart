@@ -213,6 +213,26 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         return;
       }
 
+      // A full page with nothing in common with what is held means more
+      // arrived while the socket was down than one page can carry. The middle
+      // is missing, so the retained tail is not contiguous with it — keeping
+      // both would leave `skip` pointing past the gap and those messages
+      // would never load. Start again from the newest page and let `loadMore`
+      // walk back through the gap.
+      final known = state.messages.map((message) => message.id).toSet();
+      final overlaps = fetched.any((message) => known.contains(message.id));
+      if (!overlaps && fetched.length >= _limit) {
+        state = state.copyWith(
+          messages: fetched,
+          hasLoaded: true,
+          hasMore: fetched.length < page.total,
+          skip: fetched.length,
+          total: page.total,
+          clearError: true,
+        );
+        return;
+      }
+
       // Refresh what is already held rather than skipping it. A reaction that
       // changed while the socket was down arrives on a message whose id we
       // already have, and `appendLive` alone would drop that update on the
@@ -235,6 +255,12 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       for (final message in fetched.reversed) {
         appendLive(message);
       }
+
+      // The server's count is newer than the one carried since the last page.
+      state = state.copyWith(
+        total: page.total,
+        hasMore: state.messages.length < page.total,
+      );
     });
   }
 
@@ -391,20 +417,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
 
     if (!mounted) return null;
 
-    // On a swap the optimistic state is already right and this summary is not
-    // — it still carries the emoji the DELETE is about to drop.
-    final failure = result.fold<Failure?>((failure) => failure, (reactions) {
-      if (!isSwap && _isCurrent(messageId, seq)) {
-        _applyReactions(
-          messageId,
-          reactions,
-          currentUserId: currentUserId,
-          currentUserEmail: currentUserEmail,
-        );
-      }
-      return null;
-    });
-
+    final failure = result.fold<Failure?>((failure) => failure, (_) => null);
     if (failure != null) {
       // Rolling back to this operation's baseline would wipe a newer tap.
       if (_isCurrent(messageId, seq)) {
@@ -413,43 +426,85 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       return failure;
     }
 
-    // isSwap implies a previous emoji; bind it so the type says as much.
-    final replaced = previousEmoji;
-    if (!isSwap || replaced == null) return null;
+    var summary = result.getOrElse((_) => const []);
 
-    // Drop the emoji this one replaced. Idempotent, so it is a harmless no-op
-    // if the backend already enforces one reaction per member.
-    final dropped = await repository.removeReaction(
-      roomIdForCall,
-      messageId: messageId,
-      emoji: replaced,
+    // What the **server** says is mine, which is not the same as the
+    // optimistic baseline: an earlier queued POST may have failed, leaving a
+    // reaction on the server that the local state has already replaced.
+    // Deleting the optimistic emoji would then miss the real one and leave the
+    // member holding two.
+    final stale = _staleOwnEmoji(
+      summary,
+      keep: isRemoval ? null : emoji,
+      // Un-reacting has nothing left to reconcile against: the DELETE already
+      // went out, and falling back to the same emoji would send it twice.
+      fallback: isRemoval ? null : previousEmoji,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
     );
-    if (!mounted || !_isCurrent(messageId, seq)) return null;
 
-    dropped.fold(
-      (_) {
-        // The old emoji is still on the server. Say so rather than showing a
-        // state the next fetch would contradict.
-        result.fold((_) {}, (reactions) {
-          _applyReactions(
-            messageId,
-            reactions,
-            currentUserId: currentUserId,
-            currentUserEmail: currentUserEmail,
-          );
-        });
-      },
-      (reactions) {
+    if (stale.isEmpty) {
+      if (_isCurrent(messageId, seq)) {
         _applyReactions(
           messageId,
-          reactions,
+          summary,
           currentUserId: currentUserId,
           currentUserEmail: currentUserEmail,
         );
-      },
-    );
+      }
+      return null;
+    }
 
+    // One reaction per member: drop everything else this member holds. The
+    // in-between summaries carry more than one emoji, so none of them is
+    // applied — only the last.
+    for (final extra in stale) {
+      final dropped = await repository.removeReaction(
+        roomIdForCall,
+        messageId: messageId,
+        emoji: extra,
+      );
+      if (!mounted) return null;
+      dropped.fold((_) {}, (reactions) => summary = reactions);
+    }
+
+    if (!_isCurrent(messageId, seq)) return null;
+    _applyReactions(
+      messageId,
+      summary,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
     return null;
+  }
+
+  /// Emoji this member still holds on the server besides [keep].
+  ///
+  /// Derived from the returned summary, since `reacted_by_me` on the wire is
+  /// not viewer-specific. When nothing identifies the viewer the optimistic
+  /// [fallback] is the best available answer.
+  List<String> _staleOwnEmoji(
+    List<ChatMessageReactionDTO> summary, {
+    required String? keep,
+    required String? fallback,
+    String? currentUserId,
+    String? currentUserEmail,
+  }) {
+    final resolved = chatReactionsForViewer(
+      summary,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
+    final mine =
+        resolved
+            .where((reaction) => reaction.reactedByMe && reaction.count > 0)
+            .map((reaction) => reaction.emoji)
+            .where((value) => value != keep)
+            .toList();
+
+    if (mine.isNotEmpty) return mine;
+    if (fallback != null && fallback != keep) return [fallback];
+    return const [];
   }
 
   void _setReactions(String messageId, List<ChatMessageReactionDTO> reactions) {

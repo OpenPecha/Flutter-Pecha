@@ -481,6 +481,74 @@ void main() {
       expect(reactions.map((r) => r.emoji), [heart]);
     });
 
+    test('a queued swap deletes what the server holds, not the phantom',
+        () async {
+      const prayer = '🙏';
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: prayer,
+              count: 1,
+              reactedByMe: true,
+              users: [
+                ChatMessageReactionUserDTO(
+                  userId: 'u1',
+                  email: 'rena@example.com',
+                ),
+              ],
+            ),
+          ]),
+        ],
+      );
+      // The first POST fails, so the prayer is never dropped and stays on the
+      // server while the local state has already moved on.
+      repository.failFirstReaction = true;
+      repository.reactionResponses = const [
+        [],
+        // POST heart: the server still holds the prayer too.
+        [
+          ChatMessageReactionDTO(
+            emoji: prayer,
+            count: 1,
+            users: [
+              ChatMessageReactionUserDTO(
+                userId: 'u1',
+                email: 'rena@example.com',
+              ),
+            ],
+          ),
+          ChatMessageReactionDTO(emoji: heart, count: 1),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final first = notifier.toggleReaction(
+        'm1',
+        thumbsUp,
+        roomIdForCall: 'room-1',
+        currentUserEmail: 'rena@example.com',
+      );
+      final second = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+        currentUserEmail: 'rena@example.com',
+      );
+      await Future.wait([first, second]);
+
+      // The prayer is what the server actually had — not the thumbs-up the
+      // optimistic state showed.
+      expect(repository.reactionCalls.last, 'DELETE $prayer');
+      expect(
+        notifier.state.messages.single.reactions.map((r) => r.emoji),
+        [heart],
+      );
+    });
+
     test('refreshLatest updates reactions on messages already held', () async {
       repository = _FakeGroupChatRepository(
         history: [reacted('m1', const [])],
@@ -555,6 +623,47 @@ void main() {
       final reactions = notifier.state.messages.single.reactions;
       expect(reactions.single.count, 2);
       expect(reactions.single.reactedByMe, isFalse);
+    });
+  });
+
+  group('refreshLatest gaps', () {
+    test('restarts from the newest page when the gap cannot be stitched',
+        () async {
+      repository = _FakeGroupChatRepository(
+        history: List.generate(40, (i) => _message('old$i')),
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(notifier.state.messages, hasLength(30));
+
+      // 40 brand-new messages arrived while the socket was down: a full page
+      // with nothing in common with what is held.
+      repository.history = List.generate(40, (i) => _message('new$i'));
+      await notifier.refreshLatest();
+
+      final ids = notifier.state.messages.map((m) => m.id).toList();
+      expect(ids, hasLength(30));
+      // Nothing stale is stitched onto a non-contiguous page.
+      expect(ids.every((id) => id.startsWith('new')), isTrue);
+      // skip matches what is held, so loadMore walks back through the gap.
+      expect(notifier.state.skip, 30);
+      expect(notifier.state.hasMore, isTrue);
+    });
+
+    test('stitches normally when the page overlaps what is held', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      repository.history = [_message('m3'), _message('m2'), _message('m1')];
+      await notifier.refreshLatest();
+
+      expect(notifier.state.messages.map((m) => m.id), ['m3', 'm2', 'm1']);
     });
   });
 
