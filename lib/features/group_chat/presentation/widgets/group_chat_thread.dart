@@ -131,9 +131,9 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
       case ChatMessageAction.copy:
         await Clipboard.setData(ClipboardData(text: message.body));
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.group_chat_copied)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.group_chat_copied)));
       case ChatMessageAction.reply:
       case ChatMessageAction.report:
       case ChatMessageAction.delete:
@@ -145,9 +145,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(groupChatThreadProvider(widget.roomId));
-    final notifier = ref.read(
-      groupChatThreadProvider(widget.roomId).notifier,
-    );
+    final notifier = ref.read(groupChatThreadProvider(widget.roomId).notifier);
     final user = ref.watch(userProvider).user;
 
     if (!state.hasLoaded && state.messages.isEmpty) {
@@ -155,10 +153,12 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     }
 
     if (state.error != null && state.messages.isEmpty) {
-      return _ThreadError(onRetry: notifier.retry);
+      return _dismissKeyboardOnTap(_ThreadError(onRetry: notifier.retry));
     }
 
-    if (state.messages.isEmpty) return const GroupChatEmptyState();
+    if (state.messages.isEmpty) {
+      return _dismissKeyboardOnTap(const GroupChatEmptyState());
+    }
 
     final rows = buildChatThreadRows(state.messages);
 
@@ -166,48 +166,68 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     // by the inset itself, which already shrinks this Expanded to the space
     // above the field — adding it again would double the gap under the newest
     // message.
-    return ListView.builder(
-      controller: _scrollController,
-      reverse: true,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: rows.length + (state.isLoadingMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index >= rows.length) return const _LoadingMoreFooter();
+    return _dismissKeyboardOnTap(
+      ListView.builder(
+        controller: _scrollController,
+        reverse: true,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        // Dragging the thread closes the keyboard, as every chat app does. On
+        // iOS this is the primary way out — there is no system back button to
+        // dismiss it, which is why the keyboard felt stuck there and not on
+        // Android.
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        itemCount: rows.length + (state.isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= rows.length) return const _LoadingMoreFooter();
 
-        final row = rows[index];
-        switch (row) {
-          case ChatDateRow(day: final day):
-            return GroupChatDateSeparator(day: day);
-          case ChatMessageRow(
-            message: final message,
-            isRunStart: final isRunStart,
-          ):
-            GroupChatMessageBubble bubble({VoidCallback? onLongPress}) {
-              return GroupChatMessageBubble(
-                message: message,
-                isSelf: isSelfChatMessage(
-                  senderId: message.senderId,
-                  senderEmail: message.senderEmail,
-                  currentUserId: widget.currentUserId,
-                  currentUserEmail: user?.email,
-                ),
-                isRunStart: isRunStart,
-                selfAvatarUrl: user?.avatarUrl,
-                selfDisplayName: joinChatName(user?.firstName, user?.lastName),
-                onLongPress: onLongPress,
-                onShowReactions: () => _showReactions(message),
+          final row = rows[index];
+          switch (row) {
+            case ChatDateRow(day: final day):
+              return GroupChatDateSeparator(day: day);
+            case ChatMessageRow(
+              message: final message,
+              isRunStart: final isRunStart,
+            ):
+              GroupChatMessageBubble bubble({VoidCallback? onLongPress}) {
+                return GroupChatMessageBubble(
+                  message: message,
+                  isSelf: isSelfChatMessage(
+                    senderId: message.senderId,
+                    senderEmail: message.senderEmail,
+                    currentUserId: widget.currentUserId,
+                    currentUserEmail: user?.email,
+                  ),
+                  isRunStart: isRunStart,
+                  selfAvatarUrl: user?.avatarUrl,
+                  selfDisplayName: joinChatName(
+                    user?.firstName,
+                    user?.lastName,
+                  ),
+                  onLongPress: onLongPress,
+                  onShowReactions: () => _showReactions(message),
+                );
+              }
+
+              // The menu re-renders the row over its own blurred backdrop, so it
+              // gets a copy without the long-press handler.
+              final lifted = bubble();
+              return KeyedSubtree(
+                key: _rowKey(message.id),
+                child: bubble(onLongPress: () => _openMenu(message, lifted)),
               );
-            }
+          }
+        },
+      ),
+    );
+  }
 
-            // The menu re-renders the row over its own blurred backdrop, so it
-            // gets a copy without the long-press handler.
-            final lifted = bubble();
-            return KeyedSubtree(
-              key: _rowKey(message.id),
-              child: bubble(onLongPress: () => _openMenu(message, lifted)),
-            );
-        }
-      },
+  /// Taps that no child claims fall through to here and drop focus, so tapping
+  /// the thread closes the keyboard.
+  Widget _dismissKeyboardOnTap(Widget child) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: child,
     );
   }
 }
