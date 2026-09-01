@@ -37,6 +37,7 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   /// Reaction summaries handed back, in call order.
   List<List<ChatMessageReactionDTO>> reactionResponses = const [];
   Failure? reactionFailure;
+  Set<int> failReactionCalls = const {};
   bool failFirstReaction = false;
   final List<String> reactionCalls = [];
 
@@ -109,6 +110,9 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   Either<Failure, List<ChatMessageReactionDTO>> _reaction(String call) {
     reactionCalls.add(call);
     if (failFirstReaction && reactionCalls.length == 1) {
+      return const Left(NetworkFailure('offline'));
+    }
+    if (failReactionCalls.contains(reactionCalls.length)) {
       return const Left(NetworkFailure('offline'));
     }
     final failure = reactionFailure;
@@ -655,6 +659,69 @@ void main() {
       expect(
         notifier.state.messages.single.reactions.single.reactedByMe,
         isTrue,
+      );
+    });
+
+    test('a failed cleanup reports the error instead of claiming success',
+        () async {
+      const prayer = '🙏';
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: prayer,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      // The POST lands; the cleanup DELETE does not.
+      repository.failReactionCalls = const {2};
+      repository.reactionResponses = const [
+        [
+          ChatMessageReactionDTO(emoji: prayer, count: 1),
+          ChatMessageReactionDTO(emoji: heart, count: 1),
+        ],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+      );
+
+      expect(failure, isA<NetworkFailure>());
+      // Both are still on the server, so both are shown rather than hidden.
+      expect(
+        notifier.state.messages.single.reactions.map((r) => r.emoji),
+        [prayer, heart],
+      );
+    });
+
+    test('a refetch in flight across a swap does not overwrite it', () async {
+      repository = _FakeGroupChatRepository(
+        history: [reacted('m1', const [])],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // The refetch is sent while the message has no reactions...
+      final refresh = notifier.refreshLatest();
+      // ...and a reaction is confirmed before that page comes back.
+      notifier.replaceReactions('m1', const [
+        ChatMessageReactionDTO(emoji: heart, count: 1),
+      ]);
+      await refresh;
+
+      // The stale page must not undo it.
+      expect(
+        notifier.state.messages.single.reactions.map((r) => r.emoji),
+        [heart],
       );
     });
 

@@ -105,6 +105,17 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// messages are ignored until the swap settles.
   final Set<String> _swapping = {};
 
+  /// Bumped whenever a message's reactions change locally. A refetch compares
+  /// the value it saw before its request with the value on arrival: checking
+  /// `_swapping` alone only asks whether a swap is running *now*, so a page
+  /// requested before a swap and delivered after it would overwrite the
+  /// freshly confirmed reaction with its own stale snapshot.
+  final Map<String, int> _reactionRevision = {};
+
+  void _bumpRevision(String messageId) {
+    _reactionRevision[messageId] = (_reactionRevision[messageId] ?? 0) + 1;
+  }
+
   Future<void> loadInitial() async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
@@ -193,6 +204,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     String? currentUserId,
     String? currentUserEmail,
   }) async {
+    // Taken before the request goes out, so anything that changes while it is
+    // in flight is visible on arrival.
+    final revisionsBefore = {
+      for (final message in state.messages)
+        message.id: _reactionRevision[message.id] ?? 0,
+    };
+
     final result = await ref
         .read(groupChatRepositoryProvider)
         .listMessages(roomId, skip: 0, limit: _limit);
@@ -255,9 +273,16 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         messages:
             state.messages.map((existing) {
               final fresh = fetchedById[existing.id];
-              if (fresh == null || _swapping.contains(existing.id)) {
-                return existing;
-              }
+              if (fresh == null) return existing;
+
+              // Anything touched since this request was sent is newer than the
+              // page it brought back, whether or not that work has finished by
+              // the time the page arrives.
+              final changed =
+                  (_reactionRevision[existing.id] ?? 0) !=
+                  (revisionsBefore[existing.id] ?? 0);
+              if (changed || _swapping.contains(existing.id)) return existing;
+
               return fresh;
             }).toList(),
       );
@@ -305,6 +330,8 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   }) {
     if (messageId.isEmpty) return;
     if (!state.messages.any((message) => message.id == messageId)) return;
+
+    _bumpRevision(messageId);
 
     final resolved = chatReactionsForViewer(
       reactions,
@@ -484,6 +511,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     // One reaction per member: drop everything else this member holds. The
     // in-between summaries carry more than one emoji, so none of them is
     // applied — only the last.
+    Failure? cleanupFailure;
     for (final extra in stale) {
       final dropped = await repository.removeReaction(
         roomIdForCall,
@@ -491,20 +519,30 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         emoji: extra,
       );
       if (!mounted) return null;
-      dropped.fold((_) {}, (reactions) {
-        summary = reactions;
-        _serverOwn[messageId]?.remove(extra);
-      });
+      dropped.fold(
+        (failure) {
+          // The member is left holding two on the server. `_serverOwn` keeps
+          // `extra`, so a later burst still knows to drop it, and the summary
+          // applied below shows both rather than hiding the duplicate — but
+          // the caller has to hear about it instead of being told this
+          // succeeded.
+          cleanupFailure ??= failure;
+        },
+        (reactions) {
+          summary = reactions;
+          _serverOwn[messageId]?.remove(extra);
+        },
+      );
     }
 
-    if (!_isCurrent(messageId, seq)) return null;
+    if (!_isCurrent(messageId, seq)) return cleanupFailure;
     _applyReactions(
       messageId,
       summary,
       currentUserId: currentUserId,
       currentUserEmail: currentUserEmail,
     );
-    return null;
+    return cleanupFailure;
   }
 
   /// The emoji [summary] says this member holds, or null when it cannot say.
@@ -541,6 +579,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   }
 
   void _setReactions(String messageId, List<ChatMessageReactionDTO> reactions) {
+    _bumpRevision(messageId);
     state = state.copyWith(
       messages:
           state.messages
