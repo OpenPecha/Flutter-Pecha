@@ -86,6 +86,18 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   final Map<String, int> _toggleSeq = {};
   final Map<String, Future<void>> _toggleChain = {};
 
+  /// Per message, the emoji this member holds **on the server**.
+  ///
+  /// Seeded from displayed state when a burst of taps begins — at that point
+  /// nothing optimistic has been layered on yet — and then advanced only by
+  /// confirmed calls: a successful POST adds, a successful DELETE removes, a
+  /// failure changes nothing. A summary that can identify the viewer replaces
+  /// it outright. Later taps in a burst must never read their cleanup target
+  /// from optimistic state: if an earlier queued POST failed, that state names
+  /// an emoji the server never received, and deleting it would leave the real
+  /// one in place.
+  final Map<String, Set<String>> _serverOwn = {};
+
   /// Messages mid-swap. Between the POST of the new emoji and the DELETE of
   /// the old one the server legitimately holds **both**, and so does any
   /// `reactions_updated` broadcast in that window. Adopting either would show
@@ -342,6 +354,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     final isSwap = !isRemoval && previousEmoji != null;
     if (isSwap) _swapping.add(messageId);
 
+    // First tap of a burst: this baseline is still confirmed state, so it is
+    // the only trustworthy seed. Later taps inherit it rather than reseeding
+    // from their own optimistic baseline.
+    if (!_toggleChain.containsKey(messageId)) {
+      _serverOwn[messageId] = {if (previousEmoji != null) previousEmoji};
+    }
+
     // Optimistic, and synchronously so: the tap has to read as instant, and a
     // broadcast arriving in the same frame must not overwrite it.
     _setReactions(
@@ -374,6 +393,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     if (_toggleSeq[messageId] == seq) {
       _toggleSeq.remove(messageId);
       _toggleChain.remove(messageId);
+      _serverOwn.remove(messageId);
       // The last operation for this message owns the cleanup, whichever one
       // opened the swap guard.
       _swapping.remove(messageId);
@@ -428,20 +448,26 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
 
     var summary = result.getOrElse((_) => const []);
 
-    // What the **server** says is mine, which is not the same as the
-    // optimistic baseline: an earlier queued POST may have failed, leaving a
-    // reaction on the server that the local state has already replaced.
-    // Deleting the optimistic emoji would then miss the real one and leave the
-    // member holding two.
-    final stale = _staleOwnEmoji(
-      summary,
-      keep: isRemoval ? null : emoji,
-      // Un-reacting has nothing left to reconcile against: the DELETE already
-      // went out, and falling back to the same emoji would send it twice.
-      fallback: isRemoval ? null : previousEmoji,
-      currentUserId: currentUserId,
-      currentUserEmail: currentUserEmail,
-    );
+    // This call is confirmed, so the server's state for this member is known
+    // exactly: it now holds `emoji` (or no longer does). Prefer a summary that
+    // can identify the viewer; otherwise advance what is tracked. Either way
+    // the optimistic baseline never decides what gets deleted.
+    final own =
+        _ownFromSummary(
+          summary,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
+        ) ??
+        {...?_serverOwn[messageId]};
+    if (isRemoval) {
+      own.remove(emoji);
+    } else {
+      own.add(emoji);
+    }
+    _serverOwn[messageId] = own;
+
+    // One reaction per member: everything else this member holds is stale.
+    final stale = own.where((held) => held != emoji || isRemoval).toList();
 
     if (stale.isEmpty) {
       if (_isCurrent(messageId, seq)) {
@@ -465,7 +491,10 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         emoji: extra,
       );
       if (!mounted) return null;
-      dropped.fold((_) {}, (reactions) => summary = reactions);
+      dropped.fold((_) {}, (reactions) {
+        summary = reactions;
+        _serverOwn[messageId]?.remove(extra);
+      });
     }
 
     if (!_isCurrent(messageId, seq)) return null;
@@ -478,33 +507,37 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     return null;
   }
 
-  /// Emoji this member still holds on the server besides [keep].
+  /// The emoji [summary] says this member holds, or null when it cannot say.
   ///
-  /// Derived from the returned summary, since `reacted_by_me` on the wire is
-  /// not viewer-specific. When nothing identifies the viewer the optimistic
-  /// [fallback] is the best available answer.
-  List<String> _staleOwnEmoji(
+  /// `reacted_by_me` on the wire is not viewer-specific, so the answer comes
+  /// from `users` / `user_ids`. Null — rather than an empty set — when the
+  /// viewer is unidentifiable, so the caller falls back to what it has tracked
+  /// instead of concluding the member holds nothing.
+  Set<String>? _ownFromSummary(
     List<ChatMessageReactionDTO> summary, {
-    required String? keep,
-    required String? fallback,
     String? currentUserId,
     String? currentUserEmail,
   }) {
-    final resolved = chatReactionsForViewer(
-      summary,
-      currentUserId: currentUserId,
-      currentUserEmail: currentUserEmail,
-    );
-    final mine =
-        resolved
-            .where((reaction) => reaction.reactedByMe && reaction.count > 0)
-            .map((reaction) => reaction.emoji)
-            .where((value) => value != keep)
-            .toList();
+    final hasId = (currentUserId ?? '').trim().isNotEmpty;
+    final hasEmail = (currentUserEmail ?? '').trim().isNotEmpty;
+    if (!hasId && !hasEmail) return null;
 
-    if (mine.isNotEmpty) return mine;
-    if (fallback != null && fallback != keep) return [fallback];
-    return const [];
+    // An empty summary is a definite answer: nobody holds anything.
+    if (summary.isEmpty) return <String>{};
+
+    final identifiable = summary.every(
+      (reaction) => reaction.users.isNotEmpty || reaction.userIds.isNotEmpty,
+    );
+    if (!identifiable) return null;
+
+    return chatReactionsForViewer(
+          summary,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
+        )
+        .where((reaction) => reaction.reactedByMe && reaction.count > 0)
+        .map((reaction) => reaction.emoji)
+        .toSet();
   }
 
   void _setReactions(String messageId, List<ChatMessageReactionDTO> reactions) {

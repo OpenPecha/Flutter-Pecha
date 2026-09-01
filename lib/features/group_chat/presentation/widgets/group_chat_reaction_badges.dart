@@ -5,7 +5,13 @@ import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reactions.dart';
 
-/// Reaction summary painted inside the bubble, bottom-right.
+/// Reaction summary hung off the bubble's inner bottom corner, overlapping
+/// it — bottom-right for an incoming message, bottom-left for an outgoing one.
+///
+/// The caller positions it in a [Stack]; it is not a child of the bubble's own
+/// column, because any right-aligning wrapper in there expands to the width cap
+/// and stretches short messages across the screen the moment they are reacted
+/// to.
 ///
 /// At most [kChatBadgeEmojiLimit] distinct emoji are shown, busiest first,
 /// followed by the total across all of them — so the badge never wraps and the
@@ -19,6 +25,9 @@ class GroupChatReactionBadges extends StatelessWidget {
   });
 
   final List<ChatMessageReactionDTO> reactions;
+
+  /// Which bubble fill the badge overlaps, which decides whether the count
+  /// reads light or dark.
   final bool isSelf;
 
   /// Tapping the badge opens the reactions drawer, as in WhatsApp — it does
@@ -31,38 +40,35 @@ class GroupChatReactionBadges extends StatelessWidget {
     if (badge.emoji.isEmpty) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // The badge overlaps the bubble, so the count has to read against that
+    // fill: light over the dark outgoing bubble, dark over the light incoming
+    // one.
     final countColor =
         isSelf
             ? AppColors.grey300
             : (isDark ? AppColors.textTertiaryDark : AppColors.textSecondary);
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: GestureDetector(
-          onTap: onShowAll,
-          behavior: HitTestBehavior.opaque,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final reaction in badge.emoji)
-                Padding(
-                  padding: const EdgeInsets.only(right: 2),
-                  child: _Glyph(
-                    emoji: reaction.emoji,
-                    isMine: reaction.reactedByMe,
-                    isDark: isDark,
-                  ),
-                ),
-              const SizedBox(width: 2),
-              Text(
-                _count(context, badge.total),
-                style: TextStyle(fontSize: 12, color: countColor),
+    return GestureDetector(
+      onTap: onShowAll,
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final reaction in badge.emoji)
+            Padding(
+              padding: const EdgeInsets.only(right: 2),
+              child: _Glyph(
+                emoji: reaction.emoji,
+                isMine: reaction.reactedByMe,
+                isDark: isDark,
               ),
-            ],
+            ),
+          const SizedBox(width: 2),
+          Text(
+            _count(context, badge.total),
+            style: TextStyle(fontSize: 12, color: countColor),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -549,6 +549,64 @@ void main() {
       );
     });
 
+    test('a failed queued POST still deletes the real reaction when the '
+        'summary cannot identify the viewer', () async {
+      const prayer = '🙏';
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: prayer,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      repository.failFirstReaction = true;
+      // No users and no user_ids anywhere: the summary cannot say who is who,
+      // which is the case that used to fall back to optimistic state.
+      repository.reactionResponses = const [
+        [],
+        [
+          ChatMessageReactionDTO(emoji: prayer, count: 1),
+          ChatMessageReactionDTO(emoji: heart, count: 1),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // Two swaps in a burst; the first POST fails, so the prayer is never
+      // dropped and the optimistic state names a thumbs-up the server
+      // never received.
+      final first = notifier.toggleReaction(
+        'm1',
+        thumbsUp,
+        roomIdForCall: 'room-1',
+        currentUserEmail: 'rena@example.com',
+      );
+      final second = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+        currentUserEmail: 'rena@example.com',
+      );
+      await Future.wait([first, second]);
+
+      // The prayer is what the server actually held, so that is what goes.
+      expect(repository.reactionCalls, [
+        'POST $thumbsUp',
+        'POST $heart',
+        'DELETE $prayer',
+      ]);
+      expect(
+        notifier.state.messages.single.reactions.map((r) => r.emoji),
+        [heart],
+      );
+    });
+
     test('refreshLatest updates reactions on messages already held', () async {
       repository = _FakeGroupChatRepository(
         history: [reacted('m1', const [])],

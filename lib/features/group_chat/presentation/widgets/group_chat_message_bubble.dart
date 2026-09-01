@@ -1,13 +1,17 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_spans.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_message_time.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_link_preview_card.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_reaction_badges.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// One message row: self on the right in a dark bubble, everyone else on the
@@ -30,6 +34,7 @@ class GroupChatMessageBubble extends StatelessWidget {
   final ChatMessageDTO message;
   final bool isSelf;
   final bool isRunStart;
+
   /// Own avatar and name from the session, used only for messages this API
   /// has not yet stamped with `sender_name` / `sender_avatar_url`.
   final String? selfAvatarUrl;
@@ -41,6 +46,13 @@ class GroupChatMessageBubble extends StatelessWidget {
   final VoidCallback? onShowReactions;
 
   static const double _avatarSize = 32;
+
+  /// Space kept under the bubble for the reaction badge. Less than the badge's
+  /// own height, so the remainder overlaps the bubble's bottom edge.
+  static const double _badgeReserve = 9;
+
+  /// How far the badge is inset from the bubble's inner corner.
+  static const double _badgeInset = 10;
   static const double _gutter = 40;
   static const double _maxWidthFactor = 0.76;
 
@@ -84,9 +96,34 @@ class GroupChatMessageBubble extends StatelessWidget {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
-              child: GestureDetector(
-                onLongPress: onLongPress,
-                child: _bubble(context, isDark, displayName),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Padding(
+                    // Only reserve the strip when there is a badge to hang in
+                    // it, so unreacted bubbles keep their spacing.
+                    padding: EdgeInsets.only(
+                      bottom: message.reactions.isEmpty ? 0 : _badgeReserve,
+                    ),
+                    child: GestureDetector(
+                      onLongPress: onLongPress,
+                      child: _bubble(context, isDark, displayName),
+                    ),
+                  ),
+                  if (message.reactions.isNotEmpty)
+                    Positioned(
+                      bottom: 0,
+                      // The inner corner: bottom-right on an incoming bubble,
+                      // bottom-left on an outgoing one.
+                      left: isSelf ? _badgeInset : null,
+                      right: isSelf ? null : _badgeInset,
+                      child: GroupChatReactionBadges(
+                        reactions: message.reactions,
+                        isSelf: isSelf,
+                        onShowAll: onShowReactions ?? () {},
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -128,45 +165,66 @@ class GroupChatMessageBubble extends StatelessWidget {
           bottomRight: round,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isSelf && isRunStart) ...[
+      // IntrinsicWidth so the trailing time can sit against the right edge of
+      // the text. An Align or a full-width Row would expand to the maxWidth
+      // constraint instead, stretching every reacted bubble across the screen.
+      child: IntrinsicWidth(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!isSelf && isRunStart) ...[
+              Text(
+                displayName ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                strutStyle: context.tibetanStrutStyle(13, compact: true),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      isDark ? AppColors.accentGold : AppColors.accentGoldDark,
+                ),
+              ),
+              const SizedBox(height: 2),
+            ],
+            ChatLinkText(
+              body: message.body,
+              textColor: textColor,
+              isDark: isDark,
+              isSelf: isSelf,
+            ),
+            if (previewUrl != null)
+              GroupChatLinkPreviewCard(
+                url: previewUrl,
+                isSelf: isSelf,
+                onOpen: _openUrl,
+              ),
+            const SizedBox(height: 2),
             Text(
-              displayName ?? '',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              strutStyle: context.tibetanStrutStyle(13, compact: true),
+              _timeLabel(context),
+              textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 11,
                 color:
-                    isDark ? AppColors.accentGold : AppColors.accentGoldDark,
+                    isSelf
+                        ? AppColors.grey500
+                        : (isDark
+                            ? AppColors.textTertiaryDark
+                            : AppColors.textSecondary),
               ),
             ),
-            const SizedBox(height: 2),
           ],
-          ChatLinkText(
-            body: message.body,
-            textColor: textColor,
-            isDark: isDark,
-            isSelf: isSelf,
-          ),
-          if (previewUrl != null)
-            GroupChatLinkPreviewCard(
-              url: previewUrl,
-              isSelf: isSelf,
-              onOpen: _openUrl,
-            ),
-          if (message.reactions.isNotEmpty)
-            GroupChatReactionBadges(
-              reactions: message.reactions,
-              isSelf: isSelf,
-              onShowAll: onShowReactions ?? () {},
-            ),
-        ],
+        ),
       ),
     );
+  }
+
+  String _timeLabel(BuildContext context) {
+    final formatted = DateFormat.jm(
+      intlFormatLocaleOf(context),
+    ).format(message.createdAtLocal);
+    return context.isTibetanLocale ? toTibetanDigits(formatted) : formatted;
   }
 
   static Future<void> _openUrl(String url) async {
@@ -316,15 +374,15 @@ class _Avatar extends StatelessWidget {
           name == null
               ? const SizedBox.shrink()
               : Center(
-        child: Text(
-          chatSenderInitials(name),
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.grey500 : AppColors.grey600,
-          ),
-        ),
-      ),
+                child: Text(
+                  chatSenderInitials(name),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.grey500 : AppColors.grey600,
+                  ),
+                ),
+              ),
     );
   }
 }
