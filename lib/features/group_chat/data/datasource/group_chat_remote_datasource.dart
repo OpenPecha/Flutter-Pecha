@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
-import 'package:flutter_pecha/features/group_chat/data/models/chat_person_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_member_dto.dart';
 
@@ -42,20 +41,6 @@ class ChatRoomMembersPage {
 
   const ChatRoomMembersPage({
     required this.members,
-    required this.skip,
-    required this.limit,
-    required this.total,
-  });
-}
-
-class ChatPeoplePage {
-  final List<ChatPersonDTO> people;
-  final int skip;
-  final int limit;
-  final int total;
-
-  const ChatPeoplePage({
-    required this.people,
     required this.skip,
     required this.limit,
     required this.total,
@@ -167,36 +152,6 @@ class GroupChatRemoteDatasource {
             (data['members'] as List<dynamic>?)
                 ?.whereType<Map<String, dynamic>>()
                 .map(ChatRoomMemberDTO.fromJson)
-                .toList() ??
-            const [],
-        skip: _readInt(data['skip']),
-        limit: _readInt(data['limit']),
-        total: _readInt(data['total']),
-      );
-    } on DioException catch (e) {
-      throw _unwrap(e);
-    }
-  }
-
-  /// Group joiners. Read for `avatar_url`, which the room members payload
-  /// does not carry. Excludes the caller, whose own bubbles show no avatar.
-  Future<ChatPeoplePage> listGroupPeople(
-    String groupId, {
-    int skip = 0,
-    int limit = 100,
-  }) async {
-    try {
-      final response = await _dio.get(
-        '/chat/groups/$groupId/people',
-        queryParameters: {'skip': skip, 'limit': limit},
-        options: _noCache,
-      );
-      final data = response.data as Map<String, dynamic>;
-      return ChatPeoplePage(
-        people:
-            (data['people'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>()
-                .map(ChatPersonDTO.fromJson)
                 .toList() ??
             const [],
         skip: _readInt(data['skip']),

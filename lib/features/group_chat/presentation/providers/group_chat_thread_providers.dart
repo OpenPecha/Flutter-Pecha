@@ -1,12 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/chat_link_preview_service.dart';
-import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reactions.dart';
-import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GroupChatThreadState extends Equatable {
@@ -393,40 +391,6 @@ final groupChatThreadProvider = StateNotifierProvider.autoDispose
       roomId,
     ) {
       return GroupChatThreadNotifier(ref: ref, roomId: roomId);
-    });
-
-/// Identifies a room's sender directory. Names come from the room members
-/// endpoint and avatars from the group people endpoint, so both ids are needed.
-class ChatDirectoryKey extends Equatable {
-  final String roomId;
-  final String groupId;
-
-  const ChatDirectoryKey({required this.roomId, required this.groupId});
-
-  @override
-  List<Object?> get props => [roomId, groupId];
-}
-
-/// `user_id` to display identity, fetched once per room.
-///
-/// Best-effort by design: either request may fail or 403, and the thread then
-/// falls back to the email local part with initials for the avatar.
-final groupChatSenderDirectoryProvider = FutureProvider.autoDispose
-    .family<Map<String, ChatSender>, ChatDirectoryKey>((ref, key) async {
-      final repository = ref.watch(groupChatRepositoryProvider);
-      final members = await repository.listRoomMembers(key.roomId);
-      final people = await repository.listGroupPeople(key.groupId);
-
-      return buildChatSenderDirectory(
-        members: members.fold(
-          (_) => const [],
-          (ChatRoomMembersPage page) => page.members,
-        ),
-        people: people.fold(
-          (_) => const [],
-          (ChatPeoplePage page) => page.people,
-        ),
-      );
     });
 
 /// Session-lived LRU of fetched previews. A stored null means "tried and

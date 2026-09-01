@@ -31,12 +31,6 @@ abstract class GroupChatRepository {
     int limit = 100,
   });
 
-  Future<Either<Failure, ChatPeoplePage>> listGroupPeople(
-    String groupId, {
-    int skip = 0,
-    int limit = 100,
-  });
-
   Future<Either<Failure, Unit>> markRoomRead(String roomId);
 
   Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(

@@ -84,21 +84,6 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
   }
 
   @override
-  Future<Either<Failure, ChatPeoplePage>> listGroupPeople(
-    String groupId, {
-    int skip = 0,
-    int limit = 100,
-  }) async {
-    try {
-      return Right(
-        await _remote.listGroupPeople(groupId, skip: skip, limit: limit),
-      );
-    } catch (e) {
-      return Left(ExceptionMapper.map(e, context: 'listGroupPeople'));
-    }
-  }
-
-  @override
   Future<Either<Failure, Unit>> markRoomRead(String roomId) async {
     try {
       await _remote.markRoomRead(roomId);

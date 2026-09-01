@@ -21,7 +21,6 @@ class GroupChatMessageBubble extends StatelessWidget {
     required this.message,
     required this.isSelf,
     required this.isRunStart,
-    this.sender,
     this.selfAvatarUrl,
     this.selfDisplayName,
     this.onLongPress,
@@ -31,10 +30,8 @@ class GroupChatMessageBubble extends StatelessWidget {
   final ChatMessageDTO message;
   final bool isSelf;
   final bool isRunStart;
-  final ChatSender? sender;
-
-  /// Own avatar and name, which the sender directory cannot supply — the group
-  /// people endpoint excludes the caller.
+  /// Own avatar and name from the session, used only for messages this API
+  /// has not yet stamped with `sender_name` / `sender_avatar_url`.
   final String? selfAvatarUrl;
   final String? selfDisplayName;
 
@@ -51,17 +48,21 @@ class GroupChatMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final maxWidth = MediaQuery.sizeOf(context).width * _maxWidthFactor;
+    // Identity travels with the message, so there is nothing to wait for.
     final displayName =
         (isSelf
-            ? (selfDisplayName ??
+            ? (message.senderName ??
+                selfDisplayName ??
                 chatSenderDisplayName(senderEmail: message.senderEmail))
             : chatSenderDisplayName(
-              sender: sender,
+              messageName: message.senderName,
               senderEmail: message.senderEmail,
             )) ??
         context.l10n.group_chat_unknown_sender;
+    final avatarUrl =
+        message.senderAvatarUrl ?? (isSelf ? selfAvatarUrl : null);
     final avatar = _Avatar(
-      avatarUrl: isSelf ? selfAvatarUrl : sender?.avatarUrl,
+      avatarUrl: avatarUrl,
       displayName: displayName,
       isDark: isDark,
     );
@@ -101,7 +102,7 @@ class GroupChatMessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _bubble(BuildContext context, bool isDark, String displayName) {
+  Widget _bubble(BuildContext context, bool isDark, String? displayName) {
     final background =
         isSelf
             ? AppColors.grey900
@@ -132,7 +133,7 @@ class GroupChatMessageBubble extends StatelessWidget {
         children: [
           if (!isSelf && isRunStart) ...[
             Text(
-              displayName,
+              displayName ?? '',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               strutStyle: context.tibetanStrutStyle(13, compact: true),
@@ -277,7 +278,10 @@ class _Avatar extends StatelessWidget {
   });
 
   final String? avatarUrl;
-  final String displayName;
+
+  /// Null while the directory is still resolving — initials derived from the
+  /// email would change once the real name lands.
+  final String? displayName;
   final bool isDark;
 
   @override
@@ -305,11 +309,15 @@ class _Avatar extends StatelessWidget {
   }
 
   Widget _initials() {
+    final name = displayName;
     return ColoredBox(
       color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-      child: Center(
+      child:
+          name == null
+              ? const SizedBox.shrink()
+              : Center(
         child: Text(
-          chatSenderInitials(displayName),
+          chatSenderInitials(name),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

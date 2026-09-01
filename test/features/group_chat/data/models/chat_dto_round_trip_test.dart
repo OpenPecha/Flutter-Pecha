@@ -56,6 +56,8 @@ void main() {
         'room_id': 'r1',
         'sender_id': 'u9',
         'sender_email': 'sender@example.com',
+        'sender_name': 'Pema Yangchen',
+        'sender_avatar_url': 'https://cdn.example/p.png',
         'body': 'metta',
         'created_at': '2026-01-02T00:00:00Z',
         'parent': {
@@ -81,6 +83,8 @@ void main() {
       final encoded = first.toJson();
       expect(encoded['room_id'], 'r1');
       expect(encoded['sender_email'], 'sender@example.com');
+      expect(encoded['sender_name'], 'Pema Yangchen');
+      expect(encoded['sender_avatar_url'], 'https://cdn.example/p.png');
       expect(ChatMessageDTO.fromJson(encoded), first);
     });
 

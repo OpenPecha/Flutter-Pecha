@@ -7,6 +7,12 @@ class ChatMessageDTO extends Equatable {
   final String roomId;
   final String senderId;
   final String senderEmail;
+
+  /// Display identity carried by the message itself. Null on rows written
+  /// before the API supplied it, which is what keeps the directory lookup and
+  /// the email fallback alive.
+  final String? senderName;
+  final String? senderAvatarUrl;
   final String body;
   final String createdAt;
   final ChatMessageParentDTO? parent;
@@ -17,6 +23,8 @@ class ChatMessageDTO extends Equatable {
     required this.roomId,
     required this.senderId,
     required this.senderEmail,
+    this.senderName,
+    this.senderAvatarUrl,
     required this.body,
     required this.createdAt,
     this.parent,
@@ -30,6 +38,8 @@ class ChatMessageDTO extends Equatable {
       roomId: json['room_id'] as String? ?? '',
       senderId: json['sender_id'] as String? ?? '',
       senderEmail: json['sender_email'] as String? ?? '',
+      senderName: json['sender_name'] as String?,
+      senderAvatarUrl: json['sender_avatar_url'] as String?,
       body: json['body'] as String? ?? '',
       createdAt: json['created_at'] as String? ?? '',
       parent:
@@ -56,6 +66,8 @@ class ChatMessageDTO extends Equatable {
       roomId: roomId,
       senderId: senderId,
       senderEmail: senderEmail,
+      senderName: senderName,
+      senderAvatarUrl: senderAvatarUrl,
       body: body ?? this.body,
       createdAt: createdAt,
       parent: parent,
@@ -69,6 +81,8 @@ class ChatMessageDTO extends Equatable {
       'room_id': roomId,
       'sender_id': senderId,
       'sender_email': senderEmail,
+      if (senderName != null) 'sender_name': senderName,
+      if (senderAvatarUrl != null) 'sender_avatar_url': senderAvatarUrl,
       'body': body,
       'created_at': createdAt,
       if (parent != null) 'parent': parent!.toJson(),
@@ -82,6 +96,8 @@ class ChatMessageDTO extends Equatable {
     roomId,
     senderId,
     senderEmail,
+    senderName,
+    senderAvatarUrl,
     body,
     createdAt,
     parent,

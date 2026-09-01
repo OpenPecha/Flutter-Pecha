@@ -1,64 +1,8 @@
-import 'package:flutter_pecha/features/group_chat/data/models/chat_person_dto.dart';
-import 'package:flutter_pecha/features/group_chat/data/models/chat_room_member_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('buildChatSenderDirectory', () {
-    test('merges the room name with the group avatar for one user', () {
-      final directory = buildChatSenderDirectory(
-        members: const [
-          ChatRoomMemberDTO(
-            userId: 'u1',
-            email: 'rena@example.com',
-            firstname: 'Rena',
-            lastname: 'Dolma',
-            role: 'MEMBER',
-            joinedAt: '2026-08-01T00:00:00Z',
-          ),
-        ],
-        people: const [
-          ChatPersonDTO(
-            userId: 'u1',
-            email: 'rena@example.com',
-            firstname: 'Rena',
-            avatarUrl: 'https://cdn.example.com/rena.png',
-          ),
-        ],
-      );
-
-      expect(directory['u1']!.name, 'Rena Dolma');
-      expect(directory['u1']!.avatarUrl, 'https://cdn.example.com/rena.png');
-    });
-
-    test('works when only one of the two endpoints answered', () {
-      final directory = buildChatSenderDirectory(
-        people: const [
-          ChatPersonDTO(
-            userId: 'u2',
-            email: 'jack@example.com',
-            firstname: 'Jack',
-          ),
-        ],
-      );
-
-      expect(directory['u2']!.name, 'Jack');
-      expect(directory['u2']!.avatarUrl, isNull);
-      expect(directory, hasLength(1));
-    });
-
-    test('skips entries with no user id', () {
-      final directory = buildChatSenderDirectory(
-        people: const [
-          ChatPersonDTO(userId: '', email: 'x@example.com', firstname: 'X'),
-        ],
-      );
-
-      expect(directory, isEmpty);
-    });
-  });
-
   group('isSelfChatMessage', () {
     test('matches on the user id', () {
       expect(
@@ -122,13 +66,23 @@ void main() {
   });
 
   group('chatSenderDisplayName', () {
-    test('prefers the directory name', () {
+    test('prefers the name carried by the message', () {
       expect(
         chatSenderDisplayName(
-          sender: const ChatSender(userId: 'u1', name: 'Rena Dolma'),
+          messageName: 'Pema Yangchen',
           senderEmail: 'rena@example.com',
         ),
-        'Rena Dolma',
+        'Pema Yangchen',
+      );
+    });
+
+    test('treats a blank message name as absent', () {
+      expect(
+        chatSenderDisplayName(
+          messageName: '   ',
+          senderEmail: 'rena@example.com',
+        ),
+        'rena',
       );
     });
 

@@ -69,19 +69,6 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
   GlobalKey _rowKey(String messageId) =>
       _rowKeys.putIfAbsent(messageId, GlobalKey.new);
 
-  Map<String, ChatSender> get _directory =>
-      ref
-          .read(
-            groupChatSenderDirectoryProvider(
-              ChatDirectoryKey(
-                roomId: widget.roomId,
-                groupId: widget.groupId,
-              ),
-            ),
-          )
-          .valueOrNull ??
-      const <String, ChatSender>{};
-
   Future<void> _toggleReaction(String messageId, String emoji) async {
     final failure = await ref
         .read(groupChatThreadProvider(widget.roomId).notifier)
@@ -103,7 +90,6 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     showChatReactionsSheet(
       context,
       reactions: message.reactions,
-      directory: _directory,
       currentUserEmail: ref.read(userProvider).user?.email,
       onToggle: (emoji) => _toggleReaction(message.id, emoji),
       onAddReaction: () => showChatEmojiPicker(context),
@@ -163,18 +149,6 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
       groupChatThreadProvider(widget.roomId).notifier,
     );
     final user = ref.watch(userProvider).user;
-    final directory =
-        ref
-            .watch(
-              groupChatSenderDirectoryProvider(
-                ChatDirectoryKey(
-                  roomId: widget.roomId,
-                  groupId: widget.groupId,
-                ),
-              ),
-            )
-            .valueOrNull ??
-        const <String, ChatSender>{};
 
     if (!state.hasLoaded && state.messages.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -218,7 +192,6 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
                   currentUserEmail: user?.email,
                 ),
                 isRunStart: isRunStart,
-                sender: directory[message.senderId],
                 selfAvatarUrl: user?.avatarUrl,
                 selfDisplayName: joinChatName(user?.firstName, user?.lastName),
                 onLongPress: onLongPress,

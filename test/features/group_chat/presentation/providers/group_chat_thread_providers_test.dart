@@ -88,14 +88,6 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   );
 
   @override
-  Future<Either<Failure, ChatPeoplePage>> listGroupPeople(
-    String groupId, {
-    int skip = 0,
-    int limit = 100,
-  }) async =>
-      const Right(ChatPeoplePage(people: [], skip: 0, limit: 0, total: 0));
-
-  @override
   Future<Either<Failure, Unit>> markRoomRead(String roomId) async =>
       const Right(unit);
 
