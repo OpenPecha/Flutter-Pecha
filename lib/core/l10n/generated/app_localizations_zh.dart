@@ -2303,10 +2303,5 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_chat_tap_to_remove => '點按以移除';
 
   @override
-  String group_chat_replying_to(String name) {
-    return '回覆 $name';
-  }
-
-  @override
   String get group_chat_reply_parent_gone => '該訊息已不存在，引用已移除。請再次傳送你的訊息。';
 }

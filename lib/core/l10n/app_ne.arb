@@ -1039,13 +1039,5 @@
   },
   "group_chat_you": "तपाईं",
   "group_chat_tap_to_remove": "हटाउन ट्याप गर्नुहोस्",
-  "group_chat_replying_to": "{name} लाई जवाफ",
-  "@group_chat_replying_to": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "group_chat_reply_parent_gone": "त्यो सन्देश अब उपलब्ध छैन, त्यसैले उद्धरण हटाइयो। आफ्नो सन्देश पठाउन फेरि पठाउनुहोस्।"
 }

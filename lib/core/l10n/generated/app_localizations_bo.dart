@@ -2448,11 +2448,6 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_chat_tap_to_remove => 'སུབ་པར་མནན།';
 
   @override
-  String group_chat_replying_to(String name) {
-    return '$name ལ་ལན་འདེབས།';
-  }
-
-  @override
   String get group_chat_reply_parent_gone =>
       'འཕྲིན་ཐུང་དེ་མི་འདུག་པས་ལུང་འདྲེན་ཕྱིར་བསུབས། ཡང་བསྐྱར་གཏོང་རོགས།';
 }

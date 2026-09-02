@@ -4734,14 +4734,6 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String group_chat_replying_to(String name) => TolgeeBridge.format(
-    localeName,
-    'group_chat_replying_to',
-    <String, Object>{'name': name},
-    () => _fallback.group_chat_replying_to(name),
-  );
-
-  @override
   String get group_chat_reply_parent_gone => TolgeeBridge.get(
     localeName,
     'group_chat_reply_parent_gone',

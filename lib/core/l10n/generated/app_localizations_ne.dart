@@ -2451,11 +2451,6 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_chat_tap_to_remove => 'हटाउन ट्याप गर्नुहोस्';
 
   @override
-  String group_chat_replying_to(String name) {
-    return '$name लाई जवाफ';
-  }
-
-  @override
   String get group_chat_reply_parent_gone =>
       'त्यो सन्देश अब उपलब्ध छैन, त्यसैले उद्धरण हटाइयो। आफ्नो सन्देश पठाउन फेरि पठाउनुहोस्।';
 }

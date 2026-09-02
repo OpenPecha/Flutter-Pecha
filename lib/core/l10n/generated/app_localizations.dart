@@ -4316,12 +4316,6 @@ abstract class AppLocalizations {
   /// **'Tap to remove'**
   String get group_chat_tap_to_remove;
 
-  /// No description provided for @group_chat_replying_to.
-  ///
-  /// In en, this message translates to:
-  /// **'Replying to {name}'**
-  String group_chat_replying_to(String name);
-
   /// No description provided for @group_chat_reply_parent_gone.
   ///
   /// In en, this message translates to:
