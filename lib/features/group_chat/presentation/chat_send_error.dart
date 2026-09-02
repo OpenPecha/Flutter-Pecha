@@ -49,9 +49,23 @@ String chatSendErrorMessage(AppLocalizations l10n, Object error) {
 
 /// Surfaces send failures. Profanity and 403 use dedicated l10n strings.
 void presentChatSendError(BuildContext context, Object error) {
-  ScaffoldMessenger.of(context)
+  showChatSendError(ScaffoldMessenger.of(context), context.l10n, error);
+}
+
+/// The same copy, for callers that resolved the messenger and localizations
+/// while their element was still active.
+///
+/// A socket frame can land after a route pop but before the element unmounts.
+/// `ScaffoldMessenger.of` and `context.l10n` are both ancestor lookups, and in
+/// that window they throw "Looking up a deactivated widget's ancestor is
+/// unsafe" — which lands mid-frame and replaces the thread with a red error
+/// box rather than showing a snack bar.
+void showChatSendError(
+  ScaffoldMessengerState messenger,
+  AppLocalizations l10n,
+  Object error,
+) {
+  messenger
     ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(content: Text(chatSendErrorMessage(context.l10n, error))),
-    );
+    ..showSnackBar(SnackBar(content: Text(chatSendErrorMessage(l10n, error))));
 }

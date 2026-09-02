@@ -220,6 +220,11 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
   }
 
   Future<void> _toggleReaction(String messageId, String emoji) async {
+    // Resolved before the await: leaving this screen mid-request deactivates
+    // the element, and an ancestor lookup then throws rather than showing
+    // anything.
+    final messenger = ScaffoldMessenger.of(context);
+    final failedMessage = context.l10n.group_chat_reaction_failed;
     final failure = await ref
         .read(groupChatThreadProvider(widget.roomId).notifier)
         .toggleReaction(
@@ -230,9 +235,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
           currentUserEmail: ref.read(userProvider).user?.email,
         );
     if (!mounted || failure == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.group_chat_reaction_failed)),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
   }
 
   void _showReactions(ChatMessageDTO message) {
@@ -241,6 +244,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     showChatReactionsSheet(
       context,
       reactions: message.reactions,
+      currentUserId: widget.currentUserId,
       currentUserEmail: user?.email,
       // `ChatMessageReactionUserDTO` carries no avatar, but every loaded
       // message does — and reactors are almost always people who have posted
@@ -294,11 +298,11 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
   ) async {
     switch (action) {
       case ChatMessageAction.copy:
+        final messenger = ScaffoldMessenger.of(context);
+        final copied = context.l10n.group_chat_copied;
         await Clipboard.setData(ClipboardData(text: message.body));
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(context.l10n.group_chat_copied)));
+        messenger.showSnackBar(SnackBar(content: Text(copied)));
       case ChatMessageAction.reply:
         widget.onReply(message);
       case ChatMessageAction.report:

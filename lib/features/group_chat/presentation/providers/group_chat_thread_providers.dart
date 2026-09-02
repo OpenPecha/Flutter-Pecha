@@ -492,7 +492,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     // broadcast arriving in the same frame must not overwrite it.
     _setReactions(
       messageId,
-      toggleChatReaction(baseline, emoji, previousEmoji: previousEmoji),
+      toggleChatReaction(
+        baseline,
+        emoji,
+        previousEmoji: previousEmoji,
+        viewerId: currentUserId,
+        viewerEmail: currentUserEmail,
+      ),
     );
 
     // Only the requests are chained, per message, so the server sees the taps

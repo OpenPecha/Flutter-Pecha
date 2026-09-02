@@ -20,15 +20,10 @@ class GroupChatReactionBadges extends StatelessWidget {
   const GroupChatReactionBadges({
     super.key,
     required this.reactions,
-    required this.isSelf,
     required this.onShowAll,
   });
 
   final List<ChatMessageReactionDTO> reactions;
-
-  /// Which bubble fill the badge overlaps, which decides whether the count
-  /// reads light or dark.
-  final bool isSelf;
 
   /// Tapping the badge opens the reactions drawer, as in WhatsApp — it does
   /// not toggle. Reacting happens from the long-press pill or the drawer.

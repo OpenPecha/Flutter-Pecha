@@ -141,7 +141,6 @@ class GroupChatMessageBubble extends StatelessWidget {
                       right: isSelf ? null : _badgeInset,
                       child: GroupChatReactionBadges(
                         reactions: message.reactions,
-                        isSelf: isSelf,
                         onShowAll: onShowReactions ?? () {},
                       ),
                     ),
@@ -223,16 +222,11 @@ class GroupChatMessageBubble extends StatelessWidget {
             if (message.parent != null)
               GroupChatQuotedMessage(
                 parent: message.parent!,
-                isSelf: isSelf,
                 onTap: onTapQuote,
               ),
             _body(context, textColor, isDark),
             if (previewUrl != null)
-              GroupChatLinkPreviewCard(
-                url: previewUrl,
-                isSelf: isSelf,
-                onOpen: _openUrl,
-              ),
+              GroupChatLinkPreviewCard(url: previewUrl, onOpen: _openUrl),
             const SizedBox(height: 2),
             Text(
               _timeLabel(context),
@@ -410,9 +404,9 @@ class _ChatFormattedTextState extends State<ChatFormattedText> {
       height: 1.35,
       color: widget.textColor,
     );
+    final links = findChatLinks(widget.body);
     // Nothing to mark up: the cheapest path stays a plain Text.
-    if (findChatLinks(widget.body).isEmpty &&
-        !chatTextHasInlineMarkers(widget.body)) {
+    if (links.isEmpty && !chatTextHasInlineMarkers(widget.body)) {
       return Text(
         widget.body,
         strutStyle: context.tibetanStrutStyle(15),
@@ -425,27 +419,26 @@ class _ChatFormattedTextState extends State<ChatFormattedText> {
     }
     _recognizers.clear();
 
+    // Links are carved out first and only the text *between* them is scanned
+    // for inline markers. The other way round silently rewrites URLs: the
+    // underscores in `.../Foo_(bar)_baz` parse as an italic run, so they are
+    // eaten out of the text and the only thing left to link is the truncated
+    // prefix before the first one.
     final spans = <InlineSpan>[];
-    for (final run in parseChatInlineRuns(widget.body)) {
-      final style = baseStyle.copyWith(
-        fontWeight: run.bold ? FontWeight.w700 : null,
-        fontStyle: run.italic ? FontStyle.italic : null,
-        decoration: run.strike ? TextDecoration.lineThrough : null,
-        fontFamily: run.code ? 'monospace' : null,
-        fontFamilyFallback: run.code ? const ['Courier New', 'Courier'] : null,
-        backgroundColor:
-            run.code
-                ? (widget.isDark
-                    ? AppColors.surfaceWhite.withValues(alpha: 0.08)
-                    : AppColors.textPrimary.withValues(alpha: 0.06))
-                : null,
-      );
-      if (run.code) {
-        // Literal: a code span is never scanned for links.
-        spans.add(TextSpan(text: run.text, style: style));
-        continue;
+    var cursor = 0;
+    for (final link in links) {
+      if (link.start > cursor) {
+        _appendFormatted(
+          spans,
+          widget.body.substring(cursor, link.start),
+          baseStyle,
+        );
       }
-      _appendWithLinks(spans, run.text, style);
+      _appendLink(spans, link, baseStyle);
+      cursor = link.end;
+    }
+    if (cursor < widget.body.length) {
+      _appendFormatted(spans, widget.body.substring(cursor), baseStyle);
     }
 
     return Text.rich(
@@ -454,42 +447,54 @@ class _ChatFormattedTextState extends State<ChatFormattedText> {
     );
   }
 
-  /// Splits [text] on the URLs inside it, keeping [style] on the plain parts.
-  void _appendWithLinks(List<InlineSpan> spans, String text, TextStyle style) {
-    final links = findChatLinks(text);
-    if (links.isEmpty) {
-      spans.add(TextSpan(text: text, style: style));
-      return;
+  /// Styles one stretch of text that holds no link.
+  void _appendFormatted(
+    List<InlineSpan> spans,
+    String text,
+    TextStyle baseStyle,
+  ) {
+    for (final run in parseChatInlineRuns(text)) {
+      spans.add(TextSpan(text: run.text, style: _runStyle(run, baseStyle)));
     }
+  }
 
+  TextStyle _runStyle(ChatInlineRun run, TextStyle baseStyle) {
+    return baseStyle.copyWith(
+      fontWeight: run.bold ? FontWeight.w700 : null,
+      fontStyle: run.italic ? FontStyle.italic : null,
+      decoration: run.strike ? TextDecoration.lineThrough : null,
+      fontFamily: run.code ? 'monospace' : null,
+      fontFamilyFallback: run.code ? const ['Courier New', 'Courier'] : null,
+      backgroundColor:
+          run.code
+              ? (widget.isDark
+                  ? AppColors.surfaceWhite.withValues(alpha: 0.08)
+                  : AppColors.textPrimary.withValues(alpha: 0.06))
+              : null,
+    );
+  }
+
+  void _appendLink(
+    List<InlineSpan> spans,
+    ChatLinkMatch link,
+    TextStyle baseStyle,
+  ) {
     final linkColor = widget.isDark ? AppColors.brandblue : AppColors.blue;
-    var cursor = 0;
-    for (final link in links) {
-      if (link.start > cursor) {
-        spans.add(
-          TextSpan(text: text.substring(cursor, link.start), style: style),
-        );
-      }
-      final recognizer =
-          TapGestureRecognizer()
-            ..onTap = () => GroupChatMessageBubble._openUrl(link.url);
-      _recognizers.add(recognizer);
-      spans.add(
-        TextSpan(
-          text: link.text,
-          recognizer: recognizer,
-          style: style.copyWith(
-            color: linkColor,
-            decoration: TextDecoration.underline,
-            decorationColor: linkColor,
-          ),
+    final recognizer =
+        TapGestureRecognizer()
+          ..onTap = () => GroupChatMessageBubble._openUrl(link.url);
+    _recognizers.add(recognizer);
+    spans.add(
+      TextSpan(
+        text: link.text,
+        recognizer: recognizer,
+        style: baseStyle.copyWith(
+          color: linkColor,
+          decoration: TextDecoration.underline,
+          decorationColor: linkColor,
         ),
-      );
-      cursor = link.end;
-    }
-    if (cursor < text.length) {
-      spans.add(TextSpan(text: text.substring(cursor), style: style));
-    }
+      ),
+    );
   }
 }
 
@@ -502,8 +507,8 @@ class _Avatar extends StatelessWidget {
 
   final String? avatarUrl;
 
-  /// Null while the directory is still resolving — initials derived from the
-  /// email would change once the real name lands.
+  /// Identity travels with the message, so this is only null when the API sent
+  /// no name and there is no email to fall back on.
   final String? displayName;
   final bool isDark;
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
@@ -64,6 +65,28 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   String? _roomId;
   String _currentUserId = '';
 
+  /// The provider container, captured while the element is still active.
+  ///
+  /// Socket frames, the lifecycle observer and the reconnect timer all outlive
+  /// this element. A route pop *deactivates* it before `dispose` runs, and
+  /// `_tearDownLive` is only started there, so a frame's worth of events still
+  /// arrives in that window. `ref.read` walks up from the element and throws
+  /// "Looking up a deactivated widget's ancestor is unsafe" there — an
+  /// unhandled error mid-frame, which swaps a RenderErrorBox into the thread
+  /// and corrupts the sliver child list behind it. Reading through the
+  /// container never touches the element tree.
+  late final ProviderContainer _providers;
+
+  /// `State.mounted` stays true across deactivation, so it cannot gate this on
+  /// its own. Set in [dispose] so a late arrival stops doing work instead of
+  /// resurrecting an autoDispose provider for a screen that is gone.
+  bool _disposed = false;
+
+  /// Resolved while active, for the same reason as [_providers]: a socket
+  /// error frame arriving after a route pop must not do an ancestor lookup.
+  ScaffoldMessengerState? _messenger;
+  AppLocalizations? _l10n;
+
   /// The message a reply is being composed for, quoted above the composer.
   ChatMessageDTO? _replyingTo;
 
@@ -80,11 +103,20 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   @override
   void initState() {
     super.initState();
+    _providers = ProviderScope.containerOf(context, listen: false);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _messenger = ScaffoldMessenger.maybeOf(context);
+    _l10n = context.l10n;
+  }
+
+  @override
   void dispose() {
+    _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _reconnectTimer?.cancel();
     unawaited(_tearDownLive());
@@ -95,7 +127,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_hasRoomSession) return;
+    if (_disposed || !_hasRoomSession) return;
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -150,7 +182,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   Future<String> _userId() async {
     if (_currentUserId.isNotEmpty) return _currentUserId;
     final userId =
-        await ref
+        await _providers
             .read(storageServiceProvider)
             .get<String>(StorageKeys.currentUserId) ??
         '';
@@ -161,11 +193,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// Resolves the room once per screen. Runs again only through
   /// [_retryResolveRoom] after a failed lookup.
   Future<void> _resolveRoom() async {
-    if (_resolvingRoom) return;
+    if (_disposed || _resolvingRoom) return;
     _resolvingRoom = true;
     final userId = await _userId();
     if (!mounted) return;
-    final lookup = await ref.read(resolveGroupChatRoomProvider)(
+    final lookup = await _providers.read(resolveGroupChatRoomProvider)(
       userId: userId,
       groupId: widget.groupId,
     );
@@ -197,7 +229,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// an error handler, so a failure here must degrade to a retry rather than
   /// escape as an unhandled async error.
   Future<void> _ensureLiveConnected() async {
-    if (_live != null || _connectingLive || !_hasRoomSession) return;
+    if (_disposed || _live != null || _connectingLive || !_hasRoomSession) {
+      return;
+    }
     // Set synchronously, before the first await, so a second caller racing in
     // before token retrieval resolves sees this and backs off instead of
     // opening a second socket that would silently orphan this one.
@@ -205,7 +239,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
 
     final String? token;
     try {
-      token = await ref.read(authServiceProvider).getValidAccessToken();
+      token = await _providers.read(authServiceProvider).getValidAccessToken();
     } catch (_) {
       // A renewal can fail transiently; back off and try the whole thing again
       // instead of leaving live updates silently disconnected.
@@ -219,7 +253,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     }
 
     final uri = ChatLiveClient.liveUri(
-      restBaseUrl: ref.read(apiConfigProvider).baseUrl,
+      restBaseUrl: _providers.read(apiConfigProvider).baseUrl,
       token: token,
       groupId: widget.groupId,
       roomId: _roomId,
@@ -252,7 +286,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   }
 
   void _onLiveEvent(ChatLiveEvent event) {
-    if (!mounted) return;
+    if (_disposed || !mounted) return;
     // A frame on a fresh socket means the connection is healthy again.
     _reconnectAttempt = 0;
 
@@ -262,7 +296,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
       case ChatLiveMessageCreated(message: final json):
         _onMessageCreated(json);
       case ChatLiveError():
-        presentChatSendError(context, event);
+        final messenger = _messenger;
+        final l10n = _l10n;
+        if (messenger != null && l10n != null) {
+          showChatSendError(messenger, l10n, event);
+        }
       case ChatLiveReactionsUpdated(
         messageId: final messageId,
         reactions: final raw,
@@ -295,7 +333,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     // first mention of it when the sender was someone else.
     _adoptRoomId(message.roomId);
     if (_roomId != message.roomId) return;
-    ref
+    _providers
         .read(groupChatThreadProvider(message.roomId).notifier)
         .appendLive(message);
     unawaited(_markRoomRead());
@@ -306,8 +344,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// own state from the identity we hold.
   void _onReactionsUpdated(String messageId, List<dynamic> raw) {
     final roomId = _roomId;
-    if (roomId == null || messageId.isEmpty) return;
-    ref
+    if (_disposed || roomId == null || messageId.isEmpty) return;
+    _providers
         .read(groupChatThreadProvider(roomId).notifier)
         .replaceReactions(
           messageId,
@@ -316,27 +354,27 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
               .map(ChatMessageReactionDTO.fromJson)
               .toList(),
           currentUserId: _currentUserId,
-          currentUserEmail: ref.read(userProvider).user?.email,
+          currentUserEmail: _providers.read(userProvider).user?.email,
         );
   }
 
   Future<void> _refreshThread() async {
     final roomId = _roomId;
-    if (roomId == null) return;
-    await ref
+    if (_disposed || roomId == null) return;
+    await _providers
         .read(groupChatThreadProvider(roomId).notifier)
         .refreshLatest(
           currentUserId: _currentUserId,
-          currentUserEmail: ref.read(userProvider).user?.email,
+          currentUserEmail: _providers.read(userProvider).user?.email,
         );
   }
 
   void _scheduleReconnect() {
-    if (!mounted || !_hasRoomSession) return;
+    if (_disposed || !mounted || !_hasRoomSession) return;
     _reconnectTimer?.cancel();
     _reconnectAttempt++;
     _reconnectTimer = Timer(chatReconnectDelay(_reconnectAttempt), () async {
-      if (!mounted) return;
+      if (_disposed || !mounted) return;
       await _tearDownLive();
       await _ensureLiveConnected();
     });
@@ -345,14 +383,15 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// Best-effort: a failed read receipt never surfaces to the user.
   Future<void> _markRoomRead() async {
     final roomId = _roomId;
-    if (roomId == null) return;
-    await ref.read(groupChatRepositoryProvider).markRoomRead(roomId);
+    if (_disposed || roomId == null) return;
+    await _providers.read(groupChatRepositoryProvider).markRoomRead(roomId);
   }
 
   Future<void> _persistRoomId(String roomId) async {
+    if (_disposed) return;
     try {
       final userId = await _userId();
-      await ref
+      await _providers
           .read(groupChatRoomCacheProvider)
           .write(userId: userId, groupId: widget.groupId, roomId: roomId);
     } catch (_) {
@@ -374,7 +413,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     final parent = _replyingTo;
     setState(() => _sending = true);
     try {
-      final result = await ref
+      final result = await _providers
           .read(groupChatRepositoryProvider)
           .sendGroupMessage(
             widget.groupId,
@@ -407,7 +446,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           });
           // The POST returns the created message, so it is inserted directly
           // and the `message_created` echo dedupes against it by id.
-          ref
+          _providers
               .read(groupChatThreadProvider(message.roomId).notifier)
               .appendLive(message);
           await _ensureLiveConnected();

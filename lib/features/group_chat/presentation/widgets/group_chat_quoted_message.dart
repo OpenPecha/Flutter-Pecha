@@ -12,15 +12,11 @@ class GroupChatQuotedMessage extends StatelessWidget {
   const GroupChatQuotedMessage({
     super.key,
     required this.parent,
-    this.isSelf = false,
     this.isPreview = false,
     this.onTap,
   });
 
   final ChatMessageParentDTO parent;
-
-  /// Which bubble fill this sits on, which decides the tint and text colours.
-  final bool isSelf;
 
   /// Preview mode sits on the page background rather than inside a bubble.
   final bool isPreview;

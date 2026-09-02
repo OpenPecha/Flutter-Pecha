@@ -27,20 +27,34 @@ class _GroupChatSwipeToReplyState extends State<GroupChatSwipeToReply>
   static const double _maxDrag = 72;
   static const double _triggerAt = 52;
 
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 180),
-  )..addListener(() {
-    if (_settling) setState(() => _offset = _settle.value);
-  });
+  /// Built in [initState] rather than as a lazy `late final` initialiser.
+  ///
+  /// [build] never reads this field — only [_offset] and [_settling] — so a row
+  /// that is never swiped never creates it, and [dispose] becomes the *first*
+  /// read. The initialiser would then run during unmount, and building a
+  /// ticker there looks up `TickerMode` on an element that is already
+  /// deactivated: "Looking up a deactivated widget's ancestor is unsafe".
+  /// Every row scrolling out of the thread threw, which tore down the list.
+  late final AnimationController _controller;
 
-  late Animation<double> _settle = const AlwaysStoppedAnimation(0);
+  Animation<double> _settle = const AlwaysStoppedAnimation(0);
   double _offset = 0;
   bool _settling = false;
 
   /// Whether the haptic for this gesture has already fired, so holding past
   /// the threshold does not buzz repeatedly.
   bool _armed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    )..addListener(() {
+      if (_settling) setState(() => _offset = _settle.value);
+    });
+  }
 
   @override
   void dispose() {

@@ -12,12 +12,10 @@ class GroupChatLinkPreviewCard extends ConsumerWidget {
   const GroupChatLinkPreviewCard({
     super.key,
     required this.url,
-    required this.isSelf,
     required this.onOpen,
   });
 
   final String url;
-  final bool isSelf;
   final ValueChanged<String> onOpen;
 
   static const double _thumbnailSize = 64;

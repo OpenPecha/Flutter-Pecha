@@ -24,6 +24,7 @@ ChatMessageReactionDTO _reaction(
 }
 
 void main() {
+  _regressions();
   group('kChatQuickReactions', () {
     test('is WhatsApp six, with the heart carrying its variation selector', () {
       expect(kChatQuickReactions, hasLength(6));
@@ -187,6 +188,159 @@ void main() {
 
       expect(badge.emoji, isEmpty);
       expect(badge.total, 0);
+    });
+  });
+}
+
+void _regressions() {
+  group('viewer resolution consults both identifiers', () {
+    test('a roster with no emails still resolves from user_ids', () {
+      // `ChatMessageReactionUserDTO.email` is nullable in the API contract, and
+      // `user_ids` is the field documented for working out own reacted state.
+      // A populated `users` list must not mask it.
+      final resolved = chatReactionsForViewer(
+        [
+          _reaction(
+            _thumbsUp,
+            count: 1,
+            userIds: const ['me-uuid'],
+            users: const [ChatMessageReactionUserDTO(userId: 'me-uuid')],
+          ),
+        ],
+        currentUserId: 'me-uuid',
+        currentUserEmail: 'me@example.com',
+      );
+
+      expect(resolved.single.reactedByMe, isTrue);
+    });
+
+    test('a positive email match wins when the id space differs', () {
+      final resolved = chatReactionsForViewer(
+        [
+          _reaction(
+            _thumbsUp,
+            count: 1,
+            userIds: const ['backend-uuid'],
+            users: const [
+              ChatMessageReactionUserDTO(
+                userId: 'backend-uuid',
+                email: 'Me@Example.com',
+              ),
+            ],
+          ),
+        ],
+        currentUserId: 'jwt-sub',
+        currentUserEmail: 'me@example.com',
+      );
+
+      expect(resolved.single.reactedByMe, isTrue);
+    });
+
+    test('someone else holding it is a definite no', () {
+      final resolved = chatReactionsForViewer(
+        [
+          _reaction(
+            _thumbsUp,
+            count: 1,
+            reactedByMe: true,
+            users: const [
+              ChatMessageReactionUserDTO(
+                userId: 'other',
+                email: 'other@example.com',
+              ),
+            ],
+          ),
+        ],
+        currentUserEmail: 'me@example.com',
+      );
+
+      expect(resolved.single.reactedByMe, isFalse);
+    });
+
+    test('nothing to match on leaves the payload flag alone', () {
+      final resolved = chatReactionsForViewer(
+        [_reaction(_thumbsUp, count: 3, reactedByMe: true)],
+        currentUserEmail: 'me@example.com',
+      );
+
+      expect(resolved.single.reactedByMe, isTrue);
+    });
+  });
+
+  group('optimistic roster keeps the drawer honest', () {
+    test('joining an emoji someone else holds lists the viewer too', () {
+      final result = toggleChatReaction(
+        [
+          _reaction(
+            _thumbsUp,
+            count: 1,
+            users: const [
+              ChatMessageReactionUserDTO(
+                userId: 'other',
+                email: 'other@example.com',
+              ),
+            ],
+          ),
+        ],
+        _thumbsUp,
+        viewerId: 'me-uuid',
+        viewerEmail: 'me@example.com',
+      );
+
+      final reaction = result.single;
+      expect(reaction.count, 2);
+      expect(reaction.reactedByMe, isTrue);
+      // The count and the roster have to agree, or the drawer shows "2" above
+      // a single name and offers no row to tap to remove.
+      expect(reaction.users, hasLength(2));
+      expect(reaction.userIds, contains('me-uuid'));
+    });
+
+    test('un-reacting drops the viewer from the roster', () {
+      final result = toggleChatReaction(
+        [
+          _reaction(
+            _thumbsUp,
+            count: 2,
+            reactedByMe: true,
+            userIds: const ['me-uuid', 'other'],
+            users: const [
+              ChatMessageReactionUserDTO(
+                userId: 'me-uuid',
+                email: 'me@example.com',
+              ),
+              ChatMessageReactionUserDTO(userId: 'other'),
+            ],
+          ),
+        ],
+        _thumbsUp,
+        previousEmoji: _thumbsUp,
+        viewerId: 'me-uuid',
+        viewerEmail: 'me@example.com',
+      );
+
+      final reaction = result.single;
+      expect(reaction.count, 1);
+      expect(reaction.reactedByMe, isFalse);
+      expect(reaction.userIds, ['other']);
+      expect(reaction.users.map((user) => user.userId), ['other']);
+    });
+
+    test('a brand new emoji seeds the roster with the viewer', () {
+      final result = toggleChatReaction(
+        const [],
+        _heart,
+        viewerId: 'me-uuid',
+        viewerEmail: 'me@example.com',
+      );
+
+      expect(result.single.users.single.userId, 'me-uuid');
+    });
+
+    test('no viewer identity leaves the roster untouched', () {
+      final result = toggleChatReaction(const [], _joy);
+      expect(result.single.users, isEmpty);
+      expect(result.single.reactedByMe, isTrue);
     });
   });
 }

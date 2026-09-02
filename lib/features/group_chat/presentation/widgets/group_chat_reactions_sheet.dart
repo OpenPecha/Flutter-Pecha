@@ -6,6 +6,7 @@ import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_user_dto.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reactions.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 
 /// One person in the who-reacted list, with the emoji they used.
@@ -29,6 +30,7 @@ class _ReactionEntry {
 Future<void> showChatReactionsSheet(
   BuildContext context, {
   required List<ChatMessageReactionDTO> reactions,
+  required String? currentUserId,
   required String? currentUserEmail,
   required ValueChanged<String> onToggle,
   required Future<String?> Function() onAddReaction,
@@ -46,6 +48,7 @@ Future<void> showChatReactionsSheet(
     builder:
         (_) => _ReactionsSheet(
           reactions: reactions,
+          currentUserId: currentUserId,
           currentUserEmail: currentUserEmail,
           avatarUrls: avatarUrls,
           selfAvatarUrl: selfAvatarUrl,
@@ -58,6 +61,7 @@ Future<void> showChatReactionsSheet(
 class _ReactionsSheet extends StatefulWidget {
   const _ReactionsSheet({
     required this.reactions,
+    required this.currentUserId,
     required this.currentUserEmail,
     required this.avatarUrls,
     required this.selfAvatarUrl,
@@ -66,6 +70,7 @@ class _ReactionsSheet extends StatefulWidget {
   });
 
   final List<ChatMessageReactionDTO> reactions;
+  final String? currentUserId;
   final String? currentUserEmail;
   final Map<String, String> avatarUrls;
   final String? selfAvatarUrl;
@@ -86,27 +91,30 @@ class _ReactionsSheetState extends State<_ReactionsSheet> {
   int get _total => _tabs.fold<int>(0, (sum, reaction) => sum + reaction.count);
 
   List<_ReactionEntry> get _entries {
-    final email = widget.currentUserEmail?.trim().toLowerCase() ?? '';
     final entries = <_ReactionEntry>[];
 
     for (final reaction in _tabs) {
       if (_selected != null && reaction.emoji != _selected) continue;
+      var listedMe = false;
       for (final user in reaction.users) {
-        final userEmail = (user.email ?? '').trim().toLowerCase();
+        final isMine = isChatReactionViewer(
+          user,
+          currentUserId: widget.currentUserId,
+          currentUserEmail: widget.currentUserEmail,
+        );
+        listedMe = listedMe || isMine;
         entries.add(
-          _ReactionEntry(
-            user: user,
-            emoji: reaction.emoji,
-            isMine: email.isNotEmpty && userEmail == email,
-          ),
+          _ReactionEntry(user: user, emoji: reaction.emoji, isMine: isMine),
         );
       }
-      // A summary without `users` still has to show the viewer's own row.
-      if (reaction.users.isEmpty && reaction.reactedByMe) {
+      // A roster that names nobody — or names people but not the viewer — still
+      // has to show their own row, or a reaction they hold offers no way to
+      // take it back.
+      if (!listedMe && reaction.reactedByMe) {
         entries.add(
           _ReactionEntry(
             user: ChatMessageReactionUserDTO(
-              userId: '',
+              userId: widget.currentUserId ?? '',
               email: widget.currentUserEmail,
             ),
             emoji: reaction.emoji,
