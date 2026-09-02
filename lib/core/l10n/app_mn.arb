@@ -1038,5 +1038,14 @@
     }
   },
   "group_chat_you": "Та",
-  "group_chat_tap_to_remove": "Устгахын тулд товшино уу"
+  "group_chat_tap_to_remove": "Устгахын тулд товшино уу",
+  "group_chat_replying_to": "{name}-д хариулж байна",
+  "@group_chat_replying_to": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "group_chat_reply_parent_gone": "Тэр мессеж байхгүй тул иш татсаныг хаслаа. Мессежээ илгээхийн тулд дахин илгээнэ үү."
 }

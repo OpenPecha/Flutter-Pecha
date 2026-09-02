@@ -2441,4 +2441,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_chat_tap_to_remove => 'हटाने के लिए टैप करें';
+
+  @override
+  String group_chat_replying_to(String name) {
+    return '$name को उत्तर';
+  }
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'वह संदेश अब उपलब्ध नहीं है, इसलिए उद्धरण हटा दिया गया। अपना संदेश भेजने के लिए फिर से भेजें।';
 }

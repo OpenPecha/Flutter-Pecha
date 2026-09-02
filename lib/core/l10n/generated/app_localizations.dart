@@ -4315,6 +4315,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to remove'**
   String get group_chat_tap_to_remove;
+
+  /// No description provided for @group_chat_replying_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Replying to {name}'**
+  String group_chat_replying_to(String name);
+
+  /// No description provided for @group_chat_reply_parent_gone.
+  ///
+  /// In en, this message translates to:
+  /// **'That message is no longer available, so the quote was removed. Send again to post your message.'**
+  String get group_chat_reply_parent_gone;
 }
 
 class _AppLocalizationsDelegate

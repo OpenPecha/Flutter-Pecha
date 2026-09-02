@@ -101,11 +101,7 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
   }) async {
     try {
       return Right(
-        await _remote.addReaction(
-          roomId,
-          messageId: messageId,
-          emoji: emoji,
-        ),
+        await _remote.addReaction(roomId, messageId: messageId, emoji: emoji),
       );
     } catch (e) {
       return Left(ExceptionMapper.map(e, context: 'addReaction'));

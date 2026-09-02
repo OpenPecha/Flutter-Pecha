@@ -67,9 +67,7 @@ class _ChatEmojiPickerState extends State<_ChatEmojiPicker> {
     // The package's dataset, without its paged view. Names only drive search,
     // which this picker does not have, so the default English set is enough.
     _categories =
-        defaultEmojiSet
-            .where((category) => category.emoji.isNotEmpty)
-            .toList();
+        defaultEmojiSet.where((category) => category.emoji.isNotEmpty).toList();
     widget.scrollController.addListener(_onScroll);
   }
 
@@ -143,8 +141,7 @@ class _ChatEmojiPickerState extends State<_ChatEmojiPicker> {
                         return _EmojiCell(
                           emoji: emoji.emoji,
                           size: _tileSize,
-                          onTap:
-                              () => Navigator.of(context).pop(emoji.emoji),
+                          onTap: () => Navigator.of(context).pop(emoji.emoji),
                         );
                       }, childCount: category.emoji.length),
                     ),
@@ -181,10 +178,7 @@ class _EmojiCell extends StatelessWidget {
     return InkResponse(
       onTap: onTap,
       child: Center(
-        child: Text(
-          emoji,
-          style: TextStyle(fontSize: size * 0.58),
-        ),
+        child: Text(emoji, style: TextStyle(fontSize: size * 0.58)),
       ),
     );
   }
@@ -221,8 +215,7 @@ class _CategoryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final selected = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final muted = isDark ? AppColors.grey600 : AppColors.grey500;
 
     return Container(

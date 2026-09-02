@@ -4732,4 +4732,19 @@ class TolgeeAppLocalizations extends AppLocalizations {
     'group_chat_tap_to_remove',
     () => _fallback.group_chat_tap_to_remove,
   );
+
+  @override
+  String group_chat_replying_to(String name) => TolgeeBridge.format(
+    localeName,
+    'group_chat_replying_to',
+    <String, Object>{'name': name},
+    () => _fallback.group_chat_replying_to(name),
+  );
+
+  @override
+  String get group_chat_reply_parent_gone => TolgeeBridge.get(
+    localeName,
+    'group_chat_reply_parent_gone',
+    () => _fallback.group_chat_reply_parent_gone,
+  );
 }

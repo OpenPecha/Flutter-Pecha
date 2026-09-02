@@ -972,5 +972,14 @@
     }
   },
   "group_chat_you": "你",
-  "group_chat_tap_to_remove": "點按以移除"
+  "group_chat_tap_to_remove": "點按以移除",
+  "group_chat_replying_to": "回覆 {name}",
+  "@group_chat_replying_to": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "group_chat_reply_parent_gone": "該訊息已不存在，引用已移除。請再次傳送你的訊息。"
 }

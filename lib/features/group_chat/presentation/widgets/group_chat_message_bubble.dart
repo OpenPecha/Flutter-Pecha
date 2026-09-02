@@ -10,6 +10,7 @@ import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_s
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_message_time.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_link_preview_card.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_quoted_message.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_reaction_badges.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,7 +29,9 @@ class GroupChatMessageBubble extends StatelessWidget {
     this.selfAvatarUrl,
     this.selfDisplayName,
     this.onLongPress,
+    this.isHighlighted = false,
     this.onShowReactions,
+    this.onTapQuote,
   });
 
   final ChatMessageDTO message;
@@ -43,7 +46,13 @@ class GroupChatMessageBubble extends StatelessWidget {
   /// Opens the long-press menu. The thread measures the row itself, so the
   /// bubble only reports the gesture.
   final VoidCallback? onLongPress;
+
+  /// Briefly tinted after a quote jumped to this message.
+  final bool isHighlighted;
   final VoidCallback? onShowReactions;
+
+  /// Scrolls to the quoted original when it is still on screen.
+  final VoidCallback? onTapQuote;
 
   static const double _avatarSize = 32;
 
@@ -79,7 +88,18 @@ class GroupChatMessageBubble extends StatelessWidget {
       isDark: isDark,
     );
 
-    return Padding(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+      // Dark needs both the brighter gold and more of it: a low-alpha tint
+      // over a near-black background is almost no shift at all, where the same
+      // alpha over the cream light background reads clearly.
+      color:
+          isHighlighted
+              ? (isDark
+                  ? AppColors.accentGold.withValues(alpha: 0.26)
+                  : AppColors.accentGoldDark.withValues(alpha: 0.14))
+              : Colors.transparent,
       padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
       child: Row(
         mainAxisAlignment:
@@ -188,6 +208,12 @@ class GroupChatMessageBubble extends StatelessWidget {
               ),
               const SizedBox(height: 2),
             ],
+            if (message.parent != null)
+              GroupChatQuotedMessage(
+                parent: message.parent!,
+                isSelf: isSelf,
+                onTap: onTapQuote,
+              ),
             ChatLinkText(
               body: message.body,
               textColor: textColor,

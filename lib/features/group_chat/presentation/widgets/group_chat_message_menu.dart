@@ -172,19 +172,14 @@ class _EmojiPill extends StatelessWidget {
         children: [
           for (final emoji in kChatQuickReactions)
             _PillButton(
-              onTap:
-                  () => Navigator.of(
-                    context,
-                  ).pop(ChatMessageReact(emoji)),
+              onTap: () => Navigator.of(context).pop(ChatMessageReact(emoji)),
               isSelected: emoji == myEmoji,
               isDark: isDark,
               child: Text(emoji, style: const TextStyle(fontSize: 22)),
             ),
           _PillButton(
             onTap:
-                () => Navigator.of(
-                  context,
-                ).pop(const ChatMessageMoreEmoji()),
+                () => Navigator.of(context).pop(const ChatMessageMoreEmoji()),
             isSelected: false,
             isDark: isDark,
             background: isDark ? AppColors.grey800 : AppColors.grey100,

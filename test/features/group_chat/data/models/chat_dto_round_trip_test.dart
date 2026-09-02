@@ -64,6 +64,8 @@ void main() {
           'id': 'p1',
           'sender_id': 'u1',
           'sender_email': 'parent@example.com',
+          'sender_name': 'Tenzin Tamdin',
+          'sender_avatar_url': 'images/profile_images/u1.webp',
           'body': 'hello',
           'created_at': '2026-01-01T00:00:00Z',
         },
@@ -85,6 +87,9 @@ void main() {
       expect(encoded['sender_email'], 'sender@example.com');
       expect(encoded['sender_name'], 'Pema Yangchen');
       expect(encoded['sender_avatar_url'], 'https://cdn.example/p.png');
+      final parent = encoded['parent'] as Map<String, dynamic>;
+      expect(parent['sender_name'], 'Tenzin Tamdin');
+      expect(parent['sender_avatar_url'], 'images/profile_images/u1.webp');
       expect(ChatMessageDTO.fromJson(encoded), first);
     });
 

@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
+import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_user_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
@@ -31,6 +32,8 @@ Future<void> showChatReactionsSheet(
   required String? currentUserEmail,
   required ValueChanged<String> onToggle,
   required Future<String?> Function() onAddReaction,
+  Map<String, String> avatarUrls = const {},
+  String? selfAvatarUrl,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -44,6 +47,8 @@ Future<void> showChatReactionsSheet(
         (_) => _ReactionsSheet(
           reactions: reactions,
           currentUserEmail: currentUserEmail,
+          avatarUrls: avatarUrls,
+          selfAvatarUrl: selfAvatarUrl,
           onToggle: onToggle,
           onAddReaction: onAddReaction,
         ),
@@ -54,12 +59,16 @@ class _ReactionsSheet extends StatefulWidget {
   const _ReactionsSheet({
     required this.reactions,
     required this.currentUserEmail,
+    required this.avatarUrls,
+    required this.selfAvatarUrl,
     required this.onToggle,
     required this.onAddReaction,
   });
 
   final List<ChatMessageReactionDTO> reactions;
   final String? currentUserEmail;
+  final Map<String, String> avatarUrls;
+  final String? selfAvatarUrl;
   final ValueChanged<String> onToggle;
   final Future<String?> Function() onAddReaction;
 
@@ -74,8 +83,7 @@ class _ReactionsSheetState extends State<_ReactionsSheet> {
   List<ChatMessageReactionDTO> get _tabs =>
       widget.reactions.where((reaction) => reaction.count > 0).toList();
 
-  int get _total =>
-      _tabs.fold<int>(0, (sum, reaction) => sum + reaction.count);
+  int get _total => _tabs.fold<int>(0, (sum, reaction) => sum + reaction.count);
 
   List<_ReactionEntry> get _entries {
     final email = widget.currentUserEmail?.trim().toLowerCase() ?? '';
@@ -206,6 +214,11 @@ class _ReactionsSheetState extends State<_ReactionsSheet> {
                 final entry = entries[index];
                 return _ReactionRow(
                   entry: entry,
+                  avatarUrl:
+                      entry.isMine
+                          ? (widget.selfAvatarUrl ??
+                              widget.avatarUrls[entry.user.userId])
+                          : widget.avatarUrls[entry.user.userId],
                   isDark: isDark,
                   onRemove: entry.isMine ? () => _remove(entry.emoji) : null,
                 );
@@ -233,8 +246,7 @@ class _AddTab extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color:
-                isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+            color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Icon(
@@ -294,9 +306,7 @@ class _Tab extends StatelessWidget {
                     ? null
                     : Border.all(
                       color:
-                          isDark
-                              ? AppColors.cardBorderDark
-                              : AppColors.grey300,
+                          isDark ? AppColors.cardBorderDark : AppColors.grey300,
                     ),
           ),
           child: Row(
@@ -330,11 +340,13 @@ class _Tab extends StatelessWidget {
 class _ReactionRow extends StatelessWidget {
   const _ReactionRow({
     required this.entry,
+    required this.avatarUrl,
     required this.isDark,
     required this.onRemove,
   });
 
   final _ReactionEntry entry;
+  final String? avatarUrl;
   final bool isDark;
 
   /// Non-null only on the viewer's own row: tapping it removes the reaction.
@@ -365,7 +377,11 @@ class _ReactionRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Row(
           children: [
-            _Avatar(displayName: resolvedName, isDark: isDark),
+            _Avatar(
+              avatarUrl: avatarUrl,
+              displayName: resolvedName,
+              isDark: isDark,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -410,18 +426,37 @@ class _ReactionRow extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.displayName, required this.isDark});
+  const _Avatar({
+    required this.avatarUrl,
+    required this.displayName,
+    required this.isDark,
+  });
 
+  /// Null for anyone who has not posted in the loaded window — initials then.
+  final String? avatarUrl;
   final String displayName;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final url = avatarUrl;
+    final hasUrl = url != null && url.isNotEmpty;
+
     return ClipOval(
       child: SizedBox(
         width: _ReactionRow._avatarSize,
         height: _ReactionRow._avatarSize,
-        child: _initials(),
+        child:
+            hasUrl
+                ? CachedNetworkImageWidget(
+                  key: ValueKey(url),
+                  imageUrl: url,
+                  width: _ReactionRow._avatarSize,
+                  height: _ReactionRow._avatarSize,
+                  fit: BoxFit.cover,
+                  errorWidget: _initials(),
+                )
+                : _initials(),
       ),
     );
   }

@@ -20,6 +20,7 @@ import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_cha
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_empty_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_error_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_header.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_reply_preview.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_thread.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
@@ -58,6 +59,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   _RoomState _roomState = _RoomState.resolving;
   String? _roomId;
   String _currentUserId = '';
+
+  /// The message a reply is being composed for, quoted above the composer.
+  ChatMessageDTO? _replyingTo;
 
   /// True once the group has a room session worth holding a socket open for.
   /// [_RoomState.absent] counts: the socket is group-scoped, so it reports the
@@ -348,18 +352,39 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     }
   }
 
+  /// Starts a reply. The intent is always to type next, so focus follows.
+  void _startReply(ChatMessageDTO message) {
+    setState(() => _replyingTo = message);
+    _bodyFocusNode.requestFocus();
+  }
+
+  void _cancelReply() => setState(() => _replyingTo = null);
+
   Future<void> _send() async {
     final body = _bodyController.text.trim();
     if (body.isEmpty || _sending) return;
+    final parent = _replyingTo;
     setState(() => _sending = true);
     try {
       final result = await ref
           .read(groupChatRepositoryProvider)
-          .sendGroupMessage(widget.groupId, body: body);
+          .sendGroupMessage(
+            widget.groupId,
+            body: body,
+            parentMessageId: parent?.id,
+          );
       if (!mounted) return;
       await result.fold(
         (failure) async {
-          setState(() => _sending = false);
+          // The quoted message is gone. Drop the quote but keep the draft, so
+          // sending again posts it as an ordinary message rather than
+          // silently changing what was written or stranding it.
+          final lostParent =
+              chatSendErrorKind(failure) == ChatSendErrorKind.invalidParent;
+          setState(() {
+            _sending = false;
+            if (lostParent) _replyingTo = null;
+          });
           presentChatSendError(context, failure);
         },
         (message) async {
@@ -368,6 +393,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           _bodyController.clear();
           setState(() {
             _sending = false;
+            _replyingTo = null;
             _roomId = message.roomId;
             _roomState = _RoomState.joined;
           });
@@ -464,6 +490,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
                 roomId: roomId,
                 groupId: widget.groupId,
                 currentUserId: _currentUserId,
+                onReply: _startReply,
               ),
       },
       // A confirmed member may always write: a lookup that found no room, or
@@ -491,6 +518,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           children: [
             GroupChatHeader(isDark: isDark, onBack: _goBack, profile: profile),
             Expanded(child: body),
+            if (showComposer && _replyingTo != null)
+              GroupChatReplyPreview(
+                message: _replyingTo!,
+                onCancel: _cancelReply,
+              ),
             if (showComposer)
               GroupChatComposer(
                 controller: _bodyController,

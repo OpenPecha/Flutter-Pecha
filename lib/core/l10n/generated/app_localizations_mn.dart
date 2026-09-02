@@ -2446,4 +2446,13 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_chat_tap_to_remove => 'Устгахын тулд товшино уу';
+
+  @override
+  String group_chat_replying_to(String name) {
+    return '$name-д хариулж байна';
+  }
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'Тэр мессеж байхгүй тул иш татсаныг хаслаа. Мессежээ илгээхийн тулд дахин илгээнэ үү.';
 }

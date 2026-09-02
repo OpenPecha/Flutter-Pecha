@@ -16,12 +16,16 @@ String? chatSendErrorCode(Object error) {
   };
 }
 
-enum ChatSendErrorKind { inappropriate, notAMember, generic }
+enum ChatSendErrorKind { inappropriate, notAMember, invalidParent, generic }
 
 /// Classifies send failures so REST 403 and WS errors share the same copy.
 ChatSendErrorKind chatSendErrorKind(Object error) {
-  if (ChatModeration.isInappropriateLanguage(chatSendErrorCode(error))) {
+  final code = chatSendErrorCode(error);
+  if (ChatModeration.isInappropriateLanguage(code)) {
     return ChatSendErrorKind.inappropriate;
+  }
+  if (ChatModeration.isInvalidParentMessage(code)) {
+    return ChatSendErrorKind.invalidParent;
   }
   if (error is AuthorizationFailure || error is AuthorizationException) {
     return ChatSendErrorKind.notAMember;
@@ -33,6 +37,7 @@ String chatSendErrorMessage(AppLocalizations l10n, Object error) {
   return switch (chatSendErrorKind(error)) {
     ChatSendErrorKind.inappropriate => l10n.group_chat_inappropriate,
     ChatSendErrorKind.notAMember => l10n.group_chat_not_a_member,
+    ChatSendErrorKind.invalidParent => l10n.group_chat_reply_parent_gone,
     ChatSendErrorKind.generic => switch (error) {
       Failure(:final message) => message,
       ChatLiveError(:final message) => message,

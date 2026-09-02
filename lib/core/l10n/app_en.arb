@@ -1213,5 +1213,14 @@
     }
   },
   "group_chat_you": "You",
-  "group_chat_tap_to_remove": "Tap to remove"
+  "group_chat_tap_to_remove": "Tap to remove",
+  "group_chat_replying_to": "Replying to {name}",
+  "@group_chat_replying_to": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "group_chat_reply_parent_gone": "That message is no longer available, so the quote was removed. Send again to post your message."
 }

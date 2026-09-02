@@ -972,5 +972,14 @@
     }
   },
   "group_chat_you": "ཁྱེད།",
-  "group_chat_tap_to_remove": "སུབ་པར་མནན།"
+  "group_chat_tap_to_remove": "སུབ་པར་མནན།",
+  "group_chat_replying_to": "{name} ལ་ལན་འདེབས།",
+  "@group_chat_replying_to": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "group_chat_reply_parent_gone": "འཕྲིན་ཐུང་དེ་མི་འདུག་པས་ལུང་འདྲེན་ཕྱིར་བསུབས། ཡང་བསྐྱར་གཏོང་རོགས།"
 }
