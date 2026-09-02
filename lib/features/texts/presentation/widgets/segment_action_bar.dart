@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/features/texts/presentation/providers/selected_segment_provider.dart';
 import 'package:flutter_pecha/features/texts/presentation/widgets/action_button.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -181,12 +182,12 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
     });
 
     try {
-      final shareUrl =
-          DeepLinkUrlBuilder.readerSegmentLink(
-            textId: widget.textId,
-            segmentId: widget.segmentId,
-            language: widget.language,
-          ).toString();
+      final longUrl = DeepLinkUrlBuilder.readerSegmentLink(
+        textId: widget.textId,
+        segmentId: widget.segmentId,
+        language: widget.language,
+      ).toString();
+      final shareUrl = await resolveShareUrlRef(ref, longUrl);
 
       if (!mounted) return;
 

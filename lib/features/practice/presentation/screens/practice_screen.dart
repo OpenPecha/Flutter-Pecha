@@ -29,17 +29,6 @@ class PracticeScreen extends ConsumerWidget {
     context.pushNamed('edit-routine');
   }
 
-  /// Strips the `Exception: ` prefix from thrown errors so users do not see
-  /// Dart runtime jargon. Falls back to the generic localized error message
-  /// when the underlying error has no useful description.
-  String _friendlyErrorMessage(Object error, AppLocalizations localizations) {
-    if (error is Exception) {
-      final raw = error.toString().replaceFirst('Exception: ', '').trim();
-      if (raw.isNotEmpty) return raw;
-    }
-    return localizations.routine_load_error;
-  }
-
   PreferredSizeWidget? _appBar(
     BuildContext context,
     AppLocalizations localizations, {
@@ -104,8 +93,11 @@ class PracticeScreen extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
           ),
+      // The error object is intentionally not shown: the repository logs it,
+      // and `routine_load_error` is the complete user-facing message. Surfacing
+      // the detail put raw text like "Server error (500)" on screen.
       error:
-          (error, _) => Scaffold(
+          (_, _) => Scaffold(
             appBar: _appBar(context, localizations),
             body: SafeArea(
               child: RefreshIndicator(
@@ -131,11 +123,6 @@ class PracticeScreen extends ConsumerWidget {
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  _friendlyErrorMessage(error, localizations),
-                                  textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 24),
                                 FilledButton(

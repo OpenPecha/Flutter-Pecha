@@ -34,13 +34,11 @@ export 'data/models/collections/collections.dart';
 export 'data/datasource/text_remote_datasource.dart';
 export 'data/datasource/segment_remote_datasource.dart';
 export 'data/datasource/collections_remote_datasource.dart';
-export 'data/datasource/share_remote_datasource.dart';
 
 // Presentation - Providers
 export 'presentation/providers/texts_provider.dart';
 export 'presentation/providers/segment_provider.dart';
 export 'presentation/providers/collections_providers.dart';
-export 'presentation/providers/share_provider.dart';
 export 'presentation/providers/font_size_notifier.dart';
 export 'presentation/providers/library_search_state_provider.dart';
 export 'presentation/providers/paginated_texts_provider.dart';
@@ -53,7 +51,6 @@ export 'presentation/providers/version_provider.dart';
 export 'data/repositories/texts_repository.dart' hide TextsRepository;
 export 'data/repositories/segment_repository.dart';
 export 'data/repositories/collections_repository.dart';
-export 'data/repositories/share_repository.dart';
 
 // Presentation - Screens
 export 'presentation/screens/chapters/chapters_screen.dart';

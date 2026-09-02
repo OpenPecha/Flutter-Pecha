@@ -25,6 +25,20 @@ class PushSessionType {
   static const String dailyVerse = 'DAILY_VERSE';
   static const String verseOfTheDay = 'VERSE_OF_THE_DAY';
 
+  /// `CHAT_MESSAGE` pushes — private or group chat, see [PushChatKind].
+  static const String chat = 'CHAT';
+
+  /// `GROUP_POST` pushes — a new post in a group the user follows.
+  static const String groupPost = 'GROUP_POST';
+
+  /// `EVENT` pushes — a group event.
+  static const String event = 'EVENT';
+
+  /// Shared by `JOIN_REQUEST_CREATED` and `JOIN_REQUEST_DECIDED`; the backend
+  /// does not distinguish them by `session_type`, and it doesn't need to —
+  /// both currently land on the same screen.
+  static const String group = 'GROUP';
+
   static bool isVerseOfDay(String sessionType) =>
       sessionType == verseOfDay ||
       sessionType == verse ||
@@ -33,8 +47,26 @@ class PushSessionType {
       sessionType == verseOfTheDay;
 }
 
+/// FCM `chat_kind` values carried alongside [PushSessionType.chat].
+class PushChatKind {
+  PushChatKind._();
+
+  static const String private = 'PRIVATE';
+  static const String group = 'GROUP';
+}
+
 /// Where a push-notification tap should land.
-enum PushTapTarget { home, practice, practiceMyPractices, seriesDetail, timers }
+enum PushTapTarget {
+  home,
+  practice,
+  practiceMyPractices,
+  seriesDetail,
+  timers,
+  groupChat,
+  postDetail,
+  eventDetail,
+  groupProfile,
+}
 
 /// Result of mapping an FCM data payload to a navigation target.
 class PushTapResolution {
@@ -49,6 +81,11 @@ class PushTapResolution {
 /// Isolated so routing can be unit-tested. Verse-of-day and unknown/empty
 /// payloads land on Home (the verse card lives there). Practice is reserved
 /// for recitation / accumulation until those have dedicated screens.
+///
+/// [PushTapResolution.sourceId] is "the id to route with", which is usually
+/// the payload's own `source_id` — but not always. For chat pushes the backend
+/// sets `source_id` = room id, while the app routes by group id, so the
+/// resolution carries `group_id` instead.
 PushTapResolution resolvePushTap(Map<String, dynamic> data) {
   final sessionType = _sessionTypeOf(data);
   final sourceId = (data['source_id'] as String?)?.trim() ?? '';
@@ -67,6 +104,29 @@ PushTapResolution resolvePushTap(Map<String, dynamic> data) {
     case PushSessionType.recitationCollection:
     case PushSessionType.accumulation:
       return const PushTapResolution(PushTapTarget.practice);
+    case PushSessionType.chat:
+      // The payload's `source_id` is the *room* id, but the only chat screen
+      // in the app is keyed by group id, so route with `group_id`.
+      final groupId = (data['group_id'] as String?)?.trim() ?? '';
+      if (_chatKindOf(data) == PushChatKind.group && groupId.isNotEmpty) {
+        return PushTapResolution(PushTapTarget.groupChat, sourceId: groupId);
+      }
+      // Private chats (and group chats missing a group id) fall back to Home:
+      // the app has no private/1:1 chat screen yet, so there is nowhere else
+      // to send them. Don't "fix" this to a chat route until one exists.
+      return const PushTapResolution(PushTapTarget.home);
+    case PushSessionType.groupPost when sourceId.isNotEmpty:
+      return PushTapResolution(PushTapTarget.postDetail, sourceId: sourceId);
+    case PushSessionType.event when sourceId.isNotEmpty:
+      return PushTapResolution(PushTapTarget.eventDetail, sourceId: sourceId);
+    case PushSessionType.group when sourceId.isNotEmpty:
+      // Both JOIN_REQUEST_CREATED and JOIN_REQUEST_DECIDED arrive with
+      // `session_type: GROUP` and `source_id` = group id. There is no admin
+      // join-request review screen in this app today, so both land on the
+      // group's profile. When such a screen ships, JOIN_REQUEST_CREATED
+      // should deep-link an admin there instead of the generic profile
+      // (it will need `notification_type` to tell the two flavours apart).
+      return PushTapResolution(PushTapTarget.groupProfile, sourceId: sourceId);
     default:
       return const PushTapResolution(PushTapTarget.home);
   }
@@ -80,6 +140,9 @@ String _sessionTypeOf(Map<String, dynamic> data) {
   final fromType = (data['type'] as String?)?.trim();
   return fromType?.toUpperCase() ?? '';
 }
+
+String _chatKindOf(Map<String, dynamic> data) =>
+    (data['chat_kind'] as String?)?.trim().toUpperCase() ?? '';
 
 /// Single entry point for navigating after a push notification is opened.
 ///
@@ -105,7 +168,40 @@ class PushMessageNavigator {
   void handleData(Map<String, dynamic> data) => _schedule(data);
 
   void _schedule(Map<String, dynamic> data) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _route(data));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _routeWhenSettled(data),
+    );
+  }
+
+  /// Defers routing until the router has left `/splash`.
+  ///
+  /// A cold start via notification tap (`getInitialMessage`) races auth
+  /// restoration: [RouteGuard] sends every destination to `/splash` while
+  /// [AuthState.isLoading] is true and does not remember it — the pending-route
+  /// mechanism in [RouteGuard] only captures unauthenticated attempts, not
+  /// loading ones — so pushing the real destination now would just get
+  /// redirected away and lost, landing the user on Home once auth settles.
+  /// Mirrors `AppLinksDeepLinkService._dispatchWhenRouterSettled`, which
+  /// solves the identical race for app-link cold starts.
+  void _routeWhenSettled(Map<String, dynamic> data) {
+    final router = _ref.read(appRouterProvider);
+    final delegate = router.routerDelegate;
+
+    bool isSettled() =>
+        delegate.currentConfiguration.uri.path != AppRoutes.splash;
+
+    if (isSettled()) {
+      _route(data);
+      return;
+    }
+
+    void onRouterChanged() {
+      if (!isSettled()) return;
+      delegate.removeListener(onRouterChanged);
+      _route(data);
+    }
+
+    delegate.addListener(onRouterChanged);
   }
 
   void _route(Map<String, dynamic> data) {
@@ -140,6 +236,23 @@ class PushMessageNavigator {
       case PushTapTarget.timers:
         router.go(AppRoutes.home);
         router.push('/home/timers');
+
+      case PushTapTarget.groupChat:
+        // Group chat is a top-level route, outside the /home shell, so it is
+        // pushed directly — same as the in-app call sites on group profile.
+        router.push(AppRoutes.groupChatPath(sourceId));
+
+      case PushTapTarget.postDetail:
+        router.go(AppRoutes.home);
+        router.push('/home/posts/$sourceId');
+
+      case PushTapTarget.eventDetail:
+        router.go(AppRoutes.home);
+        router.push('/home/events/$sourceId');
+
+      case PushTapTarget.groupProfile:
+        router.go(AppRoutes.home);
+        router.push('/home/group/$sourceId');
 
       case PushTapTarget.practice:
         _openPracticeTab(router);

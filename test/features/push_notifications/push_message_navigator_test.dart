@@ -88,6 +88,130 @@ void main() {
         PushTapTarget.practice,
       );
     });
+
+    test('group CHAT routes by group_id, not the room id in source_id', () {
+      final actual = resolvePushTap({
+        'notification_type': 'CHAT_MESSAGE',
+        'session_type': 'CHAT',
+        'chat_kind': 'GROUP',
+        'room_id': 'room-1',
+        'group_id': 'group-1',
+        'source_id': 'room-1',
+      });
+      expect(actual.target, PushTapTarget.groupChat);
+      expect(
+        actual.sourceId,
+        'group-1',
+        reason: 'chat pushes route by group_id, while source_id is the room id',
+      );
+    });
+
+    test('private CHAT falls back to Home (no private chat screen yet)', () {
+      final actual = resolvePushTap({
+        'notification_type': 'CHAT_MESSAGE',
+        'session_type': 'CHAT',
+        'chat_kind': 'PRIVATE',
+        'room_id': 'room-1',
+        'group_id': '',
+        'source_id': 'room-1',
+      });
+      expect(actual.target, PushTapTarget.home);
+    });
+
+    test('group CHAT without a group_id falls back to Home', () {
+      expect(
+        resolvePushTap({
+          'session_type': 'CHAT',
+          'chat_kind': 'GROUP',
+          'group_id': '',
+          'source_id': 'room-1',
+        }).target,
+        PushTapTarget.home,
+      );
+      expect(
+        resolvePushTap({
+          'session_type': 'CHAT',
+          'chat_kind': 'GROUP',
+          'source_id': 'room-1',
+        }).target,
+        PushTapTarget.home,
+      );
+    });
+
+    test('GROUP_POST with source_id opens the post detail', () {
+      final actual = resolvePushTap({
+        'notification_type': 'GROUP_POST',
+        'session_type': 'GROUP_POST',
+        'post_id': 'post-1',
+        'group_id': 'group-1',
+        'source_id': 'post-1',
+      });
+      expect(actual.target, PushTapTarget.postDetail);
+      expect(actual.sourceId, 'post-1');
+    });
+
+    test('GROUP_POST without source_id falls back to Home', () {
+      expect(
+        resolvePushTap({'session_type': 'GROUP_POST'}).target,
+        PushTapTarget.home,
+      );
+    });
+
+    test('EVENT with source_id opens the event detail', () {
+      final actual = resolvePushTap({
+        'notification_type': 'EVENT',
+        'session_type': 'EVENT',
+        'event_id': 'event-1',
+        'group_id': 'group-1',
+        'source_id': 'event-1',
+      });
+      expect(actual.target, PushTapTarget.eventDetail);
+      expect(actual.sourceId, 'event-1');
+    });
+
+    test('EVENT without source_id falls back to Home', () {
+      expect(
+        resolvePushTap({'session_type': 'EVENT'}).target,
+        PushTapTarget.home,
+      );
+    });
+
+    test('a created join request opens the group profile', () {
+      final actual = resolvePushTap({
+        'notification_type': 'JOIN_REQUEST_CREATED',
+        'session_type': 'GROUP',
+        'join_request_id': 'jr-1',
+        'group_id': 'group-1',
+        'status': 'PENDING',
+        'source_id': 'group-1',
+      });
+      expect(actual.target, PushTapTarget.groupProfile);
+      expect(actual.sourceId, 'group-1');
+    });
+
+    test('a decided join request opens the same group profile', () {
+      final actual = resolvePushTap({
+        'notification_type': 'JOIN_REQUEST_DECIDED',
+        'session_type': 'GROUP',
+        'join_request_id': 'jr-1',
+        'group_id': 'group-1',
+        'status': 'APPROVED',
+        'source_id': 'group-1',
+      });
+      expect(actual.target, PushTapTarget.groupProfile);
+      expect(actual.sourceId, 'group-1');
+    });
+
+    test('GROUP without source_id falls back to Home', () {
+      expect(
+        resolvePushTap({
+          'notification_type': 'JOIN_REQUEST_CREATED',
+          'session_type': 'GROUP',
+          'status': 'PENDING',
+        }).target,
+        PushTapTarget.home,
+      );
+    });
   });
 
   group('PushSessionType.isVerseOfDay', () {
