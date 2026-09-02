@@ -116,9 +116,9 @@ class AppColors {
   /// page rather than a second solid colour.
   static const Color chatOutgoingBubble = Color(0x1ADC8600);
 
-  /// The same hue carries almost nothing over a black background at 10%, so
-  /// dark mode takes it at 20% to stay visible.
-  static const Color chatOutgoingBubbleDark = Color(0x33DC8600);
+  /// Dark mode uses its own value: #FDAE33 at 70% (`#FDAE33B2`) — a brighter
+  /// amber and far more of it, since a light tint disappears against black.
+  static const Color chatOutgoingBubbleDark = Color(0xB2FDAE33);
 
   // ============ Group chat sender colours ============
   /// One colour per participant in a group thread, picked by a stable hash of
