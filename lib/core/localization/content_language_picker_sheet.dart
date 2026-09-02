@@ -11,17 +11,23 @@ class ContentLanguagePickerSheet extends ConsumerWidget {
     required this.selectedCode,
     required this.onSelected,
     this.title,
+    this.recitationOnly = false,
   });
 
   final String selectedCode;
   final ValueChanged<String> onSelected;
   final String? title;
+  final bool recitationOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final languages = ref.watch(resolvedContentLanguagesProvider);
+    final languages = ref.watch(
+      recitationOnly
+          ? resolvedRecitationLanguagesProvider
+          : resolvedContentLanguagesProvider,
+    );
 
     return SafeArea(
       top: false,
@@ -57,7 +63,10 @@ class ContentLanguagePickerSheet extends ConsumerWidget {
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 itemCount: languages.length,
                 separatorBuilder:
                     (_, __) => Divider(
@@ -143,6 +152,7 @@ Future<void> showContentLanguagePickerSheet(
   required String selectedCode,
   required ValueChanged<String> onSelected,
   String? title,
+  bool recitationOnly = false,
 }) {
   return showModalBottomSheet(
     context: context,
@@ -157,6 +167,7 @@ Future<void> showContentLanguagePickerSheet(
           selectedCode: selectedCode,
           onSelected: onSelected,
           title: title,
+          recitationOnly: recitationOnly,
         ),
   );
 }

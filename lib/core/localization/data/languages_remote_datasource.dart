@@ -13,9 +13,15 @@ class LanguagesRemoteDatasource {
 
   LanguagesRemoteDatasource({required this.dio});
 
-  Future<List<AppLanguage>> fetchLanguages() async {
+  Future<List<AppLanguage>> fetchLanguages({
+    bool recitationOnly = false,
+  }) async {
     try {
-      final response = await dio.get('/languages');
+      final response = await dio.get(
+        '/languages',
+        queryParameters:
+            recitationOnly ? const {'recitation_only': true} : null,
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;

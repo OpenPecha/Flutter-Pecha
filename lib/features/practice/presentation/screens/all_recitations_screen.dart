@@ -56,6 +56,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     showContentLanguagePickerSheet(
       context,
       selectedCode: selectedCode,
+      recitationOnly: true,
       onSelected: (code) {
         ref
             .read(practiceRecitationsLanguageProvider.notifier)

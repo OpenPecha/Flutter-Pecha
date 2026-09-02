@@ -52,3 +52,22 @@ final resolvedContentLanguagesProvider = Provider<List<AppLanguage>>((ref) {
   return ref.watch(availableContentLanguagesProvider).valueOrNull ??
       AppLanguage.bundledFallback;
 });
+
+final recitationContentLanguagesProvider = FutureProvider<List<AppLanguage>>((
+  ref,
+) async {
+  try {
+    final languages = await ref
+        .watch(languagesRemoteDatasourceProvider)
+        .fetchLanguages(recitationOnly: true);
+
+    return languages.isNotEmpty ? languages : AppLanguage.bundledFallback;
+  } catch (_) {
+    return AppLanguage.bundledFallback;
+  }
+});
+
+final resolvedRecitationLanguagesProvider = Provider<List<AppLanguage>>((ref) {
+  return ref.watch(recitationContentLanguagesProvider).valueOrNull ??
+      AppLanguage.bundledFallback;
+});
