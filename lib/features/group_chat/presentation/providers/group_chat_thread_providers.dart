@@ -115,6 +115,44 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// freshly confirmed reaction with its own stale snapshot.
   final Map<String, int> _reactionRevision = {};
 
+  /// Summaries that arrived for a message not yet in the loaded window while
+  /// a page request was in flight. That page carries a snapshot older than the
+  /// broadcast, so the broadcast is held and applied to the row the page
+  /// inserts rather than being overwritten by it.
+  ///
+  /// Only kept while a fetch is running. Outside one the original reasoning
+  /// holds: a message outside the window is refetched with current counts
+  /// anyway, so dropping the update is correct.
+  final Map<String, List<ChatMessageReactionDTO>> _pendingReactions = {};
+
+  /// How many page requests are in flight. A reaction broadcast is only worth
+  /// holding while one of them might be carrying the message it names.
+  int _fetchesInFlight = 0;
+
+  /// Runs a page request with [_fetchesInFlight] raised for its duration.
+  Future<T> _guardFetch<T>(Future<T> Function() fetch) async {
+    _fetchesInFlight++;
+    try {
+      return await fetch();
+    } finally {
+      _fetchesInFlight--;
+    }
+  }
+
+  /// Applies a summary held while this page was in flight. It is newer than
+  /// the page's own snapshot of the same message.
+  ChatMessageDTO _withPendingReactions(ChatMessageDTO message) {
+    final pending = _pendingReactions.remove(message.id);
+    if (pending == null) return message;
+    return message.copyWith(reactions: pending);
+  }
+
+  /// Anything still held once no fetch is running names a message no page is
+  /// going to insert, so it is dropped rather than kept for good.
+  void _dropStalePendingReactions() {
+    if (_fetchesInFlight == 0) _pendingReactions.clear();
+  }
+
   void _bumpRevision(String messageId) {
     _reactionRevision[messageId] = (_reactionRevision[messageId] ?? 0) + 1;
   }
@@ -123,9 +161,11 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, clearError: true);
 
-    final result = await ref
-        .read(groupChatRepositoryProvider)
-        .listMessages(roomId, skip: 0, limit: _limit);
+    final result = await _guardFetch(
+      () => ref
+          .read(groupChatRepositoryProvider)
+          .listMessages(roomId, skip: 0, limit: _limit),
+    );
 
     if (!mounted) return;
 
@@ -139,7 +179,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       },
       (page) {
         state = state.copyWith(
-          messages: page.messages,
+          messages: page.messages.map(_withPendingReactions).toList(),
           isLoading: false,
           hasLoaded: true,
           hasMore: page.messages.length < page.total,
@@ -149,15 +189,18 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         );
       },
     );
+    _dropStalePendingReactions();
   }
 
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
     state = state.copyWith(isLoadingMore: true, clearError: true);
 
-    final result = await ref
-        .read(groupChatRepositoryProvider)
-        .listMessages(roomId, skip: state.skip, limit: _limit);
+    final result = await _guardFetch(
+      () => ref
+          .read(groupChatRepositoryProvider)
+          .listMessages(roomId, skip: state.skip, limit: _limit),
+    );
 
     if (!mounted) return;
 
@@ -173,6 +216,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         final fresh =
             page.messages
                 .where((message) => !known.contains(message.id))
+                .map(_withPendingReactions)
                 .toList();
         final messages = [...state.messages, ...fresh];
         state = state.copyWith(
@@ -185,6 +229,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         );
       },
     );
+    _dropStalePendingReactions();
   }
 
   /// Inserts a message that arrived over the socket or came back from a REST
@@ -213,19 +258,28 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       for (final message in state.messages)
         message.id: _reactionRevision[message.id] ?? 0,
     };
+    // Identity is snapshot for the same reason. Only the history held when the
+    // request went out can say whether the page that comes back is contiguous
+    // with it; a message appended over the socket meanwhile has no standing in
+    // that question, and reading it back out of post-await state would let one
+    // such insert suppress a restart the gap actually needs.
+    final knownBefore = state.messages.map((message) => message.id).toSet();
 
-    final result = await ref
-        .read(groupChatRepositoryProvider)
-        .listMessages(roomId, skip: 0, limit: _limit);
+    final result = await _guardFetch(
+      () => ref
+          .read(groupChatRepositoryProvider)
+          .listMessages(roomId, skip: 0, limit: _limit),
+    );
 
     if (!mounted) return;
 
     result.fold((_) {}, (page) {
       ChatMessageDTO forViewer(ChatMessageDTO message) {
-        if (message.reactions.isEmpty) return message;
-        return message.copyWith(
+        final fresh = _withPendingReactions(message);
+        if (fresh.reactions.isEmpty) return fresh;
+        return fresh.copyWith(
           reactions: chatReactionsForViewer(
-            message.reactions,
+            fresh.reactions,
             currentUserId: currentUserId,
             currentUserEmail: currentUserEmail,
           ),
@@ -252,15 +306,32 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // both would leave `skip` pointing past the gap and those messages
       // would never load. Start again from the newest page and let `loadMore`
       // walk back through the gap.
-      final known = state.messages.map((message) => message.id).toSet();
-      final overlaps = fetched.any((message) => known.contains(message.id));
+      final overlaps = fetched.any(
+        (message) => knownBefore.contains(message.id),
+      );
       if (!overlaps && fetched.length >= _limit) {
+        // Restarting must not throw away what the restored socket delivered
+        // while this page was in flight. Those messages are newer than the
+        // page, so they sit above it — and being newer, they are not in the
+        // count the server sent with it either.
+        final fetchedIds = fetched.map((message) => message.id).toSet();
+        final arrivedDuring =
+            state.messages
+                .where(
+                  (message) =>
+                      !knownBefore.contains(message.id) &&
+                      !fetchedIds.contains(message.id),
+                )
+                .toList();
+
+        final messages = [...arrivedDuring, ...fetched];
+        final total = page.total + arrivedDuring.length;
         state = state.copyWith(
-          messages: fetched,
+          messages: messages,
           hasLoaded: true,
-          hasMore: fetched.length < page.total,
-          skip: fetched.length,
-          total: page.total,
+          hasMore: messages.length < total,
+          skip: messages.length,
+          total: total,
           clearError: true,
         );
         return;
@@ -302,6 +373,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         hasMore: state.messages.length < page.total,
       );
     });
+    _dropStalePendingReactions();
   }
 
   /// Rewrites one message's reactions from an authoritative summary — the
@@ -332,7 +404,17 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     String? currentUserEmail,
   }) {
     if (messageId.isEmpty) return;
-    if (!state.messages.any((message) => message.id == messageId)) return;
+    if (!state.messages.any((message) => message.id == messageId)) {
+      // Not in the loaded window. While a page is in flight that page may be
+      // carrying this very message, with a snapshot taken before this update —
+      // so the summary is held for the row it inserts. The revision moves with
+      // it, so an even older page still in flight cannot overwrite the result.
+      if (_fetchesInFlight > 0) {
+        _pendingReactions[messageId] = reactions;
+        _bumpRevision(messageId);
+      }
+      return;
+    }
 
     _bumpRevision(messageId);
 

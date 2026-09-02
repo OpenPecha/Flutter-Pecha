@@ -879,6 +879,86 @@ void main() {
 
       expect(notifier.state.messages.map((m) => m.id), ['m3', 'm2', 'm1']);
     });
+
+    test(
+      'one live insert during the flight cannot suppress the restart',
+      () async {
+        repository = _FakeGroupChatRepository(
+          history: List.generate(40, (i) => _message('old$i')),
+        );
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        // More than a page arrived while the socket was down.
+        repository.history = List.generate(40, (i) => _message('new$i'));
+
+        // The socket comes back and delivers one of those messages while the
+        // refresh is still in flight, so it is held by the time the page
+        // lands — and it is in that page.
+        final refresh = notifier.refreshLatest();
+        notifier.appendLive(_message('new0'));
+        await refresh;
+
+        // That single shared id must not stitch the page onto history it is
+        // not contiguous with.
+        final ids = notifier.state.messages.map((m) => m.id).toList();
+        expect(ids.any((id) => id.startsWith('old')), isFalse);
+        expect(ids, hasLength(30));
+        expect(notifier.state.skip, 30);
+      },
+    );
+
+    test('the restart keeps messages that arrived during the flight', () async {
+      repository = _FakeGroupChatRepository(
+        history: List.generate(40, (i) => _message('old$i')),
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      repository.history = List.generate(40, (i) => _message('new$i'));
+
+      // Sent after the server built the page, so it is in neither the page
+      // nor the history the request was made against.
+      final refresh = notifier.refreshLatest();
+      notifier.appendLive(_message('live1'));
+      await refresh;
+
+      final ids = notifier.state.messages.map((m) => m.id).toList();
+      // Newer than the page, so it stays at the head rather than vanishing.
+      expect(ids.first, 'live1');
+      expect(ids, hasLength(31));
+      expect(notifier.state.skip, 31);
+      // The server counted 40 before it existed.
+      expect(notifier.state.total, 41);
+    });
+
+    test('a reaction that arrives before its message is not lost', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m0')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // m1 is new: it is in the page being fetched, but not yet held.
+      repository.history = [
+        _message('m1').copyWith(
+          reactions: const [ChatMessageReactionDTO(emoji: heart, count: 1)],
+        ),
+        _message('m0'),
+      ];
+
+      final refresh = notifier.refreshLatest();
+      // Two more react while the page is in flight, so the page's own count
+      // is already stale by the time it arrives.
+      notifier.replaceReactions('m1', const [
+        ChatMessageReactionDTO(emoji: heart, count: 3),
+      ]);
+      await refresh;
+
+      final inserted = notifier.state.messages.firstWhere((m) => m.id == 'm1');
+      expect(inserted.reactions.single.count, 3);
+    });
   });
 
   group('ChatLinkPreviewCache', () {
