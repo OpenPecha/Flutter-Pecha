@@ -1,3 +1,4 @@
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,6 +96,65 @@ void main() {
 
     test('returns null when there is nothing to show', () {
       expect(chatSenderDisplayName(senderEmail: ''), isNull);
+    });
+  });
+
+  group('chatSenderSeed', () {
+    test('prefers the id, then the email, then the name', () {
+      expect(
+        chatSenderSeed(senderId: 'U1', senderEmail: 'a@b.com', name: 'A'),
+        'u1',
+      );
+      expect(chatSenderSeed(senderEmail: 'A@B.com', name: 'A'), 'a@b.com');
+      expect(chatSenderSeed(name: 'Rena'), 'rena');
+      expect(chatSenderSeed(), '');
+    });
+  });
+
+  group('chatSenderColor', () {
+    test('gives one person the same colour every time', () {
+      final first = chatSenderColor(seed: 'u1', onDark: false);
+      final again = chatSenderColor(seed: 'u1', onDark: false);
+      expect(first, again);
+    });
+
+    test('casing cannot split a person across two colours', () {
+      expect(
+        chatSenderColor(
+          seed: chatSenderSeed(senderEmail: 'Rena@X.com'),
+          onDark: false,
+        ),
+        chatSenderColor(
+          seed: chatSenderSeed(senderEmail: 'rena@x.com'),
+          onDark: false,
+        ),
+      );
+    });
+
+    test('the light and dark variants line up on the same index', () {
+      final light = chatSenderColor(seed: 'u1', onDark: false);
+      final dark = chatSenderColor(seed: 'u1', onDark: true);
+      expect(
+        AppColors.chatSenderColors.indexOf(light),
+        AppColors.chatSenderColorsDark.indexOf(dark),
+      );
+    });
+
+    test('spreads a handful of people across the palette', () {
+      final seeds = List.generate(10, (i) => 'user-$i');
+      final used =
+          seeds
+              .map((seed) => chatSenderColor(seed: seed, onDark: false))
+              .toSet();
+      // Collisions are expected in a fixed palette; a single bucket is not.
+      expect(used.length, greaterThan(3));
+    });
+
+    test('an empty seed still yields a colour', () {
+      expect(
+        chatSenderColor(seed: '', onDark: false),
+        AppColors.chatSenderColors.first,
+      );
     });
   });
 

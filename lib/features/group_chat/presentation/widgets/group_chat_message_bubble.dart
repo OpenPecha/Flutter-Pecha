@@ -202,8 +202,14 @@ class GroupChatMessageBubble extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color:
-                      isDark ? AppColors.accentGold : AppColors.accentGoldDark,
+                  color: chatSenderColor(
+                    seed: chatSenderSeed(
+                      senderId: message.senderId,
+                      senderEmail: message.senderEmail,
+                      name: message.senderName,
+                    ),
+                    onDark: isDark,
+                  ),
                 ),
               ),
               const SizedBox(height: 2),

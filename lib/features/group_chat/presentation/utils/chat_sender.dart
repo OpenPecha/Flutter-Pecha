@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 /// Whether [senderId] / [senderEmail] identify the signed-in user.
 ///
@@ -44,6 +45,37 @@ String? chatSenderDisplayName({String? messageName, String? senderEmail}) {
   if (email.isEmpty) return null;
   final local = email.split('@').first.trim();
   return local.isEmpty ? null : local;
+}
+
+/// The value a sender's colour is derived from.
+///
+/// The backend id is preferred because it never changes; email is the fallback
+/// for rows that predate it, and the name only as a last resort. Lower-cased so
+/// the same person cannot land on two colours through casing alone.
+String chatSenderSeed({String? senderId, String? senderEmail, String? name}) {
+  for (final candidate in [senderId, senderEmail, name]) {
+    final value = candidate?.trim().toLowerCase() ?? '';
+    if (value.isNotEmpty) return value;
+  }
+  return '';
+}
+
+/// A participant's colour, stable for the life of that seed.
+///
+/// FNV-1a rather than [String.hashCode]: the hash has to give the same person
+/// the same colour on every device and every launch, and `hashCode` carries no
+/// such guarantee across platforms or SDK versions.
+Color chatSenderColor({required String seed, required bool onDark}) {
+  final palette =
+      onDark ? AppColors.chatSenderColorsDark : AppColors.chatSenderColors;
+  if (seed.isEmpty) return palette.first;
+
+  var hash = 0x811c9dc5;
+  for (final unit in seed.codeUnits) {
+    hash ^= unit;
+    hash = (hash * 0x01000193) & 0xFFFFFFFF;
+  }
+  return palette[hash % palette.length];
 }
 
 /// Up to two initials for the avatar fallback.

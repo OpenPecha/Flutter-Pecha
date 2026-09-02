@@ -38,10 +38,18 @@ class GroupChatQuotedMessage extends StatelessWidget {
         context.l10n.group_chat_unknown_sender;
 
     final onDarkFill = isSelf && !isPreview;
-    final accent =
-        onDarkFill
-            ? AppColors.surfaceWhite
-            : (isDark ? AppColors.accentGold : AppColors.accentGoldDark);
+    // The quote carries the original author's colour on both the name and the
+    // rule, so a reply says who it answers at a glance. The dark variant is
+    // used whenever it sits on a dark surface — the outgoing bubble's fill in
+    // either theme, or any bubble in dark mode.
+    final accent = chatSenderColor(
+      seed: chatSenderSeed(
+        senderId: parent.senderId,
+        senderEmail: parent.senderEmail,
+        name: parent.senderName,
+      ),
+      onDark: onDarkFill || isDark,
+    );
     final bodyColor =
         onDarkFill
             ? AppColors.grey300
