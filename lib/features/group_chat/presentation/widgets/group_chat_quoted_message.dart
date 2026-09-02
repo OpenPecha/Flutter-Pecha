@@ -48,11 +48,14 @@ class GroupChatQuotedMessage extends StatelessWidget {
       ),
       onDark: isDark,
     );
+    // Dark needs both a stronger fill and a brighter body: 6% white over a
+    // dark bubble is barely a panel at all, and the tertiary grey on top of it
+    // left the quote looking switched off.
     final bodyColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final fill =
         isDark
-            ? AppColors.surfaceWhite.withValues(alpha: 0.06)
+            ? AppColors.surfaceWhite.withValues(alpha: 0.14)
             : AppColors.textPrimary.withValues(alpha: 0.04);
 
     return Padding(
