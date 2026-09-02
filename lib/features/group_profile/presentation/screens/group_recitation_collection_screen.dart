@@ -45,8 +45,6 @@ class _GroupRecitationCollectionScreenState
   /// unrelated state change).
   bool _hasShownCompletionSheetThisVisit = false;
 
-  bool? _wasCompleteAtBaseline;
-
   GroupRecitationCollectionKey get _key => GroupRecitationCollectionKey(
     groupId: widget.groupId,
     collectionId: widget.collectionId,
@@ -122,20 +120,14 @@ class _GroupRecitationCollectionScreenState
   ) {
     if (_hasShownCompletionSheetThisVisit) return;
     if (collection == null || collection.items.isEmpty) return;
-    // Today's completions load asynchronously; judging before they settle
-    // would record an empty baseline and make the load itself look like a
-    // fresh completion.
-    if (completionState.isLoading) return;
+    // Only celebrate a completion the user performed during this visit —
+    // the completion notifier is autoDispose, so this flag is false when
+    // the screen opens onto a collection that was already finished today.
+    if (!completionState.hasCompletedChantThisSession) return;
 
     final isFullyCompleted = collection.items.every(
       (item) => completionState.isCompleted(item.id),
     );
-
-    if (_wasCompleteAtBaseline == null) {
-      _wasCompleteAtBaseline = isFullyCompleted;
-      return;
-    }
-    if (_wasCompleteAtBaseline == true) return;
     if (!isFullyCompleted) return;
 
     // Claim it now so a rebuild before the post-frame callback runs can't

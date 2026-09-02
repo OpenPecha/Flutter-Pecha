@@ -251,12 +251,19 @@ enum GroupChantCompletionResult {
 class GroupRecitationCollectionCompletionState {
   final Set<String> completedChantIds;
   final Set<String> submittingChantIds;
+
+  /// True once the user has completed at least one chant through this
+  /// notifier instance (as opposed to completions loaded from the server).
+  /// Distinguishes "the user just finished the collection" from "it was
+  /// already finished before they arrived".
+  final bool hasCompletedChantThisSession;
   final bool isLoading;
   final String? error;
 
   const GroupRecitationCollectionCompletionState({
     this.completedChantIds = const {},
     this.submittingChantIds = const {},
+    this.hasCompletedChantThisSession = false,
     this.isLoading = false,
     this.error,
   });
@@ -270,6 +277,7 @@ class GroupRecitationCollectionCompletionState {
   GroupRecitationCollectionCompletionState copyWith({
     Set<String>? completedChantIds,
     Set<String>? submittingChantIds,
+    bool? hasCompletedChantThisSession,
     bool? isLoading,
     String? error,
     bool clearError = false,
@@ -277,6 +285,8 @@ class GroupRecitationCollectionCompletionState {
     return GroupRecitationCollectionCompletionState(
       completedChantIds: completedChantIds ?? this.completedChantIds,
       submittingChantIds: submittingChantIds ?? this.submittingChantIds,
+      hasCompletedChantThisSession:
+          hasCompletedChantThisSession ?? this.hasCompletedChantThisSession,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : error ?? this.error,
     );
@@ -316,8 +326,13 @@ class GroupRecitationCollectionCompletionNotifier
         state = state.copyWith(isLoading: false, error: failure.message);
       },
       (completedChantIds) {
+        // Merge rather than replace: a chant completed locally while this
+        // fetch was in flight may not be in the server snapshot yet.
         state = state.copyWith(
-          completedChantIds: completedChantIds,
+          completedChantIds: {
+            ...state.completedChantIds,
+            ...completedChantIds,
+          },
           isLoading: false,
           clearError: true,
         );
@@ -366,6 +381,7 @@ class GroupRecitationCollectionCompletionNotifier
         state = state.copyWith(
           completedChantIds: {...state.completedChantIds, trimmedChantId},
           submittingChantIds: submitting,
+          hasCompletedChantThisSession: true,
           clearError: true,
         );
         return GroupChantCompletionResult.completed;
