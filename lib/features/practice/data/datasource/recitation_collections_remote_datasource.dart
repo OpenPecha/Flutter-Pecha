@@ -1,0 +1,138 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/practice/data/models/recitation_collection_models.dart';
+
+/// Remote datasource for `/users/me/recitation-collections`.
+///
+/// Error handling is centralised in ErrorInterceptor, which converts
+/// DioExceptions to typed AppExceptions that propagate to the repository.
+class RecitationCollectionsRemoteDatasource {
+  RecitationCollectionsRemoteDatasource({required this.dio});
+
+  final Dio dio;
+  final _logger = AppLogger('RecitationCollectionsRemoteDatasource');
+
+  /// POST /users/me/recitation-collections/upload-image
+  ///
+  /// Uploads a cover image and returns its storage [RecitationCollectionImageUploadResponse.key].
+  Future<RecitationCollectionImageUploadResponse> uploadImage(File file) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        file.path,
+        filename: file.path.split(Platform.pathSeparator).last,
+      ),
+    });
+
+    final response = await dio.post(
+      '/users/me/recitation-collections/upload-image',
+      data: formData,
+    );
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Unexpected /users/me/recitation-collections/upload-image payload type',
+      );
+    }
+    return RecitationCollectionImageUploadResponse.fromJson(data);
+  }
+
+  /// POST /users/me/recitation-collections
+  ///
+  /// Creates a new collection for the authenticated user.
+  /// Pass [CreateRecitationCollectionRequest.imgUrl] from a prior upload `key`.
+  Future<RecitationCollectionModel> createCollection(
+    CreateRecitationCollectionRequest request,
+  ) async {
+    final response = await dio.post(
+      '/users/me/recitation-collections',
+      data: request.toJson(),
+    );
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Unexpected /users/me/recitation-collections create payload type',
+      );
+    }
+    return RecitationCollectionModel.fromJson(data);
+  }
+
+  /// POST /users/me/recitation-collections/{collectionId}/items
+  ///
+  /// Adds chants to an existing collection. Items are posted one at a time so
+  /// display order matches the UI and a single bad row does not fail the batch.
+  Future<AddRecitationCollectionItemsResponse> addItemsToCollection({
+    required String collectionId,
+    required List<String> textIds,
+  }) async {
+    final uniqueIds = _uniqueNonEmptyTextIds(textIds);
+    if (uniqueIds.isEmpty) {
+      return AddRecitationCollectionItemsResponse(
+        collectionId: collectionId,
+        addedCount: 0,
+      );
+    }
+
+    _logger.debug(
+      'Adding ${uniqueIds.length} chant(s) to collection $collectionId',
+    );
+
+    final allItems = <RecitationCollectionItemModel>[];
+    var addedCount = 0;
+
+    for (final textId in uniqueIds) {
+      try {
+        final response = await _postItems(
+          collectionId: collectionId,
+          textIds: [textId],
+        );
+        addedCount += response.addedCount;
+        allItems.addAll(response.items);
+      } on DioException catch (e) {
+        _logger.error(
+          'Failed to add chant $textId to collection $collectionId',
+          e.error ?? e,
+        );
+        rethrow;
+      }
+    }
+
+    return AddRecitationCollectionItemsResponse(
+      collectionId: collectionId,
+      addedCount: addedCount,
+      items: allItems,
+    );
+  }
+
+  Future<AddRecitationCollectionItemsResponse> _postItems({
+    required String collectionId,
+    required List<String> textIds,
+  }) async {
+    final payload = AddRecitationCollectionItemsRequest(textIds: textIds).toJson();
+    _logger.debug('POST .../items payload: $payload');
+
+    final response = await dio.post(
+      '/users/me/recitation-collections/$collectionId/items',
+      data: payload,
+    );
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Unexpected /users/me/recitation-collections/items payload type',
+      );
+    }
+    return AddRecitationCollectionItemsResponse.fromJson(data);
+  }
+
+  static List<String> _uniqueNonEmptyTextIds(List<String> textIds) {
+    final seen = <String>{};
+    final unique = <String>[];
+    for (final raw in textIds) {
+      final id = raw.trim();
+      if (id.isEmpty || !seen.add(id)) continue;
+      unique.add(id);
+    }
+    return unique;
+  }
+}

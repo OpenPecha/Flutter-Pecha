@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 
@@ -13,6 +14,10 @@ class ExceptionMapper {
   /// [exception] - The exception to map
   /// [context] - Optional context prefix for failure messages
   static Failure map(Object exception, {String? context}) {
+    if (exception is DioException && exception.error != null) {
+      return map(exception.error!, context: context);
+    }
+
     final prefix = context != null ? '$context: ' : '';
 
     return switch (exception) {

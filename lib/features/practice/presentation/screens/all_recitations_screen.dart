@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/localization/content_language_picker_sheet.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/recitations_search_screen.dart';
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
+import 'package:flutter_pecha/features/practice/presentation/widgets/new_collection_dialog.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/practice_chant_list_tile.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_list_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,6 +103,9 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
         ],
       ),
       body: _buildBody(context, recitationsState, languageCode),
+      floatingActionButton: _CreateCollectionButton(
+        onPressed: () => showNewCollectionDialog(context),
+      ),
     );
   }
 
@@ -136,7 +141,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      padding: const EdgeInsets.only(top: 8, bottom: 88),
       itemCount: state.recitations.length + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.recitations.length) {
@@ -161,6 +166,50 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class _CreateCollectionButton extends StatelessWidget {
+  const _CreateCollectionButton({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor =
+        isDark ? AppColors.surfaceWhite : AppColors.textPrimary;
+    final foregroundColor =
+        isDark ? AppColors.textPrimary : AppColors.onPrimary;
+
+    return Material(
+      color: backgroundColor,
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
+      shape: const StadiumBorder(),
+      child: InkWell(
+        onTap: onPressed,
+        customBorder: const StadiumBorder(),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 12, 14, 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Create collection',
+                style: TextStyle(
+                  color: foregroundColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(AppAssets.plus, size: 20, color: foregroundColor),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

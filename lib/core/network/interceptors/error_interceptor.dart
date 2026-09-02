@@ -92,9 +92,25 @@ class ErrorInterceptor extends Interceptor {
       case 502:
       case 503:
       case 504:
-        return ServerException('Server error ($statusCode)');
+        return ServerException(_serverErrorMessage(body, statusCode));
       default:
         return ServerException('HTTP $statusCode: $message');
     }
+  }
+
+  String _serverErrorMessage(Map<String, dynamic>? body, int? statusCode) {
+    final message = body?['message'];
+    if (message is String && message.isNotEmpty) return message;
+
+    final detail = body?['detail'];
+    if (detail is String && detail.isNotEmpty) return detail;
+    if (detail is List && detail.isNotEmpty) {
+      final first = detail.first;
+      if (first is Map && first['msg'] is String) {
+        return first['msg'] as String;
+      }
+    }
+
+    return 'Server error ($statusCode)';
   }
 }
