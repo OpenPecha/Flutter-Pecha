@@ -40,13 +40,9 @@ class GroupChatReactionBadges extends StatelessWidget {
     if (badge.emoji.isEmpty) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // The badge overlaps the bubble, so the count has to read against that
-    // fill: light over the dark outgoing bubble, dark over the light incoming
-    // one.
+    // Both bubbles share a fill now, so the count reads the same on either.
     final countColor =
-        isSelf
-            ? AppColors.grey300
-            : (isDark ? AppColors.textTertiaryDark : AppColors.textSecondary);
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
 
     return GestureDetector(
       onTap: onShowAll,

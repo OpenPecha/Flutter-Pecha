@@ -160,14 +160,16 @@ class GroupChatMessageBubble extends StatelessWidget {
   }
 
   Widget _bubble(BuildContext context, bool isDark, String? displayName) {
+    // One step apart rather than a hard contrast: the old charcoal outgoing
+    // bubble was too heavy, and an identical fill left only the alignment to
+    // tell the two apart. Outgoing is a warm tint of the incoming fill in
+    // light, and one step lighter than it in dark.
     final background =
         isSelf
-            ? AppColors.grey900
+            ? (isDark ? AppColors.chipBackgroundDark : AppColors.goldAccent)
             : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceWhite);
     final textColor =
-        isSelf
-            ? AppColors.surfaceWhite
-            : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary);
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final previewUrl = firstChatLinkUrl(message.body);
     // The tail corner is the one nearest the avatar, which sits at the top of
     // the run.
@@ -239,11 +241,9 @@ class GroupChatMessageBubble extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 color:
-                    isSelf
-                        ? AppColors.grey500
-                        : (isDark
-                            ? AppColors.textTertiaryDark
-                            : AppColors.textSecondary),
+                    isDark
+                        ? AppColors.textTertiaryDark
+                        : AppColors.textSecondary,
               ),
             ),
           ],
@@ -321,10 +321,7 @@ class _ChatLinkTextState extends State<ChatLinkText> {
     }
     _recognizers.clear();
 
-    final linkColor =
-        widget.isSelf
-            ? AppColors.surfaceWhite
-            : (widget.isDark ? AppColors.brandblue : AppColors.blue);
+    final linkColor = widget.isDark ? AppColors.brandblue : AppColors.blue;
     final spans = <InlineSpan>[];
     var cursor = 0;
 
