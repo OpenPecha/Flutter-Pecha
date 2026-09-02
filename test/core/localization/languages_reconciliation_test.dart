@@ -183,4 +183,32 @@ void main() {
     expect(container.read(contentLanguageProvider), 'bo');
     expect(container.read(localeProvider).languageCode, 'bo');
   });
+
+  test('recitation languages pass an authoritative empty list through',
+      () async {
+    // No language has recitations. Substituting the bundled list here would
+    // offer choices that all dead-end on "no recitations available".
+    final container = _container(_FakeStorage(), () async => <AppLanguage>[]);
+    addTearDown(container.dispose);
+
+    final shown =
+        await container.read(recitationContentLanguagesProvider.future);
+
+    expect(shown, isEmpty);
+  });
+
+  test('recitation languages fall back to bundled when the fetch fails',
+      () async {
+    final container = _container(
+      _FakeStorage(),
+      () async => throw DioException(requestOptions: RequestOptions()),
+    );
+    addTearDown(container.dispose);
+
+    final shown =
+        await container.read(recitationContentLanguagesProvider.future);
+
+    // Nothing authoritative is known offline, so keep the picker usable.
+    expect(shown, AppLanguage.bundledFallback);
+  });
 }

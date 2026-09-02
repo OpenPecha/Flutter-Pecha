@@ -57,11 +57,9 @@ final recitationContentLanguagesProvider = FutureProvider<List<AppLanguage>>((
   ref,
 ) async {
   try {
-    final languages = await ref
+    return await ref
         .watch(languagesRemoteDatasourceProvider)
         .fetchLanguages(recitationOnly: true);
-
-    return languages.isNotEmpty ? languages : AppLanguage.bundledFallback;
   } catch (_) {
     return AppLanguage.bundledFallback;
   }
