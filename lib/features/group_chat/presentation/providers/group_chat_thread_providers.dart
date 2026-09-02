@@ -88,14 +88,17 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
 
   /// Per message, the emoji this member holds **on the server**.
   ///
-  /// Seeded from displayed state when a burst of taps begins — at that point
-  /// nothing optimistic has been layered on yet — and then advanced only by
-  /// confirmed calls: a successful POST adds, a successful DELETE removes, a
-  /// failure changes nothing. A summary that can identify the viewer replaces
-  /// it outright. Later taps in a burst must never read their cleanup target
-  /// from optimistic state: if an earlier queued POST failed, that state names
-  /// an emoji the server never received, and deleting it would leave the real
-  /// one in place.
+  /// Advanced only by confirmed calls: a successful POST adds, a successful
+  /// DELETE removes, a failure changes nothing. Any summary that can identify
+  /// the viewer replaces it outright, which is what prunes it.
+  ///
+  /// It deliberately **outlives the burst**. Rebuilding it from displayed state
+  /// each time only works while the display knows which reactions are the
+  /// viewer's, and a summary carrying no `users` or `user_ids` cannot say —
+  /// so a duplicate left by a failed cleanup would stop being recognised as
+  /// owned and could never be retried. Later taps must also never read their
+  /// cleanup target from optimistic state: if an earlier queued POST failed,
+  /// that state names an emoji the server never received.
   final Map<String, Set<String>> _serverOwn = {};
 
   /// Messages mid-swap. Between the POST of the new emoji and the DELETE of
@@ -333,6 +336,15 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
 
     _bumpRevision(messageId);
 
+    // Whenever a summary can say who holds what, it is more authoritative than
+    // anything tracked — this is what keeps `_serverOwn` from going stale.
+    final own = _ownFromSummary(
+      reactions,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
+    if (own != null) _serverOwn[messageId] = own;
+
     final resolved = chatReactionsForViewer(
       reactions,
       currentUserId: currentUserId,
@@ -385,10 +397,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     // the only trustworthy seed. Later taps inherit it rather than reseeding
     // from their own optimistic baseline.
     if (!_toggleChain.containsKey(messageId)) {
-      // Every reaction the viewer holds, not just the first: a cleanup that
-      // failed earlier leaves a second one on the server, and seeding one
-      // would leave the extra unreachable for good.
-      _serverOwn[messageId] = ownChatReactionEmoji(baseline);
+      // Union, not replacement: what the display knows the viewer holds, plus
+      // anything still recorded from an earlier burst whose cleanup failed.
+      // Every reaction, not just the first — one failed cleanup leaves two.
+      _serverOwn[messageId] = {
+        ...?_serverOwn[messageId],
+        ...ownChatReactionEmoji(baseline),
+      };
     }
 
     // Optimistic, and synchronously so: the tap has to read as instant, and a
@@ -423,7 +438,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     if (_toggleSeq[messageId] == seq) {
       _toggleSeq.remove(messageId);
       _toggleChain.remove(messageId);
-      _serverOwn.remove(messageId);
+      // `_serverOwn` is not cleared here: an unresolved duplicate has to
+      // survive into the next burst to be retried. An identifying summary
+      // prunes it instead.
       // The last operation for this message owns the cleanup, whichever one
       // opened the swap guard.
       _swapping.remove(messageId);

@@ -14,6 +14,7 @@ import 'package:fpdart/fpdart.dart';
 
 const thumbsUp = '\u{1F44D}';
 const heart = '\u{2764}\u{FE0F}';
+const joy = '\u{1F602}';
 
 ChatMessageDTO _message(String id, {String senderId = 'a'}) {
   return ChatMessageDTO(
@@ -648,6 +649,59 @@ void main() {
         heart,
       ]);
     });
+
+    test(
+      'a duplicate survives a summary that cannot identify the viewer',
+      () async {
+        const prayer = '🙏';
+        repository = _FakeGroupChatRepository(
+          history: [
+            reacted('m1', const [
+              ChatMessageReactionDTO(
+                emoji: prayer,
+                count: 1,
+                reactedByMe: true,
+              ),
+            ]),
+          ],
+        );
+        // No users and no user_ids anywhere, so nothing in these payloads can
+        // say which reactions are the viewer's.
+        repository.reactionResponses = const [
+          // POST heart succeeds; the prayer is still there.
+          [
+            ChatMessageReactionDTO(emoji: prayer, count: 1),
+            ChatMessageReactionDTO(emoji: heart, count: 1),
+          ],
+          [],
+          // Second burst.
+          [
+            ChatMessageReactionDTO(emoji: prayer, count: 1),
+            ChatMessageReactionDTO(emoji: joy, count: 1),
+          ],
+          [],
+          [],
+        ];
+        // The cleanup DELETE of the first burst fails.
+        repository.failReactionCalls = const {2};
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        await notifier.toggleReaction('m1', heart, roomIdForCall: 'room-1');
+        expect(repository.reactionCalls, ['POST $heart', 'DELETE $prayer']);
+
+        // The display cannot tell these are the viewer's, so only the retained
+        // record can drive the retry.
+        await notifier.toggleReaction('m1', joy, roomIdForCall: 'room-1');
+
+        expect(repository.reactionCalls.sublist(2), [
+          'POST $joy',
+          'DELETE $prayer',
+          'DELETE $heart',
+        ]);
+      },
+    );
 
     test('refreshLatest updates reactions on messages already held', () async {
       repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
