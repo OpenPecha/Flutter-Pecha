@@ -64,8 +64,3 @@ final recitationContentLanguagesProvider = FutureProvider<List<AppLanguage>>((
     return AppLanguage.bundledFallback;
   }
 });
-
-final resolvedRecitationLanguagesProvider = Provider<List<AppLanguage>>((ref) {
-  return ref.watch(recitationContentLanguagesProvider).valueOrNull ??
-      AppLanguage.bundledFallback;
-});
