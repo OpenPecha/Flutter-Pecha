@@ -168,7 +168,9 @@ class GroupChatMessageBubble extends StatelessWidget {
     // light, and one step lighter than it in dark.
     final background =
         isSelf
-            ? (isDark ? AppColors.chipBackgroundDark : AppColors.goldAccent)
+            ? (isDark
+                ? AppColors.chatOutgoingBubbleDark
+                : AppColors.chatOutgoingBubble)
             : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceWhite);
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;

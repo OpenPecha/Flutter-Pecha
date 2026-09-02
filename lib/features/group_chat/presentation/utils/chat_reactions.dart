@@ -74,6 +74,17 @@ String? currentChatReactionEmoji(List<ChatMessageReactionDTO> reactions) {
   return null;
 }
 
+/// Every emoji this viewer holds, not just the first.
+///
+/// One is the norm, but a cleanup that failed leaves two on the server, and
+/// the next burst has to know about both or the extra is never retried.
+Set<String> ownChatReactionEmoji(List<ChatMessageReactionDTO> reactions) {
+  return {
+    for (final reaction in reactions)
+      if (reaction.reactedByMe && reaction.count > 0) reaction.emoji,
+  };
+}
+
 /// The optimistic local result of reacting with [emoji] while holding
 /// [previousEmoji].
 ///

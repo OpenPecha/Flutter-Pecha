@@ -607,6 +607,48 @@ void main() {
       ]);
     });
 
+    test('a later burst clears a duplicate left by a failed cleanup', () async {
+      const prayer = '🙏';
+      // The state a failed cleanup leaves behind: two reactions, both mine.
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(emoji: prayer, count: 1, reactedByMe: true),
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+            ),
+          ]),
+        ],
+      );
+      repository.reactionResponses = const [
+        // POST heart: the server still holds both of the earlier ones.
+        [
+          ChatMessageReactionDTO(emoji: prayer, count: 1),
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1),
+          ChatMessageReactionDTO(emoji: heart, count: 1),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+        [ChatMessageReactionDTO(emoji: heart, count: 1)],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.toggleReaction('m1', heart, roomIdForCall: 'room-1');
+
+      // Both leftovers are dropped, not just whichever came first.
+      expect(repository.reactionCalls, [
+        'POST $heart',
+        'DELETE $prayer',
+        'DELETE $thumbsUp',
+      ]);
+      expect(notifier.state.messages.single.reactions.map((r) => r.emoji), [
+        heart,
+      ]);
+    });
+
     test('refreshLatest updates reactions on messages already held', () async {
       repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
       container = buildContainer();

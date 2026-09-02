@@ -385,7 +385,10 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     // the only trustworthy seed. Later taps inherit it rather than reseeding
     // from their own optimistic baseline.
     if (!_toggleChain.containsKey(messageId)) {
-      _serverOwn[messageId] = {if (previousEmoji != null) previousEmoji};
+      // Every reaction the viewer holds, not just the first: a cleanup that
+      // failed earlier leaves a second one on the server, and seeding one
+      // would leave the extra unreachable for good.
+      _serverOwn[messageId] = ownChatReactionEmoji(baseline);
     }
 
     // Optimistic, and synchronously so: the tap has to read as instant, and a

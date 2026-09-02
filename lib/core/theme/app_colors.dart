@@ -111,6 +111,15 @@ class AppColors {
   static const Color middleCircleColor = Color(0xFF871C1C);
   static const Color innerCircleColor = Color(0xFF611414);
 
+  // ============ Group chat bubbles ============
+  /// Outgoing message fill: #DC8600 at 10% (`#DC86001A`), a warm tint of the
+  /// page rather than a second solid colour.
+  static const Color chatOutgoingBubble = Color(0x1ADC8600);
+
+  /// The same hue carries almost nothing over a black background at 10%, so
+  /// dark mode takes it at 20% to stay visible.
+  static const Color chatOutgoingBubbleDark = Color(0x33DC8600);
+
   // ============ Group chat sender colours ============
   /// One colour per participant in a group thread, picked by a stable hash of
   /// the sender so a person keeps the same colour across every message.
