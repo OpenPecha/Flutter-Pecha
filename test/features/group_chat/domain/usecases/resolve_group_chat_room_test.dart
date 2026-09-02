@@ -92,9 +92,8 @@ class _FakeGroupChatRepository implements GroupChatRepository {
     String roomId, {
     int skip = 0,
     int limit = 20,
-  }) async => const Right(
-    ChatMessagesPage(messages: [], skip: 0, limit: 0, total: 0),
-  );
+  }) async =>
+      const Right(ChatMessagesPage(messages: [], skip: 0, limit: 0, total: 0));
 
   @override
   Future<Either<Failure, ChatMessageDTO>> sendGroupMessage(

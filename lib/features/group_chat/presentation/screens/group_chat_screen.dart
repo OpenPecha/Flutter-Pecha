@@ -14,9 +14,12 @@ import 'package:flutter_pecha/features/group_chat/domain/usecases/resolve_group_
 import 'package:flutter_pecha/features/group_chat/presentation/chat_send_error.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_thread_providers.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_composer_controller.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_spans.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer_link_preview.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_empty_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_error_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_header.dart';
@@ -45,7 +48,8 @@ class GroupChatScreen extends ConsumerStatefulWidget {
 
 class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     with WidgetsBindingObserver {
-  final _bodyController = TextEditingController();
+  // Styles its own markers as they are typed.
+  final _bodyController = ChatComposerController();
   final _bodyFocusNode = FocusNode();
   ChatLiveClient? _live;
   StreamSubscription<ChatLiveEvent>? _liveSub;
@@ -62,6 +66,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
 
   /// The message a reply is being composed for, quoted above the composer.
   ChatMessageDTO? _replyingTo;
+
+  /// Draft link previews the sender closed, so a dismissed card does not come
+  /// straight back on the next keystroke.
+  final _dismissedPreviews = <String>{};
 
   /// True once the group has a room session worth holding a socket open for.
   /// [_RoomState.absent] counts: the socket is group-scoped, so it reports the
@@ -518,6 +526,23 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           children: [
             GroupChatHeader(isDark: isDark, onBack: _goBack, profile: profile),
             Expanded(child: body),
+            if (showComposer)
+              // Watches the draft directly, so the rest of the screen does not
+              // rebuild on every keystroke.
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _bodyController,
+                builder: (context, value, _) {
+                  final url = firstChatLinkUrl(value.text);
+                  if (url == null || _dismissedPreviews.contains(url)) {
+                    return const SizedBox.shrink();
+                  }
+                  return GroupChatComposerLinkPreview(
+                    url: url,
+                    onDismiss:
+                        () => setState(() => _dismissedPreviews.add(url)),
+                  );
+                },
+              ),
             if (showComposer && _replyingTo != null)
               GroupChatReplyPreview(
                 message: _replyingTo!,

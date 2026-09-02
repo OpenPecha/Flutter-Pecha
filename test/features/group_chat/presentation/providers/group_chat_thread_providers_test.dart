@@ -152,22 +152,24 @@ void main() {
   tearDown(() => container.dispose());
 
   group('GroupChatThreadNotifier', () {
-    test('loadInitial fills the newest page and reports more to come',
-        () async {
-      repository = _FakeGroupChatRepository(
-        history: List.generate(50, (i) => _message('m$i')),
-      );
-      container = buildContainer();
+    test(
+      'loadInitial fills the newest page and reports more to come',
+      () async {
+        repository = _FakeGroupChatRepository(
+          history: List.generate(50, (i) => _message('m$i')),
+        );
+        container = buildContainer();
 
-      final notifier = _keepAlive(container);
-      await _settle();
+        final notifier = _keepAlive(container);
+        await _settle();
 
-      expect(notifier.state.messages, hasLength(30));
-      expect(notifier.state.messages.first.id, 'm0');
-      expect(notifier.state.hasLoaded, isTrue);
-      expect(notifier.state.hasMore, isTrue);
-      expect(notifier.state.total, 50);
-    });
+        expect(notifier.state.messages, hasLength(30));
+        expect(notifier.state.messages.first.id, 'm0');
+        expect(notifier.state.hasLoaded, isTrue);
+        expect(notifier.state.hasMore, isTrue);
+        expect(notifier.state.total, 50);
+      },
+    );
 
     test('loadMore appends older messages and stops at total', () async {
       repository = _FakeGroupChatRepository(
@@ -221,19 +223,21 @@ void main() {
       expect(notifier.state.total, 1);
     });
 
-    test('loadInitial surfaces a failure and still marks the fetch settled',
-        () async {
-      repository = _FakeGroupChatRepository(history: []);
-      repository.listFailure = const NetworkFailure('offline');
-      container = buildContainer();
+    test(
+      'loadInitial surfaces a failure and still marks the fetch settled',
+      () async {
+        repository = _FakeGroupChatRepository(history: []);
+        repository.listFailure = const NetworkFailure('offline');
+        container = buildContainer();
 
-      final notifier = _keepAlive(container);
-      await _settle();
+        final notifier = _keepAlive(container);
+        await _settle();
 
-      expect(notifier.state.error, 'offline');
-      expect(notifier.state.hasLoaded, isTrue);
-      expect(notifier.state.messages, isEmpty);
-    });
+        expect(notifier.state.error, 'offline');
+        expect(notifier.state.hasLoaded, isTrue);
+        expect(notifier.state.messages, isEmpty);
+      },
+    );
 
     test('refreshLatest merges what was missed without duplicating', () async {
       repository = _FakeGroupChatRepository(history: [_message('m1')]);
@@ -296,23 +300,21 @@ void main() {
       await _settle();
 
       // A broadcast flag that is about somebody else.
-      notifier.replaceReactions(
-        'm1',
-        const [
-          ChatMessageReactionDTO(
-            emoji: thumbsUp,
-            count: 1,
-            reactedByMe: true,
-            users: [
-              ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
-            ],
-          ),
-        ],
-        currentUserEmail: 'rena@example.com',
-      );
+      notifier.replaceReactions('m1', const [
+        ChatMessageReactionDTO(
+          emoji: thumbsUp,
+          count: 1,
+          reactedByMe: true,
+          users: [
+            ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
+          ],
+        ),
+      ], currentUserEmail: 'rena@example.com');
 
-      expect(notifier.state.messages.single.reactions.single.reactedByMe,
-          isFalse);
+      expect(
+        notifier.state.messages.single.reactions.single.reactedByMe,
+        isFalse,
+      );
     });
 
     test('toggleReaction posts and adopts the returned summary', () async {
@@ -453,9 +455,7 @@ void main() {
     });
 
     test('overlapping toggles do not undo the newer choice', () async {
-      repository = _FakeGroupChatRepository(
-        history: [reacted('m1', const [])],
-      );
+      repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
       // The first call fails; the second succeeds.
       repository.failFirstReaction = true;
       repository.reactionResponses = const [
@@ -485,16 +485,37 @@ void main() {
       expect(reactions.map((r) => r.emoji), [heart]);
     });
 
-    test('a queued swap deletes what the server holds, not the phantom',
-        () async {
-      const prayer = '🙏';
-      repository = _FakeGroupChatRepository(
-        history: [
-          reacted('m1', const [
+    test(
+      'a queued swap deletes what the server holds, not the phantom',
+      () async {
+        const prayer = '🙏';
+        repository = _FakeGroupChatRepository(
+          history: [
+            reacted('m1', const [
+              ChatMessageReactionDTO(
+                emoji: prayer,
+                count: 1,
+                reactedByMe: true,
+                users: [
+                  ChatMessageReactionUserDTO(
+                    userId: 'u1',
+                    email: 'rena@example.com',
+                  ),
+                ],
+              ),
+            ]),
+          ],
+        );
+        // The first POST fails, so the prayer is never dropped and stays on the
+        // server while the local state has already moved on.
+        repository.failFirstReaction = true;
+        repository.reactionResponses = const [
+          [],
+          // POST heart: the server still holds the prayer too.
+          [
             ChatMessageReactionDTO(
               emoji: prayer,
               count: 1,
-              reactedByMe: true,
               users: [
                 ChatMessageReactionUserDTO(
                   userId: 'u1',
@@ -502,56 +523,36 @@ void main() {
                 ),
               ],
             ),
-          ]),
-        ],
-      );
-      // The first POST fails, so the prayer is never dropped and stays on the
-      // server while the local state has already moved on.
-      repository.failFirstReaction = true;
-      repository.reactionResponses = const [
-        [],
-        // POST heart: the server still holds the prayer too.
-        [
-          ChatMessageReactionDTO(
-            emoji: prayer,
-            count: 1,
-            users: [
-              ChatMessageReactionUserDTO(
-                userId: 'u1',
-                email: 'rena@example.com',
-              ),
-            ],
-          ),
-          ChatMessageReactionDTO(emoji: heart, count: 1),
-        ],
-        [ChatMessageReactionDTO(emoji: heart, count: 1)],
-      ];
-      container = buildContainer();
-      final notifier = _keepAlive(container);
-      await _settle();
+            ChatMessageReactionDTO(emoji: heart, count: 1),
+          ],
+          [ChatMessageReactionDTO(emoji: heart, count: 1)],
+        ];
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
 
-      final first = notifier.toggleReaction(
-        'm1',
-        thumbsUp,
-        roomIdForCall: 'room-1',
-        currentUserEmail: 'rena@example.com',
-      );
-      final second = notifier.toggleReaction(
-        'm1',
-        heart,
-        roomIdForCall: 'room-1',
-        currentUserEmail: 'rena@example.com',
-      );
-      await Future.wait([first, second]);
+        final first = notifier.toggleReaction(
+          'm1',
+          thumbsUp,
+          roomIdForCall: 'room-1',
+          currentUserEmail: 'rena@example.com',
+        );
+        final second = notifier.toggleReaction(
+          'm1',
+          heart,
+          roomIdForCall: 'room-1',
+          currentUserEmail: 'rena@example.com',
+        );
+        await Future.wait([first, second]);
 
-      // The prayer is what the server actually had — not the thumbs-up the
-      // optimistic state showed.
-      expect(repository.reactionCalls.last, 'DELETE $prayer');
-      expect(
-        notifier.state.messages.single.reactions.map((r) => r.emoji),
-        [heart],
-      );
-    });
+        // The prayer is what the server actually had — not the thumbs-up the
+        // optimistic state showed.
+        expect(repository.reactionCalls.last, 'DELETE $prayer');
+        expect(notifier.state.messages.single.reactions.map((r) => r.emoji), [
+          heart,
+        ]);
+      },
+    );
 
     test('a failed queued POST still deletes the real reaction when the '
         'summary cannot identify the viewer', () async {
@@ -559,11 +560,7 @@ void main() {
       repository = _FakeGroupChatRepository(
         history: [
           reacted('m1', const [
-            ChatMessageReactionDTO(
-              emoji: prayer,
-              count: 1,
-              reactedByMe: true,
-            ),
+            ChatMessageReactionDTO(emoji: prayer, count: 1, reactedByMe: true),
           ]),
         ],
       );
@@ -605,16 +602,13 @@ void main() {
         'POST $heart',
         'DELETE $prayer',
       ]);
-      expect(
-        notifier.state.messages.single.reactions.map((r) => r.emoji),
-        [heart],
-      );
+      expect(notifier.state.messages.single.reactions.map((r) => r.emoji), [
+        heart,
+      ]);
     });
 
     test('refreshLatest updates reactions on messages already held', () async {
-      repository = _FakeGroupChatRepository(
-        history: [reacted('m1', const [])],
-      );
+      repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
       container = buildContainer();
       final notifier = _keepAlive(container);
       await _settle();
@@ -633,9 +627,7 @@ void main() {
     });
 
     test('refreshLatest derives reactedByMe for this viewer', () async {
-      repository = _FakeGroupChatRepository(
-        history: [reacted('m1', const [])],
-      );
+      repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
       container = buildContainer();
       final notifier = _keepAlive(container);
       await _settle();
@@ -662,50 +654,50 @@ void main() {
       );
     });
 
-    test('a failed cleanup reports the error instead of claiming success',
-        () async {
-      const prayer = '🙏';
-      repository = _FakeGroupChatRepository(
-        history: [
-          reacted('m1', const [
-            ChatMessageReactionDTO(
-              emoji: prayer,
-              count: 1,
-              reactedByMe: true,
-            ),
-          ]),
-        ],
-      );
-      // The POST lands; the cleanup DELETE does not.
-      repository.failReactionCalls = const {2};
-      repository.reactionResponses = const [
-        [
-          ChatMessageReactionDTO(emoji: prayer, count: 1),
-          ChatMessageReactionDTO(emoji: heart, count: 1),
-        ],
-      ];
-      container = buildContainer();
-      final notifier = _keepAlive(container);
-      await _settle();
+    test(
+      'a failed cleanup reports the error instead of claiming success',
+      () async {
+        const prayer = '🙏';
+        repository = _FakeGroupChatRepository(
+          history: [
+            reacted('m1', const [
+              ChatMessageReactionDTO(
+                emoji: prayer,
+                count: 1,
+                reactedByMe: true,
+              ),
+            ]),
+          ],
+        );
+        // The POST lands; the cleanup DELETE does not.
+        repository.failReactionCalls = const {2};
+        repository.reactionResponses = const [
+          [
+            ChatMessageReactionDTO(emoji: prayer, count: 1),
+            ChatMessageReactionDTO(emoji: heart, count: 1),
+          ],
+        ];
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
 
-      final failure = await notifier.toggleReaction(
-        'm1',
-        heart,
-        roomIdForCall: 'room-1',
-      );
+        final failure = await notifier.toggleReaction(
+          'm1',
+          heart,
+          roomIdForCall: 'room-1',
+        );
 
-      expect(failure, isA<NetworkFailure>());
-      // Both are still on the server, so both are shown rather than hidden.
-      expect(
-        notifier.state.messages.single.reactions.map((r) => r.emoji),
-        [prayer, heart],
-      );
-    });
+        expect(failure, isA<NetworkFailure>());
+        // Both are still on the server, so both are shown rather than hidden.
+        expect(notifier.state.messages.single.reactions.map((r) => r.emoji), [
+          prayer,
+          heart,
+        ]);
+      },
+    );
 
     test('a refetch in flight across a swap does not overwrite it', () async {
-      repository = _FakeGroupChatRepository(
-        history: [reacted('m1', const [])],
-      );
+      repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
       container = buildContainer();
       final notifier = _keepAlive(container);
       await _settle();
@@ -719,10 +711,9 @@ void main() {
       await refresh;
 
       // The stale page must not undo it.
-      expect(
-        notifier.state.messages.single.reactions.map((r) => r.emoji),
-        [heart],
-      );
+      expect(notifier.state.messages.single.reactions.map((r) => r.emoji), [
+        heart,
+      ]);
     });
 
     test('a failed call rolls back to the previous reactions', () async {
@@ -752,30 +743,32 @@ void main() {
   });
 
   group('refreshLatest gaps', () {
-    test('restarts from the newest page when the gap cannot be stitched',
-        () async {
-      repository = _FakeGroupChatRepository(
-        history: List.generate(40, (i) => _message('old$i')),
-      );
-      container = buildContainer();
-      final notifier = _keepAlive(container);
-      await _settle();
+    test(
+      'restarts from the newest page when the gap cannot be stitched',
+      () async {
+        repository = _FakeGroupChatRepository(
+          history: List.generate(40, (i) => _message('old$i')),
+        );
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
 
-      expect(notifier.state.messages, hasLength(30));
+        expect(notifier.state.messages, hasLength(30));
 
-      // 40 brand-new messages arrived while the socket was down: a full page
-      // with nothing in common with what is held.
-      repository.history = List.generate(40, (i) => _message('new$i'));
-      await notifier.refreshLatest();
+        // 40 brand-new messages arrived while the socket was down: a full page
+        // with nothing in common with what is held.
+        repository.history = List.generate(40, (i) => _message('new$i'));
+        await notifier.refreshLatest();
 
-      final ids = notifier.state.messages.map((m) => m.id).toList();
-      expect(ids, hasLength(30));
-      // Nothing stale is stitched onto a non-contiguous page.
-      expect(ids.every((id) => id.startsWith('new')), isTrue);
-      // skip matches what is held, so loadMore walks back through the gap.
-      expect(notifier.state.skip, 30);
-      expect(notifier.state.hasMore, isTrue);
-    });
+        final ids = notifier.state.messages.map((m) => m.id).toList();
+        expect(ids, hasLength(30));
+        // Nothing stale is stitched onto a non-contiguous page.
+        expect(ids.every((id) => id.startsWith('new')), isTrue);
+        // skip matches what is held, so loadMore walks back through the gap.
+        expect(notifier.state.skip, 30);
+        expect(notifier.state.hasMore, isTrue);
+      },
+    );
 
     test('stitches normally when the page overlaps what is held', () async {
       repository = _FakeGroupChatRepository(

@@ -35,10 +35,7 @@ void main() {
     });
 
     test('falls back to the epoch on unparseable input', () {
-      expect(
-        parseChatTimestamp('not a date').millisecondsSinceEpoch,
-        0,
-      );
+      expect(parseChatTimestamp('not a date').millisecondsSinceEpoch, 0);
     });
   });
 

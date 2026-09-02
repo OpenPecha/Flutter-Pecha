@@ -13,8 +13,10 @@ void main() {
 
       expect(links, hasLength(1));
       expect(links.single.text, 'https://pecha.org/texts');
-      expect(body.substring(links.single.start, links.single.end),
-          'https://pecha.org/texts');
+      expect(
+        body.substring(links.single.start, links.single.end),
+        'https://pecha.org/texts',
+      );
     });
 
     test('strips trailing sentence punctuation', () {
@@ -30,8 +32,9 @@ void main() {
 
     test('keeps a closing bracket the URL opened itself', () {
       expect(
-        findChatLinks('see https://en.wikipedia.org/wiki/Sutta_(text)').single
-            .text,
+        findChatLinks(
+          'see https://en.wikipedia.org/wiki/Sutta_(text)',
+        ).single.text,
         'https://en.wikipedia.org/wiki/Sutta_(text)',
       );
     });

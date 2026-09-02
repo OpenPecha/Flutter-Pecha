@@ -6,7 +6,9 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/tibetan_numerals.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_inline_format.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_spans.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_message_blocks.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_message_time.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_link_preview_card.dart';
@@ -222,12 +224,7 @@ class GroupChatMessageBubble extends StatelessWidget {
                 isSelf: isSelf,
                 onTap: onTapQuote,
               ),
-            ChatLinkText(
-              body: message.body,
-              textColor: textColor,
-              isDark: isDark,
-              isSelf: isSelf,
-            ),
+            _body(context, textColor, isDark),
             if (previewUrl != null)
               GroupChatLinkPreviewCard(
                 url: previewUrl,
@@ -252,6 +249,113 @@ class GroupChatMessageBubble extends StatelessWidget {
     );
   }
 
+  /// A message with no markers stays a single [Text]; only one that needs
+  /// block layout pays for it.
+  Widget _body(BuildContext context, Color textColor, bool isDark) {
+    if (!chatBodyNeedsBlocks(message.body)) {
+      return ChatFormattedText(
+        body: message.body,
+        textColor: textColor,
+        isDark: isDark,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final block in parseChatMessageBlocks(message.body))
+          _block(block, textColor, isDark),
+      ],
+    );
+  }
+
+  Widget _block(ChatTextBlock block, Color textColor, bool isDark) {
+    final text = ChatFormattedText(
+      body: block.text,
+      textColor: textColor,
+      isDark: isDark,
+    );
+
+    switch (block.kind) {
+      case ChatBlockKind.paragraph:
+        return text;
+
+      case ChatBlockKind.bullet:
+      case ChatBlockKind.numbered:
+        // A fixed gutter, so a marked line that wraps hangs under its own text
+        // rather than under the marker.
+        return Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: block.kind == ChatBlockKind.bullet ? 16 : 22,
+                child: Text(
+                  block.marker ?? '\u2022',
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.35,
+                    color: textColor,
+                  ),
+                ),
+              ),
+              Flexible(child: text),
+            ],
+          ),
+        );
+
+      case ChatBlockKind.quote:
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Container(
+            padding: const EdgeInsets.only(left: 8),
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color:
+                      isDark
+                          ? AppColors.textTertiaryDark
+                          : AppColors.textSecondary,
+                  width: 3,
+                ),
+              ),
+            ),
+            child: text,
+          ),
+        );
+
+      case ChatBlockKind.code:
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color:
+                  isDark
+                      ? AppColors.surfaceWhite.withValues(alpha: 0.06)
+                      : AppColors.textPrimary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            // Literal on purpose: a fenced block is shown exactly as typed.
+            child: Text(
+              block.text,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.35,
+                color: textColor,
+                fontFamily: 'monospace',
+                fontFamilyFallback: const ['Courier New', 'Courier'],
+              ),
+            ),
+          ),
+        );
+    }
+  }
+
   String _timeLabel(BuildContext context) {
     final formatted = DateFormat.jm(
       intlFormatLocaleOf(context),
@@ -266,29 +370,27 @@ class GroupChatMessageBubble extends StatelessWidget {
   }
 }
 
-/// Message body with tappable links.
+/// Message body with tappable links and inline formatting.
 ///
 /// Stateful so the [TapGestureRecognizer]s it creates are disposed with the
 /// row rather than leaking on every rebuild.
-class ChatLinkText extends StatefulWidget {
-  const ChatLinkText({
+class ChatFormattedText extends StatefulWidget {
+  const ChatFormattedText({
     super.key,
     required this.body,
     required this.textColor,
     required this.isDark,
-    required this.isSelf,
   });
 
   final String body;
   final Color textColor;
   final bool isDark;
-  final bool isSelf;
 
   @override
-  State<ChatLinkText> createState() => _ChatLinkTextState();
+  State<ChatFormattedText> createState() => _ChatFormattedTextState();
 }
 
-class _ChatLinkTextState extends State<ChatLinkText> {
+class _ChatFormattedTextState extends State<ChatFormattedText> {
   final List<TapGestureRecognizer> _recognizers = [];
 
   @override
@@ -306,9 +408,9 @@ class _ChatLinkTextState extends State<ChatLinkText> {
       height: 1.35,
       color: widget.textColor,
     );
-    final links = findChatLinks(widget.body);
-
-    if (links.isEmpty) {
+    // Nothing to mark up: the cheapest path stays a plain Text.
+    if (findChatLinks(widget.body).isEmpty &&
+        !chatTextHasInlineMarkers(widget.body)) {
       return Text(
         widget.body,
         strutStyle: context.tibetanStrutStyle(15),
@@ -321,13 +423,50 @@ class _ChatLinkTextState extends State<ChatLinkText> {
     }
     _recognizers.clear();
 
-    final linkColor = widget.isDark ? AppColors.brandblue : AppColors.blue;
     final spans = <InlineSpan>[];
-    var cursor = 0;
+    for (final run in parseChatInlineRuns(widget.body)) {
+      final style = baseStyle.copyWith(
+        fontWeight: run.bold ? FontWeight.w700 : null,
+        fontStyle: run.italic ? FontStyle.italic : null,
+        decoration: run.strike ? TextDecoration.lineThrough : null,
+        fontFamily: run.code ? 'monospace' : null,
+        fontFamilyFallback: run.code ? const ['Courier New', 'Courier'] : null,
+        backgroundColor:
+            run.code
+                ? (widget.isDark
+                    ? AppColors.surfaceWhite.withValues(alpha: 0.08)
+                    : AppColors.textPrimary.withValues(alpha: 0.06))
+                : null,
+      );
+      if (run.code) {
+        // Literal: a code span is never scanned for links.
+        spans.add(TextSpan(text: run.text, style: style));
+        continue;
+      }
+      _appendWithLinks(spans, run.text, style);
+    }
 
+    return Text.rich(
+      TextSpan(style: baseStyle, children: spans),
+      strutStyle: context.tibetanStrutStyle(15),
+    );
+  }
+
+  /// Splits [text] on the URLs inside it, keeping [style] on the plain parts.
+  void _appendWithLinks(List<InlineSpan> spans, String text, TextStyle style) {
+    final links = findChatLinks(text);
+    if (links.isEmpty) {
+      spans.add(TextSpan(text: text, style: style));
+      return;
+    }
+
+    final linkColor = widget.isDark ? AppColors.brandblue : AppColors.blue;
+    var cursor = 0;
     for (final link in links) {
       if (link.start > cursor) {
-        spans.add(TextSpan(text: widget.body.substring(cursor, link.start)));
+        spans.add(
+          TextSpan(text: text.substring(cursor, link.start), style: style),
+        );
       }
       final recognizer =
           TapGestureRecognizer()
@@ -337,7 +476,7 @@ class _ChatLinkTextState extends State<ChatLinkText> {
         TextSpan(
           text: link.text,
           recognizer: recognizer,
-          style: baseStyle.copyWith(
+          style: style.copyWith(
             color: linkColor,
             decoration: TextDecoration.underline,
             decorationColor: linkColor,
@@ -346,14 +485,9 @@ class _ChatLinkTextState extends State<ChatLinkText> {
       );
       cursor = link.end;
     }
-    if (cursor < widget.body.length) {
-      spans.add(TextSpan(text: widget.body.substring(cursor)));
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor), style: style));
     }
-
-    return Text.rich(
-      TextSpan(style: baseStyle, children: spans),
-      strutStyle: context.tibetanStrutStyle(15),
-    );
   }
 }
 

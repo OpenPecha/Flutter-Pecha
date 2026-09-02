@@ -36,22 +36,16 @@ void main() {
 
   group('chatReactionsForViewer', () {
     test('marks a reaction mine when my email is among the users', () {
-      final resolved = chatReactionsForViewer(
-        [
-          _reaction(
-            _thumbsUp,
-            count: 2,
-            users: const [
-              ChatMessageReactionUserDTO(
-                userId: 'u1',
-                email: 'Rena@Example.com',
-              ),
-              ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
-            ],
-          ),
-        ],
-        currentUserEmail: 'rena@example.com',
-      );
+      final resolved = chatReactionsForViewer([
+        _reaction(
+          _thumbsUp,
+          count: 2,
+          users: const [
+            ChatMessageReactionUserDTO(userId: 'u1', email: 'Rena@Example.com'),
+            ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
+          ],
+        ),
+      ], currentUserEmail: 'rena@example.com');
 
       expect(resolved.single.reactedByMe, isTrue);
     });
@@ -59,30 +53,24 @@ void main() {
     test('clears a broadcast flag that is not about me', () {
       // reactions_updated is one payload for every member, so its
       // reacted_by_me cannot mean "me" for all of them.
-      final resolved = chatReactionsForViewer(
-        [
-          _reaction(
-            _thumbsUp,
-            count: 1,
-            reactedByMe: true,
-            users: const [
-              ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
-            ],
-          ),
-        ],
-        currentUserEmail: 'rena@example.com',
-      );
+      final resolved = chatReactionsForViewer([
+        _reaction(
+          _thumbsUp,
+          count: 1,
+          reactedByMe: true,
+          users: const [
+            ChatMessageReactionUserDTO(userId: 'u2', email: 'jack@e.com'),
+          ],
+        ),
+      ], currentUserEmail: 'rena@example.com');
 
       expect(resolved.single.reactedByMe, isFalse);
     });
 
     test('falls back to user_ids when no email is known', () {
-      final resolved = chatReactionsForViewer(
-        [
-          _reaction(_thumbsUp, count: 1, userIds: const ['u1', 'u2']),
-        ],
-        currentUserId: 'u1',
-      );
+      final resolved = chatReactionsForViewer([
+        _reaction(_thumbsUp, count: 1, userIds: const ['u1', 'u2']),
+      ], currentUserId: 'u1');
 
       expect(resolved.single.reactedByMe, isTrue);
     });
@@ -189,11 +177,7 @@ void main() {
         _reaction('\u{1F622}', count: 4),
       ]);
 
-      expect(badge.emoji.map((r) => r.emoji), [
-        _heart,
-        '\u{1F622}',
-        _thumbsUp,
-      ]);
+      expect(badge.emoji.map((r) => r.emoji), [_heart, '\u{1F622}', _thumbsUp]);
       // The total counts the emoji beyond the cap, so the number stays honest.
       expect(badge.total, 12);
     });

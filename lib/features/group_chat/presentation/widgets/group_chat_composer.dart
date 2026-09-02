@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_list_continuation.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
@@ -67,7 +68,6 @@ class GroupChatComposer extends StatelessWidget {
               isDark: isDark,
               hintText: hintText,
               enabled: enabled,
-              onSubmit: onSubmit,
             ),
           ),
           ValueListenableBuilder<TextEditingValue>(
@@ -154,7 +154,6 @@ class _MessageField extends StatelessWidget {
     required this.isDark,
     required this.hintText,
     required this.enabled,
-    required this.onSubmit,
   });
 
   final TextEditingController controller;
@@ -162,7 +161,6 @@ class _MessageField extends StatelessWidget {
   final bool isDark;
   final String hintText;
   final bool enabled;
-  final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -176,11 +174,15 @@ class _MessageField extends StatelessWidget {
       focusNode: focusNode,
       enabled: enabled,
       minLines: 1,
-      maxLines: 4,
-      textInputAction: TextInputAction.send,
-      onSubmitted: (_) {
-        if (enabled) onSubmit();
-      },
+      maxLines: 5,
+      // Return adds a line rather than sending: with a send button always at
+      // hand there is no other way to type a second line, and `send` made
+      // multi-line messages impossible to compose.
+      textInputAction: TextInputAction.newline,
+      keyboardType: TextInputType.multiline,
+      // Return inside a list carries the marker on; Return on an empty item
+      // ends the list.
+      inputFormatters: const [ChatListContinuationFormatter()],
       style: TextStyle(
         fontSize: 15,
         height: 1.2,
