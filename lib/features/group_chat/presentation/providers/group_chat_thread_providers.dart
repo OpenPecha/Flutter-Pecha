@@ -374,17 +374,37 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // newer than this page.
       final fetchedById = {for (final message in fetched) message.id: message};
 
-      // Counted before the page's own rows are inserted below: these are
-      // messages the socket delivered while the request was in flight, so the
-      // count that came back with it does not include them.
+      // What the socket delivered while the request was in flight, which the
+      // count that came back with it cannot include.
+      //
+      // "Not held before and not in this page" is not enough on its own:
+      // nothing stops `loadMore` finishing inside the same window — it gates
+      // on `isLoadingMore` and `isLoading`, and a refresh sets neither — and
+      // the older page it appends is already inside the server's count.
+      // Position separates them. The list is newest-first and the two writers
+      // add at opposite ends: `appendLive` prepends an arrival, `loadMore`
+      // appends older history. So everything the socket delivered sits above
+      // the *last* row this page shares with what is held, and everything
+      // `loadMore` appended sits below it. The last shared row, not the first:
+      // the socket does not promise creation order, and an arrival the page
+      // does include can land on top of one it does not — cutting at the
+      // first shared row would hide the second. Rows the page carries are
+      // excluded by id since they are already in its count. Counted before
+      // the page's own rows are inserted further down.
+      final lastFromPage = state.messages.lastIndexWhere(
+        (message) => fetchedById.containsKey(message.id),
+      );
       final arrivedDuring =
-          state.messages
-              .where(
-                (message) =>
-                    !knownBefore.contains(message.id) &&
-                    !fetchedById.containsKey(message.id),
-              )
-              .length;
+          lastFromPage < 0
+              ? 0
+              : state.messages
+                  .take(lastFromPage)
+                  .where(
+                    (message) =>
+                        !knownBefore.contains(message.id) &&
+                        !fetchedById.containsKey(message.id),
+                  )
+                  .length;
 
       state = state.copyWith(
         messages:

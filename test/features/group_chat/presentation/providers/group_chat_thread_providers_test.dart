@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/chat_link_preview_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
@@ -35,6 +36,9 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   Failure? listFailure;
   int listCallCount = 0;
 
+  /// Holds the next list call until completed, so a later one can overtake it.
+  Completer<void>? holdNextList;
+
   /// Reaction summaries handed back, in call order.
   List<List<ChatMessageReactionDTO>> reactionResponses = const [];
   Failure? reactionFailure;
@@ -49,6 +53,10 @@ class _FakeGroupChatRepository implements GroupChatRepository {
     int limit = 20,
   }) async {
     listCallCount++;
+    // Cleared before awaiting, so only this call is held.
+    final hold = holdNextList;
+    holdNextList = null;
+    if (hold != null) await hold.future;
     final failure = listFailure;
     if (failure != null) return Left(failure);
     final end = (skip + limit).clamp(0, history.length);
@@ -453,6 +461,71 @@ void main() {
 
       await pending;
       expect(notifier.state.messages.single.reactions.single.emoji, heart);
+    });
+
+    test('a loadMore landing mid-refresh is not counted as an arrival',
+        () async {
+      // `loadMore` gates on isLoadingMore/isLoading and a refresh sets
+      // neither, so the two overlap freely.
+      repository = _FakeGroupChatRepository(
+        history: [for (var i = 0; i < 60; i++) _message('m$i')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+      expect(notifier.state.messages, hasLength(30));
+      expect(notifier.state.total, 60);
+
+      final hold = Completer<void>();
+      repository.holdNextList = hold;
+      final refreshing = notifier.refreshLatest();
+      await Future<void>.delayed(Duration.zero);
+
+      // The older page lands while the refresh is still awaiting its own.
+      await notifier.loadMore();
+      expect(notifier.state.messages, hasLength(60));
+
+      hold.complete();
+      await refreshing;
+
+      // That page is older history the server already counted, not a socket
+      // arrival — adding it would leave hasMore true past the real end and
+      // send the next loadMore at an empty offset.
+      expect(notifier.state.total, 60);
+      expect(notifier.state.hasMore, isFalse);
+    });
+
+    test('an out-of-order socket arrival mid-refresh is still counted',
+        () async {
+      // 31 on the server, so the first page of 30 leaves m31 unread.
+      repository = _FakeGroupChatRepository(
+        history: [for (var i = 1; i <= 31; i++) _message('m$i')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+      expect(notifier.state.hasMore, isTrue);
+
+      final hold = Completer<void>();
+      repository.holdNextList = hold;
+      final refreshing = notifier.refreshLatest();
+      await Future<void>.delayed(Duration.zero);
+
+      // The server gains m0 before its page is computed, so the page carries
+      // it. The socket then delivers a brand-new message first and m0 second,
+      // leaving the one the page *does* include on top of the one it does
+      // not. Cutting at the first shared row would hide `live`.
+      repository.history = [_message('m0'), ...repository.history];
+      notifier.appendLive(_message('live'));
+      notifier.appendLive(_message('m0'));
+      hold.complete();
+      await refreshing;
+
+      // 32 on the server, plus the arrival its count predates. Cutting at the
+      // first shared row gives 32, and with 32 rows held that reads as "all
+      // loaded" while m31 is still on the server unread.
+      expect(notifier.state.total, 33);
+      expect(notifier.state.hasMore, isTrue);
     });
 
     test('refreshLatest keeps counting messages that arrived mid-request',
