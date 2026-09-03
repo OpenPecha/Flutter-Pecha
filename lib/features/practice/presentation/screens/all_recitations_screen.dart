@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/localization/content_language_picker_sheet.dart';
+import 'package:flutter_pecha/core/localization/languages_providers.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
@@ -29,6 +30,8 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Prefetch so the language picker usually opens already resolved.
+    ref.read(recitationContentLanguagesProvider);
   }
 
   @override
@@ -60,6 +63,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     showContentLanguagePickerSheet(
       context,
       selectedCode: selectedCode,
+      recitationOnly: true,
       onSelected: (code) {
         ref
             .read(practiceRecitationsLanguageProvider.notifier)

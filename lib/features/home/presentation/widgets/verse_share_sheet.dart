@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/theme/app_theme.dart';
 import 'package:flutter_pecha/core/theme/font_config.dart';
@@ -108,7 +109,8 @@ Future<void> shareVerseOfDayQuote(
       context: context,
       globalKey: shareOriginKey,
     );
-    final shareText = _verseOfDayShareText(context);
+    final shareText = await _verseOfDayShareText(context);
+    if (!context.mounted) return;
 
     await SharePlus.instance.share(
       ShareParams(
@@ -136,9 +138,14 @@ Future<void> shareVerseOfDayQuote(
   }
 }
 
-String _verseOfDayShareText(BuildContext context) {
-  final homeLink = DeepLinkUrlBuilder.homeLink().toString();
-  return '${AppLocalizations.of(context)!.share_quote_message}\n\n$homeLink';
+Future<String> _verseOfDayShareText(BuildContext context) async {
+  final shareQuoteMessage =
+      AppLocalizations.of(context)!.share_quote_message;
+  final longUrl = DeepLinkUrlBuilder.homeLink().toString();
+  final homeLink = await resolveShareUrl(context, longUrl);
+  if (!context.mounted) return shareQuoteMessage;
+
+  return '$shareQuoteMessage\n\n$homeLink';
 }
 
 Future<Uint8List?> _captureVerseShareImage(

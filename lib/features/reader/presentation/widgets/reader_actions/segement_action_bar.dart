@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/youtube_video_player.dart';
 import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
 import 'package:flutter_pecha/features/practice/presentation/controllers/bookmark_controller.dart';
@@ -746,12 +747,13 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
     });
 
     try {
-      final shareUrl =
+      final longUrl =
           DeepLinkUrlBuilder.readerSegmentLink(
             textId: widget.textId,
             segmentId: widget.segmentId,
             language: widget.language,
           ).toString();
+      final shareUrl = await resolveShareUrlRef(ref, longUrl);
 
       if (!mounted) return;
 
