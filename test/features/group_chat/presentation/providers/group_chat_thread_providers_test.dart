@@ -455,6 +455,49 @@ void main() {
       expect(notifier.state.messages.single.reactions.single.emoji, heart);
     });
 
+    test('refreshLatest keeps counting messages that arrived mid-request',
+        () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+      expect(notifier.state.total, 1);
+
+      // The socket delivers while the refresh is in flight, so the count that
+      // comes back with the page was taken before it existed.
+      final refreshing = notifier.refreshLatest();
+      notifier.appendLive(_message('m2'));
+      await refreshing;
+
+      expect(notifier.state.messages, hasLength(2));
+      // Overwriting with the page's figure would say 1 for two held rows, and
+      // hasMore would latch false with history still unread.
+      expect(notifier.state.total, 2);
+      expect(notifier.state.messages.length <= notifier.state.total, isTrue);
+    });
+
+    test('a summary held mid-fetch survives the row being kept', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final refreshing = notifier.refreshLatest();
+      // Arrives for a row outside the loaded window, so it is held for the
+      // page to carry...
+      notifier.replaceReactions('m2', const [
+        ChatMessageReactionDTO(emoji: thumbsUp, count: 1),
+      ]);
+      // ...and then that row lands over the socket before the page does.
+      notifier.appendLive(_message('m2'));
+      await refreshing;
+
+      final held = notifier.state.messages.firstWhere(
+        (message) => message.id == 'm2',
+      );
+      expect(held.reactions.single.emoji, thumbsUp);
+    });
+
     test('a broadcast during a swap is applied once the swap settles', () async {
       repository = _FakeGroupChatRepository(
         history: [

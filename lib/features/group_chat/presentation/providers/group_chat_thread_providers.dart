@@ -286,26 +286,44 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     if (!mounted) return;
 
     result.fold((_) {}, (page) {
-      ChatMessageDTO forViewer(ChatMessageDTO message) {
-        final fresh = _withPendingReactions(message);
-        if (fresh.reactions.isEmpty) return fresh;
-        return fresh.copyWith(
-          reactions: chatReactionsForViewer(
-            fresh.reactions,
-            currentUserId: currentUserId,
-            currentUserEmail: currentUserEmail,
-          ),
+      List<ChatMessageReactionDTO> resolve(
+        List<ChatMessageReactionDTO> reactions,
+      ) {
+        if (reactions.isEmpty) return reactions;
+        return chatReactionsForViewer(
+          reactions,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
         );
       }
 
-      final fetched = page.messages.map(forViewer).toList();
+      /// Adopts the summary held for this row while the page was in flight.
+      ///
+      /// Taken at the point the row is committed rather than when the page is
+      /// parsed. The merge below can keep the copy already held instead of the
+      /// fetched one, and a summary lifted out of the map into a copy that is
+      /// then dropped is lost for good — the map has already forgotten it.
+      ChatMessageDTO withPending(ChatMessageDTO message) {
+        final pending = _pendingReactions.remove(message.id);
+        if (pending == null) return message;
+        return message.copyWith(reactions: resolve(pending));
+      }
+
+      final fetched = [
+        for (final message in page.messages)
+          if (message.reactions.isEmpty)
+            message
+          else
+            message.copyWith(reactions: resolve(message.reactions)),
+      ];
 
       if (state.messages.isEmpty) {
+        final messages = fetched.map(withPending).toList();
         state = state.copyWith(
-          messages: fetched,
+          messages: messages,
           hasLoaded: true,
-          hasMore: fetched.length < page.total,
-          skip: fetched.length,
+          hasMore: messages.length < page.total,
+          skip: messages.length,
           total: page.total,
           clearError: true,
         );
@@ -336,7 +354,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
                 )
                 .toList();
 
-        final messages = [...arrivedDuring, ...fetched];
+        final messages = [...arrivedDuring, ...fetched.map(withPending)];
         final total = page.total + arrivedDuring.length;
         state = state.copyWith(
           messages: messages,
@@ -355,9 +373,30 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // floor. A message mid-swap is left alone — its optimistic state is
       // newer than this page.
       final fetchedById = {for (final message in fetched) message.id: message};
+
+      // Counted before the page's own rows are inserted below: these are
+      // messages the socket delivered while the request was in flight, so the
+      // count that came back with it does not include them.
+      final arrivedDuring =
+          state.messages
+              .where(
+                (message) =>
+                    !knownBefore.contains(message.id) &&
+                    !fetchedById.containsKey(message.id),
+              )
+              .length;
+
       state = state.copyWith(
         messages:
             state.messages.map((existing) {
+              // A summary held while this page was in flight is newer than the
+              // page and newer than what is held, so it settles the row before
+              // either branch below gets to.
+              final pending = _pendingReactions.remove(existing.id);
+              if (pending != null) {
+                return existing.copyWith(reactions: resolve(pending));
+              }
+
               final fresh = fetchedById[existing.id];
               if (fresh == null) return existing;
 
@@ -376,13 +415,18 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // Oldest first, so each insert lands above the previous one and the
       // newest-first order is preserved.
       for (final message in fetched.reversed) {
-        appendLive(message);
+        appendLive(withPending(message));
       }
 
-      // The server's count is newer than the one carried since the last page.
+      // The server's count plus what the socket delivered after the server
+      // counted. Taking the page's figure alone walks `total` backwards past
+      // those arrivals, and in a room small enough for the difference to
+      // matter that leaves `hasMore` false — after which `loadMore` returns
+      // immediately and the thread will not page back any further.
+      final total = page.total + arrivedDuring;
       state = state.copyWith(
-        total: page.total,
-        hasMore: state.messages.length < page.total,
+        total: total,
+        hasMore: state.messages.length < total,
       );
     });
     _dropStalePendingReactions();
