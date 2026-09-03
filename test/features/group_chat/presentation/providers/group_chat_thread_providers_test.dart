@@ -455,6 +455,103 @@ void main() {
       expect(notifier.state.messages.single.reactions.single.emoji, heart);
     });
 
+    test('a broadcast during a swap is applied once the swap settles', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+              userIds: ['me'],
+            ),
+          ]),
+        ],
+      );
+      repository.reactionResponses = const [
+        // POST of the new emoji: the server briefly holds both.
+        [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+        ],
+        // DELETE of the old one, computed before the other member commits.
+        [ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me'])],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final pending = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+        currentUserId: 'me',
+      );
+      // Another member reacts mid-swap. This summary is newer than either of
+      // our own responses, so it must survive the swap rather than be dropped.
+      notifier.replaceReactions(
+        'm1',
+        const [
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: joy, count: 1, userIds: ['other']),
+        ],
+        currentUserId: 'me',
+      );
+
+      await pending;
+      final emoji =
+          notifier.state.messages.single.reactions
+              .map((reaction) => reaction.emoji)
+              .toList();
+      expect(emoji, containsAll(<String>[heart, joy]));
+    });
+
+    test('our own mid-swap echo is still discarded', () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+              userIds: ['me'],
+            ),
+          ]),
+        ],
+      );
+      repository.reactionResponses = const [
+        [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me'])],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final pending = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+        currentUserId: 'me',
+      );
+      // The broadcast the server fans back to us for our own POST: it still
+      // carries the emoji being replaced, so it is older than where the swap
+      // ends up and must not be replayed over it.
+      notifier.replaceReactions(
+        'm1',
+        const [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+        ],
+        currentUserId: 'me',
+      );
+
+      await pending;
+      expect(notifier.state.messages.single.reactions.single.emoji, heart);
+    });
+
     test('overlapping toggles do not undo the newer choice', () async {
       repository = _FakeGroupChatRepository(history: [reacted('m1', const [])]);
       // The first call fails; the second succeeds.

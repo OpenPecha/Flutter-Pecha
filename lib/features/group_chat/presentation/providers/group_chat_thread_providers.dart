@@ -108,6 +108,18 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// messages are ignored until the swap settles.
   final Set<String> _swapping = {};
 
+  /// The last summary that arrived for a message while it was mid-swap.
+  ///
+  /// Dropping these outright loses a reaction another member added during the
+  /// swap. Replaying one blindly is just as wrong: the broadcast fans out to
+  /// the actor too, so some of them are this client's own intermediate state,
+  /// carrying both the old emoji and the new one. Nothing on the wire orders
+  /// the two — there is no version or sequence on a reaction payload — so the
+  /// tie is broken on content once the swap settles: a summary is adopted only
+  /// if it agrees with what this member is known to hold on the server, which
+  /// an intermediate echo never does.
+  final Map<String, List<ChatMessageReactionDTO>> _deferredReactions = {};
+
   /// Bumped whenever a message's reactions change locally. A refetch compares
   /// the value it saw before its request with the value on arrival: checking
   /// `_swapping` alone only asks whether a swap is running *now*, so a page
@@ -388,10 +400,50 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     String? currentUserId,
     String? currentUserEmail,
   }) {
-    if (_swapping.contains(messageId)) return;
+    if (_swapping.contains(messageId)) {
+      // Held, not dropped. Only the newest one can still be current, and it is
+      // judged against the swap's own result once that lands.
+      _deferredReactions[messageId] = reactions;
+      return;
+    }
     _applyReactions(
       messageId,
       reactions,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
+  }
+
+  /// Adopts a summary held during a swap, when it proves to be newer than the
+  /// swap's own result.
+  void _replayDeferredReaction(
+    String messageId, {
+    String? currentUserId,
+    String? currentUserEmail,
+  }) {
+    final deferred = _deferredReactions.remove(messageId);
+    if (deferred == null) return;
+
+    final own = _ownFromSummary(
+      deferred,
+      currentUserId: currentUserId,
+      currentUserEmail: currentUserEmail,
+    );
+    // Unidentifiable is not the same as newer: with no way to tell whose
+    // reactions these are, a later broadcast cannot be told from our own echo,
+    // and what the swap applied came from a confirmed call.
+    if (own == null) return;
+
+    // An echo from inside the swap still shows the emoji being replaced, so it
+    // disagrees with the settled set and is discarded. Anything that agrees
+    // was computed after the swap and may carry another member's reaction the
+    // swap's own response was too early to include.
+    final settled = _serverOwn[messageId] ?? const <String>{};
+    if (own.length != settled.length || !own.every(settled.contains)) return;
+
+    _applyReactions(
+      messageId,
+      deferred,
       currentUserId: currentUserId,
       currentUserEmail: currentUserEmail,
     );
@@ -532,6 +584,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // The last operation for this message owns the cleanup, whichever one
       // opened the swap guard.
       _swapping.remove(messageId);
+      if (mounted) {
+        _replayDeferredReaction(
+          messageId,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
+        );
+      }
     }
     return failure;
   }

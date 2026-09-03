@@ -63,7 +63,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   bool _resolvingRoom = false;
   _RoomState _roomState = _RoomState.resolving;
   String? _roomId;
-  String _currentUserId = '';
+
+  /// The JWT `sub`, used **only** to namespace this account's local room
+  /// cache. It is a different id space from chat's `sender_id`, so it must
+  /// never reach an identity check — see [_viewerId].
+  String _accountId = '';
 
   /// The provider container, captured while the element is still active.
   ///
@@ -179,26 +183,36 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     });
   }
 
-  Future<String> _userId() async {
-    if (_currentUserId.isNotEmpty) return _currentUserId;
-    final userId =
+  Future<String> _loadAccountId() async {
+    if (_accountId.isNotEmpty) return _accountId;
+    final accountId =
         await _providers
             .read(storageServiceProvider)
             .get<String>(StorageKeys.currentUserId) ??
         '';
-    _currentUserId = userId;
-    return userId;
+    _accountId = accountId;
+    return accountId;
   }
+
+  /// The viewer's backend user id, in the same id space as chat's `sender_id`
+  /// and reaction `user_ids`.
+  ///
+  /// Empty until `/users/info` has landed, and empty is the honest answer:
+  /// every consumer then falls back to matching on email, where a value from
+  /// the wrong id space would instead assert a confident "not mine".
+  String get _viewerId => _providers.read(userProvider).user?.id?.trim() ?? '';
+
+  String? get _viewerEmail => _providers.read(userProvider).user?.email;
 
   /// Resolves the room once per screen. Runs again only through
   /// [_retryResolveRoom] after a failed lookup.
   Future<void> _resolveRoom() async {
     if (_disposed || _resolvingRoom) return;
     _resolvingRoom = true;
-    final userId = await _userId();
+    final accountId = await _loadAccountId();
     if (!mounted) return;
     final lookup = await _providers.read(resolveGroupChatRoomProvider)(
-      userId: userId,
+      userId: accountId,
       groupId: widget.groupId,
     );
     if (!mounted) return;
@@ -353,8 +367,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
               .whereType<Map<String, dynamic>>()
               .map(ChatMessageReactionDTO.fromJson)
               .toList(),
-          currentUserId: _currentUserId,
-          currentUserEmail: _providers.read(userProvider).user?.email,
+          currentUserId: _viewerId,
+          currentUserEmail: _viewerEmail,
         );
   }
 
@@ -364,8 +378,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     await _providers
         .read(groupChatThreadProvider(roomId).notifier)
         .refreshLatest(
-          currentUserId: _currentUserId,
-          currentUserEmail: _providers.read(userProvider).user?.email,
+          currentUserId: _viewerId,
+          currentUserEmail: _viewerEmail,
         );
   }
 
@@ -390,10 +404,14 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   Future<void> _persistRoomId(String roomId) async {
     if (_disposed) return;
     try {
-      final userId = await _userId();
+      final accountId = await _loadAccountId();
       await _providers
           .read(groupChatRoomCacheProvider)
-          .write(userId: userId, groupId: widget.groupId, roomId: roomId);
+          .write(
+            userId: accountId,
+            groupId: widget.groupId,
+            roomId: roomId,
+          );
     } catch (_) {
       // Cache is best-effort; join is already committed on the server.
     }
@@ -536,7 +554,6 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
               : GroupChatThread(
                 roomId: roomId,
                 groupId: widget.groupId,
-                currentUserId: _currentUserId,
                 onReply: _startReply,
               ),
       },
