@@ -140,6 +140,10 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   }
 }
 
+ChatMessageDTO _byId(GroupChatThreadNotifier notifier, String id) {
+  return notifier.state.messages.firstWhere((message) => message.id == id);
+}
+
 /// autoDispose tears the provider down the moment nothing listens, so tests
 /// hold a subscription open for the life of the container.
 GroupChatThreadNotifier _keepAlive(ProviderContainer container) {
@@ -988,7 +992,9 @@ void main() {
 
       expect(failure, isNull);
       expect(repository.deleteCalls, ['m1']);
-      expect(notifier.state.deletedMessageIds, {'m1'});
+      // Stamped locally: the 204 carries no body, so there is nothing to adopt
+      // until the next fetch brings the server's own value.
+      expect(_byId(notifier, 'm1').deletedAt, isNotNull);
       // The row stays: it is the tombstone. Removing it would move the
       // pagination cursor for a message the server already dropped.
       expect(notifier.state.messages.map((m) => m.id), ['m2', 'm1']);
@@ -1007,7 +1013,7 @@ void main() {
       // Reported rather than swallowed, and nothing is tombstoned — the
       // message is still there for everyone.
       expect(failure, isA<NetworkFailure>());
-      expect(notifier.state.deletedMessageIds, isEmpty);
+      expect(_byId(notifier, 'm1').deletedAt, isNull);
       expect(notifier.state.messages, hasLength(1));
     });
 
@@ -1036,10 +1042,91 @@ void main() {
       repository.history = [_message('m2')];
       await notifier.refreshLatest();
 
-      // Still held, still tombstoned: the marker outlives the refetch that
-      // dropped it, so the row does not silently turn back into a message.
+      // Still held, still tombstoned: the refetch that dropped it does not
+      // silently turn the row back into a message.
       expect(notifier.state.messages.map((m) => m.id), ['m2', 'm1']);
-      expect(notifier.state.deletedMessageIds, {'m1'});
+      expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+    });
+
+    test('a refetch adopts the server deleted_at', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(_byId(notifier, 'm1').deletedAt, isNull);
+
+      // Deleted by this member on another device: nothing local marked it, the
+      // page simply comes back carrying the timestamp.
+      repository.history = [
+        _message('m1').copyWith(deletedAt: '2026-09-03T10:00:00Z'),
+      ];
+      await notifier.refreshLatest();
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+    });
+  });
+
+  group('applyDeletion', () {
+    test('a broadcast tombstones a loaded message', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      notifier.applyDeletion('m1', deletedAt: '2026-09-03T10:00:00Z');
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+      // Nobody else is touched.
+      expect(_byId(notifier, 'm2').deletedAt, isNull);
+    });
+
+    test('the first timestamp stands', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      notifier.applyDeletion('m1', deletedAt: 'first');
+      // Our own delete stamps the row, then the broadcast for it arrives.
+      notifier.applyDeletion('m1', deletedAt: 'second');
+
+      expect(_byId(notifier, 'm1').deletedAt, 'first');
+    });
+
+    test('a deletion arriving before its message is not lost', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m0')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // m1 is in the page being fetched, but not yet held. That page was built
+      // before the deletion, so it carries the message as live.
+      repository.history = [_message('m1'), _message('m0')];
+
+      final refresh = notifier.refreshLatest();
+      notifier.applyDeletion('m1', deletedAt: '2026-09-03T10:00:00Z');
+      await refresh;
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+    });
+
+    test('a deletion for a message no page brings back is dropped', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m0')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // No fetch running: a later page would carry deleted_at itself, so
+      // holding this would only leak.
+      notifier.applyDeletion('gone', deletedAt: '2026-09-03T10:00:00Z');
+
+      repository.history = [_message('gone'), _message('m0')];
+      await notifier.refreshLatest();
+
+      expect(_byId(notifier, 'gone').deletedAt, isNull);
     });
   });
 

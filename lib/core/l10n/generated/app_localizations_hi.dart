@@ -2438,6 +2438,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_chat_message_deleted => 'आपने यह संदेश हटा दिया';
 
   @override
+  String get group_chat_message_deleted_by_sender => 'यह संदेश हटा दिया गया';
+
+  @override
   String get group_chat_reaction_failed =>
       'आपकी प्रतिक्रिया सहेजी नहीं जा सकी।';
 

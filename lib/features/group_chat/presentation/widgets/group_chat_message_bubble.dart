@@ -33,7 +33,7 @@ class GroupChatMessageBubble extends StatelessWidget {
     this.selfDisplayName,
     this.onLongPress,
     this.isHighlighted = false,
-    this.isDeleted = false,
+    this.isParentDeleted = false,
     this.onShowReactions,
     this.onTapQuote,
   });
@@ -54,9 +54,14 @@ class GroupChatMessageBubble extends StatelessWidget {
   /// Briefly tinted after a quote jumped to this message.
   final bool isHighlighted;
 
-  /// Deleted by this member during this session: the bubble becomes a
-  /// tombstone instead of showing a body it no longer has on the server.
-  final bool isDeleted;
+  /// The quoted original has since been deleted. Resolved by the thread, which
+  /// is the only place that can see the rest of the loaded window.
+  final bool isParentDeleted;
+
+  /// Deleted, per the server's own `deleted_at`. A deleted message can still
+  /// arrive carrying its body, so this — never an empty body — is what decides
+  /// that the bubble becomes a tombstone.
+  bool get isDeleted => message.deletedAt != null;
   final VoidCallback? onShowReactions;
 
   /// Scrolls to the quoted original when it is still on screen.
@@ -234,6 +239,7 @@ class GroupChatMessageBubble extends StatelessWidget {
               if (message.parent != null)
                 GroupChatQuotedMessage(
                   parent: message.parent!,
+                  isDeleted: isParentDeleted,
                   onTap: onTapQuote,
                 ),
               _body(context, textColor, isDark),
@@ -272,7 +278,13 @@ class GroupChatMessageBubble extends StatelessWidget {
         const SizedBox(width: 6),
         Flexible(
           child: Text(
-            context.l10n.group_chat_message_deleted,
+            // Deletion is sender-only, so the sender is the deleter and
+            // `isSelf` is enough to tell the two labels apart — and it is the
+            // one signal present on both the REST payload and the socket
+            // frame.
+            isSelf
+                ? context.l10n.group_chat_message_deleted
+                : context.l10n.group_chat_message_deleted_by_sender,
             strutStyle: context.tibetanStrutStyle(14),
             style: TextStyle(
               fontSize: 14,

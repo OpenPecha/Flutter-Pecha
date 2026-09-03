@@ -4322,6 +4322,12 @@ abstract class AppLocalizations {
   /// **'You deleted this message'**
   String get group_chat_message_deleted;
 
+  /// No description provided for @group_chat_message_deleted_by_sender.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get group_chat_message_deleted_by_sender;
+
   /// No description provided for @group_chat_reaction_failed.
   ///
   /// In en, this message translates to:

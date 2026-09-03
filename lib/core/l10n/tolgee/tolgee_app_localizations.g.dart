@@ -4740,6 +4740,13 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_chat_message_deleted_by_sender => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_deleted_by_sender',
+    () => _fallback.group_chat_message_deleted_by_sender,
+  );
+
+  @override
   String get group_chat_reaction_failed => TolgeeBridge.get(
     localeName,
     'group_chat_reaction_failed',

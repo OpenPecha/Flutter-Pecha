@@ -2298,6 +2298,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_chat_message_deleted => '你已刪除此訊息';
 
   @override
+  String get group_chat_message_deleted_by_sender => '此訊息已刪除';
+
+  @override
   String get group_chat_reaction_failed => '無法儲存你的回應。';
 
   @override

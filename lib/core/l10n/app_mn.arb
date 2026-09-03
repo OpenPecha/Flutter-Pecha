@@ -1033,6 +1033,7 @@
   "group_chat_delete_for_everyone": "Бүгдээс устгах",
   "group_chat_delete_failed": "Мессежийг устгаж чадсангүй.",
   "group_chat_message_deleted": "Та энэ мессежийг устгасан",
+  "group_chat_message_deleted_by_sender": "Энэ мессежийг устгасан",
   "group_chat_reaction_failed": "Таны хариу үйлдлийг хадгалж чадсангүй.",
   "group_chat_reactions_count": "{count, plural, =1{1 хариу үйлдэл} other{{count} хариу үйлдэл}}",
   "@group_chat_reactions_count": {

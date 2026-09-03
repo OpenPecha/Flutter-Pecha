@@ -2417,6 +2417,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_chat_message_deleted => 'You deleted this message';
 
   @override
+  String get group_chat_message_deleted_by_sender => 'This message was deleted';
+
+  @override
   String get group_chat_reaction_failed => 'Your reaction couldn\'t be saved.';
 
   @override

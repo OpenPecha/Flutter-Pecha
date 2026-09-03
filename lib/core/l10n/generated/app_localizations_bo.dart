@@ -2445,6 +2445,9 @@ class AppLocalizationsBo extends AppLocalizations {
       'ཁྱེད་ཀྱིས་འཕྲིན་ཐུང་འདི་བསུབས་སོང་།';
 
   @override
+  String get group_chat_message_deleted_by_sender => 'འཕྲིན་ཐུང་འདི་བསུབས་ཟིན།';
+
+  @override
   String get group_chat_reaction_failed => 'ཁྱེད་ཀྱི་དྲན་བརྡ་ཉར་མ་ཐུབ།';
 
   @override

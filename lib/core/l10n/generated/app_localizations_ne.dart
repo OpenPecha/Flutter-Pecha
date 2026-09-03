@@ -2446,6 +2446,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_chat_message_deleted => 'तपाईंले यो सन्देश मेटाउनुभयो';
 
   @override
+  String get group_chat_message_deleted_by_sender => 'यो सन्देश मेटाइयो';
+
+  @override
   String get group_chat_reaction_failed =>
       'तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।';
 

@@ -2443,6 +2443,9 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_chat_message_deleted => 'Та энэ мессежийг устгасан';
 
   @override
+  String get group_chat_message_deleted_by_sender => 'Энэ мессежийг устгасан';
+
+  @override
   String get group_chat_reaction_failed =>
       'Таны хариу үйлдлийг хадгалж чадсангүй.';
 
