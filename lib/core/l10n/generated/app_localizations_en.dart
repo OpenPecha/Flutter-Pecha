@@ -2401,6 +2401,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_chat_delete => 'Delete';
 
   @override
+  String get group_chat_delete_title => 'Delete message?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'This message will be deleted for everyone in this chat.';
+
+  @override
+  String get group_chat_delete_for_everyone => 'Delete for everyone';
+
+  @override
+  String get group_chat_delete_failed => 'The message couldn\'t be deleted.';
+
+  @override
+  String get group_chat_message_deleted => 'You deleted this message';
+
+  @override
   String get group_chat_reaction_failed => 'Your reaction couldn\'t be saved.';
 
   @override

@@ -2427,6 +2427,22 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_chat_delete => 'Устгах';
 
   @override
+  String get group_chat_delete_title => 'Мессежийг устгах уу?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'Энэ мессеж энэ чат дахь бүх хүний хувьд устгагдана.';
+
+  @override
+  String get group_chat_delete_for_everyone => 'Бүгдээс устгах';
+
+  @override
+  String get group_chat_delete_failed => 'Мессежийг устгаж чадсангүй.';
+
+  @override
+  String get group_chat_message_deleted => 'Та энэ мессежийг устгасан';
+
+  @override
   String get group_chat_reaction_failed =>
       'Таны хариу үйлдлийг хадгалж чадсангүй.';
 

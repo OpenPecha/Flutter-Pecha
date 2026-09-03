@@ -210,6 +210,19 @@ class GroupChatRemoteDatasource {
         const [];
   }
 
+  /// Deletes one of the caller's own messages, for everyone. Returns 204
+  /// with no body.
+  ///
+  /// Sender-only, enforced server side. Nothing is broadcast over the socket,
+  /// so other members see it gone on their next fetch rather than live.
+  Future<void> deleteMessage(String roomId, {required String messageId}) async {
+    try {
+      await _dio.delete('/chat/rooms/$roomId/messages/$messageId');
+    } on DioException catch (e) {
+      throw _unwrap(e);
+    }
+  }
+
   /// Bumps the caller's `last_read_at`. Returns 204 with no body.
   Future<void> markRoomRead(String roomId) async {
     try {

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
@@ -32,6 +33,7 @@ class GroupChatMessageBubble extends StatelessWidget {
     this.selfDisplayName,
     this.onLongPress,
     this.isHighlighted = false,
+    this.isDeleted = false,
     this.onShowReactions,
     this.onTapQuote,
   });
@@ -51,6 +53,10 @@ class GroupChatMessageBubble extends StatelessWidget {
 
   /// Briefly tinted after a quote jumped to this message.
   final bool isHighlighted;
+
+  /// Deleted by this member during this session: the bubble becomes a
+  /// tombstone instead of showing a body it no longer has on the server.
+  final bool isDeleted;
   final VoidCallback? onShowReactions;
 
   /// Scrolls to the quoted original when it is still on screen.
@@ -125,14 +131,17 @@ class GroupChatMessageBubble extends StatelessWidget {
                     // Only reserve the strip when there is a badge to hang in
                     // it, so unreacted bubbles keep their spacing.
                     padding: EdgeInsets.only(
-                      bottom: message.reactions.isEmpty ? 0 : _badgeReserve,
+                      bottom:
+                          message.reactions.isEmpty || isDeleted
+                              ? 0
+                              : _badgeReserve,
                     ),
                     child: GestureDetector(
                       onLongPress: onLongPress,
                       child: _bubble(context, isDark, displayName),
                     ),
                   ),
-                  if (message.reactions.isNotEmpty)
+                  if (message.reactions.isNotEmpty && !isDeleted)
                     Positioned(
                       bottom: 0,
                       // The inner corner: bottom-right on an incoming bubble,
@@ -219,14 +228,18 @@ class GroupChatMessageBubble extends StatelessWidget {
               ),
               const SizedBox(height: 2),
             ],
-            if (message.parent != null)
-              GroupChatQuotedMessage(
-                parent: message.parent!,
-                onTap: onTapQuote,
-              ),
-            _body(context, textColor, isDark),
-            if (previewUrl != null)
-              GroupChatLinkPreviewCard(url: previewUrl, onOpen: _openUrl),
+            if (isDeleted)
+              _tombstone(context, isDark)
+            else ...[
+              if (message.parent != null)
+                GroupChatQuotedMessage(
+                  parent: message.parent!,
+                  onTap: onTapQuote,
+                ),
+              _body(context, textColor, isDark),
+              if (previewUrl != null)
+                GroupChatLinkPreviewCard(url: previewUrl, onOpen: _openUrl),
+            ],
             const SizedBox(height: 2),
             Text(
               _timeLabel(context),
@@ -242,6 +255,33 @@ class GroupChatMessageBubble extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Stands in for a message this member deleted.
+  ///
+  /// The quote, link preview and reaction badges all go with the body: none of
+  /// them describes anything that still exists.
+  Widget _tombstone(BuildContext context, bool isDark) {
+    final color = isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(AppAssets.trash, size: 14, color: color),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            context.l10n.group_chat_message_deleted,
+            strutStyle: context.tibetanStrutStyle(14),
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

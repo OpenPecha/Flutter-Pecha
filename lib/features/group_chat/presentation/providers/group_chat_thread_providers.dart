@@ -22,6 +22,16 @@ class GroupChatThreadState extends Equatable {
   /// before the initial request lands.
   final bool hasLoaded;
 
+  /// Messages this member deleted during this session, shown as a tombstone.
+  ///
+  /// Deliberately here rather than on [ChatMessageDTO]: the DTO mirrors the
+  /// wire, and the wire has no deleted flag — the server hard-deletes and does
+  /// not broadcast it. Keeping the marker in state says plainly what it is, a
+  /// local overlay that lasts as long as this screen does. Re-entering the
+  /// room drops the row entirely, which is what every other member already
+  /// sees.
+  final Set<String> deletedMessageIds;
+
   const GroupChatThreadState({
     this.messages = const [],
     this.isLoading = false,
@@ -31,6 +41,7 @@ class GroupChatThreadState extends Equatable {
     this.skip = 0,
     this.total = 0,
     this.hasLoaded = false,
+    this.deletedMessageIds = const {},
   });
 
   GroupChatThreadState copyWith({
@@ -42,6 +53,7 @@ class GroupChatThreadState extends Equatable {
     int? skip,
     int? total,
     bool? hasLoaded,
+    Set<String>? deletedMessageIds,
     bool clearError = false,
   }) {
     return GroupChatThreadState(
@@ -53,6 +65,7 @@ class GroupChatThreadState extends Equatable {
       skip: skip ?? this.skip,
       total: total ?? this.total,
       hasLoaded: hasLoaded ?? this.hasLoaded,
+      deletedMessageIds: deletedMessageIds ?? this.deletedMessageIds,
     );
   }
 
@@ -66,6 +79,7 @@ class GroupChatThreadState extends Equatable {
     skip,
     total,
     hasLoaded,
+    deletedMessageIds,
   ];
 }
 
@@ -699,6 +713,31 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
               )
               .toList(),
     );
+  }
+
+  /// Deletes one of this member's own messages, for everyone.
+  ///
+  /// The row is left in place until the server confirms. A destructive action
+  /// already behind a confirm dialog should not need a rollback that brings
+  /// back a message the user watched disappear.
+  ///
+  /// Returns the failure when the call fails, so the caller can say so.
+  Future<Failure?> deleteMessage(String messageId) async {
+    if (messageId.isEmpty) return null;
+    if (state.deletedMessageIds.contains(messageId)) return null;
+
+    final result = await ref
+        .read(groupChatRepositoryProvider)
+        .deleteMessage(roomId, messageId: messageId);
+
+    if (!mounted) return null;
+
+    return result.fold((failure) => failure, (_) {
+      state = state.copyWith(
+        deletedMessageIds: {...state.deletedMessageIds, messageId},
+      );
+      return null;
+    });
   }
 
   void retry() {

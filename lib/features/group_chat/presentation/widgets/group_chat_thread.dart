@@ -14,6 +14,7 @@ import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reacti
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_thread_rows.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_date_separator.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_delete_dialog.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_emoji_picker.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_empty_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_message_bubble.dart';
@@ -276,7 +277,9 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
       anchor: anchor,
       message: row,
       myEmoji: currentChatReactionEmoji(message.reactions),
-      canDelete: false, // Delete lands with task 6.
+      // Sender-only, and never twice. The backend enforces this too; the gate
+      // is here because the API answers a non-sender attempt generically.
+      canDelete: _canDelete(message),
     );
     if (!mounted || result == null) return;
 
@@ -292,6 +295,38 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     }
   }
 
+  bool _canDelete(ChatMessageDTO message) {
+    if (ref
+        .read(groupChatThreadProvider(widget.roomId))
+        .deletedMessageIds
+        .contains(message.id)) {
+      return false;
+    }
+    return isSelfChatMessage(
+      senderId: message.senderId,
+      senderEmail: message.senderEmail,
+      currentUserId: widget.currentUserId,
+      currentUserEmail: ref.read(userProvider).user?.email,
+    );
+  }
+
+  Future<void> _deleteMessage(ChatMessageDTO message) async {
+    if (!await confirmChatMessageDelete(context)) return;
+    if (!mounted) return;
+
+    // Resolved before the await for the same reason as `_toggleReaction`:
+    // leaving the screen mid-request deactivates this element.
+    final messenger = ScaffoldMessenger.of(context);
+    final failedMessage = context.l10n.group_chat_delete_failed;
+
+    final failure = await ref
+        .read(groupChatThreadProvider(widget.roomId).notifier)
+        .deleteMessage(message.id);
+
+    if (!mounted || failure == null) return;
+    messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
+  }
+
   Future<void> _onAction(
     ChatMessageAction action,
     ChatMessageDTO message,
@@ -305,9 +340,10 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
         messenger.showSnackBar(SnackBar(content: Text(copied)));
       case ChatMessageAction.reply:
         widget.onReply(message);
-      case ChatMessageAction.report:
       case ChatMessageAction.delete:
-        // Wired by tasks 5 and 6.
+        await _deleteMessage(message);
+      case ChatMessageAction.report:
+        // Wired by task 6's reporting half.
         break;
     }
   }
@@ -394,6 +430,8 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
             message: final message,
             isRunStart: final isRunStart,
           ):
+            final isDeleted = state.deletedMessageIds.contains(message.id);
+
             GroupChatMessageBubble bubble({VoidCallback? onLongPress}) {
               return GroupChatMessageBubble(
                 message: message,
@@ -408,6 +446,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
                 selfDisplayName: joinChatName(user?.firstName, user?.lastName),
                 onLongPress: onLongPress,
                 isHighlighted: message.id == _highlightedId,
+                isDeleted: isDeleted,
                 onShowReactions: () => _showReactions(message),
                 onTapQuote:
                     message.parent == null
@@ -419,6 +458,13 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
             // The menu re-renders the row over its own blurred backdrop, so it
             // gets a copy without the long-press handler.
             final lifted = bubble();
+
+            // Nothing on offer for a message that is gone: no menu to react,
+            // quote or copy from, and nothing to swipe a reply at.
+            if (isDeleted) {
+              return KeyedSubtree(key: _rowKey(message.id), child: lifted);
+            }
+
             return KeyedSubtree(
               key: _rowKey(message.id),
               // Swipe and long-press reach the same reply path, so the two

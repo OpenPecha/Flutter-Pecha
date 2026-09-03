@@ -2422,6 +2422,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_chat_delete => 'हटाएँ';
 
   @override
+  String get group_chat_delete_title => 'संदेश हटाएँ?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'यह संदेश इस चैट में सभी के लिए हटा दिया जाएगा।';
+
+  @override
+  String get group_chat_delete_for_everyone => 'सभी के लिए हटाएँ';
+
+  @override
+  String get group_chat_delete_failed => 'संदेश हटाया नहीं जा सका।';
+
+  @override
+  String get group_chat_message_deleted => 'आपने यह संदेश हटा दिया';
+
+  @override
   String get group_chat_reaction_failed =>
       'आपकी प्रतिक्रिया सहेजी नहीं जा सकी।';
 

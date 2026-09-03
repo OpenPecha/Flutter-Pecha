@@ -962,6 +962,11 @@
   "group_chat_copied": "已複製訊息",
   "group_chat_report": "檢舉",
   "group_chat_delete": "刪除",
+  "group_chat_delete_title": "刪除訊息？",
+  "group_chat_delete_confirm_body": "此訊息將為聊天中的所有人刪除。",
+  "group_chat_delete_for_everyone": "為所有人刪除",
+  "group_chat_delete_failed": "無法刪除訊息。",
+  "group_chat_message_deleted": "你已刪除此訊息",
   "group_chat_reaction_failed": "無法儲存你的回應。",
   "group_chat_reactions_count": "{count, plural, =1{1 個回應} other{{count} 個回應}}",
   "@group_chat_reactions_count": {

@@ -1028,6 +1028,11 @@
   "group_chat_copied": "Мессежийг хуулсан",
   "group_chat_report": "Мэдэгдэх",
   "group_chat_delete": "Устгах",
+  "group_chat_delete_title": "Мессежийг устгах уу?",
+  "group_chat_delete_confirm_body": "Энэ мессеж энэ чат дахь бүх хүний хувьд устгагдана.",
+  "group_chat_delete_for_everyone": "Бүгдээс устгах",
+  "group_chat_delete_failed": "Мессежийг устгаж чадсангүй.",
+  "group_chat_message_deleted": "Та энэ мессежийг устгасан",
   "group_chat_reaction_failed": "Таны хариу үйлдлийг хадгалж чадсангүй.",
   "group_chat_reactions_count": "{count, plural, =1{1 хариу үйлдэл} other{{count} хариу үйлдэл}}",
   "@group_chat_reactions_count": {

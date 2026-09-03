@@ -94,6 +94,20 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   Future<Either<Failure, Unit>> markRoomRead(String roomId) async =>
       const Right(unit);
 
+  final List<String> deleteCalls = [];
+  Failure? deleteFailure;
+
+  @override
+  Future<Either<Failure, Unit>> deleteMessage(
+    String roomId, {
+    required String messageId,
+  }) async {
+    deleteCalls.add(messageId);
+    final failure = deleteFailure;
+    if (failure != null) return Left(failure);
+    return const Right(unit);
+  }
+
   @override
   Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
     String roomId, {
@@ -958,6 +972,74 @@ void main() {
 
       final inserted = notifier.state.messages.firstWhere((m) => m.id == 'm1');
       expect(inserted.reactions.single.count, 3);
+    });
+  });
+
+  group('deleteMessage', () {
+    test('tombstones the message once the server confirms', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.deleteMessage('m1');
+
+      expect(failure, isNull);
+      expect(repository.deleteCalls, ['m1']);
+      expect(notifier.state.deletedMessageIds, {'m1'});
+      // The row stays: it is the tombstone. Removing it would move the
+      // pagination cursor for a message the server already dropped.
+      expect(notifier.state.messages.map((m) => m.id), ['m2', 'm1']);
+      expect(notifier.state.skip, 2);
+    });
+
+    test('a failed delete leaves the message standing', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      repository.deleteFailure = const NetworkFailure('offline');
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.deleteMessage('m1');
+
+      // Reported rather than swallowed, and nothing is tombstoned — the
+      // message is still there for everyone.
+      expect(failure, isA<NetworkFailure>());
+      expect(notifier.state.deletedMessageIds, isEmpty);
+      expect(notifier.state.messages, hasLength(1));
+    });
+
+    test('deleting the same message twice sends one request', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.deleteMessage('m1');
+      await notifier.deleteMessage('m1');
+
+      expect(repository.deleteCalls, ['m1']);
+    });
+
+    test('a refresh does not resurrect a tombstoned message', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.deleteMessage('m1');
+      // The server no longer returns it.
+      repository.history = [_message('m2')];
+      await notifier.refreshLatest();
+
+      // Still held, still tombstoned: the marker outlives the refetch that
+      // dropped it, so the row does not silently turn back into a message.
+      expect(notifier.state.messages.map((m) => m.id), ['m2', 'm1']);
+      expect(notifier.state.deletedMessageIds, {'m1'});
     });
   });
 
