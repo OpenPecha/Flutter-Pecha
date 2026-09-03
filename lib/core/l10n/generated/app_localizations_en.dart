@@ -856,6 +856,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_events_filter_empty_in_person => 'No in-person events';
 
   @override
+  String get connect_events_filter_hybrid => 'Hybrid';
+
+  @override
+  String get connect_events_filter_empty_hybrid => 'No hybrid events';
+
+  @override
   String get connect_open => 'Open';
 
   @override

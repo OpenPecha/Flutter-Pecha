@@ -1642,6 +1642,18 @@ abstract class AppLocalizations {
   /// **'No in-person events'**
   String get connect_events_filter_empty_in_person;
 
+  /// No description provided for @connect_events_filter_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get connect_events_filter_hybrid;
+
+  /// No description provided for @connect_events_filter_empty_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'No hybrid events'**
+  String get connect_events_filter_empty_hybrid;
+
   /// No description provided for @connect_open.
   ///
   /// In en, this message translates to:

@@ -282,6 +282,7 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
     required String language,
     int skip = 0,
     int limit = 20,
+    String? eventFormat,
   }) async {
     try {
       final model = await remote.fetchConnectEvents(
@@ -289,6 +290,7 @@ class GroupProfileRepositoryImpl implements GroupProfileRepositoryInterface {
         language: language,
         skip: skip,
         limit: limit,
+        eventFormat: eventFormat,
       );
       return Right(model.toEntity());
     } on ServerException catch (e) {

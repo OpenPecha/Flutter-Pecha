@@ -1,6 +1,16 @@
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 
-enum ConnectEventLocationFilter { all, online, inPerson }
+enum ConnectEventFormatFilter { all, online, offline, hybrid }
+
+extension ConnectEventFormatFilterX on ConnectEventFormatFilter {
+  /// `event_format` query value; null on the "All" tab, which sends no filter.
+  String? get apiValue => switch (this) {
+    ConnectEventFormatFilter.all => null,
+    ConnectEventFormatFilter.online => 'online',
+    ConnectEventFormatFilter.offline => 'offline',
+    ConnectEventFormatFilter.hybrid => 'hybrid',
+  };
+}
 
 bool isGroupEventOnline(GroupEvent event) {
   final locationId = event.locationId?.trim();
@@ -18,15 +28,3 @@ String groupEventLocationLabel(GroupEvent event, String onlineLabel) {
   return onlineLabel;
 }
 
-List<GroupEvent> filterGroupEventsByLocation(
-  List<GroupEvent> events,
-  ConnectEventLocationFilter filter,
-) {
-  return switch (filter) {
-    ConnectEventLocationFilter.all => events,
-    ConnectEventLocationFilter.online =>
-      events.where(isGroupEventOnline).toList(growable: false),
-    ConnectEventLocationFilter.inPerson =>
-      events.where(isGroupEventInPerson).toList(growable: false),
-  };
-}

@@ -868,6 +868,12 @@ class AppLocalizationsBo extends AppLocalizations {
       'ས་ཁུལ་དུའི་བྱེད་སྒོ་མེད།';
 
   @override
+  String get connect_events_filter_hybrid => 'ཟུང་འབྲེལ།';
+
+  @override
+  String get connect_events_filter_empty_hybrid => 'ཟུང་འབྲེལ་བྱེད་སྒོ་མེད།';
+
+  @override
   String get connect_open => 'ཁ་ཕྱེ།';
 
   @override

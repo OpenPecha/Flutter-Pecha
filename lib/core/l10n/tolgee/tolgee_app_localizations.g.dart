@@ -1687,6 +1687,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_events_filter_hybrid => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_hybrid',
+    () => _fallback.connect_events_filter_hybrid,
+  );
+
+  @override
+  String get connect_events_filter_empty_hybrid => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_hybrid',
+    () => _fallback.connect_events_filter_empty_hybrid,
+  );
+
+  @override
   String get connect_open => TolgeeBridge.get(
     localeName,
     'connect_open',

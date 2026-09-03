@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_events_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_filter_utils.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_event_card.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_lazy_segment_mixin.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_my_discover_tab_gate.dart';
@@ -9,6 +10,10 @@ import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_paginated_list_view.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// The Connect events list is unfiltered; format tabs live on the group
+/// events screen.
+final _myEventsProvider = myConnectEventsProvider(ConnectEventFormatFilter.all);
 
 /// Events tab content with My / Discover sub-tabs.
 class ConnectEventsTab extends ConsumerStatefulWidget {
@@ -34,7 +39,7 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
   void loadActiveSegment() {
     if (!isTabActive) return;
     if (selectedSegment == 0) {
-      ref.read(myConnectEventsProvider.notifier).ensureLoaded();
+      ref.read(_myEventsProvider.notifier).ensureLoaded();
     } else {
       ref.read(discoverConnectEventsProvider.notifier).ensureLoaded();
     }
@@ -45,7 +50,7 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
     // Watch both providers unconditionally so they stay alive across
     // My/Discover segment switches; only `loadActiveSegment()` decides
     // when to actually fetch.
-    final myState = ref.watch(myConnectEventsProvider);
+    final myState = ref.watch(_myEventsProvider);
     final discoverState = ref.watch(discoverConnectEventsProvider);
 
     return ConnectMyDiscoverTabGate(
@@ -53,10 +58,10 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
       myIsEmpty: myState.events.isEmpty,
       myHasError: myState.error != null,
       onSegmentChanged: handleSegmentChanged,
-      onMyRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
+      onMyRefresh: () => ref.read(_myEventsProvider.notifier).refresh(),
       onDiscoverRefresh:
           () => ref.read(discoverConnectEventsProvider.notifier).refresh(),
-      onMyLoadMore: () => ref.read(myConnectEventsProvider.notifier).loadMore(),
+      onMyLoadMore: () => ref.read(_myEventsProvider.notifier).loadMore(),
       onDiscoverLoadMore:
           () => ref.read(discoverConnectEventsProvider.notifier).loadMore(),
       myBuilder: (context, switchToDiscover, scrollHeader) {
@@ -71,7 +76,7 @@ class _ConnectEventsTabState extends ConsumerState<ConnectEventsTab>
           error: myState.error,
           hasMore: myState.hasMore,
           hasLoaded: myState.hasLoaded,
-          onRetry: () => ref.read(myConnectEventsProvider.notifier).retry(),
+          onRetry: () => ref.read(_myEventsProvider.notifier).retry(),
           myEmptyState: ConnectMyEmptyState(
             type: ConnectMyEmptyStateType.events,
             onBrowseTap: switchToDiscover,
