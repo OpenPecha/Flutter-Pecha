@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
-import 'package:flutter_pecha/features/practice/presentation/providers/recitation_collections_providers.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/add_chants_to_collection_screen.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +64,7 @@ class _CreateCollectionScreenState
     });
 
     final result = await ref
-        .read(recitationCollectionsRepositoryProvider)
+        .read(myRecitationCollectionsRepositoryProvider)
         .uploadImage(file);
 
     if (!mounted) return;
@@ -158,7 +159,7 @@ class _CreateCollectionScreenState
 
     final textIds = _chants.map((c) => c.textId).toList();
     final result = await ref
-        .read(recitationCollectionsRepositoryProvider)
+        .read(myRecitationCollectionsRepositoryProvider)
         .createCollectionWithItems(
           name: _name,
           imgUrl: imageKey,
@@ -179,6 +180,8 @@ class _CreateCollectionScreenState
         );
       },
       (_) {
+        final languageCode = ref.read(practiceRecitationsLanguageProvider);
+        ref.invalidate(practiceRecitationsPaginatedProvider(languageCode));
         Navigator.of(context).pop();
       },
     );

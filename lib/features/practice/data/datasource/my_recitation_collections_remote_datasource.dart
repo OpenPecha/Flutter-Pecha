@@ -2,22 +2,22 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
-import 'package:flutter_pecha/features/practice/data/models/recitation_collection_models.dart';
+import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 
 /// Remote datasource for `/users/me/recitation-collections`.
 ///
 /// Error handling is centralised in ErrorInterceptor, which converts
 /// DioExceptions to typed AppExceptions that propagate to the repository.
-class RecitationCollectionsRemoteDatasource {
-  RecitationCollectionsRemoteDatasource({required this.dio});
+class MyRecitationCollectionsRemoteDatasource {
+  MyRecitationCollectionsRemoteDatasource({required this.dio});
 
   final Dio dio;
-  final _logger = AppLogger('RecitationCollectionsRemoteDatasource');
+  final _logger = AppLogger('MyRecitationCollectionsRemoteDatasource');
 
   /// POST /users/me/recitation-collections/upload-image
   ///
-  /// Uploads a cover image and returns its storage [RecitationCollectionImageUploadResponse.key].
-  Future<RecitationCollectionImageUploadResponse> uploadImage(File file) async {
+  /// Uploads a cover image and returns its storage [MyRecitationCollectionImageUploadResponse.key].
+  Future<MyRecitationCollectionImageUploadResponse> uploadImage(File file) async {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(
         file.path,
@@ -35,15 +35,15 @@ class RecitationCollectionsRemoteDatasource {
         'Unexpected /users/me/recitation-collections/upload-image payload type',
       );
     }
-    return RecitationCollectionImageUploadResponse.fromJson(data);
+    return MyRecitationCollectionImageUploadResponse.fromJson(data);
   }
 
   /// POST /users/me/recitation-collections
   ///
   /// Creates a new collection for the authenticated user.
-  /// Pass [CreateRecitationCollectionRequest.imgUrl] from a prior upload `key`.
-  Future<RecitationCollectionModel> createCollection(
-    CreateRecitationCollectionRequest request,
+  /// Pass [CreateMyRecitationCollectionRequest.imgUrl] from a prior upload `key`.
+  Future<MyRecitationCollectionModel> createCollection(
+    CreateMyRecitationCollectionRequest request,
   ) async {
     final response = await dio.post(
       '/users/me/recitation-collections',
@@ -55,20 +55,36 @@ class RecitationCollectionsRemoteDatasource {
         'Unexpected /users/me/recitation-collections create payload type',
       );
     }
-    return RecitationCollectionModel.fromJson(data);
+    return MyRecitationCollectionModel.fromJson(data);
+  }
+
+  /// GET /users/me/recitation-collections/{collectionId}
+  Future<MyRecitationCollectionDetailModel> getCollectionDetail(
+    String collectionId,
+  ) async {
+    final response = await dio.get(
+      '/users/me/recitation-collections/$collectionId',
+    );
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Unexpected /users/me/recitation-collections detail payload type',
+      );
+    }
+    return MyRecitationCollectionDetailModel.fromJson(data);
   }
 
   /// POST /users/me/recitation-collections/{collectionId}/items
   ///
   /// Adds chants to an existing collection. Items are posted one at a time so
   /// display order matches the UI and a single bad row does not fail the batch.
-  Future<AddRecitationCollectionItemsResponse> addItemsToCollection({
+  Future<AddMyRecitationCollectionItemsResponse> addItemsToCollection({
     required String collectionId,
     required List<String> textIds,
   }) async {
     final uniqueIds = _uniqueNonEmptyTextIds(textIds);
     if (uniqueIds.isEmpty) {
-      return AddRecitationCollectionItemsResponse(
+      return AddMyRecitationCollectionItemsResponse(
         collectionId: collectionId,
         addedCount: 0,
       );
@@ -78,7 +94,7 @@ class RecitationCollectionsRemoteDatasource {
       'Adding ${uniqueIds.length} chant(s) to collection $collectionId',
     );
 
-    final allItems = <RecitationCollectionItemModel>[];
+    final allItems = <MyRecitationCollectionItemModel>[];
     var addedCount = 0;
 
     for (final textId in uniqueIds) {
@@ -98,18 +114,18 @@ class RecitationCollectionsRemoteDatasource {
       }
     }
 
-    return AddRecitationCollectionItemsResponse(
+    return AddMyRecitationCollectionItemsResponse(
       collectionId: collectionId,
       addedCount: addedCount,
       items: allItems,
     );
   }
 
-  Future<AddRecitationCollectionItemsResponse> _postItems({
+  Future<AddMyRecitationCollectionItemsResponse> _postItems({
     required String collectionId,
     required List<String> textIds,
   }) async {
-    final payload = AddRecitationCollectionItemsRequest(textIds: textIds).toJson();
+    final payload = AddMyRecitationCollectionItemsRequest(textIds: textIds).toJson();
     _logger.debug('POST .../items payload: $payload');
 
     final response = await dio.post(
@@ -122,7 +138,7 @@ class RecitationCollectionsRemoteDatasource {
         'Unexpected /users/me/recitation-collections/items payload type',
       );
     }
-    return AddRecitationCollectionItemsResponse.fromJson(data);
+    return AddMyRecitationCollectionItemsResponse.fromJson(data);
   }
 
   static List<String> _uniqueNonEmptyTextIds(List<String> textIds) {

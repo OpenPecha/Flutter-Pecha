@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_pecha/core/error/exception_mapper.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
-import 'package:flutter_pecha/features/practice/data/datasource/recitation_collections_remote_datasource.dart';
-import 'package:flutter_pecha/features/practice/data/models/recitation_collection_models.dart';
+import 'package:flutter_pecha/features/practice/data/datasource/my_recitation_collections_remote_datasource.dart';
+import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 
-class RecitationCollectionsRepository {
-  final RecitationCollectionsRemoteDatasource remoteDatasource;
+class MyRecitationCollectionsRepository {
+  final MyRecitationCollectionsRemoteDatasource remoteDatasource;
 
-  RecitationCollectionsRepository({required this.remoteDatasource});
+  MyRecitationCollectionsRepository({required this.remoteDatasource});
 
-  Future<Either<Failure, RecitationCollectionImageUploadResponse>>
+  Future<Either<Failure, MyRecitationCollectionImageUploadResponse>>
   uploadImage(File file) async {
     try {
       final result = await remoteDatasource.uploadImage(file);
@@ -23,13 +23,13 @@ class RecitationCollectionsRepository {
     }
   }
 
-  Future<Either<Failure, RecitationCollectionModel>> createCollection({
+  Future<Either<Failure, MyRecitationCollectionModel>> createCollection({
     required String name,
     required String imgUrl,
   }) async {
     try {
       final result = await remoteDatasource.createCollection(
-        CreateRecitationCollectionRequest(name: name, imgUrl: imgUrl),
+        CreateMyRecitationCollectionRequest(name: name, imgUrl: imgUrl),
       );
       return Right(result);
     } catch (e) {
@@ -39,7 +39,20 @@ class RecitationCollectionsRepository {
     }
   }
 
-  Future<Either<Failure, AddRecitationCollectionItemsResponse>>
+  Future<Either<Failure, MyRecitationCollectionDetailModel>> getCollectionDetail(
+    String collectionId,
+  ) async {
+    try {
+      final result = await remoteDatasource.getCollectionDetail(collectionId);
+      return Right(result);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to load collection'),
+      );
+    }
+  }
+
+  Future<Either<Failure, AddMyRecitationCollectionItemsResponse>>
   addItemsToCollection({
     required String collectionId,
     required List<String> textIds,
@@ -58,7 +71,7 @@ class RecitationCollectionsRepository {
   }
 
   /// Creates a collection, then adds [textIds] when non-empty.
-  Future<Either<Failure, RecitationCollectionModel>> createCollectionWithItems({
+  Future<Either<Failure, MyRecitationCollectionModel>> createCollectionWithItems({
     required String name,
     required String imgUrl,
     required List<String> textIds,

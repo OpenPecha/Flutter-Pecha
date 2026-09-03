@@ -4,13 +4,13 @@
 // Separate from group-scoped collections (`GroupRecitationCollectionModel`).
 
 /// Request body for `POST /users/me/recitation-collections`.
-class CreateRecitationCollectionRequest {
+class CreateMyRecitationCollectionRequest {
   final String name;
 
-  /// Storage key returned by [RecitationCollectionImageUploadResponse.key].
+  /// Storage key returned by [MyRecitationCollectionImageUploadResponse.key].
   final String imgUrl;
 
-  const CreateRecitationCollectionRequest({
+  const CreateMyRecitationCollectionRequest({
     required this.name,
     required this.imgUrl,
   });
@@ -22,21 +22,21 @@ class CreateRecitationCollectionRequest {
 }
 
 /// Nested image URLs from `POST .../upload-image`.
-class RecitationCollectionUploadedImage {
+class MyRecitationCollectionUploadedImage {
   final String? thumbnail;
   final String? medium;
   final String? original;
 
-  const RecitationCollectionUploadedImage({
+  const MyRecitationCollectionUploadedImage({
     this.thumbnail,
     this.medium,
     this.original,
   });
 
-  factory RecitationCollectionUploadedImage.fromJson(
+  factory MyRecitationCollectionUploadedImage.fromJson(
     Map<String, dynamic> json,
   ) {
-    return RecitationCollectionUploadedImage(
+    return MyRecitationCollectionUploadedImage(
       thumbnail: json['thumbnail'] as String?,
       medium: json['medium'] as String?,
       original: json['original'] as String?,
@@ -48,30 +48,30 @@ class RecitationCollectionUploadedImage {
 }
 
 /// Response from `POST /users/me/recitation-collections/upload-image` (201).
-class RecitationCollectionImageUploadResponse {
-  final RecitationCollectionUploadedImage? image;
+class MyRecitationCollectionImageUploadResponse {
+  final MyRecitationCollectionUploadedImage? image;
 
   /// Pass this value as `img_url` when creating/updating a collection.
   final String key;
   final String? path;
   final String? message;
 
-  const RecitationCollectionImageUploadResponse({
+  const MyRecitationCollectionImageUploadResponse({
     required this.key,
     this.image,
     this.path,
     this.message,
   });
 
-  factory RecitationCollectionImageUploadResponse.fromJson(
+  factory MyRecitationCollectionImageUploadResponse.fromJson(
     Map<String, dynamic> json,
   ) {
     final imageJson = json['image'];
-    return RecitationCollectionImageUploadResponse(
+    return MyRecitationCollectionImageUploadResponse(
       key: json['key'] as String? ?? '',
       image:
           imageJson is Map<String, dynamic>
-              ? RecitationCollectionUploadedImage.fromJson(imageJson)
+              ? MyRecitationCollectionUploadedImage.fromJson(imageJson)
               : null,
       path: json['path'] as String?,
       message: json['message'] as String?,
@@ -80,14 +80,14 @@ class RecitationCollectionImageUploadResponse {
 }
 
 /// Response from `POST /users/me/recitation-collections` (201).
-class RecitationCollectionModel {
+class MyRecitationCollectionModel {
   final String id;
   final String name;
   final String? imgUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  const RecitationCollectionModel({
+  const MyRecitationCollectionModel({
     required this.id,
     required this.name,
     this.imgUrl,
@@ -95,8 +95,8 @@ class RecitationCollectionModel {
     this.updatedAt,
   });
 
-  factory RecitationCollectionModel.fromJson(Map<String, dynamic> json) {
-    return RecitationCollectionModel(
+  factory MyRecitationCollectionModel.fromJson(Map<String, dynamic> json) {
+    return MyRecitationCollectionModel(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       imgUrl: json['img_url'] as String?,
@@ -109,17 +109,55 @@ class RecitationCollectionModel {
       value is String ? DateTime.tryParse(value) : null;
 }
 
+/// Response from `GET /users/me/recitation-collections/{id}` (200).
+class MyRecitationCollectionDetailModel {
+  final String id;
+  final String name;
+  final String? imgUrl;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final List<MyRecitationCollectionItemModel> items;
+
+  const MyRecitationCollectionDetailModel({
+    required this.id,
+    required this.name,
+    this.imgUrl,
+    this.createdAt,
+    this.updatedAt,
+    this.items = const [],
+  });
+
+  factory MyRecitationCollectionDetailModel.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'] as List<dynamic>? ?? const [];
+    final items =
+        rawItems
+            .whereType<Map<String, dynamic>>()
+            .map(MyRecitationCollectionItemModel.fromJson)
+            .toList()
+          ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+
+    return MyRecitationCollectionDetailModel(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      imgUrl: json['img_url'] as String?,
+      createdAt: MyRecitationCollectionModel._parseDate(json['created_at']),
+      updatedAt: MyRecitationCollectionModel._parseDate(json['updated_at']),
+      items: items,
+    );
+  }
+}
+
 /// Request body for `POST /users/me/recitation-collections/{id}/items`.
-class AddRecitationCollectionItemsRequest {
+class AddMyRecitationCollectionItemsRequest {
   final List<String> textIds;
 
-  const AddRecitationCollectionItemsRequest({required this.textIds});
+  const AddMyRecitationCollectionItemsRequest({required this.textIds});
 
   Map<String, dynamic> toJson() => {'text_ids': textIds};
 }
 
 /// A chant row returned after adding items to a collection.
-class RecitationCollectionItemModel {
+class MyRecitationCollectionItemModel {
   final String id;
   final String textId;
   final String? title;
@@ -127,7 +165,7 @@ class RecitationCollectionItemModel {
   final String? type;
   final int displayOrder;
 
-  const RecitationCollectionItemModel({
+  const MyRecitationCollectionItemModel({
     required this.id,
     required this.textId,
     this.title,
@@ -136,8 +174,8 @@ class RecitationCollectionItemModel {
     this.displayOrder = 0,
   });
 
-  factory RecitationCollectionItemModel.fromJson(Map<String, dynamic> json) {
-    return RecitationCollectionItemModel(
+  factory MyRecitationCollectionItemModel.fromJson(Map<String, dynamic> json) {
+    return MyRecitationCollectionItemModel(
       id: json['id'] as String? ?? '',
       textId: json['text_id'] as String? ?? '',
       title: json['title'] as String?,
@@ -149,28 +187,28 @@ class RecitationCollectionItemModel {
 }
 
 /// Response from `POST /users/me/recitation-collections/{id}/items` (201).
-class AddRecitationCollectionItemsResponse {
+class AddMyRecitationCollectionItemsResponse {
   final String collectionId;
   final int addedCount;
-  final List<RecitationCollectionItemModel> items;
+  final List<MyRecitationCollectionItemModel> items;
 
-  const AddRecitationCollectionItemsResponse({
+  const AddMyRecitationCollectionItemsResponse({
     required this.collectionId,
     required this.addedCount,
     this.items = const [],
   });
 
-  factory AddRecitationCollectionItemsResponse.fromJson(
+  factory AddMyRecitationCollectionItemsResponse.fromJson(
     Map<String, dynamic> json,
   ) {
     final rawItems = json['items'] as List<dynamic>? ?? const [];
-    return AddRecitationCollectionItemsResponse(
+    return AddMyRecitationCollectionItemsResponse(
       collectionId: json['collection_id'] as String? ?? '',
       addedCount: (json['added_count'] as num?)?.toInt() ?? 0,
       items:
           rawItems
               .whereType<Map<String, dynamic>>()
-              .map(RecitationCollectionItemModel.fromJson)
+              .map(MyRecitationCollectionItemModel.fromJson)
               .toList(),
     );
   }

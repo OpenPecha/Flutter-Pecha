@@ -9,8 +9,10 @@ import 'package:flutter_pecha/features/practice/presentation/screens/recitations
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/new_collection_dialog.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/practice_chant_list_tile.dart';
+import 'package:flutter_pecha/features/practice/presentation/widgets/practice_my_chants_collection_list_tile.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_list_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class AllRecitationsScreen extends ConsumerStatefulWidget {
   const AllRecitationsScreen({super.key});
@@ -114,13 +116,13 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     PracticeRecitationsState state,
     String languageCode,
   ) {
-    if (state.isLoading && state.recitations.isEmpty) {
+    if (state.isLoading && state.isEmpty) {
       return const RecitationListSkeleton(
         variant: RecitationListSkeletonVariant.chantTile,
       );
     }
 
-    if (state.error != null && state.recitations.isEmpty) {
+    if (state.error != null && state.isEmpty) {
       return ErrorStateWidget(
         error: state.error!,
         onRetry:
@@ -135,16 +137,35 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
       );
     }
 
-    if (state.recitations.isEmpty) {
+    if (state.isEmpty) {
       return Center(child: Text(context.l10n.recitations_no_content));
     }
+
+    final collectionCount = state.collections.length;
+    final recitationCount = state.recitations.length;
 
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.only(top: 8, bottom: 88),
-      itemCount: state.recitations.length + (state.hasMore ? 1 : 0),
+      itemCount:
+          collectionCount + recitationCount + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == state.recitations.length) {
+        if (index < collectionCount) {
+          final collection = state.collections[index];
+          return PracticeMyChantsCollectionListTile(
+            collection: collection,
+            onTap: () {
+              context.pushNamed(
+                'my-recitation-collection',
+                pathParameters: {'collectionId': collection.collectionId},
+                extra: {'title': collection.name},
+              );
+            },
+          );
+        }
+
+        final recitationIndex = index - collectionCount;
+        if (recitationIndex == recitationCount) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Center(
@@ -156,7 +177,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
           );
         }
 
-        final recitation = state.recitations[index];
+        final recitation = state.recitations[recitationIndex];
         return PracticeChantListTile(
           recitation: recitation,
           onTap: () => openRecitationReader(

@@ -115,6 +115,9 @@ class ProtectedRoutes {
     '/groups/author/posts/{postId}/comments',
     // Group feeds: sends auth when logged in for user-specific fields.
     '/author/groups/feeds',
+    // Chant catalogue is public; when logged in, Bearer is required for
+    // `should_include_collections` / group-collection enrichment to return.
+    '/recitations',
   ];
 
   /// Check if a given path is protected (requires authentication).
