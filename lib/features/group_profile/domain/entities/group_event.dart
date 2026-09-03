@@ -80,6 +80,9 @@ class GroupEvent {
   final String? locationId;
   final GroupEventLocation? location;
 
+  /// `event_format` from the API: "online", "offline" or "hybrid".
+  final String? eventFormat;
+
   const GroupEvent({
     required this.id,
     required this.groupId,
@@ -103,6 +106,7 @@ class GroupEvent {
     this.groupAvatarUrl,
     this.locationId,
     this.location,
+    this.eventFormat,
   });
 }
 

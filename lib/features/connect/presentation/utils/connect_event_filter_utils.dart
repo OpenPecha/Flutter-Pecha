@@ -13,18 +13,28 @@ extension ConnectEventFormatFilterX on ConnectEventFormatFilter {
 }
 
 bool isGroupEventOnline(GroupEvent event) {
+  final format = event.eventFormat;
+  if (format != null) return format == ConnectEventFormatFilter.online.apiValue;
   final locationId = event.locationId?.trim();
   return locationId == null || locationId.isEmpty;
 }
 
-bool isGroupEventInPerson(GroupEvent event) => !isGroupEventOnline(event);
+bool isGroupEventHybrid(GroupEvent event) =>
+    event.eventFormat == ConnectEventFormatFilter.hybrid.apiValue;
 
-String groupEventLocationLabel(GroupEvent event, String onlineLabel) {
-  final locationId = event.locationId?.trim();
-  if (locationId != null && locationId.isNotEmpty) {
-    final name = event.location?.name.trim();
-    if (name != null && name.isNotEmpty) return name;
+/// Location name for the event, suffixed with [hybridLabel] on hybrid events
+/// since they run in person and online at once.
+String groupEventLocationLabel(
+  GroupEvent event,
+  String onlineLabel, {
+  String? hybridLabel,
+}) {
+  final name = event.location?.name.trim();
+  final hasName = name != null && name.isNotEmpty;
+
+  if (isGroupEventHybrid(event) && hybridLabel != null) {
+    return hasName ? '$name / $hybridLabel' : hybridLabel;
   }
+  if (hasName && !isGroupEventOnline(event)) return name;
   return onlineLabel;
 }
-
