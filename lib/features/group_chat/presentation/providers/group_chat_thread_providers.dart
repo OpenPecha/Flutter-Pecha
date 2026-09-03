@@ -108,7 +108,8 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// messages are ignored until the swap settles.
   final Set<String> _swapping = {};
 
-  /// The last summary that arrived for a message while it was mid-swap.
+  /// Every summary that arrived for a message while it was mid-swap, in
+  /// arrival order.
   ///
   /// Dropping these outright loses a reaction another member added during the
   /// swap. Replaying one blindly is just as wrong: the broadcast fans out to
@@ -118,7 +119,12 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// tie is broken on content once the swap settles: a summary is adopted only
   /// if it agrees with what this member is known to hold on the server, which
   /// an intermediate echo never does.
-  final Map<String, List<ChatMessageReactionDTO>> _deferredReactions = {};
+  ///
+  /// All of them, not the last: the same missing order means a member's
+  /// summary that does agree can be followed by an echo that does not, and a
+  /// single slot let the echo overwrite the one worth keeping.
+  final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions =
+      {};
 
   /// Bumped whenever a message's reactions change locally. A refetch compares
   /// the value it saw before its request with the value on arrival: checking
@@ -316,6 +322,48 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
           else
             message.copyWith(reactions: resolve(message.reactions)),
       ];
+      final fetchedIds = {for (final message in fetched) message.id};
+
+      /// Rows `appendLive` prepended since [knownBefore] was taken, minus any
+      /// this page already carries.
+      ///
+      /// "Not held before and not in this page" is not enough on its own:
+      /// nothing stops `loadMore` finishing inside the same window — it gates
+      /// on `isLoadingMore` and `isLoading`, and a refresh sets neither — and
+      /// the older page it appends fits that description too, while already
+      /// being inside the server's count. Position separates them. The rows
+      /// held when the request went out form one contiguous block, because
+      /// the two writers add at opposite ends of it: `appendLive` prepends an
+      /// arrival above the block, `loadMore` appends history below it. So
+      /// everything above the first held row came over the socket and is
+      /// newer than this page; everything below the last came from `loadMore`
+      /// and the server has already counted it. Cutting at the first held row
+      /// rather than at a page row is what lets this hold for a page that
+      /// shares nothing with what is held. Rows the page carries are excluded
+      /// by id: the socket does not promise creation order, so an arrival the
+      /// page includes can land on top of one it does not.
+      List<ChatMessageDTO> arrivedSince(Set<String> pageIds) {
+        final firstKnown = state.messages.indexWhere(
+          (message) => knownBefore.contains(message.id),
+        );
+        // Every held row was in `knownBefore` and nothing removes rows, so
+        // this is unreachable today. Should it ever be reached the two cannot
+        // be told apart, and misordering older history is the lesser harm
+        // next to dropping what the socket delivered.
+        if (firstKnown < 0) {
+          return state.messages
+              .where(
+                (message) =>
+                    !knownBefore.contains(message.id) &&
+                    !pageIds.contains(message.id),
+              )
+              .toList();
+        }
+        return state.messages
+            .take(firstKnown)
+            .where((message) => !pageIds.contains(message.id))
+            .toList();
+      }
 
       if (state.messages.isEmpty) {
         final messages = fetched.map(withPending).toList();
@@ -341,18 +389,12 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       );
       if (!overlaps && fetched.length >= _limit) {
         // Restarting must not throw away what the restored socket delivered
-        // while this page was in flight. Those messages are newer than the
-        // page, so they sit above it — and being newer, they are not in the
-        // count the server sent with it either.
-        final fetchedIds = fetched.map((message) => message.id).toSet();
-        final arrivedDuring =
-            state.messages
-                .where(
-                  (message) =>
-                      !knownBefore.contains(message.id) &&
-                      !fetchedIds.contains(message.id),
-                )
-                .toList();
+        // while this page was in flight: those rows are newer than the page,
+        // so they sit above it, and the count that came with it predates
+        // them. Older history `loadMore` appended meanwhile is neither — it
+        // is what the restart will walk back through, and `arrivedSince`
+        // keeps it out of both the list and the count.
+        final arrivedDuring = arrivedSince(fetchedIds);
 
         final messages = [...arrivedDuring, ...fetched.map(withPending)];
         final total = page.total + arrivedDuring.length;
@@ -375,36 +417,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       final fetchedById = {for (final message in fetched) message.id: message};
 
       // What the socket delivered while the request was in flight, which the
-      // count that came back with it cannot include.
-      //
-      // "Not held before and not in this page" is not enough on its own:
-      // nothing stops `loadMore` finishing inside the same window — it gates
-      // on `isLoadingMore` and `isLoading`, and a refresh sets neither — and
-      // the older page it appends is already inside the server's count.
-      // Position separates them. The list is newest-first and the two writers
-      // add at opposite ends: `appendLive` prepends an arrival, `loadMore`
-      // appends older history. So everything the socket delivered sits above
-      // the *last* row this page shares with what is held, and everything
-      // `loadMore` appended sits below it. The last shared row, not the first:
-      // the socket does not promise creation order, and an arrival the page
-      // does include can land on top of one it does not — cutting at the
-      // first shared row would hide the second. Rows the page carries are
-      // excluded by id since they are already in its count. Counted before
-      // the page's own rows are inserted further down.
-      final lastFromPage = state.messages.lastIndexWhere(
-        (message) => fetchedById.containsKey(message.id),
-      );
-      final arrivedDuring =
-          lastFromPage < 0
-              ? 0
-              : state.messages
-                  .take(lastFromPage)
-                  .where(
-                    (message) =>
-                        !knownBefore.contains(message.id) &&
-                        !fetchedById.containsKey(message.id),
-                  )
-                  .length;
+      // count that came back with it cannot include. Counted before the
+      // page's own rows are inserted further down.
+      final arrivedDuring = arrivedSince(fetchedIds).length;
 
       state = state.copyWith(
         messages:
@@ -465,9 +480,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     String? currentUserEmail,
   }) {
     if (_swapping.contains(messageId)) {
-      // Held, not dropped. Only the newest one can still be current, and it is
-      // judged against the swap's own result once that lands.
-      _deferredReactions[messageId] = reactions;
+      // Held, not dropped: each is judged against the swap's own result once
+      // that lands.
+      (_deferredReactions[messageId] ??= []).add(reactions);
       return;
     }
     _applyReactions(
@@ -488,29 +503,35 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     final deferred = _deferredReactions.remove(messageId);
     if (deferred == null) return;
 
-    final own = _ownFromSummary(
-      deferred,
-      currentUserId: currentUserId,
-      currentUserEmail: currentUserEmail,
-    );
-    // Unidentifiable is not the same as newer: with no way to tell whose
-    // reactions these are, a later broadcast cannot be told from our own echo,
-    // and what the swap applied came from a confirmed call.
-    if (own == null) return;
-
-    // An echo from inside the swap still shows the emoji being replaced, so it
-    // disagrees with the settled set and is discarded. Anything that agrees
-    // was computed after the swap and may carry another member's reaction the
-    // swap's own response was too early to include.
     final settled = _serverOwn[messageId] ?? const <String>{};
-    if (own.length != settled.length || !own.every(settled.contains)) return;
+    // Newest first, so the latest summary that qualifies is the one adopted.
+    for (final summary in deferred.reversed) {
+      final own = _ownFromSummary(
+        summary,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+      // Unidentifiable is not the same as newer: with no way to tell whose
+      // reactions these are, a later broadcast cannot be told from our own
+      // echo, and what the swap applied came from a confirmed call.
+      if (own == null) continue;
 
-    _applyReactions(
-      messageId,
-      deferred,
-      currentUserId: currentUserId,
-      currentUserEmail: currentUserEmail,
-    );
+      // An echo from inside the swap still shows the emoji being replaced, so
+      // it disagrees with the settled set and is passed over. Anything that
+      // agrees was computed after the swap and may carry another member's
+      // reaction the swap's own response was too early to include.
+      if (own.length != settled.length || !own.every(settled.contains)) {
+        continue;
+      }
+
+      _applyReactions(
+        messageId,
+        summary,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+      return;
+    }
   }
 
   void _applyReactions(

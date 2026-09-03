@@ -495,6 +495,134 @@ void main() {
       expect(notifier.state.hasMore, isFalse);
     });
 
+    test('a loadMore landing mid-restart is neither prepended nor counted',
+        () async {
+      // 60 on the server: the first page holds m0..m29, loadMore can fetch
+      // m30..m59.
+      repository = _FakeGroupChatRepository(
+        history: [for (var i = 0; i < 60; i++) _message('m$i')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final hold = Completer<void>();
+      repository.holdNextList = hold;
+      final refreshing = notifier.refreshLatest();
+      await Future<void>.delayed(Duration.zero);
+
+      // Older history lands while the refresh is still awaiting its page.
+      await notifier.loadMore();
+      expect(notifier.state.messages, hasLength(60));
+
+      // Meanwhile 30 new messages arrived on the server, so the newest page
+      // comes back full and shares nothing with what is held: a restart.
+      repository.history = [
+        for (var i = 0; i < 30; i++) _message('n$i'),
+        ...repository.history,
+      ];
+      hold.complete();
+      await refreshing;
+
+      final ids = notifier.state.messages.map((m) => m.id).toList();
+      // Only the newest page. The older rows loadMore appended are history
+      // the restart walks back through, not arrivals to sit on top of it.
+      expect(ids, [for (var i = 0; i < 30; i++) 'n$i']);
+      // 90 on the server, and nothing the socket added on top of that.
+      expect(notifier.state.total, 90);
+      expect(notifier.state.hasMore, isTrue);
+    });
+
+    test('a socket arrival mid-restart still sits above the new page',
+        () async {
+      repository = _FakeGroupChatRepository(
+        history: [for (var i = 0; i < 30; i++) _message('m$i')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final hold = Completer<void>();
+      repository.holdNextList = hold;
+      final refreshing = notifier.refreshLatest();
+      await Future<void>.delayed(Duration.zero);
+
+      notifier.appendLive(_message('live'));
+      repository.history = [
+        for (var i = 0; i < 30; i++) _message('n$i'),
+        ...repository.history,
+      ];
+      hold.complete();
+      await refreshing;
+
+      final ids = notifier.state.messages.map((m) => m.id).toList();
+      expect(ids.first, 'live');
+      expect(ids.sublist(1), [for (var i = 0; i < 30; i++) 'n$i']);
+      // 60 on the server plus the arrival its count predates.
+      expect(notifier.state.total, 61);
+    });
+
+    test('a replayable broadcast survives a later echo during the swap',
+        () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+              userIds: ['me'],
+            ),
+          ]),
+        ],
+      );
+      repository.reactionResponses = const [
+        [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me'])],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final pending = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+        currentUserId: 'me',
+      );
+      // Another member's summary, computed after our swap settled on the
+      // server, arrives first...
+      notifier.replaceReactions(
+        'm1',
+        const [
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: joy, count: 1, userIds: ['other']),
+        ],
+        currentUserId: 'me',
+      );
+      // ...and our own intermediate echo lands after it. Nothing on the wire
+      // orders them, and a single deferred slot let the echo overwrite the
+      // one summary worth keeping.
+      notifier.replaceReactions(
+        'm1',
+        const [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+        ],
+        currentUserId: 'me',
+      );
+
+      await pending;
+      final emoji =
+          notifier.state.messages.single.reactions
+              .map((reaction) => reaction.emoji)
+              .toList();
+      expect(emoji, containsAll(<String>[heart, joy]));
+    });
+
     test('an out-of-order socket arrival mid-refresh is still counted',
         () async {
       // 31 on the server, so the first page of 30 leaves m31 unread.
