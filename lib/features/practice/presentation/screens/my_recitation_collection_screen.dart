@@ -6,14 +6,16 @@ import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
+import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
+import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// Detail screen for a user-created recitation collection
 /// (`GET /users/me/recitation-collections/{id}`).
 ///
-/// Layout matches [GroupRecitationCollectionScreen]. Item / action taps are
-/// intentionally no-ops until follow-up work wires them.
+/// Layout matches [GroupRecitationCollectionScreen]. Tapping a chant opens the
+/// shared reader using the item's `text_id` and `language`.
 class MyRecitationCollectionScreen extends ConsumerWidget {
   const MyRecitationCollectionScreen({
     super.key,
@@ -56,6 +58,7 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                       (collection) => _CollectionContent(
                         collection: collection,
                         isDark: isDark,
+                        onOpenItem: (item) => _openChantReader(context, item),
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -74,6 +77,25 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _openChantReader(
+  BuildContext context,
+  MyRecitationCollectionItemModel item,
+) {
+  final textId = item.textId.trim();
+  if (textId.isEmpty) return;
+
+  final title = item.title?.trim().isNotEmpty == true ? item.title! : textId;
+
+  openRecitationReader(
+    context,
+    RecitationModel(
+      textId: textId,
+      title: title,
+      language: item.language,
+    ),
+  );
 }
 
 class _CollectionAppBar extends StatelessWidget {
@@ -117,10 +139,12 @@ class _CollectionContent extends StatelessWidget {
   const _CollectionContent({
     required this.collection,
     required this.isDark,
+    required this.onOpenItem,
   });
 
   final MyRecitationCollectionDetailModel collection;
   final bool isDark;
+  final ValueChanged<MyRecitationCollectionItemModel> onOpenItem;
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +167,7 @@ class _CollectionContent extends StatelessWidget {
                     (item) => _RecitationCollectionRow(
                       item: item,
                       isDark: isDark,
-                      onTap: () {},
+                      onTap: () => onOpenItem(item),
                     ),
                   )
                 else
