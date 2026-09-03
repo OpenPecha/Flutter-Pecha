@@ -562,6 +562,63 @@ void main() {
       expect(notifier.state.total, 61);
     });
 
+    test('a no-op echo arriving after a member update does not shadow it',
+        () async {
+      repository = _FakeGroupChatRepository(
+        history: [
+          reacted('m1', const [
+            ChatMessageReactionDTO(
+              emoji: thumbsUp,
+              count: 1,
+              reactedByMe: true,
+              userIds: ['me'],
+            ),
+          ]),
+        ],
+      );
+      repository.reactionResponses = const [
+        [
+          ChatMessageReactionDTO(emoji: thumbsUp, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+        ],
+        [ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me'])],
+      ];
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final pending = notifier.toggleReaction(
+        'm1',
+        heart,
+        roomIdForCall: 'room-1',
+        currentUserId: 'me',
+      );
+      // Another member's fuller update arrives first...
+      notifier.replaceReactions(
+        'm1',
+        const [
+          ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me']),
+          ChatMessageReactionDTO(emoji: joy, count: 1, userIds: ['other']),
+        ],
+        currentUserId: 'me',
+      );
+      // ...then our own DELETE echo, computed at the same instant as the
+      // response the swap already applied, lands after it. It agrees with the
+      // settled set too; taking it as "latest" would drop the member's joy.
+      notifier.replaceReactions(
+        'm1',
+        const [ChatMessageReactionDTO(emoji: heart, count: 1, userIds: ['me'])],
+        currentUserId: 'me',
+      );
+
+      await pending;
+      final emoji =
+          notifier.state.messages.single.reactions
+              .map((reaction) => reaction.emoji)
+              .toList();
+      expect(emoji, containsAll(<String>[heart, joy]));
+    });
+
     test('a replayable broadcast survives a later echo during the swap',
         () async {
       repository = _FakeGroupChatRepository(

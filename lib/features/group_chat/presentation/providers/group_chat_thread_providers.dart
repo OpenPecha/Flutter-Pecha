@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/chat_link_preview_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
@@ -122,7 +123,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   ///
   /// All of them, not the last: the same missing order means a member's
   /// summary that does agree can be followed by an echo that does not, and a
-  /// single slot let the echo overwrite the one worth keeping.
+  /// single slot let the echo overwrite the one worth keeping. Among those
+  /// that agree, one that would change nothing is passed over for the same
+  /// reason — see [_replayDeferredReaction].
   final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions =
       {};
 
@@ -503,6 +506,11 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     final deferred = _deferredReactions.remove(messageId);
     if (deferred == null) return;
 
+    final index = state.messages.indexWhere(
+      (message) => message.id == messageId,
+    );
+    if (index < 0) return;
+    final current = state.messages[index].reactions;
     final settled = _serverOwn[messageId] ?? const <String>{};
     // Newest first, so the latest summary that qualifies is the one adopted.
     for (final summary in deferred.reversed) {
@@ -523,6 +531,19 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       if (own.length != settled.length || !own.every(settled.contains)) {
         continue;
       }
+
+      // A summary that would change nothing cannot be newer than what is
+      // shown, and must not shadow an earlier one that would. The swap's own
+      // echo carries exactly the state its response already applied, and
+      // with nothing on the wire to order them it can land after a member's
+      // fuller update rather than before it — adopting it as "latest" would
+      // drop that member's reaction.
+      final resolved = chatReactionsForViewer(
+        summary,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+      if (listEquals(resolved, current)) continue;
 
       _applyReactions(
         messageId,
