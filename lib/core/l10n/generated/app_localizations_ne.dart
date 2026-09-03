@@ -870,6 +870,13 @@ class AppLocalizationsNe extends AppLocalizations {
       'कुनै प्रत्यक्ष कार्यक्रम छैन';
 
   @override
+  String get connect_events_filter_hybrid => 'हाइब्रिड';
+
+  @override
+  String get connect_events_filter_empty_hybrid =>
+      'कुनै हाइब्रिड कार्यक्रम छैन';
+
+  @override
   String get connect_open => 'खोल्नुहोस्';
 
   @override

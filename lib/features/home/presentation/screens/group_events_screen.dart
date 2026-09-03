@@ -20,6 +20,7 @@ class GroupEventsScreen extends ConsumerStatefulWidget {
 class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen>
     with SingleTickerProviderStateMixin {
   static const _paginationThreshold = 200.0;
+  static const _filters = ConnectEventFormatFilter.values;
 
   late TabController _tabController;
   late final List<ScrollController> _scrollControllers;
@@ -28,16 +29,19 @@ class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _scrollControllers = List.generate(3, (_) => ScrollController());
-    _scrollListeners = List.generate(3, (index) => () => _onScroll(index));
+    _tabController = TabController(length: _filters.length, vsync: this);
+    _scrollControllers = List.generate(
+      _filters.length,
+      (_) => ScrollController(),
+    );
+    _scrollListeners = List.generate(
+      _filters.length,
+      (index) => () => _onScroll(index),
+    );
     for (var i = 0; i < _scrollControllers.length; i++) {
       _scrollControllers[i].addListener(_scrollListeners[i]);
     }
     _tabController.addListener(_onTabChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(myConnectEventsProvider.notifier).ensureLoaded();
-    });
   }
 
   void _onTabChanged() {
@@ -63,7 +67,7 @@ class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen>
         controller.position.maxScrollExtent - _paginationThreshold) {
       return;
     }
-    ref.read(myConnectEventsProvider.notifier).loadMore();
+    ref.read(myConnectEventsProvider(_filters[tabIndex]).notifier).loadMore();
   }
 
   @override
@@ -89,13 +93,9 @@ class _GroupEventsScreenState extends ConsumerState<GroupEventsScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                for (
-                  var i = 0;
-                  i < ConnectEventLocationFilter.values.length;
-                  i++
-                )
+                for (var i = 0; i < _filters.length; i++)
                   _GroupEventsTabContent(
-                    filter: ConnectEventLocationFilter.values[i],
+                    filter: _filters[i],
                     scrollController: _scrollControllers[i],
                   ),
               ],
@@ -113,104 +113,50 @@ class _GroupEventsTabContent extends ConsumerWidget {
     required this.scrollController,
   });
 
-  final ConnectEventLocationFilter filter;
+  final ConnectEventFormatFilter filter;
   final ScrollController scrollController;
 
   String? _emptyMessage(BuildContext context) {
     final l10n = context.l10n;
     return switch (filter) {
-      ConnectEventLocationFilter.all => null,
-      ConnectEventLocationFilter.online =>
+      ConnectEventFormatFilter.all => null,
+      ConnectEventFormatFilter.online =>
         l10n.connect_events_filter_empty_online,
-      ConnectEventLocationFilter.inPerson =>
+      ConnectEventFormatFilter.offline =>
         l10n.connect_events_filter_empty_in_person,
+      ConnectEventFormatFilter.hybrid =>
+        l10n.connect_events_filter_empty_hybrid,
     };
-  }
-
-  bool _canAutoLoadMoreForFilter(ConnectEventsState state) {
-    return filter != ConnectEventLocationFilter.all &&
-        state.hasLoaded &&
-        !state.isLoading &&
-        !state.isLoadingMore &&
-        state.hasMore &&
-        state.error == null;
-  }
-
-  bool _needsMoreFilteredEvents(
-    List<GroupEvent> filteredEvents,
-    ScrollController scrollController,
-  ) {
-    if (filteredEvents.isEmpty) return true;
-    if (!scrollController.hasClients) return false;
-    return scrollController.position.maxScrollExtent <= 0;
-  }
-
-  bool _shouldAutoLoadMoreForFilter(
-    ConnectEventsState state,
-    List<GroupEvent> filteredEvents,
-    ScrollController scrollController,
-  ) {
-    if (!_canAutoLoadMoreForFilter(state)) return false;
-    return _needsMoreFilteredEvents(filteredEvents, scrollController);
-  }
-
-  bool _isResolvingFilteredEmpty(
-    ConnectEventsState state,
-    List<GroupEvent> filteredEvents,
-  ) {
-    return filter != ConnectEventLocationFilter.all &&
-        filteredEvents.isEmpty &&
-        state.hasLoaded &&
-        state.hasMore &&
-        state.error == null;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(myConnectEventsProvider);
-    final filteredEvents = filterGroupEventsByLocation(state.events, filter);
+    final provider = myConnectEventsProvider(filter);
+    final state = ref.watch(provider);
 
-    if (_canAutoLoadMoreForFilter(state)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final currentState = ref.read(myConnectEventsProvider);
-        final currentFiltered = filterGroupEventsByLocation(
-          currentState.events,
-          filter,
-        );
-        if (!_shouldAutoLoadMoreForFilter(
-          currentState,
-          currentFiltered,
-          scrollController,
-        )) {
-          return;
-        }
-        ref.read(myConnectEventsProvider.notifier).loadMore();
-      });
-    }
-
-    final isResolvingFilteredEmpty = _isResolvingFilteredEmpty(
-      state,
-      filteredEvents,
-    );
+    // Each tab fetches its own `event_format` listing the first time it builds.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(provider.notifier).ensureLoaded();
+    });
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(myConnectEventsProvider.notifier).refresh(),
+      onRefresh: () => ref.read(provider.notifier).refresh(),
       child: ConnectPaginatedListView<GroupEvent>(
-        items: filteredEvents,
-        isLoading: state.isLoading || isResolvingFilteredEmpty,
+        items: state.events,
+        isLoading: state.isLoading,
         isLoadingMore: state.isLoadingMore,
         error: state.error,
         hasMore: state.hasMore,
         hasLoaded: state.hasLoaded,
         scrollController: scrollController,
-        onRetry: () => ref.read(myConnectEventsProvider.notifier).retry(),
+        onRetry: () => ref.read(provider.notifier).retry(),
         emptyDiscoverMessage: _emptyMessage(context),
         myEmptyState:
-            filter == ConnectEventLocationFilter.all
+            filter == ConnectEventFormatFilter.all
                 ? _GroupEventsEmptyState()
                 : null,
         itemBuilder:
-            (context, index) => ConnectEventCard(event: filteredEvents[index]),
+            (context, index) => ConnectEventCard(event: state.events[index]),
       ),
     );
   }
@@ -254,6 +200,7 @@ class _GroupEventsTabBar extends StatelessWidget {
           Tab(text: l10n.connect_events_filter_all),
           Tab(text: l10n.connect_online),
           Tab(text: l10n.connect_events_filter_in_person),
+          Tab(text: l10n.connect_events_filter_hybrid),
         ],
       ),
     );

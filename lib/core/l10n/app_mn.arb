@@ -984,6 +984,8 @@
   "connect_events_filter_in_person": "Биечлэн",
   "connect_events_filter_empty_online": "Онлайн арга хэмжээ байхгүй",
   "connect_events_filter_empty_in_person": "Биечлэн арга хэмжээ байхгүй",
+  "connect_events_filter_hybrid": "Хосолсон",
+  "connect_events_filter_empty_hybrid": "Хосолсон арга хэмжээ байхгүй",
   "connect_open": "Нээх",
   "connect_event_fallback_title": "Арга хэмжээ",
   "connect_group_fallback_title": "Бүлэг",

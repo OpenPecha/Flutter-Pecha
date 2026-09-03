@@ -154,6 +154,7 @@ class GroupEventModel {
   final String? groupAvatarUrl;
   final String? locationId;
   final GroupEventLocationModel? location;
+  final String? eventFormat;
 
   const GroupEventModel({
     required this.id,
@@ -176,6 +177,7 @@ class GroupEventModel {
     this.groupAvatarUrl,
     this.locationId,
     this.location,
+    this.eventFormat,
   });
 
   factory GroupEventModel.fromJson(
@@ -215,6 +217,7 @@ class GroupEventModel {
           locationJson != null
               ? GroupEventLocationModel.fromJson(locationJson)
               : null,
+      eventFormat: json['event_format'] as String?,
     );
   }
 
@@ -242,6 +245,7 @@ class GroupEventModel {
       groupAvatarUrl: groupAvatarUrl,
       locationId: locationId,
       location: location?.toEntity(),
+      eventFormat: eventFormat,
     );
   }
 

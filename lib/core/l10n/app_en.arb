@@ -328,6 +328,8 @@
   "connect_events_filter_in_person": "In person",
   "connect_events_filter_empty_online": "No online events",
   "connect_events_filter_empty_in_person": "No in-person events",
+  "connect_events_filter_hybrid": "Hybrid",
+  "connect_events_filter_empty_hybrid": "No hybrid events",
   "connect_open": "Open",
   "connect_event_fallback_title": "Event",
   "connect_group_fallback_title": "Group",

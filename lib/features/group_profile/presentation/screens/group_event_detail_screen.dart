@@ -612,6 +612,7 @@ class _EventInfoCard extends StatelessWidget {
     final locationLabel = groupEventLocationLabel(
       event,
       context.l10n.connect_online,
+      hybridLabel: context.l10n.connect_events_filter_hybrid,
     );
     final locationIcon =
         isGroupEventOnline(event)

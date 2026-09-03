@@ -984,6 +984,8 @@
   "connect_events_filter_in_person": "सामने",
   "connect_events_filter_empty_online": "कोई ऑनलाइन कार्यक्रम नहीं",
   "connect_events_filter_empty_in_person": "कोई सामने का कार्यक्रम नहीं",
+  "connect_events_filter_hybrid": "हाइब्रिड",
+  "connect_events_filter_empty_hybrid": "कोई हाइब्रिड कार्यक्रम नहीं",
   "connect_open": "खोलें",
   "connect_event_fallback_title": "कार्यक्रम",
   "connect_group_fallback_title": "समूह",

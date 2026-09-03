@@ -863,6 +863,13 @@ class AppLocalizationsMn extends AppLocalizations {
       'Биечлэн арга хэмжээ байхгүй';
 
   @override
+  String get connect_events_filter_hybrid => 'Хосолсон';
+
+  @override
+  String get connect_events_filter_empty_hybrid =>
+      'Хосолсон арга хэмжээ байхгүй';
+
+  @override
   String get connect_open => 'Нээх';
 
   @override

@@ -811,6 +811,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_events_filter_empty_in_person => '沒有實體活動';
 
   @override
+  String get connect_events_filter_hybrid => '混合';
+
+  @override
+  String get connect_events_filter_empty_hybrid => '沒有混合活動';
+
+  @override
   String get connect_open => '開啟';
 
   @override

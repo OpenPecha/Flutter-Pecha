@@ -863,6 +863,13 @@ class AppLocalizationsHi extends AppLocalizations {
       'कोई सामने का कार्यक्रम नहीं';
 
   @override
+  String get connect_events_filter_hybrid => 'हाइब्रिड';
+
+  @override
+  String get connect_events_filter_empty_hybrid =>
+      'कोई हाइब्रिड कार्यक्रम नहीं';
+
+  @override
   String get connect_open => 'खोलें';
 
   @override

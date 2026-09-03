@@ -918,6 +918,8 @@
   "connect_events_filter_in_person": "ས་ཁུལ་དུ།",
   "connect_events_filter_empty_online": "དྲ་ཐོག་བྱེད་སྒོ་མེད།",
   "connect_events_filter_empty_in_person": "ས་ཁུལ་དུའི་བྱེད་སྒོ་མེད།",
+  "connect_events_filter_hybrid": "ཟུང་འབྲེལ།",
+  "connect_events_filter_empty_hybrid": "ཟུང་འབྲེལ་བྱེད་སྒོ་མེད།",
   "connect_open": "ཁ་ཕྱེ།",
   "connect_event_fallback_title": "བྱེད་སྒོ།",
   "connect_group_fallback_title": "ཚོགས་པ།",
