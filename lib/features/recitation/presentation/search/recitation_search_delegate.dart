@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
+import 'package:flutter_pecha/features/recitation/presentation/providers/recitation_search_provider.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_card.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_list_skeleton.dart';
@@ -73,8 +74,9 @@ class _SearchResultsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(recitationSearchProvider);
     final localizations = context.l10n;
-    // Empty query state
-    if (searchState.query.trim().isEmpty) {
+    // Empty or too-short query state
+    if (searchState.query.trim().length <
+        RecitationSearchNotifier.minQueryLength) {
       return _EmptySearchState(
         icon: Icons.search,
         title: localizations.recitations_search_for,
