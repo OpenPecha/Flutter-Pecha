@@ -4731,4 +4731,89 @@ class TolgeeAppLocalizations extends AppLocalizations {
     'group_chat_unknown_sender',
     () => _fallback.group_chat_unknown_sender,
   );
+
+  @override
+  String get group_chat_reactions_all => TolgeeBridge.get(
+    localeName,
+    'group_chat_reactions_all',
+    () => _fallback.group_chat_reactions_all,
+  );
+
+  @override
+  String get group_chat_reacted => TolgeeBridge.get(
+    localeName,
+    'group_chat_reacted',
+    () => _fallback.group_chat_reacted,
+  );
+
+  @override
+  String get group_chat_reply => TolgeeBridge.get(
+    localeName,
+    'group_chat_reply',
+    () => _fallback.group_chat_reply,
+  );
+
+  @override
+  String get group_chat_copy => TolgeeBridge.get(
+    localeName,
+    'group_chat_copy',
+    () => _fallback.group_chat_copy,
+  );
+
+  @override
+  String get group_chat_copied => TolgeeBridge.get(
+    localeName,
+    'group_chat_copied',
+    () => _fallback.group_chat_copied,
+  );
+
+  @override
+  String get group_chat_report => TolgeeBridge.get(
+    localeName,
+    'group_chat_report',
+    () => _fallback.group_chat_report,
+  );
+
+  @override
+  String get group_chat_delete => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete',
+    () => _fallback.group_chat_delete,
+  );
+
+  @override
+  String get group_chat_reaction_failed => TolgeeBridge.get(
+    localeName,
+    'group_chat_reaction_failed',
+    () => _fallback.group_chat_reaction_failed,
+  );
+
+  @override
+  String group_chat_reactions_count(int count) => TolgeeBridge.format(
+    localeName,
+    'group_chat_reactions_count',
+    <String, Object>{'count': count},
+    () => _fallback.group_chat_reactions_count(count),
+  );
+
+  @override
+  String get group_chat_you => TolgeeBridge.get(
+    localeName,
+    'group_chat_you',
+    () => _fallback.group_chat_you,
+  );
+
+  @override
+  String get group_chat_tap_to_remove => TolgeeBridge.get(
+    localeName,
+    'group_chat_tap_to_remove',
+    () => _fallback.group_chat_tap_to_remove,
+  );
+
+  @override
+  String get group_chat_reply_parent_gone => TolgeeBridge.get(
+    localeName,
+    'group_chat_reply_parent_gone',
+    () => _fallback.group_chat_reply_parent_gone,
+  );
 }

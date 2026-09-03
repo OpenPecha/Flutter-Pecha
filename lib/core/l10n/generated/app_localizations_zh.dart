@@ -2293,4 +2293,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => '成員';
+
+  @override
+  String get group_chat_reactions_all => '全部';
+
+  @override
+  String get group_chat_reacted => '已回應';
+
+  @override
+  String get group_chat_reply => '回覆';
+
+  @override
+  String get group_chat_copy => '複製';
+
+  @override
+  String get group_chat_copied => '已複製訊息';
+
+  @override
+  String get group_chat_report => '檢舉';
+
+  @override
+  String get group_chat_delete => '刪除';
+
+  @override
+  String get group_chat_reaction_failed => '無法儲存你的回應。';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 個回應',
+      one: '1 個回應',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => '你';
+
+  @override
+  String get group_chat_tap_to_remove => '點按以移除';
+
+  @override
+  String get group_chat_reply_parent_gone => '該訊息已不存在，引用已移除。請再次傳送你的訊息。';
 }

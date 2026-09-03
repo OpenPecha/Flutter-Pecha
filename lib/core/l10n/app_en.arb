@@ -1206,5 +1206,24 @@
   "group_chat_empty_body": "Start the conversation with your group.",
   "group_chat_load_failed": "Messages couldn't be loaded.",
   "group_chat_retry": "Retry",
-  "group_chat_unknown_sender": "Member"
+  "group_chat_unknown_sender": "Member",
+  "group_chat_reactions_all": "All",
+  "group_chat_reacted": "Reacted",
+  "group_chat_reply": "Reply",
+  "group_chat_copy": "Copy",
+  "group_chat_copied": "Message copied",
+  "group_chat_report": "Report",
+  "group_chat_delete": "Delete",
+  "group_chat_reaction_failed": "Your reaction couldn't be saved.",
+  "group_chat_reactions_count": "{count, plural, =1{1 reaction} other{{count} reactions}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "You",
+  "group_chat_tap_to_remove": "Tap to remove",
+  "group_chat_reply_parent_gone": "That message is no longer available, so the quote was removed. Send again to post your message."
 }

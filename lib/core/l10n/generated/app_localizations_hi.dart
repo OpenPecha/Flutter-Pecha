@@ -2433,4 +2433,50 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'सदस्य';
+
+  @override
+  String get group_chat_reactions_all => 'सभी';
+
+  @override
+  String get group_chat_reacted => 'प्रतिक्रिया दी';
+
+  @override
+  String get group_chat_reply => 'उत्तर दें';
+
+  @override
+  String get group_chat_copy => 'कॉपी करें';
+
+  @override
+  String get group_chat_copied => 'संदेश कॉपी किया गया';
+
+  @override
+  String get group_chat_report => 'रिपोर्ट करें';
+
+  @override
+  String get group_chat_delete => 'हटाएँ';
+
+  @override
+  String get group_chat_reaction_failed =>
+      'आपकी प्रतिक्रिया सहेजी नहीं जा सकी।';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count प्रतिक्रियाएँ',
+      one: '1 प्रतिक्रिया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'आप';
+
+  @override
+  String get group_chat_tap_to_remove => 'हटाने के लिए टैप करें';
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'वह संदेश अब उपलब्ध नहीं है, इसलिए उद्धरण हटा दिया गया। अपना संदेश भेजने के लिए फिर से भेजें।';
 }

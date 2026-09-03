@@ -2438,4 +2438,49 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'ཚོགས་མི།';
+
+  @override
+  String get group_chat_reactions_all => 'ཡོངས།';
+
+  @override
+  String get group_chat_reacted => 'དྲན་བརྡ་བཏང་།';
+
+  @override
+  String get group_chat_reply => 'ལན་འདེབས།';
+
+  @override
+  String get group_chat_copy => 'འདྲ་བཤུས།';
+
+  @override
+  String get group_chat_copied => 'འཕྲིན་ཐུང་འདྲ་བཤུས་བྱས་ཟིན།';
+
+  @override
+  String get group_chat_report => 'སྙན་ཞུ།';
+
+  @override
+  String get group_chat_delete => 'སུབ།';
+
+  @override
+  String get group_chat_reaction_failed => 'ཁྱེད་ཀྱི་དྲན་བརྡ་ཉར་མ་ཐུབ།';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'དྲན་བརྡ་ $count',
+      one: 'དྲན་བརྡ་ ༡',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'ཁྱེད།';
+
+  @override
+  String get group_chat_tap_to_remove => 'སུབ་པར་མནན།';
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'འཕྲིན་ཐུང་དེ་མི་འདུག་པས་ལུང་འདྲེན་ཕྱིར་བསུབས། ཡང་བསྐྱར་གཏོང་རོགས།';
 }

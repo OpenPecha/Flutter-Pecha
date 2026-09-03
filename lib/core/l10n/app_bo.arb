@@ -965,5 +965,24 @@
   "group_chat_empty_body": "ཁྱེད་ཀྱི་ཚོགས་པ་དང་མཉམ་དུ་གླེང་མོལ་འགོ་འཛུགས།",
   "group_chat_load_failed": "འཕྲིན་ཐུང་སྣོན་འཇུག་བྱེད་མ་ཐུབ།",
   "group_chat_retry": "བསྐྱར་དུ་འབད།",
-  "group_chat_unknown_sender": "ཚོགས་མི།"
+  "group_chat_unknown_sender": "ཚོགས་མི།",
+  "group_chat_reactions_all": "ཡོངས།",
+  "group_chat_reacted": "དྲན་བརྡ་བཏང་།",
+  "group_chat_reply": "ལན་འདེབས།",
+  "group_chat_copy": "འདྲ་བཤུས།",
+  "group_chat_copied": "འཕྲིན་ཐུང་འདྲ་བཤུས་བྱས་ཟིན།",
+  "group_chat_report": "སྙན་ཞུ།",
+  "group_chat_delete": "སུབ།",
+  "group_chat_reaction_failed": "ཁྱེད་ཀྱི་དྲན་བརྡ་ཉར་མ་ཐུབ།",
+  "group_chat_reactions_count": "{count, plural, =1{དྲན་བརྡ་ ༡} other{དྲན་བརྡ་ {count}}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "ཁྱེད།",
+  "group_chat_tap_to_remove": "སུབ་པར་མནན།",
+  "group_chat_reply_parent_gone": "འཕྲིན་ཐུང་དེ་མི་འདུག་པས་ལུང་འདྲེན་ཕྱིར་བསུབས། ཡང་བསྐྱར་གཏོང་རོགས།"
 }

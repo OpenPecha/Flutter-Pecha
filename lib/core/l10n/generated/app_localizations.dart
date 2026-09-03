@@ -4315,6 +4315,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Member'**
   String get group_chat_unknown_sender;
+
+  /// No description provided for @group_chat_reactions_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get group_chat_reactions_all;
+
+  /// No description provided for @group_chat_reacted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reacted'**
+  String get group_chat_reacted;
+
+  /// No description provided for @group_chat_reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get group_chat_reply;
+
+  /// No description provided for @group_chat_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get group_chat_copy;
+
+  /// No description provided for @group_chat_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied'**
+  String get group_chat_copied;
+
+  /// No description provided for @group_chat_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get group_chat_report;
+
+  /// No description provided for @group_chat_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get group_chat_delete;
+
+  /// No description provided for @group_chat_reaction_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reaction couldn\'t be saved.'**
+  String get group_chat_reaction_failed;
+
+  /// No description provided for @group_chat_reactions_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reaction} other{{count} reactions}}'**
+  String group_chat_reactions_count(int count);
+
+  /// No description provided for @group_chat_you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get group_chat_you;
+
+  /// No description provided for @group_chat_tap_to_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to remove'**
+  String get group_chat_tap_to_remove;
+
+  /// No description provided for @group_chat_reply_parent_gone.
+  ///
+  /// In en, this message translates to:
+  /// **'That message is no longer available, so the quote was removed. Send again to post your message.'**
+  String get group_chat_reply_parent_gone;
 }
 
 class _AppLocalizationsDelegate

@@ -1031,5 +1031,24 @@
   "group_chat_empty_body": "Бүлгээрээ яриа эхлүүлээрэй.",
   "group_chat_load_failed": "Мессежийг ачаалж чадсангүй.",
   "group_chat_retry": "Дахин оролдох",
-  "group_chat_unknown_sender": "Гишүүн"
+  "group_chat_unknown_sender": "Гишүүн",
+  "group_chat_reactions_all": "Бүгд",
+  "group_chat_reacted": "Хариу үйлдэл үзүүлсэн",
+  "group_chat_reply": "Хариулах",
+  "group_chat_copy": "Хуулах",
+  "group_chat_copied": "Мессежийг хуулсан",
+  "group_chat_report": "Мэдэгдэх",
+  "group_chat_delete": "Устгах",
+  "group_chat_reaction_failed": "Таны хариу үйлдлийг хадгалж чадсангүй.",
+  "group_chat_reactions_count": "{count, plural, =1{1 хариу үйлдэл} other{{count} хариу үйлдэл}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "Та",
+  "group_chat_tap_to_remove": "Устгахын тулд товшино уу",
+  "group_chat_reply_parent_gone": "Тэр мессеж байхгүй тул иш татсаныг хаслаа. Мессежээ илгээхийн тулд дахин илгээнэ үү."
 }

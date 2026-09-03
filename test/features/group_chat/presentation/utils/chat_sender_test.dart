@@ -1,64 +1,9 @@
-import 'package:flutter_pecha/features/group_chat/data/models/chat_person_dto.dart';
-import 'package:flutter_pecha/features/group_chat/data/models/chat_room_member_dto.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('buildChatSenderDirectory', () {
-    test('merges the room name with the group avatar for one user', () {
-      final directory = buildChatSenderDirectory(
-        members: const [
-          ChatRoomMemberDTO(
-            userId: 'u1',
-            email: 'rena@example.com',
-            firstname: 'Rena',
-            lastname: 'Dolma',
-            role: 'MEMBER',
-            joinedAt: '2026-08-01T00:00:00Z',
-          ),
-        ],
-        people: const [
-          ChatPersonDTO(
-            userId: 'u1',
-            email: 'rena@example.com',
-            firstname: 'Rena',
-            avatarUrl: 'https://cdn.example.com/rena.png',
-          ),
-        ],
-      );
-
-      expect(directory['u1']!.name, 'Rena Dolma');
-      expect(directory['u1']!.avatarUrl, 'https://cdn.example.com/rena.png');
-    });
-
-    test('works when only one of the two endpoints answered', () {
-      final directory = buildChatSenderDirectory(
-        people: const [
-          ChatPersonDTO(
-            userId: 'u2',
-            email: 'jack@example.com',
-            firstname: 'Jack',
-          ),
-        ],
-      );
-
-      expect(directory['u2']!.name, 'Jack');
-      expect(directory['u2']!.avatarUrl, isNull);
-      expect(directory, hasLength(1));
-    });
-
-    test('skips entries with no user id', () {
-      final directory = buildChatSenderDirectory(
-        people: const [
-          ChatPersonDTO(userId: '', email: 'x@example.com', firstname: 'X'),
-        ],
-      );
-
-      expect(directory, isEmpty);
-    });
-  });
-
   group('isSelfChatMessage', () {
     test('matches on the user id', () {
       expect(
@@ -122,13 +67,23 @@ void main() {
   });
 
   group('chatSenderDisplayName', () {
-    test('prefers the directory name', () {
+    test('prefers the name carried by the message', () {
       expect(
         chatSenderDisplayName(
-          sender: const ChatSender(userId: 'u1', name: 'Rena Dolma'),
+          messageName: 'Pema Yangchen',
           senderEmail: 'rena@example.com',
         ),
-        'Rena Dolma',
+        'Pema Yangchen',
+      );
+    });
+
+    test('treats a blank message name as absent', () {
+      expect(
+        chatSenderDisplayName(
+          messageName: '   ',
+          senderEmail: 'rena@example.com',
+        ),
+        'rena',
       );
     });
 
@@ -141,6 +96,65 @@ void main() {
 
     test('returns null when there is nothing to show', () {
       expect(chatSenderDisplayName(senderEmail: ''), isNull);
+    });
+  });
+
+  group('chatSenderSeed', () {
+    test('prefers the id, then the email, then the name', () {
+      expect(
+        chatSenderSeed(senderId: 'U1', senderEmail: 'a@b.com', name: 'A'),
+        'u1',
+      );
+      expect(chatSenderSeed(senderEmail: 'A@B.com', name: 'A'), 'a@b.com');
+      expect(chatSenderSeed(name: 'Rena'), 'rena');
+      expect(chatSenderSeed(), '');
+    });
+  });
+
+  group('chatSenderColor', () {
+    test('gives one person the same colour every time', () {
+      final first = chatSenderColor(seed: 'u1', onDark: false);
+      final again = chatSenderColor(seed: 'u1', onDark: false);
+      expect(first, again);
+    });
+
+    test('casing cannot split a person across two colours', () {
+      expect(
+        chatSenderColor(
+          seed: chatSenderSeed(senderEmail: 'Rena@X.com'),
+          onDark: false,
+        ),
+        chatSenderColor(
+          seed: chatSenderSeed(senderEmail: 'rena@x.com'),
+          onDark: false,
+        ),
+      );
+    });
+
+    test('the light and dark variants line up on the same index', () {
+      final light = chatSenderColor(seed: 'u1', onDark: false);
+      final dark = chatSenderColor(seed: 'u1', onDark: true);
+      expect(
+        AppColors.chatSenderColors.indexOf(light),
+        AppColors.chatSenderColorsDark.indexOf(dark),
+      );
+    });
+
+    test('spreads a handful of people across the palette', () {
+      final seeds = List.generate(10, (i) => 'user-$i');
+      final used =
+          seeds
+              .map((seed) => chatSenderColor(seed: seed, onDark: false))
+              .toSet();
+      // Collisions are expected in a fixed palette; a single bucket is not.
+      expect(used.length, greaterThan(3));
+    });
+
+    test('an empty seed still yields a colour', () {
+      expect(
+        chatSenderColor(seed: '', onDark: false),
+        AppColors.chatSenderColors.first,
+      );
     });
   });
 
