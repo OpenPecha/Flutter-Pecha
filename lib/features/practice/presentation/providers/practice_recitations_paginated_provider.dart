@@ -190,11 +190,20 @@ final practiceRecitationsPaginatedProvider = StateNotifierProvider.autoDispose
       ref,
       languageCode,
     ) {
-      final auth = ref.watch(authProvider);
+      // Select the three fields this provider actually depends on. AuthState
+      // has no `==`, so watching it whole rebuilds the notifier on every auth
+      // emission — including the background onboarding fetch — discarding
+      // loaded pages and the user's scroll position. Records compare
+      // structurally, so this only rebuilds when one of the three changes.
+      final (isAuthLoading, isLoggedIn, isGuest) = ref.watch(
+        authProvider.select(
+          (auth) => (auth.isLoading, auth.isLoggedIn, auth.isGuest),
+        ),
+      );
 
       // Defer the first fetch until auth is ready so a logged-in session
       // attaches Bearer + should_include_collections on the first request.
-      if (auth.isLoading) {
+      if (isAuthLoading) {
         return PracticeRecitationsNotifier(
           datasource: RecitationsRemoteDatasource(dio: ref.watch(dioProvider)),
           languageCode: languageCode,
@@ -206,7 +215,7 @@ final practiceRecitationsPaginatedProvider = StateNotifierProvider.autoDispose
       return PracticeRecitationsNotifier(
         datasource: RecitationsRemoteDatasource(dio: ref.watch(dioProvider)),
         languageCode: languageCode,
-        includeCollections: auth.isLoggedIn && !auth.isGuest,
+        includeCollections: isLoggedIn && !isGuest,
       );
     });
 

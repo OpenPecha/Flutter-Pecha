@@ -46,14 +46,13 @@ class RecitationsRemoteDatasource {
   Future<RecitationsPageResponse> fetchRecitationsPage({
     RecitationsQueryParams? queryParams,
   }) async {
-    final includeCollections = queryParams?.shouldIncludeCollections ?? false;
+    // Collection-bearing responses stay cacheable: cache keys are scoped by
+    // `should_include_collections` and by auth (CacheInterceptor clears the
+    // `auth|` scope on login/logout), and a collection mutation invalidates
+    // `/recitations` via CacheInterceptor._extractRelatedPaths.
     final response = await dio.get(
       '/recitations',
       queryParameters: queryParams?.toQueryParams(),
-      options:
-          includeCollections
-              ? Options(extra: {'no_cache': true})
-              : null,
     );
 
     return RecitationsPageResponse.fromJson(
