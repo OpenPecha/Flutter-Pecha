@@ -1195,6 +1195,9 @@
     }
   },
   "group_chat_title": "Chat",
+  "chats_title": "Chats",
+  "chats_empty_title": "No chats yet",
+  "chats_empty_body": "Join a community to start chatting.",
   "group_chat_inappropriate": "This message couldn't be sent because it contains language that isn't allowed.",
   "group_chat_not_a_member": "Only members can open this chat.",
   "group_chat_open": "Chat",

@@ -4649,6 +4649,24 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get chats_title =>
+      TolgeeBridge.get(localeName, 'chats_title', () => _fallback.chats_title);
+
+  @override
+  String get chats_empty_title => TolgeeBridge.get(
+    localeName,
+    'chats_empty_title',
+    () => _fallback.chats_empty_title,
+  );
+
+  @override
+  String get chats_empty_body => TolgeeBridge.get(
+    localeName,
+    'chats_empty_body',
+    () => _fallback.chats_empty_body,
+  );
+
+  @override
   String get group_chat_inappropriate => TolgeeBridge.get(
     localeName,
     'group_chat_inappropriate',
