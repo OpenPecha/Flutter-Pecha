@@ -173,12 +173,21 @@ class PracticeRecitationsLanguageNotifier extends StateNotifier<String> {
 
   Future<void> ensureInitialized() async => _initFuture ??= _initialize();
 
+  /// Callers fire this without awaiting, so a failed write is logged rather
+  /// than thrown; the selection still applies for this session.
   Future<void> setLanguage(String languageCode) async {
     if (languageCode.isEmpty) return;
     _userSelected = true;
     _lastKnown = languageCode;
     state = languageCode;
-    await _localStorageService.set(StorageKeys.chantListLanguage, languageCode);
+    try {
+      await _localStorageService.set(
+        StorageKeys.chantListLanguage,
+        languageCode,
+      );
+    } catch (e) {
+      _logger.warning('Persisting chant list language failed', e);
+    }
   }
 }
 
