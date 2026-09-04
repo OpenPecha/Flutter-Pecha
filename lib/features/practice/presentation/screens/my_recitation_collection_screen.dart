@@ -214,8 +214,8 @@ class _CollectionContent extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed:
-                  hasItems ? () => onOpenItem(collection.items.first) : null,
+              // Disabled until the collection reading flow is designed.
+              onPressed: null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor:

@@ -7,6 +7,8 @@ import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
@@ -84,6 +86,17 @@ class _CreateEditCollectionScreenState
   /// True once the row exists on the server; see [_createdCollectionId].
   bool get _isMetadataLocked => _createdCollectionId != null;
 
+  /// Every write here hits a bearer-only endpoint. This screen is pushed
+  /// imperatively, so the route guard does not re-run if the session ends
+  /// underneath it; re-check before each write and offer sign-in instead of
+  /// letting the request fail.
+  bool _ensureSignedIn() {
+    final auth = ref.read(authProvider);
+    if (auth.isLoggedIn && !auth.isGuest) return true;
+    LoginDrawer.show(context, ref);
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -121,6 +134,7 @@ class _CreateEditCollectionScreenState
 
   Future<void> _pickImage() async {
     if (_isUploadingImage || _isSubmitting || _isMetadataLocked) return;
+    if (!_ensureSignedIn()) return;
 
     final picker = ImagePicker();
     final xFile = await picker.pickImage(
@@ -217,6 +231,7 @@ class _CreateEditCollectionScreenState
 
   Future<void> _onSubmit() async {
     if (_isSubmitting || _isUploadingImage) return;
+    if (!_ensureSignedIn()) return;
 
     if (_isEditing) {
       await _submitEdit();
