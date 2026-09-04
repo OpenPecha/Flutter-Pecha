@@ -141,7 +141,8 @@ class RetryInterceptor extends Interceptor {
         err.requestOptions.extra['retry_count'] = retryCount + 1;
 
         try {
-          // Clone and retry the request
+          // Multipart bodies are single-use; clone before resending.
+          _cloneFormDataIfNeeded(err.requestOptions);
           final response = await _retryDio.fetch(err.requestOptions);
           handler.resolve(response);
           return;
@@ -178,8 +179,9 @@ class RetryInterceptor extends Interceptor {
   }
 
   /// A [FormData] body's underlying file streams are consumed on the first
-  /// send, so replaying the same instance after a refresh would fail (multipart
-  /// avatar upload). Clone it so the replay has fresh, unread streams.
+  /// send, so replaying the same instance after a refresh or network retry
+  /// would fail (multipart cover/avatar upload). Clone it so the replay has
+  /// fresh, unread streams.
   void _cloneFormDataIfNeeded(RequestOptions opts) {
     if (opts.data is FormData) {
       opts.data = (opts.data as FormData).clone();
