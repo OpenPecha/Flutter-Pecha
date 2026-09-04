@@ -309,6 +309,7 @@ class GroupProfileRemoteDatasource {
     required String language,
     int skip = 0,
     int limit = 20,
+    String? eventFormat,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
@@ -318,6 +319,9 @@ class GroupProfileRemoteDatasource {
       };
       if (includeUnfollowed) {
         queryParameters['include_unfollowed'] = true;
+      }
+      if (eventFormat != null) {
+        queryParameters['event_format'] = eventFormat;
       }
 
       final response = await dio.get(

@@ -856,6 +856,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_events_filter_empty_in_person => 'No in-person events';
 
   @override
+  String get connect_events_filter_hybrid => 'Hybrid';
+
+  @override
+  String get connect_events_filter_empty_hybrid => 'No hybrid events';
+
+  @override
   String get connect_open => 'Open';
 
   @override
@@ -877,6 +883,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => 'No participants yet';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => 'Search groups';

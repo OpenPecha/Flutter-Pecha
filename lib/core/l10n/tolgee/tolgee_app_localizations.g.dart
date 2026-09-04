@@ -1687,6 +1687,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_events_filter_hybrid => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_hybrid',
+    () => _fallback.connect_events_filter_hybrid,
+  );
+
+  @override
+  String get connect_events_filter_empty_hybrid => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_hybrid',
+    () => _fallback.connect_events_filter_empty_hybrid,
+  );
+
+  @override
   String get connect_open => TolgeeBridge.get(
     localeName,
     'connect_open',
@@ -1734,6 +1748,69 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_event_participants_empty',
     () => _fallback.connect_event_participants_empty,
+  );
+
+  @override
+  String get connect_event_tab_videos => TolgeeBridge.get(
+    localeName,
+    'connect_event_tab_videos',
+    () => _fallback.connect_event_tab_videos,
+  );
+
+  @override
+  String get connect_event_tab_links => TolgeeBridge.get(
+    localeName,
+    'connect_event_tab_links',
+    () => _fallback.connect_event_tab_links,
+  );
+
+  @override
+  String get connect_event_tab_about => TolgeeBridge.get(
+    localeName,
+    'connect_event_tab_about',
+    () => _fallback.connect_event_tab_about,
+  );
+
+  @override
+  String get connect_event_links_title => TolgeeBridge.get(
+    localeName,
+    'connect_event_links_title',
+    () => _fallback.connect_event_links_title,
+  );
+
+  @override
+  String get connect_event_links_empty => TolgeeBridge.get(
+    localeName,
+    'connect_event_links_empty',
+    () => _fallback.connect_event_links_empty,
+  );
+
+  @override
+  String get connect_event_link_tap_to_join => TolgeeBridge.get(
+    localeName,
+    'connect_event_link_tap_to_join',
+    () => _fallback.connect_event_link_tap_to_join,
+  );
+
+  @override
+  String get connect_event_link_open => TolgeeBridge.get(
+    localeName,
+    'connect_event_link_open',
+    () => _fallback.connect_event_link_open,
+  );
+
+  @override
+  String get connect_event_date_tba => TolgeeBridge.get(
+    localeName,
+    'connect_event_date_tba',
+    () => _fallback.connect_event_date_tba,
+  );
+
+  @override
+  String get connect_event_about_empty => TolgeeBridge.get(
+    localeName,
+    'connect_event_about_empty',
+    () => _fallback.connect_event_about_empty,
   );
 
   @override

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/chat_link_preview_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
@@ -107,6 +108,26 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// two emoji for the ~600ms the round trip takes, so summaries for these
   /// messages are ignored until the swap settles.
   final Set<String> _swapping = {};
+
+  /// Every summary that arrived for a message while it was mid-swap, in
+  /// arrival order.
+  ///
+  /// Dropping these outright loses a reaction another member added during the
+  /// swap. Replaying one blindly is just as wrong: the broadcast fans out to
+  /// the actor too, so some of them are this client's own intermediate state,
+  /// carrying both the old emoji and the new one. Nothing on the wire orders
+  /// the two — there is no version or sequence on a reaction payload — so the
+  /// tie is broken on content once the swap settles: a summary is adopted only
+  /// if it agrees with what this member is known to hold on the server, which
+  /// an intermediate echo never does.
+  ///
+  /// All of them, not the last: the same missing order means a member's
+  /// summary that does agree can be followed by an echo that does not, and a
+  /// single slot let the echo overwrite the one worth keeping. Among those
+  /// that agree, one that would change nothing is passed over for the same
+  /// reason — see [_replayDeferredReaction].
+  final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions =
+      {};
 
   /// Bumped whenever a message's reactions change locally. A refetch compares
   /// the value it saw before its request with the value on arrival: checking
@@ -287,26 +308,86 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     if (!mounted) return;
 
     result.fold((_) {}, (page) {
-      ChatMessageDTO forViewer(ChatMessageDTO message) {
-        final fresh = _withPendingUpdates(message);
-        if (fresh.reactions.isEmpty) return fresh;
-        return fresh.copyWith(
-          reactions: chatReactionsForViewer(
-            fresh.reactions,
-            currentUserId: currentUserId,
-            currentUserEmail: currentUserEmail,
-          ),
+      List<ChatMessageReactionDTO> resolve(
+        List<ChatMessageReactionDTO> reactions,
+      ) {
+        if (reactions.isEmpty) return reactions;
+        return chatReactionsForViewer(
+          reactions,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
         );
       }
 
-      final fetched = page.messages.map(forViewer).toList();
+      /// Adopts the summary held for this row while the page was in flight.
+      ///
+      /// Taken at the point the row is committed rather than when the page is
+      /// parsed. The merge below can keep the copy already held instead of the
+      /// fetched one, and a summary lifted out of the map into a copy that is
+      /// then dropped is lost for good — the map has already forgotten it.
+      ChatMessageDTO withPending(ChatMessageDTO message) {
+        final pending = _pendingReactions.remove(message.id);
+        if (pending == null) return message;
+        return message.copyWith(reactions: resolve(pending));
+      }
+
+      final fetched = [
+        for (final message in page.messages)
+          if (message.reactions.isEmpty)
+            message
+          else
+            message.copyWith(reactions: resolve(message.reactions)),
+      ];
+      final fetchedIds = {for (final message in fetched) message.id};
+
+      /// Rows `appendLive` prepended since [knownBefore] was taken, minus any
+      /// this page already carries.
+      ///
+      /// "Not held before and not in this page" is not enough on its own:
+      /// nothing stops `loadMore` finishing inside the same window — it gates
+      /// on `isLoadingMore` and `isLoading`, and a refresh sets neither — and
+      /// the older page it appends fits that description too, while already
+      /// being inside the server's count. Position separates them. The rows
+      /// held when the request went out form one contiguous block, because
+      /// the two writers add at opposite ends of it: `appendLive` prepends an
+      /// arrival above the block, `loadMore` appends history below it. So
+      /// everything above the first held row came over the socket and is
+      /// newer than this page; everything below the last came from `loadMore`
+      /// and the server has already counted it. Cutting at the first held row
+      /// rather than at a page row is what lets this hold for a page that
+      /// shares nothing with what is held. Rows the page carries are excluded
+      /// by id: the socket does not promise creation order, so an arrival the
+      /// page includes can land on top of one it does not.
+      List<ChatMessageDTO> arrivedSince(Set<String> pageIds) {
+        final firstKnown = state.messages.indexWhere(
+          (message) => knownBefore.contains(message.id),
+        );
+        // Every held row was in `knownBefore` and nothing removes rows, so
+        // this is unreachable today. Should it ever be reached the two cannot
+        // be told apart, and misordering older history is the lesser harm
+        // next to dropping what the socket delivered.
+        if (firstKnown < 0) {
+          return state.messages
+              .where(
+                (message) =>
+                    !knownBefore.contains(message.id) &&
+                    !pageIds.contains(message.id),
+              )
+              .toList();
+        }
+        return state.messages
+            .take(firstKnown)
+            .where((message) => !pageIds.contains(message.id))
+            .toList();
+      }
 
       if (state.messages.isEmpty) {
+        final messages = fetched.map(withPending).toList();
         state = state.copyWith(
-          messages: fetched,
+          messages: messages,
           hasLoaded: true,
-          hasMore: fetched.length < page.total,
-          skip: fetched.length,
+          hasMore: messages.length < page.total,
+          skip: messages.length,
           total: page.total,
           clearError: true,
         );
@@ -324,20 +405,14 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       );
       if (!overlaps && fetched.length >= _limit) {
         // Restarting must not throw away what the restored socket delivered
-        // while this page was in flight. Those messages are newer than the
-        // page, so they sit above it — and being newer, they are not in the
-        // count the server sent with it either.
-        final fetchedIds = fetched.map((message) => message.id).toSet();
-        final arrivedDuring =
-            state.messages
-                .where(
-                  (message) =>
-                      !knownBefore.contains(message.id) &&
-                      !fetchedIds.contains(message.id),
-                )
-                .toList();
+        // while this page was in flight: those rows are newer than the page,
+        // so they sit above it, and the count that came with it predates
+        // them. Older history `loadMore` appended meanwhile is neither — it
+        // is what the restart will walk back through, and `arrivedSince`
+        // keeps it out of both the list and the count.
+        final arrivedDuring = arrivedSince(fetchedIds);
 
-        final messages = [...arrivedDuring, ...fetched];
+        final messages = [...arrivedDuring, ...fetched.map(withPending)];
         final total = page.total + arrivedDuring.length;
         state = state.copyWith(
           messages: messages,
@@ -356,9 +431,23 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // floor. A message mid-swap is left alone — its optimistic state is
       // newer than this page.
       final fetchedById = {for (final message in fetched) message.id: message};
+
+      // What the socket delivered while the request was in flight, which the
+      // count that came back with it cannot include. Counted before the
+      // page's own rows are inserted further down.
+      final arrivedDuring = arrivedSince(fetchedIds).length;
+
       state = state.copyWith(
         messages:
             state.messages.map((existing) {
+              // A summary held while this page was in flight is newer than the
+              // page and newer than what is held, so it settles the row before
+              // either branch below gets to.
+              final pending = _pendingReactions.remove(existing.id);
+              if (pending != null) {
+                return existing.copyWith(reactions: resolve(pending));
+              }
+
               final fresh = fetchedById[existing.id];
               if (fresh == null) return existing;
 
@@ -377,13 +466,18 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // Oldest first, so each insert lands above the previous one and the
       // newest-first order is preserved.
       for (final message in fetched.reversed) {
-        appendLive(message);
+        appendLive(withPending(message));
       }
 
-      // The server's count is newer than the one carried since the last page.
+      // The server's count plus what the socket delivered after the server
+      // counted. Taking the page's figure alone walks `total` backwards past
+      // those arrivals, and in a room small enough for the difference to
+      // matter that leaves `hasMore` false — after which `loadMore` returns
+      // immediately and the thread will not page back any further.
+      final total = page.total + arrivedDuring;
       state = state.copyWith(
-        total: page.total,
-        hasMore: state.messages.length < page.total,
+        total: total,
+        hasMore: state.messages.length < total,
       );
     });
     _dropStalePending();
@@ -401,13 +495,77 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     String? currentUserId,
     String? currentUserEmail,
   }) {
-    if (_swapping.contains(messageId)) return;
+    if (_swapping.contains(messageId)) {
+      // Held, not dropped: each is judged against the swap's own result once
+      // that lands.
+      (_deferredReactions[messageId] ??= []).add(reactions);
+      return;
+    }
     _applyReactions(
       messageId,
       reactions,
       currentUserId: currentUserId,
       currentUserEmail: currentUserEmail,
     );
+  }
+
+  /// Adopts a summary held during a swap, when it proves to be newer than the
+  /// swap's own result.
+  void _replayDeferredReaction(
+    String messageId, {
+    String? currentUserId,
+    String? currentUserEmail,
+  }) {
+    final deferred = _deferredReactions.remove(messageId);
+    if (deferred == null) return;
+
+    final index = state.messages.indexWhere(
+      (message) => message.id == messageId,
+    );
+    if (index < 0) return;
+    final current = state.messages[index].reactions;
+    final settled = _serverOwn[messageId] ?? const <String>{};
+    // Newest first, so the latest summary that qualifies is the one adopted.
+    for (final summary in deferred.reversed) {
+      final own = _ownFromSummary(
+        summary,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+      // Unidentifiable is not the same as newer: with no way to tell whose
+      // reactions these are, a later broadcast cannot be told from our own
+      // echo, and what the swap applied came from a confirmed call.
+      if (own == null) continue;
+
+      // An echo from inside the swap still shows the emoji being replaced, so
+      // it disagrees with the settled set and is passed over. Anything that
+      // agrees was computed after the swap and may carry another member's
+      // reaction the swap's own response was too early to include.
+      if (own.length != settled.length || !own.every(settled.contains)) {
+        continue;
+      }
+
+      // A summary that would change nothing cannot be newer than what is
+      // shown, and must not shadow an earlier one that would. The swap's own
+      // echo carries exactly the state its response already applied, and
+      // with nothing on the wire to order them it can land after a member's
+      // fuller update rather than before it — adopting it as "latest" would
+      // drop that member's reaction.
+      final resolved = chatReactionsForViewer(
+        summary,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+      if (listEquals(resolved, current)) continue;
+
+      _applyReactions(
+        messageId,
+        summary,
+        currentUserId: currentUserId,
+        currentUserEmail: currentUserEmail,
+      );
+      return;
+    }
   }
 
   void _applyReactions(
@@ -545,6 +703,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // The last operation for this message owns the cleanup, whichever one
       // opened the swap guard.
       _swapping.remove(messageId);
+      if (mounted) {
+        _replayDeferredReaction(
+          messageId,
+          currentUserId: currentUserId,
+          currentUserEmail: currentUserEmail,
+        );
+      }
     }
     return failure;
   }

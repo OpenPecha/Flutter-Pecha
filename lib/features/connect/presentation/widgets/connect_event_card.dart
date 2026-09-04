@@ -164,7 +164,13 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    parts.add(groupEventLocationLabel(event, context.l10n.connect_online));
+    parts.add(
+      groupEventLocationLabel(
+        event,
+        context.l10n.connect_online,
+        hybridLabel: context.l10n.connect_events_filter_hybrid,
+      ),
+    );
 
     if (participantCount > 0) {
       parts.add(

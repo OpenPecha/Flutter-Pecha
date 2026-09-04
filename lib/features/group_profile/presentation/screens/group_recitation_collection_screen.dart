@@ -42,8 +42,7 @@ class _GroupRecitationCollectionScreenState
     extends ConsumerState<GroupRecitationCollectionScreen> {
   /// Guards against re-showing the sheet after the user dismisses it while
   /// staying on this screen instance (e.g. a rebuild triggered by an
-  /// unrelated state change). Resets naturally on the next visit, since a
-  /// fresh screen instance is created each time it's navigated to.
+  /// unrelated state change).
   bool _hasShownCompletionSheetThisVisit = false;
 
   GroupRecitationCollectionKey get _key => GroupRecitationCollectionKey(
@@ -87,11 +86,8 @@ class _GroupRecitationCollectionScreenState
                         completionState: completionState,
                         isDark: isDark,
                         onOpenItem:
-                            (item) => _openReaderAndComplete(
-                              key,
-                              item,
-                              collection,
-                            ),
+                            (item) =>
+                                _openReaderAndComplete(key, item, collection),
                         onShare: () => _onShare(collection),
                       ),
                     ),
@@ -112,11 +108,11 @@ class _GroupRecitationCollectionScreenState
     );
   }
 
-  /// Shows the completion celebration once per visit to this screen, as
-  /// soon as every chant in [collection] is marked completed in
-  /// [completionState] — whether that happened moments ago (returning from
-  /// the reader) or the collection was already fully completed for today
-  /// before this screen was even opened.
+  /// Shows the completion celebration once, when the last remaining chant
+  /// of [collection] gets marked completed while this screen is alive
+  /// (typically right after returning from the reader). A collection that
+  /// was already fully completed before the screen opened does not
+  /// re-trigger it.
   void _maybeShowCompletionSheet(
     GroupRecitationCollectionKey key,
     GroupRecitationCollection? collection,
@@ -124,6 +120,10 @@ class _GroupRecitationCollectionScreenState
   ) {
     if (_hasShownCompletionSheetThisVisit) return;
     if (collection == null || collection.items.isEmpty) return;
+    // Only celebrate a completion the user performed during this visit —
+    // the completion notifier is autoDispose, so this flag is false when
+    // the screen opens onto a collection that was already finished today.
+    if (!completionState.hasCompletedChantThisSession) return;
 
     final isFullyCompleted = collection.items.every(
       (item) => completionState.isCompleted(item.id),
@@ -152,17 +152,17 @@ class _GroupRecitationCollectionScreenState
     final completionState = ref.read(
       groupRecitationCollectionCompletionProvider(key),
     );
-    final currentIndex =
-        collection.items.indexWhere((i) => i.id == item.id);
+    final currentIndex = collection.items.indexWhere((i) => i.id == item.id);
 
-    final planTextItems = collection.items.map((collectionItem) {
-      return PlanTextItem.sourceReference(
-        textId: collectionItem.textId,
-        title: collectionItem.title,
-        subtaskId: collectionItem.id,
-        isCompleted: completionState.isCompleted(collectionItem.id),
-      );
-    }).toList();
+    final planTextItems =
+        collection.items.map((collectionItem) {
+          return PlanTextItem.sourceReference(
+            textId: collectionItem.textId,
+            title: collectionItem.title,
+            subtaskId: collectionItem.id,
+            isCompleted: completionState.isCompleted(collectionItem.id),
+          );
+        }).toList();
 
     final navigationContext = NavigationContext(
       source: NavigationSource.groupRecitationCollection,
@@ -208,12 +208,12 @@ class _GroupRecitationCollectionScreenState
     final shareMessage =
         groupName == null
             ? l10n.group_recitation_collection_share_message_no_group(
-                collection.name,
-              )
+              collection.name,
+            )
             : l10n.group_recitation_collection_share_message(
-                collection.name,
-                groupName,
-              );
+              collection.name,
+              groupName,
+            );
     final longUrl =
         DeepLinkUrlBuilder.groupRecitationCollectionLink(
           groupId: collection.groupId,

@@ -811,6 +811,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_events_filter_empty_in_person => '沒有實體活動';
 
   @override
+  String get connect_events_filter_hybrid => '混合';
+
+  @override
+  String get connect_events_filter_empty_hybrid => '沒有混合活動';
+
+  @override
   String get connect_open => '開啟';
 
   @override
@@ -832,6 +838,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => '尚無參與者';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => '搜尋社群';

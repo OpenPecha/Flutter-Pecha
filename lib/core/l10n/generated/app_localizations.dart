@@ -1642,6 +1642,18 @@ abstract class AppLocalizations {
   /// **'No in-person events'**
   String get connect_events_filter_empty_in_person;
 
+  /// No description provided for @connect_events_filter_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get connect_events_filter_hybrid;
+
+  /// No description provided for @connect_events_filter_empty_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'No hybrid events'**
+  String get connect_events_filter_empty_hybrid;
+
   /// No description provided for @connect_open.
   ///
   /// In en, this message translates to:
@@ -1683,6 +1695,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No participants yet'**
   String get connect_event_participants_empty;
+
+  /// No description provided for @connect_event_tab_videos.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get connect_event_tab_videos;
+
+  /// No description provided for @connect_event_tab_links.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get connect_event_tab_links;
+
+  /// No description provided for @connect_event_tab_about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get connect_event_tab_about;
+
+  /// No description provided for @connect_event_links_title.
+  ///
+  /// In en, this message translates to:
+  /// **'More about this event'**
+  String get connect_event_links_title;
+
+  /// No description provided for @connect_event_links_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No links yet'**
+  String get connect_event_links_empty;
+
+  /// No description provided for @connect_event_link_tap_to_join.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to join'**
+  String get connect_event_link_tap_to_join;
+
+  /// No description provided for @connect_event_link_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open link'**
+  String get connect_event_link_open;
+
+  /// No description provided for @connect_event_date_tba.
+  ///
+  /// In en, this message translates to:
+  /// **'Date to be announced'**
+  String get connect_event_date_tba;
+
+  /// No description provided for @connect_event_about_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No event details yet'**
+  String get connect_event_about_empty;
 
   /// No description provided for @search_groups.
   ///

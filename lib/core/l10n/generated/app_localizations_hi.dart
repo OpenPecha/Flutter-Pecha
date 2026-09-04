@@ -863,6 +863,13 @@ class AppLocalizationsHi extends AppLocalizations {
       'कोई सामने का कार्यक्रम नहीं';
 
   @override
+  String get connect_events_filter_hybrid => 'हाइब्रिड';
+
+  @override
+  String get connect_events_filter_empty_hybrid =>
+      'कोई हाइब्रिड कार्यक्रम नहीं';
+
+  @override
   String get connect_open => 'खोलें';
 
   @override
@@ -884,6 +891,33 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => 'अभी तक कोई प्रतिभागी नहीं';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => 'समूह खोजें';

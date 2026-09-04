@@ -3,10 +3,15 @@ import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 /// Whether [senderId] / [senderEmail] identify the signed-in user.
 ///
-/// Two id spaces are in play: `StorageKeys.currentUserId` holds the JWT `sub`
-/// claim, while chat `sender_id` is a backend UUID, and `/users/info` returns
-/// no id to bridge them. Matching on either the id **or** the email keeps own
-/// messages on the right whichever space the deployment uses.
+/// [currentUserId] must be the **backend** user id — the one `/users/info`
+/// returns, which is the id space chat's `sender_id` and reaction `user_ids`
+/// live in. It is deliberately not the JWT `sub`: those are different ids for
+/// the same person, so comparing them can only ever produce a false negative,
+/// and a false negative here puts the viewer's own messages on the left.
+///
+/// Email stays as the fallback for a session that has not loaded the profile
+/// yet. Pass an empty [currentUserId] rather than a guess when the real one is
+/// unavailable — "unknown" degrades to the email check, a wrong id does not.
 bool isSelfChatMessage({
   required String senderId,
   required String senderEmail,

@@ -32,13 +32,11 @@ class GroupChatThread extends ConsumerStatefulWidget {
     super.key,
     required this.roomId,
     required this.groupId,
-    required this.currentUserId,
     required this.onReply,
   });
 
   final String roomId;
   final String groupId;
-  final String currentUserId;
 
   /// Starts a reply in the composer, which the screen owns.
   final ValueChanged<ChatMessageDTO> onReply;
@@ -80,6 +78,14 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
 
   /// Distance from the reversed end at which the next page is requested.
   static const double _loadMoreThreshold = 320;
+
+  /// The viewer's backend user id — the id space chat's `sender_id` and
+  /// reaction `user_ids` use. Read from the profile rather than passed in, so
+  /// a session that loads `/users/info` after this screen opens starts
+  /// matching on it without the thread holding a stale copy.
+  String get _viewerId => ref.read(userProvider).user?.id?.trim() ?? '';
+
+  String? get _viewerEmail => ref.read(userProvider).user?.email;
 
   @override
   void initState() {
@@ -232,8 +238,8 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
           messageId,
           emoji,
           roomIdForCall: widget.roomId,
-          currentUserId: widget.currentUserId,
-          currentUserEmail: ref.read(userProvider).user?.email,
+          currentUserId: _viewerId,
+          currentUserEmail: _viewerEmail,
         );
     if (!mounted || failure == null) return;
     messenger.showSnackBar(SnackBar(content: Text(failedMessage)));
@@ -245,7 +251,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     showChatReactionsSheet(
       context,
       reactions: message.reactions,
-      currentUserId: widget.currentUserId,
+      currentUserId: user?.id?.trim() ?? '',
       currentUserEmail: user?.email,
       // `ChatMessageReactionUserDTO` carries no avatar, but every loaded
       // message does — and reactors are almost always people who have posted
@@ -374,8 +380,8 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
         isSelfChatMessage(
           senderId: newest.senderId,
           senderEmail: newest.senderEmail,
-          currentUserId: widget.currentUserId,
-          currentUserEmail: ref.read(userProvider).user?.email,
+          currentUserId: _viewerId,
+          currentUserEmail: _viewerEmail,
         ),
       );
     });
@@ -447,7 +453,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
                 isSelf: isSelfChatMessage(
                   senderId: message.senderId,
                   senderEmail: message.senderEmail,
-                  currentUserId: widget.currentUserId,
+                  currentUserId: user?.id?.trim() ?? '',
                   currentUserEmail: user?.email,
                 ),
                 isRunStart: isRunStart,

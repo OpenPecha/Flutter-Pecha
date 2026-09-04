@@ -39,6 +39,9 @@ class RecitationSearchNotifier extends StateNotifier<RecitationSearchState> {
   Timer? _debounceTimer;
   static const Duration _debounceDuration = Duration(milliseconds: 500);
 
+  /// Shortest query that triggers a network request.
+  static const int minQueryLength = 3;
+
   RecitationSearchNotifier({
     required this.repository,
     required this.languageCode,
@@ -52,8 +55,8 @@ class RecitationSearchNotifier extends StateNotifier<RecitationSearchState> {
     // Update query immediately for UI feedback
     state = state.copyWith(query: query, isLoading: true, error: null);
 
-    if (query.trim().isEmpty) {
-      state = const RecitationSearchState();
+    if (query.trim().length < minQueryLength) {
+      state = RecitationSearchState(query: query);
       return;
     }
 
@@ -65,8 +68,8 @@ class RecitationSearchNotifier extends StateNotifier<RecitationSearchState> {
 
   /// Perform the actual search
   Future<void> _performSearch(String query) async {
-    if (query.trim().isEmpty) {
-      state = const RecitationSearchState();
+    if (query.trim().length < minQueryLength) {
+      state = RecitationSearchState(query: query);
       return;
     }
 
@@ -100,7 +103,7 @@ class RecitationSearchNotifier extends StateNotifier<RecitationSearchState> {
 
   /// Retry search
   void retry() {
-    if (state.query.isNotEmpty) {
+    if (state.query.trim().length >= minQueryLength) {
       _performSearch(state.query);
     }
   }

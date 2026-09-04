@@ -11,17 +11,24 @@ class ContentLanguagePickerSheet extends ConsumerWidget {
     required this.selectedCode,
     required this.onSelected,
     this.title,
+    this.recitationOnly = false,
   });
 
   final String selectedCode;
   final ValueChanged<String> onSelected;
   final String? title;
+  final bool recitationOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final languages = ref.watch(resolvedContentLanguagesProvider);
+    // Recitation list is a narrower subset: never stand in the bundled list
+    // for it while loading (null = show a spinner).
+    final List<AppLanguage>? languages =
+        recitationOnly
+            ? ref.watch(recitationContentLanguagesProvider).valueOrNull
+            : ref.watch(resolvedContentLanguagesProvider);
 
     return SafeArea(
       top: false,
@@ -54,30 +61,39 @@ class ContentLanguagePickerSheet extends ConsumerWidget {
                 ),
               ),
             ),
-            Flexible(
-              child: ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                itemCount: languages.length,
-                separatorBuilder:
-                    (_, __) => Divider(
-                      height: 1,
-                      color: theme.dividerColor.withValues(alpha: 0.4),
-                    ),
-                itemBuilder: (_, index) {
-                  final language = languages[index];
-                  final isSelected = language.code == selectedCode;
-                  return _ContentLanguageOption(
-                    language: language,
-                    isSelected: isSelected,
-                    onTap: () {
-                      onSelected(language.code);
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
+            if (languages == null)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  itemCount: languages.length,
+                  separatorBuilder:
+                      (_, __) => Divider(
+                        height: 1,
+                        color: theme.dividerColor.withValues(alpha: 0.4),
+                      ),
+                  itemBuilder: (_, index) {
+                    final language = languages[index];
+                    final isSelected = language.code == selectedCode;
+                    return _ContentLanguageOption(
+                      language: language,
+                      isSelected: isSelected,
+                      onTap: () {
+                        onSelected(language.code);
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -143,6 +159,7 @@ Future<void> showContentLanguagePickerSheet(
   required String selectedCode,
   required ValueChanged<String> onSelected,
   String? title,
+  bool recitationOnly = false,
 }) {
   return showModalBottomSheet(
     context: context,
@@ -157,6 +174,7 @@ Future<void> showContentLanguagePickerSheet(
           selectedCode: selectedCode,
           onSelected: onSelected,
           title: title,
+          recitationOnly: recitationOnly,
         ),
   );
 }

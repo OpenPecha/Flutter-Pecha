@@ -1,5 +1,6 @@
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/connect/presentation/utils/connect_event_filter_utils.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,11 +54,15 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
     required this.ref,
     required this.includeUnfollowed,
     required this.language,
+    this.eventFormat,
   }) : super(const ConnectEventsState());
 
   final Ref ref;
   final bool includeUnfollowed;
   final String language;
+
+  /// `event_format` query value, or null to list every format.
+  final String? eventFormat;
   static const int _limit = 20;
   bool _loadRequested = false;
 
@@ -83,6 +88,7 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
       language: language,
       skip: 0,
       limit: _limit,
+      eventFormat: eventFormat,
     );
 
     if (!mounted) return;
@@ -118,6 +124,7 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
       language: language,
       skip: state.skip,
       limit: _limit,
+      eventFormat: eventFormat,
     );
 
     if (!mounted) return;
@@ -154,17 +161,18 @@ class ConnectEventsNotifier extends StateNotifier<ConnectEventsState> {
   }
 }
 
-final myConnectEventsProvider =
-    StateNotifierProvider.autoDispose<ConnectEventsNotifier, ConnectEventsState>((
-      ref,
-    ) {
-      final language = ref.watch(contentLanguageProvider);
-      return ConnectEventsNotifier(
-        ref: ref,
-        includeUnfollowed: false,
-        language: language,
-      );
-    });
+final myConnectEventsProvider = StateNotifierProvider.autoDispose
+    .family<ConnectEventsNotifier, ConnectEventsState, ConnectEventFormatFilter>(
+      (ref, filter) {
+        final language = ref.watch(contentLanguageProvider);
+        return ConnectEventsNotifier(
+          ref: ref,
+          includeUnfollowed: false,
+          language: language,
+          eventFormat: filter.apiValue,
+        );
+      },
+    );
 
 final discoverConnectEventsProvider =
     StateNotifierProvider.autoDispose<ConnectEventsNotifier, ConnectEventsState>((
