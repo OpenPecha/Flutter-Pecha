@@ -131,6 +131,63 @@ void main() {
     });
   });
 
+  group('chatPushTargets', () {
+    const chat = {'session_type': 'CHAT'};
+
+    test('matches the room by source_id', () {
+      // The backend sets source_id to the room id, not the group id.
+      expect(
+        chatPushTargets({...chat, 'source_id': 'r1'}, roomId: 'r1'),
+        isTrue,
+      );
+      expect(
+        chatPushTargets({...chat, 'source_id': 'other'}, roomId: 'r1'),
+        isFalse,
+      );
+    });
+
+    test('matches the group when the room is not yet known', () {
+      // A thread opened by group can receive its first push before the room
+      // id has been resolved.
+      expect(
+        chatPushTargets(
+          {...chat, 'group_id': 'g1'},
+          roomId: null,
+          groupId: 'g1',
+        ),
+        isTrue,
+      );
+    });
+
+    test('ignores a chat push for somewhere else', () {
+      expect(
+        chatPushTargets(
+          {...chat, 'source_id': 'r9', 'group_id': 'g9'},
+          roomId: 'r1',
+          groupId: 'g1',
+        ),
+        isFalse,
+      );
+    });
+
+    test('ignores a push that is not a chat message at all', () {
+      expect(
+        chatPushTargets({
+          'session_type': 'GROUP_POST',
+          'source_id': 'r1',
+        }, roomId: 'r1'),
+        isFalse,
+      );
+    });
+
+    test('empty ids never match', () {
+      expect(
+        chatPushTargets({...chat, 'source_id': ''}, roomId: '', groupId: ''),
+        isFalse,
+      );
+    });
+  });
+
   group('chatRoomPreviewBody', () {
     test('is null for a room nobody has written in', () {
       expect(

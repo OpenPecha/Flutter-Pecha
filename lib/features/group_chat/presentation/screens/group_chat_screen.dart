@@ -18,6 +18,9 @@ import 'package:flutter_pecha/features/group_chat/presentation/providers/group_c
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_composer_controller.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_spans.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_rooms_list.dart';
+import 'package:flutter_pecha/features/push_notifications/domain/entities/push_message.dart';
+import 'package:flutter_pecha/features/push_notifications/presentation/providers/push_notification_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer_link_preview.dart';
@@ -54,6 +57,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   final _bodyFocusNode = FocusNode();
   ChatLiveClient? _live;
   StreamSubscription<ChatLiveEvent>? _liveSub;
+
+  /// Foreground pushes, used as a backstop for the socket — see
+  /// [_onForegroundPush].
+  StreamSubscription<PushMessage>? _pushSub;
   Timer? _reconnectTimer;
   int _reconnectAttempt = 0;
   bool _hadLiveSession = false;
@@ -109,6 +116,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     super.initState();
     _providers = ProviderScope.containerOf(context, listen: false);
     WidgetsBinding.instance.addObserver(this);
+    _pushSub = _providers
+        .read(pushMessagingRepositoryProvider)
+        .onForegroundMessage
+        .listen(_onForegroundPush);
   }
 
   @override
@@ -123,6 +134,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _reconnectTimer?.cancel();
+    unawaited(_pushSub?.cancel());
+    _pushSub = null;
     unawaited(_tearDownLive());
     _bodyController.dispose();
     _bodyFocusNode.dispose();
@@ -299,6 +312,50 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     if (reconnected) await _refreshThread();
   }
 
+  /// A push for this thread arrived while it is on screen.
+  ///
+  /// The socket should already have delivered that message. A socket that has
+  /// gone half-open cannot be told from a healthy one — no error, no close,
+  /// frames simply stop — and the client would sit there believing it is
+  /// connected, which is what made new messages appear only after leaving and
+  /// coming back.
+  ///
+  /// So the push is treated as a second opinion: refetch, and if the refetch
+  /// turns up a message the socket never delivered, that is proof the socket
+  /// is not working — replace it rather than trust it with the next one.
+  Future<void> _onForegroundPush(PushMessage message) async {
+    if (_disposed || !mounted) return;
+    if (!chatPushTargets(
+      message.data,
+      roomId: _roomId,
+      groupId: widget.groupId,
+    )) {
+      return;
+    }
+
+    final roomId = _roomId;
+    if (roomId == null) return;
+
+    final before = _newestMessageId(roomId);
+    await _refreshThread();
+    if (_disposed || !mounted) return;
+
+    unawaited(_markRoomRead());
+    if (_newestMessageId(roomId) == before) return;
+
+    // The socket missed a message. Tear it down first: `_ensureLiveConnected`
+    // treats a non-null client as already connected and would otherwise leave
+    // the dead one in place.
+    await _tearDownLive();
+    if (_disposed || !mounted) return;
+    await _ensureLiveConnected();
+  }
+
+  String? _newestMessageId(String roomId) {
+    final messages = _providers.read(groupChatThreadProvider(roomId)).messages;
+    return messages.isEmpty ? null : messages.first.id;
+  }
+
   void _onLiveEvent(ChatLiveEvent event) {
     if (_disposed || !mounted) return;
     // A frame on a fresh socket means the connection is healthy again.
@@ -429,11 +486,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
       final accountId = await _loadAccountId();
       await _providers
           .read(groupChatRoomCacheProvider)
-          .write(
-            userId: accountId,
-            groupId: widget.groupId,
-            roomId: roomId,
-          );
+          .write(userId: accountId, groupId: widget.groupId, roomId: roomId);
     } catch (_) {
       // Cache is best-effort; join is already committed on the server.
     }
