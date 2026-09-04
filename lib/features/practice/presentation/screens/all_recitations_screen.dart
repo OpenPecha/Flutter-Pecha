@@ -78,7 +78,11 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   }
 
   void _onCreateCollectionPressed() {
-    if (ref.read(authProvider).isGuest) {
+    // Guests and expired sessions both lack credentials for the protected
+    // collection endpoints. This screen is pushed imperatively, so the route
+    // guard does not re-run if auth changes underneath it.
+    final auth = ref.read(authProvider);
+    if (auth.isGuest || !auth.isLoggedIn) {
       LoginDrawer.show(context, ref);
       return;
     }
@@ -161,8 +165,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.only(top: 8, bottom: 88),
-      itemCount:
-          collectionCount + recitationCount + (state.hasMore ? 1 : 0),
+      itemCount: collectionCount + recitationCount + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < collectionCount) {
           final collection = state.collections[index];
@@ -194,11 +197,12 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
         final recitation = state.recitations[recitationIndex];
         return PracticeChantListTile(
           recitation: recitation,
-          onTap: () => openRecitationReader(
-            context,
-            recitation,
-            listLanguage: languageCode,
-          ),
+          onTap:
+              () => openRecitationReader(
+                context,
+                recitation,
+                listLanguage: languageCode,
+              ),
         );
       },
     );

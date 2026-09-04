@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/destructive_confirmation_dialog.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
@@ -27,7 +28,8 @@ class MyRecitationCollectionOptionsSheet extends ConsumerWidget {
       context: context,
       backgroundColor: Colors.transparent,
       useRootNavigator: true,
-      builder: (_) => MyRecitationCollectionOptionsSheet(collection: collection),
+      builder:
+          (_) => MyRecitationCollectionOptionsSheet(collection: collection),
     );
   }
 
@@ -95,13 +97,12 @@ class MyRecitationCollectionOptionsSheet extends ConsumerWidget {
       context,
       title: 'Delete collection?',
       message: 'This collection will be permanently removed.',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
       barrierDismissible: false,
-      onConfirmed: () => _deleteCollection(
-        repository: repository,
-        collectionId: collectionId,
-      ),
+      onConfirmed:
+          () => _deleteCollection(
+            repository: repository,
+            collectionId: collectionId,
+          ),
     );
 
     if (!context.mounted) return;
@@ -114,7 +115,7 @@ class MyRecitationCollectionOptionsSheet extends ConsumerWidget {
       router.pop();
     } else if (confirmed == false) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Something went wrong')),
+        SnackBar(content: Text(context.l10n.something_went_wrong)),
       );
     }
   }

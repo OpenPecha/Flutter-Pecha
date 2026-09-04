@@ -8,6 +8,9 @@ class CreateMyRecitationCollectionRequest {
   final String name;
 
   /// Storage key returned by [MyRecitationCollectionImageUploadResponse.key].
+  ///
+  /// The API marks `img_url` required (non-nullable), so a collection created
+  /// without a cover sends an empty string; readers treat empty as "no image".
   final String imgUrl;
 
   const CreateMyRecitationCollectionRequest({
@@ -15,10 +18,7 @@ class CreateMyRecitationCollectionRequest {
     required this.imgUrl,
   });
 
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'img_url': imgUrl,
-  };
+  Map<String, dynamic> toJson() => {'name': name, 'img_url': imgUrl};
 }
 
 /// Request body for `PUT /users/me/recitation-collections/{id}`.
@@ -29,10 +29,7 @@ class UpdateMyRecitationCollectionRequest {
   final String name;
   final String? imgUrl;
 
-  const UpdateMyRecitationCollectionRequest({
-    required this.name,
-    this.imgUrl,
-  });
+  const UpdateMyRecitationCollectionRequest({required this.name, this.imgUrl});
 
   Map<String, dynamic> toJson() => {
     'name': name,
@@ -146,7 +143,9 @@ class MyRecitationCollectionDetailModel {
     this.items = const [],
   });
 
-  factory MyRecitationCollectionDetailModel.fromJson(Map<String, dynamic> json) {
+  factory MyRecitationCollectionDetailModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
     final rawItems = json['items'] as List<dynamic>? ?? const [];
     final items =
         rawItems

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/create_edit_collection_screen.dart';
 
@@ -132,9 +133,9 @@ class _NewCollectionDialogState extends State<NewCollectionDialog> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
+                  child: Text(
+                    context.l10n.cancel,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                     ),

@@ -13,6 +13,7 @@ import 'package:flutter_pecha/features/practice/presentation/providers/practice_
 import 'package:flutter_pecha/features/practice/presentation/screens/add_chants_to_collection_screen.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart' show Either;
 import 'package:image_picker/image_picker.dart';
 
 /// Placeholder mustard accent used for the empty cover tile in the designs.
@@ -25,8 +26,10 @@ const Color _kCoverPlaceholder = Color(0xFFC9A84C);
 /// only initial data and the submit API differ.
 class CreateEditCollectionScreen extends ConsumerStatefulWidget {
   /// Create a new collection starting with [initialName].
-  const CreateEditCollectionScreen({super.key, required String this.initialName})
-    : collection = null;
+  const CreateEditCollectionScreen({
+    super.key,
+    required String this.initialName,
+  }) : collection = null;
 
   /// Edit an existing [collection] (name, cover, add chants).
   const CreateEditCollectionScreen.edit({
@@ -49,7 +52,11 @@ class _CreateEditCollectionScreenState
   static final _logger = AppLogger('CreateEditCollectionScreen');
 
   late String _name;
+
+  /// `text_id`s on the server when the screen opened. Save diffs [_chants]
+  /// against this: missing ids are deleted, extra ids are added.
   late final Set<String> _originalTextIds;
+
   /// Collection-item ids keyed by `text_id` for chants already on the server.
   late final Map<String, String> _itemIdsByTextId;
   File? _localCoverFile;
@@ -62,7 +69,6 @@ class _CreateEditCollectionScreenState
   String? _createdCollectionId;
   bool _isUploadingImage = false;
   bool _isSubmitting = false;
-  bool _isRemovingChant = false;
   late final List<RecitationModel> _chants;
 
   bool get _isEditing => widget.isEditing;
@@ -94,7 +100,8 @@ class _CreateEditCollectionScreenState
       _originalTextIds = _chants.map((c) => c.textId).toSet();
       _itemIdsByTextId = {
         for (final item in existing.items)
-          if (item.textId.isNotEmpty && item.id.isNotEmpty) item.textId: item.id,
+          if (item.textId.isNotEmpty && item.id.isNotEmpty)
+            item.textId: item.id,
       };
     } else {
       _name = widget.initialName ?? '';
@@ -182,55 +189,12 @@ class _CreateEditCollectionScreenState
     });
   }
 
-  Future<void> _removeChant(int index) async {
-    if (_isSubmitting || _isRemovingChant) return;
+  /// Staged, like every other edit: the server delete happens on Save, so
+  /// closing with X discards it.
+  void _removeChant(int index) {
+    if (_isSubmitting) return;
     if (index < 0 || index >= _chants.length) return;
-
-    final chant = _chants[index];
-    final itemId = _itemIdsByTextId[chant.textId];
-    final collectionId = widget.collection?.id;
-
-    if (_isEditing &&
-        collectionId != null &&
-        collectionId.isNotEmpty &&
-        itemId != null &&
-        itemId.isNotEmpty) {
-      setState(() => _isRemovingChant = true);
-      final result = await ref
-          .read(myRecitationCollectionsRepositoryProvider)
-          .deleteCollectionItem(collectionId: collectionId, itemId: itemId);
-
-      if (!mounted) return;
-
-      result.fold(
-        (failure) {
-          _logger.error('Failed to remove chant: ${failure.message}');
-          setState(() => _isRemovingChant = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(failure.message),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
-        (_) {
-          setState(() {
-            _isRemovingChant = false;
-            _chants.removeWhere((c) => c.textId == chant.textId);
-            _originalTextIds.remove(chant.textId);
-            _itemIdsByTextId.remove(chant.textId);
-          });
-          ref.invalidate(myRecitationCollectionDetailProvider(collectionId));
-        },
-      );
-      return;
-    }
-
-    setState(() {
-      _chants.removeAt(index);
-      _originalTextIds.remove(chant.textId);
-      _itemIdsByTextId.remove(chant.textId);
-    });
+    setState(() => _chants.removeAt(index));
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -252,16 +216,6 @@ class _CreateEditCollectionScreenState
   }
 
   Future<void> _submitCreate() async {
-    if (_chants.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least one chant'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
     setState(() => _isSubmitting = true);
 
     final textIds = _chants.map((c) => c.textId).toList();
@@ -301,79 +255,68 @@ class _CreateEditCollectionScreenState
     );
   }
 
+  /// Applies the edit as metadata → removals → additions. Each step is
+  /// idempotent for a retry: the PUT re-sends the same values, ids already
+  /// deleted are dropped from [_originalTextIds] as they go, and additions are
+  /// computed against what is still known to be on the server.
   Future<void> _submitEdit() async {
     final collection = widget.collection;
     if (collection == null) return;
 
-    final trimmedName = _name.trim();
-    if (trimmedName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a collection name'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    setState(() => _isSubmitting = true);
+    final repository = ref.read(myRecitationCollectionsRepositoryProvider);
+
+    final imageKey = _uploadedImageKey?.trim();
+    final updateFailure = _failureOf(
+      await repository.updateCollection(
+        collectionId: collection.id,
+        name: _name.trim(),
+        imgUrl: imageKey != null && imageKey.isNotEmpty ? imageKey : null,
+      ),
+    );
+    if (!mounted) return;
+    if (updateFailure != null) {
+      _showSubmitFailure('Failed to update collection', updateFailure);
       return;
     }
 
-    setState(() => _isSubmitting = true);
-
-    final imageKey = _uploadedImageKey?.trim();
-    final updateResult = await ref
-        .read(myRecitationCollectionsRepositoryProvider)
-        .updateCollection(
+    // Chants deselected in the picker or removed with the minus button.
+    final currentTextIds = _chants.map((c) => c.textId).toSet();
+    for (final textId in _originalTextIds.difference(currentTextIds)) {
+      final itemId = _itemIdsByTextId[textId];
+      if (itemId == null || itemId.isEmpty) continue;
+      final deleteFailure = _failureOf(
+        await repository.deleteCollectionItem(
           collectionId: collection.id,
-          name: trimmedName,
-          imgUrl: imageKey != null && imageKey.isNotEmpty ? imageKey : null,
-        );
-
-    if (!mounted) return;
-
-    final updateFailed = updateResult.fold((failure) {
-      _logger.error('Failed to update collection: ${failure.message}');
-      setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(failure.message),
-          behavior: SnackBarBehavior.floating,
+          itemId: itemId,
         ),
       );
-      return true;
-    }, (_) => false);
-    if (updateFailed || !mounted) return;
+      if (!mounted) return;
+      if (deleteFailure != null) {
+        _showSubmitFailure('Failed to remove chant $textId', deleteFailure);
+        return;
+      }
+      _originalTextIds.remove(textId);
+      _itemIdsByTextId.remove(textId);
+    }
 
     final newTextIds =
         _chants
             .map((c) => c.textId)
             .where((id) => !_originalTextIds.contains(id))
             .toList();
-
     if (newTextIds.isNotEmpty) {
-      final addResult = await ref
-          .read(myRecitationCollectionsRepositoryProvider)
-          .addItemsToCollection(
-            collectionId: collection.id,
-            textIds: newTextIds,
-          );
+      final addFailure = _failureOf(
+        await repository.addItemsToCollection(
+          collectionId: collection.id,
+          textIds: newTextIds,
+        ),
+      );
       if (!mounted) return;
-
-      final addFailed = addResult.fold((failure) {
-        _logger.error(
-          'Collection updated but failed to add chants: ${failure.message}',
-        );
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Collection updated, but some chants could not be added: '
-              '${failure.message}',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return true;
-      }, (_) => false);
-      if (addFailed) return;
+      if (addFailure != null) {
+        _showSubmitFailure('Failed to add chants', addFailure);
+        return;
+      }
     }
 
     final languageCode = ref.read(practiceRecitationsLanguageProvider);
@@ -384,8 +327,23 @@ class _CreateEditCollectionScreenState
     Navigator.of(context).pop(true);
   }
 
+  static Failure? _failureOf<T>(Either<Failure, T> result) =>
+      result.fold((failure) => failure, (_) => null);
+
+  /// Logs the detail, re-enables the form, and shows a translated message.
+  void _showSubmitFailure(String logContext, Failure failure) {
+    _logger.error('$logContext: ${failure.message}');
+    setState(() => _isSubmitting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.something_went_wrong),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   bool get _canSubmit {
-    if (_isUploadingImage || _isSubmitting || _isRemovingChant) return false;
+    if (_isUploadingImage || _isSubmitting) return false;
     if (_isEditing) return _name.trim().isNotEmpty;
     return _chants.isNotEmpty;
   }
@@ -482,6 +440,10 @@ class _CreateEditCollectionScreenState
                   ),
                   const SizedBox(height: 28),
                   if (_chants.isNotEmpty) ...[
+                    // Order is only persisted on create, via the text_ids
+                    // array; the API has no reorder call for personal
+                    // collections (unlike the CMS group one), so the drag
+                    // handle is hidden in edit mode rather than lying.
                     ReorderableListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -503,6 +465,7 @@ class _CreateEditCollectionScreenState
                           isDark: isDark,
                           onRemove: () => _removeChant(index),
                           dragIndex: index,
+                          canReorder: !_isEditing,
                         );
                       },
                     ),
@@ -626,7 +589,7 @@ class _ChangeCollectionNameDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.cancel),
         ),
         TextButton(onPressed: _save, child: Text(context.l10n.save)),
       ],
@@ -754,12 +717,16 @@ class _SelectedChantRow extends StatelessWidget {
     required this.isDark,
     required this.onRemove,
     required this.dragIndex,
+    this.canReorder = true,
   });
 
   final String title;
   final bool isDark;
   final VoidCallback onRemove;
   final int dragIndex;
+
+  /// Hides the drag handle when the order cannot be saved.
+  final bool canReorder;
 
   @override
   Widget build(BuildContext context) {
@@ -788,16 +755,17 @@ class _SelectedChantRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          ReorderableDragStartListener(
-            index: dragIndex,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Icon(
-                Icons.drag_handle,
-                color: isDark ? AppColors.textSubtleDark : AppColors.grey800,
+          if (canReorder)
+            ReorderableDragStartListener(
+              index: dragIndex,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.drag_handle,
+                  color: isDark ? AppColors.textSubtleDark : AppColors.grey800,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

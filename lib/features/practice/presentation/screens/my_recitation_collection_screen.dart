@@ -100,11 +100,7 @@ void _openChantReader(
 
   openRecitationReader(
     context,
-    RecitationModel(
-      textId: textId,
-      title: title,
-      language: item.language,
-    ),
+    RecitationModel(textId: textId, title: title, language: item.language),
   );
 }
 
@@ -218,7 +214,8 @@ class _CollectionContent extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: hasItems ? () {} : null,
+              onPressed:
+                  hasItems ? () => onOpenItem(collection.items.first) : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor:
@@ -376,9 +373,8 @@ class _RecitationCollectionRow extends StatelessWidget {
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
     final borderColor = isDark ? AppColors.grey800 : AppColors.grey600;
-    final title = item.title?.trim().isNotEmpty == true
-        ? item.title!
-        : item.textId;
+    final title =
+        item.title?.trim().isNotEmpty == true ? item.title! : item.textId;
 
     return InkWell(
       onTap: onTap,
