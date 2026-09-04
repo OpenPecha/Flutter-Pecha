@@ -21,6 +21,7 @@ class AllRecitationsScreen extends ConsumerStatefulWidget {
 
 class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool _languageRestored = false;
 
   @override
   void initState() {
@@ -28,6 +29,17 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     _scrollController.addListener(_onScroll);
     // Prefetch so the language picker usually opens already resolved.
     ref.read(recitationContentLanguagesProvider);
+    _restoreLanguage();
+  }
+
+  // Waits for the persisted pick so the first page is not fetched in the app
+  // language and immediately refetched.
+  Future<void> _restoreLanguage() async {
+    await ref
+        .read(practiceRecitationsLanguageProvider.notifier)
+        .ensureInitialized();
+    if (!mounted) return;
+    setState(() => _languageRestored = true);
   }
 
   @override
@@ -75,9 +87,10 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final languageCode = ref.watch(practiceRecitationsLanguageProvider);
-    final recitationsState = ref.watch(
-      practiceRecitationsPaginatedProvider(languageCode),
-    );
+    final recitationsState =
+        _languageRestored
+            ? ref.watch(practiceRecitationsPaginatedProvider(languageCode))
+            : const PracticeRecitationsState(isLoading: true);
 
     return Scaffold(
       appBar: AppBar(

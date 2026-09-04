@@ -1,6 +1,8 @@
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/di/core_providers.dart';
+import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/core/utils/local_storage_service.dart';
 import 'package:flutter_pecha/features/recitation/data/datasource/recitations_remote_datasource.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitation_search_provider.dart';
@@ -138,23 +140,57 @@ class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState
 }
 
 class PracticeRecitationsLanguageNotifier extends StateNotifier<String> {
-  PracticeRecitationsLanguageNotifier(String initialLanguage)
-    : super(initialLanguage);
+  PracticeRecitationsLanguageNotifier({
+    required LocalStorageService localStorageService,
+    required String fallbackLanguage,
+  }) : _localStorageService = localStorageService,
+       super(_lastKnown ?? fallbackLanguage) {
+    _initFuture = _initialize();
+  }
 
-  void setLanguage(String languageCode) {
+  final LocalStorageService _localStorageService;
+  // Kept static so a stored pick is re-applied synchronously when the notifier
+  // is rebuilt (app content language change) instead of flashing that language.
+  static String? _lastKnown;
+  bool _userSelected = false;
+  Future<void>? _initFuture;
+
+  Future<void> _initialize() async {
+    try {
+      final stored = await _localStorageService.get<String>(
+        StorageKeys.chantListLanguage,
+      );
+      if (_userSelected || !mounted) return;
+      if (stored != null && stored.isNotEmpty) {
+        _lastKnown = stored;
+        state = stored;
+      }
+    } catch (e) {
+      // Keep the seeded language on failure.
+      _logger.warning('Reading stored chant list language failed', e);
+    }
+  }
+
+  Future<void> ensureInitialized() async => _initFuture ??= _initialize();
+
+  Future<void> setLanguage(String languageCode) async {
+    if (languageCode.isEmpty) return;
+    _userSelected = true;
+    _lastKnown = languageCode;
     state = languageCode;
+    await _localStorageService.set(StorageKeys.chantListLanguage, languageCode);
   }
 }
 
 /// Chant list language for [AllRecitationsScreen]. Does not change app locale.
-final practiceRecitationsLanguageProvider = StateNotifierProvider.autoDispose<
-  PracticeRecitationsLanguageNotifier,
-  String
->((ref) {
-  return PracticeRecitationsLanguageNotifier(
-    ref.watch(contentLanguageProvider),
-  );
-});
+/// Persisted, and kept alive so the pick survives navigation and restarts.
+final practiceRecitationsLanguageProvider =
+    StateNotifierProvider<PracticeRecitationsLanguageNotifier, String>((ref) {
+      return PracticeRecitationsLanguageNotifier(
+        localStorageService: ref.read(localStorageServiceProvider),
+        fallbackLanguage: ref.watch(contentLanguageProvider),
+      );
+    });
 
 final practiceRecitationsPaginatedProvider = StateNotifierProvider.autoDispose
     .family<PracticeRecitationsNotifier, PracticeRecitationsState, String>((
