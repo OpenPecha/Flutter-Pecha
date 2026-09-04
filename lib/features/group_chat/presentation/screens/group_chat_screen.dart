@@ -542,6 +542,12 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           _providers
               .read(groupChatThreadProvider(message.roomId).notifier)
               .appendLive(message);
+          // Your own message is read the moment it is sent. The server counts
+          // it as unread until `last_read_at` moves past it, so without this
+          // the chats list shows the sender their own message with a badge.
+          // It used to be covered only by the `message_created` echo marking
+          // read — which never arrives if the socket is not delivering.
+          unawaited(_markRoomRead());
           await _ensureLiveConnected();
         },
       );
