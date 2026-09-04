@@ -119,38 +119,74 @@ class MyRecitationCollectionsRepository {
     }
   }
 
-  /// Creates a collection, then adds [textIds] when non-empty.
+  /// Creates a collection (unless [existingCollectionId] is set), then adds
+  /// [textIds] when non-empty.
+  ///
+  /// If the collection row is already persisted but adding chants fails, returns
+  /// [PartialCollectionCreateFailure] so callers can retry items without creating
+  /// a duplicate collection. Retries only add chants that are not already present.
   Future<Either<Failure, MyRecitationCollectionModel>> createCollectionWithItems({
     required String name,
     required String imgUrl,
     required List<String> textIds,
+    String? existingCollectionId,
   }) async {
-    final createResult = await createCollection(name: name, imgUrl: imgUrl);
+    final MyRecitationCollectionModel collection;
 
-    return createResult.fold(
-      (failure) async => Left(failure),
-      (collection) async {
-        if (textIds.isEmpty) return Right(collection);
-        if (collection.id.isEmpty) {
-          return const Left(
-            ServerFailure('Failed to create collection: missing collection id'),
-          );
-        }
+    final existingId = existingCollectionId?.trim();
+    final isResume = existingId != null && existingId.isNotEmpty;
+    if (isResume) {
+      collection = MyRecitationCollectionModel(
+        id: existingId,
+        name: name,
+        imgUrl: imgUrl,
+      );
+    } else {
+      final createResult = await createCollection(name: name, imgUrl: imgUrl);
+      final created = createResult.fold<MyRecitationCollectionModel?>(
+        (_) => null,
+        (c) => c,
+      );
+      if (created == null) {
+        return createResult;
+      }
+      collection = created;
+    }
 
-        final addResult = await addItemsToCollection(
+    if (textIds.isEmpty) return Right(collection);
+    if (collection.id.isEmpty) {
+      return const Left(
+        ServerFailure('Failed to create collection: missing collection id'),
+      );
+    }
+
+    var idsToAdd = textIds;
+    if (isResume) {
+      final detailResult = await getCollectionDetail(collection.id);
+      final alreadyPresent = detailResult.fold<Set<String>?>(
+        (_) => null,
+        (detail) => detail.items.map((item) => item.textId).toSet(),
+      );
+      if (alreadyPresent != null) {
+        idsToAdd =
+            textIds.where((id) => !alreadyPresent.contains(id)).toList();
+        if (idsToAdd.isEmpty) return Right(collection);
+      }
+    }
+
+    final addResult = await addItemsToCollection(
+      collectionId: collection.id,
+      textIds: idsToAdd,
+    );
+    return addResult.fold(
+      (failure) => Left(
+        PartialCollectionCreateFailure(
+          'Collection was created but chants could not be added: '
+          '${failure.message}',
           collectionId: collection.id,
-          textIds: textIds,
-        );
-        return addResult.fold(
-          (failure) => Left(
-            ServerFailure(
-              'Collection was created but chants could not be added: '
-              '${failure.message}',
-            ),
-          ),
-          (_) => Right(collection),
-        );
-      },
+        ),
+      ),
+      (_) => Right(collection),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
@@ -54,6 +55,8 @@ class _CreateEditCollectionScreenState
   File? _localCoverFile;
   String? _uploadedImageKey;
   String? _coverPreviewUrl;
+  /// Set after the collection row is persisted so retries do not create duplicates.
+  String? _createdCollectionId;
   bool _isUploadingImage = false;
   bool _isSubmitting = false;
   bool _isRemovingChant = false;
@@ -262,6 +265,7 @@ class _CreateEditCollectionScreenState
           name: _name,
           imgUrl: _uploadedImageKey ?? '',
           textIds: textIds,
+          existingCollectionId: _createdCollectionId,
         );
 
     if (!mounted) return;
@@ -269,7 +273,12 @@ class _CreateEditCollectionScreenState
     result.fold(
       (failure) {
         _logger.error('Failed to create collection: ${failure.message}');
-        setState(() => _isSubmitting = false);
+        setState(() {
+          _isCreating = false;
+          if (failure is PartialCollectionCreateFailure) {
+            _createdCollectionId = failure.collectionId;
+          }
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(failure.message),
@@ -277,7 +286,8 @@ class _CreateEditCollectionScreenState
           ),
         );
       },
-      (_) {
+      (collection) {
+        _createdCollectionId = collection.id;
         final languageCode = ref.read(practiceRecitationsLanguageProvider);
         ref.invalidate(practiceRecitationsPaginatedProvider(languageCode));
         Navigator.of(context).pop();

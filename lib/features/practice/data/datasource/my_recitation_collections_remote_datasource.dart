@@ -131,8 +131,8 @@ class MyRecitationCollectionsRemoteDatasource {
 
   /// POST /users/me/recitation-collections/{collectionId}/items
   ///
-  /// Adds chants to an existing collection. Items are posted one at a time so
-  /// display order matches the UI and a single bad row does not fail the batch.
+  /// Adds chants in a single request (preserving [textIds] order) so a failed
+  /// write cannot leave a partially-added chant list from client-side looping.
   Future<AddMyRecitationCollectionItemsResponse> addItemsToCollection({
     required String collectionId,
     required List<String> textIds,
@@ -149,51 +149,29 @@ class MyRecitationCollectionsRemoteDatasource {
       'Adding ${uniqueIds.length} chant(s) to collection $collectionId',
     );
 
-    final allItems = <MyRecitationCollectionItemModel>[];
-    var addedCount = 0;
-
-    for (final textId in uniqueIds) {
-      try {
-        final response = await _postItems(
-          collectionId: collectionId,
-          textIds: [textId],
-        );
-        addedCount += response.addedCount;
-        allItems.addAll(response.items);
-      } on DioException catch (e) {
-        _logger.error(
-          'Failed to add chant $textId to collection $collectionId',
-          e.error ?? e,
-        );
-        rethrow;
-      }
-    }
-
-    return AddMyRecitationCollectionItemsResponse(
-      collectionId: collectionId,
-      addedCount: addedCount,
-      items: allItems,
-    );
-  }
-
-  Future<AddMyRecitationCollectionItemsResponse> _postItems({
-    required String collectionId,
-    required List<String> textIds,
-  }) async {
-    final payload = AddMyRecitationCollectionItemsRequest(textIds: textIds).toJson();
+    final payload =
+        AddMyRecitationCollectionItemsRequest(textIds: uniqueIds).toJson();
     _logger.debug('POST .../items payload: $payload');
 
-    final response = await dio.post(
-      '/users/me/recitation-collections/$collectionId/items',
-      data: payload,
-    );
-    final data = response.data;
-    if (data is! Map<String, dynamic>) {
-      throw const FormatException(
-        'Unexpected /users/me/recitation-collections/items payload type',
+    try {
+      final response = await dio.post(
+        '/users/me/recitation-collections/$collectionId/items',
+        data: payload,
       );
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException(
+          'Unexpected /users/me/recitation-collections/items payload type',
+        );
+      }
+      return AddMyRecitationCollectionItemsResponse.fromJson(data);
+    } on DioException catch (e) {
+      _logger.error(
+        'Failed to add chants to collection $collectionId',
+        e.error ?? e,
+      );
+      rethrow;
     }
-    return AddMyRecitationCollectionItemsResponse.fromJson(data);
   }
 
   static List<String> _uniqueNonEmptyTextIds(List<String> textIds) {
