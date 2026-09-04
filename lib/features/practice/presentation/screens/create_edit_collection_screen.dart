@@ -274,7 +274,7 @@ class _CreateEditCollectionScreenState
       (failure) {
         _logger.error('Failed to create collection: ${failure.message}');
         setState(() {
-          _isCreating = false;
+          _isSubmitting = false;
           if (failure is PartialCollectionCreateFailure) {
             _createdCollectionId = failure.collectionId;
           }
