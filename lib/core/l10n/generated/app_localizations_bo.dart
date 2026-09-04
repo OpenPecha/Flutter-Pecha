@@ -2402,6 +2402,15 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_chat_title => 'གླེང་མོལ།';
 
   @override
+  String get chats_title => 'ཁ་བརྡ།';
+
+  @override
+  String get chats_empty_title => 'ད་དུང་ཁ་བརྡ་མེད།';
+
+  @override
+  String get chats_empty_body => 'ཁ་བརྡ་འགོ་འཛུགས་པར་སྤྱི་ཚོགས་ཤིག་ལ་ཞུགས།';
+
+  @override
   String get group_chat_inappropriate =>
       'སྐད་ཆ་འདི་འབྱོར་མི་ཆོག་པས་འཕྲིན་ཐུང་འདི་གཏོང་མ་ཐུབ།';
 

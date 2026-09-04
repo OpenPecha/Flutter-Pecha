@@ -2398,6 +2398,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_chat_title => 'चैट';
 
   @override
+  String get chats_title => 'चैट';
+
+  @override
+  String get chats_empty_title => 'अभी कोई चैट नहीं';
+
+  @override
+  String get chats_empty_body =>
+      'बातचीत शुरू करने के लिए किसी समुदाय से जुड़ें।';
+
+  @override
   String get group_chat_inappropriate =>
       'यह संदेश नहीं भेजा जा सका क्योंकि इसमें अनुचित भाषा है।';
 
