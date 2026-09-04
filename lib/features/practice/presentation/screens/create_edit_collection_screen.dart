@@ -11,6 +11,7 @@ import 'package:flutter_pecha/features/practice/data/models/my_recitation_collec
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/add_chants_to_collection_screen.dart';
+import 'package:flutter_pecha/features/practice/presentation/widgets/collection_name_dialog.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart' show Either;
@@ -18,6 +19,13 @@ import 'package:image_picker/image_picker.dart';
 
 /// Placeholder mustard accent used for the empty cover tile in the designs.
 const Color _kCoverPlaceholder = Color(0xFFC9A84C);
+
+// Measured from the 390x844 design; page content is inset 20 each side.
+const double _kCoverWidth = 134;
+const double _kCoverHeight = 100;
+const double _kRemoveCircleSize = 24;
+const double _kRowHitSize = 40;
+const double _kAddTileSize = 60;
 
 /// Shared create / edit UI for a user recitation collection.
 ///
@@ -167,9 +175,11 @@ class _CreateEditCollectionScreenState
 
   Future<void> _changeName() async {
     if (_isSubmitting || _isMetadataLocked) return;
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => _ChangeCollectionNameDialog(initialName: _name),
+    final result = await showCollectionNameDialog(
+      context,
+      title: 'Change title',
+      actionLabel: context.l10n.save,
+      initialName: _name,
     );
     if (!mounted || result == null) return;
     setState(() => _name = result);
@@ -370,17 +380,20 @@ class _CreateEditCollectionScreenState
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                onPressed:
-                    _isSubmitting ? null : () => Navigator.of(context).pop(),
-                icon: Icon(AppAssets.x, color: titleColor),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, right: 8),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  icon: Icon(AppAssets.x, color: titleColor),
+                ),
               ),
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +405,7 @@ class _CreateEditCollectionScreenState
                         showPlusWhenHasImage: _isEditing,
                         onTap: _isMetadataLocked ? null : _pickImage,
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 18),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,33 +413,36 @@ class _CreateEditCollectionScreenState
                             Text(
                               _name,
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 color: titleColor,
                               ),
                             ),
                             if (!_isMetadataLocked) ...[
-                              const SizedBox(height: 10),
-                              Material(
-                                color: mutedFill,
-                                shape: const StadiumBorder(),
-                                child: InkWell(
-                                  onTap: _changeName,
-                                  customBorder: const StadiumBorder(),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 6,
-                                    ),
-                                    child: Text(
-                                      'Change',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color:
-                                            isDark
-                                                ? AppColors.textTertiaryDark
-                                                : AppColors.grey900,
+                              const SizedBox(height: 6),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Material(
+                                  color: mutedFill,
+                                  shape: const StadiumBorder(),
+                                  child: InkWell(
+                                    onTap: _changeName,
+                                    customBorder: const StadiumBorder(),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 7,
+                                      ),
+                                      child: Text(
+                                        'Change',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              isDark
+                                                  ? AppColors.textTertiaryDark
+                                                  : AppColors.grey900,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -438,7 +454,7 @@ class _CreateEditCollectionScreenState
                       ),
                     ],
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 32),
                   if (_chants.isNotEmpty) ...[
                     // Order is only persisted on create, via the text_ids
                     // array; the API has no reorder call for personal
@@ -476,7 +492,7 @@ class _CreateEditCollectionScreenState
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + bottomInset),
+              padding: EdgeInsets.fromLTRB(30, 8, 30, 8 + bottomInset),
               child: SizedBox(
                 width: double.infinity,
                 child: Material(
@@ -504,7 +520,7 @@ class _CreateEditCollectionScreenState
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: actionFg,
-                                  fontSize: 16,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -530,71 +546,6 @@ Future<bool?> openEditCollectionScreen(
       builder: (_) => CreateEditCollectionScreen.edit(collection: collection),
     ),
   );
-}
-
-class _ChangeCollectionNameDialog extends StatefulWidget {
-  const _ChangeCollectionNameDialog({required this.initialName});
-
-  final String initialName;
-
-  @override
-  State<_ChangeCollectionNameDialog> createState() =>
-      _ChangeCollectionNameDialogState();
-}
-
-class _ChangeCollectionNameDialogState
-    extends State<_ChangeCollectionNameDialog> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initialName);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    final trimmed = _controller.text.trim();
-    if (trimmed.isEmpty) return;
-    Navigator.of(context).pop(trimmed);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return AlertDialog(
-      backgroundColor:
-          isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Text(
-        'Change name',
-        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-      ),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => _save(),
-        decoration: InputDecoration(
-          isDense: true,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(context.l10n.cancel),
-        ),
-        TextButton(onPressed: _save, child: Text(context.l10n.save)),
-      ],
-    );
-  }
 }
 
 class _CoverTile extends StatelessWidget {
@@ -623,10 +574,10 @@ class _CoverTile extends StatelessWidget {
     return GestureDetector(
       onTap: isUploading ? null : onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: SizedBox(
-          width: 112,
-          height: 88,
+          width: _kCoverWidth,
+          height: _kCoverHeight,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -656,7 +607,7 @@ class _CoverTile extends StatelessWidget {
                     alpha: hasImage && showPlusWhenHasImage ? 0.2 : 0,
                   ),
                   child: const Center(
-                    child: Icon(AppAssets.plus, color: Colors.white, size: 28),
+                    child: Icon(AppAssets.plus, color: Colors.white, size: 24),
                   ),
                 ),
             ],
@@ -675,33 +626,43 @@ class _AddChantsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
+    final fill = isDark ? AppColors.surfaceVariantDark : AppColors.grey50;
     final color = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final dividerColor = isDark ? AppColors.cardBorderDark : AppColors.grey100;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(22, 8, 22, 8),
+        child: Column(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: fill,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(AppAssets.plus, color: color, size: 22),
+            Row(
+              children: [
+                Container(
+                  width: _kAddTileSize,
+                  height: _kAddTileSize,
+                  decoration: BoxDecoration(
+                    color: fill,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(AppAssets.plus, color: color, size: 24),
+                ),
+                const SizedBox(width: 34),
+                Text(
+                  'Add chants',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 14),
-            Text(
-              'Add chants',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: color,
-              ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: _kAddTileSize + 24),
+              child: Divider(height: 1, thickness: 1, color: dividerColor),
             ),
           ],
         ),
@@ -730,23 +691,34 @@ class _SelectedChantRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
+    final fill = isDark ? AppColors.surfaceVariantDark : AppColors.grey50;
     final color = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
       child: Row(
         children: [
+          // 24pt circle from the design, centred in a 40pt hit target.
           GestureDetector(
             onTap: onRemove,
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-              child: Icon(AppAssets.minus, size: 16, color: color),
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: _kRowHitSize,
+              height: _kRowHitSize,
+              child: Center(
+                child: Container(
+                  width: _kRemoveCircleSize,
+                  height: _kRemoveCircleSize,
+                  decoration: BoxDecoration(
+                    color: fill,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(AppAssets.minus, size: 14, color: color),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               title,
@@ -759,10 +731,15 @@ class _SelectedChantRow extends StatelessWidget {
             ReorderableDragStartListener(
               index: dragIndex,
               child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Icon(
-                  Icons.drag_handle,
-                  color: isDark ? AppColors.textSubtleDark : AppColors.grey800,
+                padding: const EdgeInsets.only(right: 8),
+                child: SizedBox(
+                  width: _kRowHitSize,
+                  height: _kRowHitSize,
+                  child: Icon(
+                    Icons.drag_handle,
+                    color:
+                        isDark ? AppColors.textSubtleDark : AppColors.grey800,
+                  ),
                 ),
               ),
             ),
