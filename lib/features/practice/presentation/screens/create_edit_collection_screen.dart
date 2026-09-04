@@ -55,7 +55,10 @@ class _CreateEditCollectionScreenState
   File? _localCoverFile;
   String? _uploadedImageKey;
   String? _coverPreviewUrl;
-  /// Set after the collection row is persisted so retries do not create duplicates.
+
+  /// Set after the collection row is persisted so retries do not create
+  /// duplicates. Once set, name and cover are locked: the retry path only adds
+  /// chants and cannot write metadata, so edits would be silently dropped.
   String? _createdCollectionId;
   bool _isUploadingImage = false;
   bool _isSubmitting = false;
@@ -63,6 +66,9 @@ class _CreateEditCollectionScreenState
   late final List<RecitationModel> _chants;
 
   bool get _isEditing => widget.isEditing;
+
+  /// True once the row exists on the server; see [_createdCollectionId].
+  bool get _isMetadataLocked => _createdCollectionId != null;
 
   @override
   void initState() {
@@ -99,7 +105,7 @@ class _CreateEditCollectionScreenState
   }
 
   Future<void> _pickImage() async {
-    if (_isUploadingImage || _isSubmitting) return;
+    if (_isUploadingImage || _isSubmitting || _isMetadataLocked) return;
 
     final picker = ImagePicker();
     final xFile = await picker.pickImage(
@@ -137,7 +143,7 @@ class _CreateEditCollectionScreenState
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(failure.message),
+            content: Text(context.l10n.something_went_wrong),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -153,7 +159,7 @@ class _CreateEditCollectionScreenState
   }
 
   Future<void> _changeName() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || _isMetadataLocked) return;
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => _ChangeCollectionNameDialog(initialName: _name),
@@ -281,7 +287,7 @@ class _CreateEditCollectionScreenState
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(failure.message),
+            content: Text(context.l10n.something_went_wrong),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -426,7 +432,7 @@ class _CreateEditCollectionScreenState
                         networkUrl: _coverPreviewUrl,
                         isUploading: _isUploadingImage,
                         showPlusWhenHasImage: _isEditing,
-                        onTap: _pickImage,
+                        onTap: _isMetadataLocked ? null : _pickImage,
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -441,32 +447,34 @@ class _CreateEditCollectionScreenState
                                 color: titleColor,
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            Material(
-                              color: mutedFill,
-                              shape: const StadiumBorder(),
-                              child: InkWell(
-                                onTap: _changeName,
-                                customBorder: const StadiumBorder(),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 6,
-                                  ),
-                                  child: Text(
-                                    'Change',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color:
-                                          isDark
-                                              ? AppColors.textTertiaryDark
-                                              : AppColors.grey900,
+                            if (!_isMetadataLocked) ...[
+                              const SizedBox(height: 10),
+                              Material(
+                                color: mutedFill,
+                                shape: const StadiumBorder(),
+                                child: InkWell(
+                                  onTap: _changeName,
+                                  customBorder: const StadiumBorder(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
+                                    child: Text(
+                                      'Change',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isDark
+                                                ? AppColors.textTertiaryDark
+                                                : AppColors.grey900,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -638,7 +646,10 @@ class _CoverTile extends StatelessWidget {
   final File? localFile;
   final String? networkUrl;
   final bool isUploading;
-  final VoidCallback onTap;
+
+  /// Null disables picking (uploading, or metadata locked after a partial
+  /// create).
+  final VoidCallback? onTap;
   final bool showPlusWhenHasImage;
 
   @override
