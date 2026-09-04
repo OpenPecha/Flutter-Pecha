@@ -126,8 +126,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// single slot let the echo overwrite the one worth keeping. Among those
   /// that agree, one that would change nothing is passed over for the same
   /// reason — see [_replayDeferredReaction].
-  final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions =
-      {};
+  final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions = {};
 
   /// Bumped whenever a message's reactions change locally. A refetch compares
   /// the value it saw before its request with the value on arrival: checking
@@ -168,15 +167,36 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// Applies anything held while this page was in flight. It is newer than
   /// the page's own snapshot of the same message.
   ChatMessageDTO _withPendingUpdates(ChatMessageDTO message) {
-    var updated = message;
-
     final reactions = _pendingReactions.remove(message.id);
-    if (reactions != null) updated = updated.copyWith(reactions: reactions);
+    if (reactions == null) return message;
+    return message.copyWith(reactions: reactions);
+  }
 
-    final deletedAt = _pendingDeletions.remove(message.id);
-    if (deletedAt != null) updated = updated.copyWith(deletedAt: deletedAt);
+  /// Applies deletions held while a page was in flight, across the whole list.
+  ///
+  /// A sweep rather than a per-row hook, because `refreshLatest` commits its
+  /// rows through several branches — restart, merge, first load — and a row it
+  /// drops as a duplicate on the way in would take the marker with it, since
+  /// the map has already forgotten it. Running last, over whatever was
+  /// actually committed, treats an inserted row and an already-held one alike.
+  void _applyPendingDeletions() {
+    if (_pendingDeletions.isEmpty) return;
 
-    return updated;
+    var changed = false;
+    final messages = [
+      for (final message in state.messages)
+        if (message.deletedAt != null)
+          message
+        else
+          () {
+            final deletedAt = _pendingDeletions.remove(message.id);
+            if (deletedAt == null) return message;
+            changed = true;
+            return message.copyWith(deletedAt: deletedAt);
+          }(),
+    ];
+
+    if (changed) state = state.copyWith(messages: messages);
   }
 
   /// Anything still held once no fetch is running names a message no page is
@@ -223,6 +243,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         );
       },
     );
+    _applyPendingDeletions();
     _dropStalePending();
   }
 
@@ -263,6 +284,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         );
       },
     );
+    _applyPendingDeletions();
     _dropStalePending();
   }
 
@@ -480,6 +502,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         hasMore: state.messages.length < total,
       );
     });
+    _applyPendingDeletions();
     _dropStalePending();
   }
 

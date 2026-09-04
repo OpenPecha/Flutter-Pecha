@@ -33,7 +33,6 @@ class GroupChatMessageBubble extends StatelessWidget {
     this.selfDisplayName,
     this.onLongPress,
     this.isHighlighted = false,
-    this.isParentDeleted = false,
     this.onShowReactions,
     this.onTapQuote,
   });
@@ -53,10 +52,6 @@ class GroupChatMessageBubble extends StatelessWidget {
 
   /// Briefly tinted after a quote jumped to this message.
   final bool isHighlighted;
-
-  /// The quoted original has since been deleted. Resolved by the thread, which
-  /// is the only place that can see the rest of the loaded window.
-  final bool isParentDeleted;
 
   /// Deleted, per the server's own `deleted_at`. A deleted message can still
   /// arrive carrying its body, so this — never an empty body — is what decides
@@ -239,7 +234,6 @@ class GroupChatMessageBubble extends StatelessWidget {
               if (message.parent != null)
                 GroupChatQuotedMessage(
                   parent: message.parent!,
-                  isDeleted: isParentDeleted,
                   onTap: onTapQuote,
                 ),
               _body(context, textColor, isDark),

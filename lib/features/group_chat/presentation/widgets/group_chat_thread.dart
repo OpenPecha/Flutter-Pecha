@@ -301,27 +301,13 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     }
   }
 
-  /// Whether the message this one quotes has since been deleted.
-  ///
-  /// The parent payload carries no `deleted_at` of its own, so the answer only
-  /// exists by looking the original up in the loaded window. A parent scrolled
-  /// out of that window still shows its old body.
-  bool _isParentDeleted(GroupChatThreadState state, ChatMessageDTO message) {
-    final parentId = message.parent?.id;
-    if (parentId == null) return false;
-    for (final loaded in state.messages) {
-      if (loaded.id == parentId) return loaded.deletedAt != null;
-    }
-    return false;
-  }
-
   bool _canDelete(ChatMessageDTO message) {
     if (message.deletedAt != null) return false;
     return isSelfChatMessage(
       senderId: message.senderId,
       senderEmail: message.senderEmail,
-      currentUserId: widget.currentUserId,
-      currentUserEmail: ref.read(userProvider).user?.email,
+      currentUserId: _viewerId,
+      currentUserEmail: _viewerEmail,
     );
   }
 
@@ -461,7 +447,6 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
                 selfDisplayName: joinChatName(user?.firstName, user?.lastName),
                 onLongPress: onLongPress,
                 isHighlighted: message.id == _highlightedId,
-                isParentDeleted: _isParentDeleted(state, message),
                 onShowReactions: () => _showReactions(message),
                 onTapQuote:
                     message.parent == null

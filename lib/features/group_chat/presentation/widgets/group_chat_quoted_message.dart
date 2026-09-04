@@ -13,7 +13,6 @@ class GroupChatQuotedMessage extends StatelessWidget {
     super.key,
     required this.parent,
     this.isPreview = false,
-    this.isDeleted = false,
     this.onTap,
   });
 
@@ -21,14 +20,6 @@ class GroupChatQuotedMessage extends StatelessWidget {
 
   /// Preview mode sits on the page background rather than inside a bubble.
   final bool isPreview;
-
-  /// The quoted original has since been deleted.
-  ///
-  /// `ChatMessageParentDTO` carries no `deleted_at`, so this can only be known
-  /// by cross-referencing the loaded window. A parent scrolled out of that
-  /// window still shows its old body — closing that needs `deleted_at` on the
-  /// parent payload.
-  final bool isDeleted;
 
   final VoidCallback? onTap;
 
@@ -91,18 +82,16 @@ class GroupChatQuotedMessage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 1),
+              // Kept even once the original is deleted. The reply was an
+              // answer to these words, and the server embeds them in the reply
+              // itself — so the quote stays readable for everyone, at any
+              // scroll position, rather than hollowing out the conversation.
               Text(
-                isDeleted
-                    ? context.l10n.group_chat_message_deleted_by_sender
-                    : parent.body,
+                parent.body,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 strutStyle: context.tibetanStrutStyle(13),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: bodyColor,
-                  fontStyle: isDeleted ? FontStyle.italic : null,
-                ),
+                style: TextStyle(fontSize: 13, color: bodyColor),
               ),
             ],
           ),
