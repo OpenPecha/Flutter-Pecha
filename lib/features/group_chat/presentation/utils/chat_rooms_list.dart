@@ -66,6 +66,29 @@ bool isChatPushPayload(Map<String, dynamic> data) {
   return raw.toUpperCase() == 'CHAT';
 }
 
+/// The room a chat push names. The backend sets `source_id` to the room id.
+String chatPushRoomId(Map<String, dynamic> data) =>
+    (data['source_id'] as String?)?.trim() ?? '';
+
+/// The group a chat push names.
+String chatPushGroupId(Map<String, dynamic> data) =>
+    (data['group_id'] as String?)?.trim() ?? '';
+
+/// Whether a chat push is about the room or group currently on screen.
+bool chatPushTargets(
+  Map<String, dynamic> data, {
+  String? roomId,
+  String? groupId,
+}) {
+  if (!isChatPushPayload(data)) return false;
+
+  final room = (roomId ?? '').trim();
+  if (room.isNotEmpty && chatPushRoomId(data) == room) return true;
+
+  final group = (groupId ?? '').trim();
+  return group.isNotEmpty && chatPushGroupId(data) == group;
+}
+
 /// The preview line's message text, with newlines flattened so a multi-line
 /// message stays tidy on two lines.
 ///
