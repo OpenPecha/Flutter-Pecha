@@ -39,16 +39,13 @@ class MyRecitationCollectionsRepository {
     }
   }
 
-  Future<Either<Failure, MyRecitationCollectionDetailModel>> getCollectionDetail(
-    String collectionId,
-  ) async {
+  Future<Either<Failure, MyRecitationCollectionDetailModel>>
+  getCollectionDetail(String collectionId) async {
     try {
       final result = await remoteDatasource.getCollectionDetail(collectionId);
       return Right(result);
     } catch (e) {
-      return Left(
-        ExceptionMapper.map(e, context: 'Failed to load collection'),
-      );
+      return Left(ExceptionMapper.map(e, context: 'Failed to load collection'));
     }
   }
 
@@ -75,23 +72,48 @@ class MyRecitationCollectionsRepository {
   ///
   /// If the collection row is already persisted but adding chants fails, returns
   /// [PartialCollectionCreateFailure] so callers can retry items without creating
-  /// a duplicate collection. Retries only add chants that are not already present.
-  Future<Either<Failure, MyRecitationCollectionModel>> createCollectionWithItems({
+  /// a duplicate collection.
+  ///
+  /// On such a retry the row already exists and [name] / [imgUrl] are **not**
+  /// written — there is no update call on this path — so callers must lock
+  /// metadata edits once they hold a collection id. The row is read back so
+  /// the returned model reflects the server and only missing chants are added.
+  Future<Either<Failure, MyRecitationCollectionModel>>
+  createCollectionWithItems({
     required String name,
     required String imgUrl,
     required List<String> textIds,
     String? existingCollectionId,
   }) async {
     final MyRecitationCollectionModel collection;
+    var idsToAdd = textIds;
 
     final existingId = existingCollectionId?.trim();
-    final isResume = existingId != null && existingId.isNotEmpty;
-    if (isResume) {
-      collection = MyRecitationCollectionModel(
-        id: existingId,
-        name: name,
-        imgUrl: imgUrl,
+    if (existingId != null && existingId.isNotEmpty) {
+      final detailResult = await getCollectionDetail(existingId);
+      collection = detailResult.fold(
+        // Detail unavailable: keep the id so the retry still targets the
+        // persisted row rather than creating another one.
+        (_) => MyRecitationCollectionModel(
+          id: existingId,
+          name: name,
+          imgUrl: imgUrl,
+        ),
+        (detail) => MyRecitationCollectionModel(
+          id: detail.id.isNotEmpty ? detail.id : existingId,
+          name: detail.name,
+          imgUrl: detail.imgUrl,
+          createdAt: detail.createdAt,
+          updatedAt: detail.updatedAt,
+        ),
       );
+      final alreadyPresent = detailResult.fold<Set<String>?>(
+        (_) => null,
+        (detail) => detail.items.map((item) => item.textId).toSet(),
+      );
+      if (alreadyPresent != null) {
+        idsToAdd = textIds.where((id) => !alreadyPresent.contains(id)).toList();
+      }
     } else {
       final createResult = await createCollection(name: name, imgUrl: imgUrl);
       final created = createResult.fold<MyRecitationCollectionModel?>(
@@ -104,25 +126,11 @@ class MyRecitationCollectionsRepository {
       collection = created;
     }
 
-    if (textIds.isEmpty) return Right(collection);
+    if (idsToAdd.isEmpty) return Right(collection);
     if (collection.id.isEmpty) {
       return const Left(
         ServerFailure('Failed to create collection: missing collection id'),
       );
-    }
-
-    var idsToAdd = textIds;
-    if (isResume) {
-      final detailResult = await getCollectionDetail(collection.id);
-      final alreadyPresent = detailResult.fold<Set<String>?>(
-        (_) => null,
-        (detail) => detail.items.map((item) => item.textId).toSet(),
-      );
-      if (alreadyPresent != null) {
-        idsToAdd =
-            textIds.where((id) => !alreadyPresent.contains(id)).toList();
-        if (idsToAdd.isEmpty) return Right(collection);
-      }
     }
 
     final addResult = await addItemsToCollection(
