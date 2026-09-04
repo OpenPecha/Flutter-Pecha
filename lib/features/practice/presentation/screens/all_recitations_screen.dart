@@ -5,6 +5,8 @@ import 'package:flutter_pecha/core/localization/content_language_picker_sheet.da
 import 'package:flutter_pecha/core/localization/languages_providers.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/recitations_search_screen.dart';
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
@@ -75,6 +77,14 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     );
   }
 
+  void _onCreateCollectionPressed() {
+    if (ref.read(authProvider).isGuest) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    showNewCollectionDialog(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -110,7 +120,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
       ),
       body: _buildBody(context, recitationsState, languageCode),
       floatingActionButton: _CreateCollectionButton(
-        onPressed: () => showNewCollectionDialog(context),
+        onPressed: _onCreateCollectionPressed,
       ),
     );
   }
