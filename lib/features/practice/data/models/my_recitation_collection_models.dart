@@ -21,6 +21,25 @@ class CreateMyRecitationCollectionRequest {
   };
 }
 
+/// Request body for `PUT /users/me/recitation-collections/{id}`.
+///
+/// [imgUrl] is the storage key from a prior upload. Omit when the cover is
+/// unchanged so the API keeps the existing image.
+class UpdateMyRecitationCollectionRequest {
+  final String name;
+  final String? imgUrl;
+
+  const UpdateMyRecitationCollectionRequest({
+    required this.name,
+    this.imgUrl,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    if (imgUrl != null && imgUrl!.isNotEmpty) 'img_url': imgUrl,
+  };
+}
+
 /// Nested image URLs from `POST .../upload-image`.
 class MyRecitationCollectionUploadedImage {
   final String? thumbnail;

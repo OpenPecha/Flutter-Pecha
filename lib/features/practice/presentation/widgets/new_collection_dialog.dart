@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
-import 'package:flutter_pecha/features/practice/presentation/screens/create_collection_screen.dart';
+import 'package:flutter_pecha/features/practice/presentation/screens/create_edit_collection_screen.dart';
 
 Future<void> showNewCollectionDialog(BuildContext context) {
   return showDialog<void>(
@@ -48,7 +48,7 @@ class _NewCollectionDialogState extends State<NewCollectionDialog> {
     navigator.pop();
     navigator.push(
       MaterialPageRoute(
-        builder: (_) => CreateCollectionScreen(initialName: name),
+        builder: (_) => CreateEditCollectionScreen(initialName: name),
       ),
     );
   }

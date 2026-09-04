@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
-import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
+import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/add_chants_to_collection_screen.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,36 +17,86 @@ import 'package:image_picker/image_picker.dart';
 /// Placeholder mustard accent used for the empty cover tile in the designs.
 const Color _kCoverPlaceholder = Color(0xFFC9A84C);
 
-class CreateCollectionScreen extends ConsumerStatefulWidget {
-  const CreateCollectionScreen({super.key, required this.initialName});
+/// Shared create / edit UI for a user recitation collection.
+///
+/// Use [CreateEditCollectionScreen] for a new collection and
+/// [CreateEditCollectionScreen.edit] to update an existing one. Layout is the same;
+/// only initial data and the submit API differ.
+class CreateEditCollectionScreen extends ConsumerStatefulWidget {
+  /// Create a new collection starting with [initialName].
+  const CreateEditCollectionScreen({super.key, required String this.initialName})
+    : collection = null;
 
-  final String initialName;
+  /// Edit an existing [collection] (name, cover, add chants).
+  const CreateEditCollectionScreen.edit({
+    super.key,
+    required MyRecitationCollectionDetailModel this.collection,
+  }) : initialName = null;
+
+  final String? initialName;
+  final MyRecitationCollectionDetailModel? collection;
+
+  bool get isEditing => collection != null;
 
   @override
-  ConsumerState<CreateCollectionScreen> createState() =>
-      _CreateCollectionScreenState();
+  ConsumerState<CreateEditCollectionScreen> createState() =>
+      _CreateEditCollectionScreenState();
 }
 
-class _CreateCollectionScreenState
-    extends ConsumerState<CreateCollectionScreen> {
-  static final _logger = AppLogger('CreateCollectionScreen');
+class _CreateEditCollectionScreenState
+    extends ConsumerState<CreateEditCollectionScreen> {
+  static final _logger = AppLogger('CreateEditCollectionScreen');
 
   late String _name;
+  late final Set<String> _originalTextIds;
+  /// Collection-item ids keyed by `text_id` for chants already on the server.
+  late final Map<String, String> _itemIdsByTextId;
   File? _localCoverFile;
   String? _uploadedImageKey;
-  String? _uploadedPreviewUrl;
+  String? _coverPreviewUrl;
   bool _isUploadingImage = false;
-  bool _isCreating = false;
-  final List<RecitationModel> _chants = [];
+  bool _isSubmitting = false;
+  bool _isRemovingChant = false;
+  late final List<RecitationModel> _chants;
+
+  bool get _isEditing => widget.isEditing;
 
   @override
   void initState() {
     super.initState();
-    _name = widget.initialName;
+    final existing = widget.collection;
+    if (existing != null) {
+      _name = existing.name;
+      _coverPreviewUrl = existing.imgUrl;
+      _chants =
+          existing.items
+              .map(
+                (item) => RecitationModel(
+                  textId: item.textId,
+                  title:
+                      item.title?.trim().isNotEmpty == true
+                          ? item.title!
+                          : item.textId,
+                  language: item.language,
+                  displayOrder: item.displayOrder,
+                ),
+              )
+              .toList();
+      _originalTextIds = _chants.map((c) => c.textId).toSet();
+      _itemIdsByTextId = {
+        for (final item in existing.items)
+          if (item.textId.isNotEmpty && item.id.isNotEmpty) item.textId: item.id,
+      };
+    } else {
+      _name = widget.initialName ?? '';
+      _chants = [];
+      _originalTextIds = {};
+      _itemIdsByTextId = {};
+    }
   }
 
   Future<void> _pickImage() async {
-    if (_isUploadingImage || _isCreating) return;
+    if (_isUploadingImage || _isSubmitting) return;
 
     final picker = ImagePicker();
     final xFile = await picker.pickImage(
@@ -60,7 +112,9 @@ class _CreateCollectionScreenState
       _localCoverFile = file;
       _isUploadingImage = true;
       _uploadedImageKey = null;
-      _uploadedPreviewUrl = null;
+      if (!_isEditing) {
+        _coverPreviewUrl = null;
+      }
     });
 
     final result = await ref
@@ -76,7 +130,7 @@ class _CreateCollectionScreenState
           _isUploadingImage = false;
           _localCoverFile = null;
           _uploadedImageKey = null;
-          _uploadedPreviewUrl = null;
+          _coverPreviewUrl = _isEditing ? widget.collection?.imgUrl : null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -89,14 +143,14 @@ class _CreateCollectionScreenState
         setState(() {
           _isUploadingImage = false;
           _uploadedImageKey = upload.key;
-          _uploadedPreviewUrl = upload.image?.displayUrl;
+          _coverPreviewUrl = upload.image?.displayUrl ?? _coverPreviewUrl;
         });
       },
     );
   }
 
   Future<void> _changeName() async {
-    if (_isCreating) return;
+    if (_isSubmitting) return;
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => _ChangeCollectionNameDialog(initialName: _name),
@@ -106,7 +160,7 @@ class _CreateCollectionScreenState
   }
 
   Future<void> _addChants() async {
-    if (_isCreating) return;
+    if (_isSubmitting) return;
     final result = await openAddChantsToCollectionScreen(
       context,
       initiallySelected: _chants,
@@ -119,8 +173,55 @@ class _CreateCollectionScreenState
     });
   }
 
-  void _removeChant(int index) {
-    setState(() => _chants.removeAt(index));
+  Future<void> _removeChant(int index) async {
+    if (_isSubmitting || _isRemovingChant) return;
+    if (index < 0 || index >= _chants.length) return;
+
+    final chant = _chants[index];
+    final itemId = _itemIdsByTextId[chant.textId];
+    final collectionId = widget.collection?.id;
+
+    if (_isEditing &&
+        collectionId != null &&
+        collectionId.isNotEmpty &&
+        itemId != null &&
+        itemId.isNotEmpty) {
+      setState(() => _isRemovingChant = true);
+      final result = await ref
+          .read(myRecitationCollectionsRepositoryProvider)
+          .deleteCollectionItem(collectionId: collectionId, itemId: itemId);
+
+      if (!mounted) return;
+
+      result.fold(
+        (failure) {
+          _logger.error('Failed to remove chant: ${failure.message}');
+          setState(() => _isRemovingChant = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        (_) {
+          setState(() {
+            _isRemovingChant = false;
+            _chants.removeWhere((c) => c.textId == chant.textId);
+            _originalTextIds.remove(chant.textId);
+            _itemIdsByTextId.remove(chant.textId);
+          });
+          ref.invalidate(myRecitationCollectionDetailProvider(collectionId));
+        },
+      );
+      return;
+    }
+
+    setState(() {
+      _chants.removeAt(index);
+      _originalTextIds.remove(chant.textId);
+      _itemIdsByTextId.remove(chant.textId);
+    });
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -131,20 +232,17 @@ class _CreateCollectionScreenState
     });
   }
 
-  Future<void> _onCreate() async {
-    if (_isCreating || _isUploadingImage) return;
+  Future<void> _onSubmit() async {
+    if (_isSubmitting || _isUploadingImage) return;
 
-    final imageKey = _uploadedImageKey;
-    if (imageKey == null || imageKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add a collection image'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+    if (_isEditing) {
+      await _submitEdit();
+    } else {
+      await _submitCreate();
     }
+  }
 
+  Future<void> _submitCreate() async {
     if (_chants.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -155,14 +253,14 @@ class _CreateCollectionScreenState
       return;
     }
 
-    setState(() => _isCreating = true);
+    setState(() => _isSubmitting = true);
 
     final textIds = _chants.map((c) => c.textId).toList();
     final result = await ref
         .read(myRecitationCollectionsRepositoryProvider)
         .createCollectionWithItems(
           name: _name,
-          imgUrl: imageKey,
+          imgUrl: _uploadedImageKey ?? '',
           textIds: textIds,
         );
 
@@ -171,7 +269,7 @@ class _CreateCollectionScreenState
     result.fold(
       (failure) {
         _logger.error('Failed to create collection: ${failure.message}');
-        setState(() => _isCreating = false);
+        setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(failure.message),
@@ -187,26 +285,112 @@ class _CreateCollectionScreenState
     );
   }
 
+  Future<void> _submitEdit() async {
+    final collection = widget.collection;
+    if (collection == null) return;
+
+    final trimmedName = _name.trim();
+    if (trimmedName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a collection name'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final imageKey = _uploadedImageKey?.trim();
+    final updateResult = await ref
+        .read(myRecitationCollectionsRepositoryProvider)
+        .updateCollection(
+          collectionId: collection.id,
+          name: trimmedName,
+          imgUrl: imageKey != null && imageKey.isNotEmpty ? imageKey : null,
+        );
+
+    if (!mounted) return;
+
+    final updateFailed = updateResult.fold((failure) {
+      _logger.error('Failed to update collection: ${failure.message}');
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(failure.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return true;
+    }, (_) => false);
+    if (updateFailed || !mounted) return;
+
+    final newTextIds =
+        _chants
+            .map((c) => c.textId)
+            .where((id) => !_originalTextIds.contains(id))
+            .toList();
+
+    if (newTextIds.isNotEmpty) {
+      final addResult = await ref
+          .read(myRecitationCollectionsRepositoryProvider)
+          .addItemsToCollection(
+            collectionId: collection.id,
+            textIds: newTextIds,
+          );
+      if (!mounted) return;
+
+      final addFailed = addResult.fold((failure) {
+        _logger.error(
+          'Collection updated but failed to add chants: ${failure.message}',
+        );
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Collection updated, but some chants could not be added: '
+              '${failure.message}',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return true;
+      }, (_) => false);
+      if (addFailed) return;
+    }
+
+    final languageCode = ref.read(practiceRecitationsLanguageProvider);
+    ref.invalidate(practiceRecitationsPaginatedProvider(languageCode));
+    ref.invalidate(myRecitationCollectionDetailProvider(collection.id));
+
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
+  }
+
+  bool get _canSubmit {
+    if (_isUploadingImage || _isSubmitting || _isRemovingChant) return false;
+    if (_isEditing) return _name.trim().isNotEmpty;
+    return _chants.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final mutedFill = isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
-    final canCreate =
-        !_isUploadingImage &&
-        !_isCreating &&
-        (_uploadedImageKey?.isNotEmpty ?? false) &&
-        _chants.isNotEmpty;
-    final createBg =
-        canCreate
+    final canSubmit = _canSubmit;
+    final actionBg =
+        canSubmit
             ? (isDark ? AppColors.surfaceWhite : AppColors.textPrimary)
             : (isDark ? AppColors.grey900 : AppColors.grey500);
-    final createFg =
-        canCreate
+    final actionFg =
+        canSubmit
             ? (isDark ? AppColors.textPrimary : AppColors.onPrimary)
             : AppColors.onPrimary;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final actionLabel = _isEditing ? context.l10n.save : 'Create';
 
     return Scaffold(
       body: SafeArea(
@@ -216,7 +400,7 @@ class _CreateCollectionScreenState
               alignment: Alignment.centerRight,
               child: IconButton(
                 onPressed:
-                    _isCreating ? null : () => Navigator.of(context).pop(),
+                    _isSubmitting ? null : () => Navigator.of(context).pop(),
                 icon: Icon(AppAssets.x, color: titleColor),
               ),
             ),
@@ -229,8 +413,9 @@ class _CreateCollectionScreenState
                     children: [
                       _CoverTile(
                         localFile: _localCoverFile,
-                        networkUrl: _uploadedPreviewUrl,
+                        networkUrl: _coverPreviewUrl,
                         isUploading: _isUploadingImage,
+                        showPlusWhenHasImage: _isEditing,
                         onTap: _pickImage,
                       ),
                       const SizedBox(width: 16),
@@ -314,30 +499,30 @@ class _CreateCollectionScreenState
               child: SizedBox(
                 width: double.infinity,
                 child: Material(
-                  color: createBg,
+                  color: actionBg,
                   shape: const StadiumBorder(),
                   child: InkWell(
-                    onTap: canCreate ? _onCreate : null,
+                    onTap: canSubmit ? _onSubmit : null,
                     customBorder: const StadiumBorder(),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       child:
-                          _isCreating
+                          _isSubmitting
                               ? Center(
                                 child: SizedBox(
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: createFg,
+                                    color: actionFg,
                                   ),
                                 ),
                               )
                               : Text(
-                                'Create',
+                                actionLabel,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: createFg,
+                                  color: actionFg,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -354,6 +539,18 @@ class _CreateCollectionScreenState
   }
 }
 
+/// Opens the shared collection editor in edit mode.
+Future<bool?> openEditCollectionScreen(
+  BuildContext context, {
+  required MyRecitationCollectionDetailModel collection,
+}) {
+  return Navigator.of(context).push<bool>(
+    MaterialPageRoute(
+      builder: (_) => CreateEditCollectionScreen.edit(collection: collection),
+    ),
+  );
+}
+
 class _ChangeCollectionNameDialog extends StatefulWidget {
   const _ChangeCollectionNameDialog({required this.initialName});
 
@@ -364,7 +561,8 @@ class _ChangeCollectionNameDialog extends StatefulWidget {
       _ChangeCollectionNameDialogState();
 }
 
-class _ChangeCollectionNameDialogState extends State<_ChangeCollectionNameDialog> {
+class _ChangeCollectionNameDialogState
+    extends State<_ChangeCollectionNameDialog> {
   late final TextEditingController _controller;
 
   @override
@@ -412,7 +610,7 @@ class _ChangeCollectionNameDialogState extends State<_ChangeCollectionNameDialog
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        TextButton(onPressed: _save, child: const Text('Save')),
+        TextButton(onPressed: _save, child: Text(context.l10n.save)),
       ],
     );
   }
@@ -424,12 +622,14 @@ class _CoverTile extends StatelessWidget {
     required this.networkUrl,
     required this.isUploading,
     required this.onTap,
+    this.showPlusWhenHasImage = false,
   });
 
   final File? localFile;
   final String? networkUrl;
   final bool isUploading;
   final VoidCallback onTap;
+  final bool showPlusWhenHasImage;
 
   @override
   Widget build(BuildContext context) {
@@ -466,9 +666,14 @@ class _CoverTile extends StatelessWidget {
                     ),
                   ),
                 )
-              else if (!hasImage)
-                const Center(
-                  child: Icon(AppAssets.plus, color: Colors.white, size: 28),
+              else if (!hasImage || showPlusWhenHasImage)
+                ColoredBox(
+                  color: Colors.black.withValues(
+                    alpha: hasImage && showPlusWhenHasImage ? 0.2 : 0,
+                  ),
+                  child: const Center(
+                    child: Icon(AppAssets.plus, color: Colors.white, size: 28),
+                  ),
                 ),
             ],
           ),

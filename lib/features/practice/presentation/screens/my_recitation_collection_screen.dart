@@ -7,6 +7,7 @@ import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
+import 'package:flutter_pecha/features/practice/presentation/widgets/my_recitation_collection_options_sheet.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -41,7 +42,16 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
         bottom: false,
         child: Column(
           children: [
-            _CollectionAppBar(title: detail?.name ?? initialTitle),
+            _CollectionAppBar(
+              title: detail?.name ?? initialTitle,
+              onMenuTap:
+                  detail != null
+                      ? () => MyRecitationCollectionOptionsSheet.show(
+                        context,
+                        collection: detail,
+                      )
+                      : null,
+            ),
             Expanded(
               child: detailAsync.when(
                 data:
@@ -99,9 +109,10 @@ void _openChantReader(
 }
 
 class _CollectionAppBar extends StatelessWidget {
-  const _CollectionAppBar({this.title});
+  const _CollectionAppBar({this.title, this.onMenuTap});
 
   final String? title;
+  final VoidCallback? onMenuTap;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +139,13 @@ class _CollectionAppBar extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const SizedBox(width: 48),
+          if (onMenuTap != null)
+            IconButton(
+              icon: const Icon(AppAssets.dotsThreeVertical),
+              onPressed: onMenuTap,
+            )
+          else
+            const SizedBox(width: 48),
         ],
       ),
     );

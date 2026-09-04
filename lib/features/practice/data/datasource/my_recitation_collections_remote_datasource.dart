@@ -74,6 +74,61 @@ class MyRecitationCollectionsRemoteDatasource {
     return MyRecitationCollectionDetailModel.fromJson(data);
   }
 
+  /// DELETE /users/me/recitation-collections/{collectionId}
+  ///
+  /// Successful response is `204 No Content`.
+  Future<void> deleteCollection(String collectionId) async {
+    final response = await dio.delete(
+      '/users/me/recitation-collections/$collectionId',
+    );
+    final status = response.statusCode;
+    if (status != null && status != 204 && status != 200) {
+      throw FormatException(
+        'Unexpected /users/me/recitation-collections delete status: $status',
+      );
+    }
+  }
+
+  /// PUT /users/me/recitation-collections/{collectionId}
+  ///
+  /// Updates name and optionally cover image. Pass [UpdateMyRecitationCollectionRequest.imgUrl]
+  /// from a prior upload `key` when replacing the image.
+  Future<MyRecitationCollectionModel> updateCollection({
+    required String collectionId,
+    required UpdateMyRecitationCollectionRequest request,
+  }) async {
+    final response = await dio.put(
+      '/users/me/recitation-collections/$collectionId',
+      data: request.toJson(),
+    );
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Unexpected /users/me/recitation-collections update payload type',
+      );
+    }
+    return MyRecitationCollectionModel.fromJson(data);
+  }
+
+  /// DELETE /users/me/recitation-collections/{collectionId}/items/{itemId}
+  ///
+  /// Removes one chant from a collection. [itemId] is the collection-item id
+  /// (not `text_id`). Successful response is `204 No Content`.
+  Future<void> deleteCollectionItem({
+    required String collectionId,
+    required String itemId,
+  }) async {
+    final response = await dio.delete(
+      '/users/me/recitation-collections/$collectionId/items/$itemId',
+    );
+    final status = response.statusCode;
+    if (status != null && status != 204 && status != 200) {
+      throw FormatException(
+        'Unexpected /users/me/recitation-collections/items delete status: $status',
+      );
+    }
+  }
+
   /// POST /users/me/recitation-collections/{collectionId}/items
   ///
   /// Adds chants to an existing collection. Items are posted one at a time so

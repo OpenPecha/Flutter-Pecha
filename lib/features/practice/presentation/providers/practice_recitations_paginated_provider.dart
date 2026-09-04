@@ -161,7 +161,7 @@ class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState
   }
 
   Future<void> refresh() async {
-    state = const PracticeRecitationsState();
+    state = const PracticeRecitationsState(isLoading: true);
     await loadInitial();
   }
 }
