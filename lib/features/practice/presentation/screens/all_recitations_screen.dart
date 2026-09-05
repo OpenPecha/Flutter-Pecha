@@ -27,6 +27,7 @@ class AllRecitationsScreen extends ConsumerStatefulWidget {
 
 class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool _languageRestored = false;
 
   @override
   void initState() {
@@ -34,6 +35,17 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     _scrollController.addListener(_onScroll);
     // Prefetch so the language picker usually opens already resolved.
     ref.read(recitationContentLanguagesProvider);
+    _restoreLanguage();
+  }
+
+  // Waits for the persisted pick so the first page is not fetched in the app
+  // language and immediately refetched.
+  Future<void> _restoreLanguage() async {
+    await ref
+        .read(practiceRecitationsLanguageProvider.notifier)
+        .ensureInitialized();
+    if (!mounted) return;
+    setState(() => _languageRestored = true);
   }
 
   @override
@@ -53,7 +65,12 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     }
   }
 
-  void _openSearch(BuildContext context, String languageCode) {
+  // Both actions resolve the language themselves: tapping before the persisted
+  // pick has loaded must not fall back to the app content language.
+  Future<void> _openSearch() async {
+    await _ensureLanguageRestored();
+    if (!mounted) return;
+    final languageCode = ref.read(practiceRecitationsLanguageProvider);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => RecitationsSearchScreen(languageCode: languageCode),
@@ -61,7 +78,10 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     );
   }
 
-  void _openLanguagePicker(BuildContext context, String selectedCode) {
+  Future<void> _openLanguagePicker() async {
+    await _ensureLanguageRestored();
+    if (!mounted) return;
+    final selectedCode = ref.read(practiceRecitationsLanguageProvider);
     showContentLanguagePickerSheet(
       context,
       selectedCode: selectedCode,
@@ -76,6 +96,10 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
       },
     );
   }
+
+  Future<void> _ensureLanguageRestored() => ref
+      .read(practiceRecitationsLanguageProvider.notifier)
+      .ensureInitialized();
 
   void _onCreateCollectionPressed() {
     // Guests and expired sessions both lack credentials for the protected
@@ -93,9 +117,10 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final languageCode = ref.watch(practiceRecitationsLanguageProvider);
-    final recitationsState = ref.watch(
-      practiceRecitationsPaginatedProvider(languageCode),
-    );
+    final recitationsState =
+        _languageRestored
+            ? ref.watch(practiceRecitationsPaginatedProvider(languageCode))
+            : const PracticeRecitationsState(isLoading: true);
 
     return Scaffold(
       appBar: AppBar(
@@ -113,12 +138,12 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: l10n.recitations_search_for,
-            onPressed: () => _openSearch(context, languageCode),
+            onPressed: _openSearch,
           ),
           IconButton(
             icon: const Icon(AppAssets.language),
             tooltip: l10n.language,
-            onPressed: () => _openLanguagePicker(context, languageCode),
+            onPressed: _openLanguagePicker,
           ),
         ],
       ),
