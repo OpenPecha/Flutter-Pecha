@@ -92,10 +92,14 @@ void main() {
 
   group('isPreviewableUrl', () {
     test('accepts public http and https hosts', () {
-      expect(ChatLinkPreviewService.isPreviewableUrl('https://pecha.org/a'),
-          isTrue);
       expect(
-          ChatLinkPreviewService.isPreviewableUrl('http://pecha.org'), isTrue);
+        ChatLinkPreviewService.isPreviewableUrl('https://pecha.org/a'),
+        isTrue,
+      );
+      expect(
+        ChatLinkPreviewService.isPreviewableUrl('http://pecha.org'),
+        isTrue,
+      );
     });
 
     test('rejects non-web schemes', () {

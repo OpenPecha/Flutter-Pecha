@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
@@ -186,10 +187,14 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
 
   Future<void> _sharePost(ConnectPost post) async {
     final caption = post.caption.trim();
-    final shareUrl =
+    final longUrl =
         post.groupId.isNotEmpty
             ? DeepLinkUrlBuilder.groupLink(groupId: post.groupId).toString()
             : '';
+    final shareUrl =
+        longUrl.isNotEmpty ? await resolveShareUrlRef(ref, longUrl) : '';
+    if (!mounted) return;
+
     final message =
         caption.isNotEmpty && shareUrl.isNotEmpty
             ? '$caption\n\n$shareUrl'

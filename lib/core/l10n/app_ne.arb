@@ -984,6 +984,8 @@
   "connect_events_filter_in_person": "प्रत्यक्ष",
   "connect_events_filter_empty_online": "कुनै अनलाइन कार्यक्रम छैन",
   "connect_events_filter_empty_in_person": "कुनै प्रत्यक्ष कार्यक्रम छैन",
+  "connect_events_filter_hybrid": "हाइब्रिड",
+  "connect_events_filter_empty_hybrid": "कुनै हाइब्रिड कार्यक्रम छैन",
   "connect_open": "खोल्नुहोस्",
   "connect_event_fallback_title": "कार्यक्रम",
   "connect_group_fallback_title": "समूह",
@@ -998,6 +1000,15 @@
     }
   },
   "connect_event_participants_empty": "अहिलेसम्म कुनै सहभागी छैन",
+  "connect_event_tab_videos": "Videos",
+  "connect_event_tab_links": "Links",
+  "connect_event_tab_about": "About",
+  "connect_event_links_title": "More about this event",
+  "connect_event_links_empty": "No links yet",
+  "connect_event_link_tap_to_join": "Tap to join",
+  "connect_event_link_open": "Open link",
+  "connect_event_date_tba": "Date to be announced",
+  "connect_event_about_empty": "No event details yet",
   "timer_notification_in_progress": "ध्यान जारी छ",
   "timer_notification_paused": "रोकिएको · {time} बाँकी",
   "@timer_notification_paused": {
@@ -1020,5 +1031,30 @@
   "group_chat_empty_body": "आफ्नो समूहसँग कुराकानी सुरु गर्नुहोस्।",
   "group_chat_load_failed": "सन्देशहरू लोड गर्न सकिएन।",
   "group_chat_retry": "पुनः प्रयास गर्नुहोस्",
-  "group_chat_unknown_sender": "सदस्य"
+  "group_chat_unknown_sender": "सदस्य",
+  "group_chat_reactions_all": "सबै",
+  "group_chat_reacted": "प्रतिक्रिया दिनुभयो",
+  "group_chat_reply": "जवाफ दिनुहोस्",
+  "group_chat_copy": "प्रतिलिपि गर्नुहोस्",
+  "group_chat_copied": "सन्देश प्रतिलिपि गरियो",
+  "group_chat_report": "रिपोर्ट गर्नुहोस्",
+  "group_chat_delete": "मेटाउनुहोस्",
+  "group_chat_delete_title": "सन्देश मेटाउने?",
+  "group_chat_delete_confirm_body": "यो सन्देश यस च्याटमा सबैका लागि मेटिनेछ।",
+  "group_chat_delete_for_everyone": "सबैका लागि मेटाउनुहोस्",
+  "group_chat_delete_failed": "सन्देश मेटाउन सकिएन।",
+  "group_chat_message_deleted": "तपाईंले यो सन्देश मेटाउनुभयो",
+  "group_chat_message_deleted_by_sender": "यो सन्देश मेटाइयो",
+  "group_chat_reaction_failed": "तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।",
+  "group_chat_reactions_count": "{count, plural, =1{1 प्रतिक्रिया} other{{count} प्रतिक्रियाहरू}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "तपाईं",
+  "group_chat_tap_to_remove": "हटाउन ट्याप गर्नुहोस्",
+  "group_chat_reply_parent_gone": "त्यो सन्देश अब उपलब्ध छैन, त्यसैले उद्धरण हटाइयो। आफ्नो सन्देश पठाउन फेरि पठाउनुहोस्।"
 }

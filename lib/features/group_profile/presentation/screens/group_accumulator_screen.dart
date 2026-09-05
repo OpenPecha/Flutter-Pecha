@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
@@ -350,11 +351,14 @@ class _GroupAccumulatorScreenState extends ConsumerState<GroupAccumulatorScreen>
               detail.title,
               groupName,
             );
-    final shareUrl =
+    final longUrl =
         DeepLinkUrlBuilder.groupAccumulatorLink(
           accumulatorId: detail.id,
           groupId: detail.groupId,
         ).toString();
+    final shareUrl = await resolveShareUrlRef(ref, longUrl);
+    if (!mounted) return;
+
     final sharePositionOrigin = getSharePositionOrigin(context: context);
 
     await SharePlus.instance.share(

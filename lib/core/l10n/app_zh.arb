@@ -918,6 +918,8 @@
   "connect_events_filter_in_person": "實體",
   "connect_events_filter_empty_online": "沒有線上活動",
   "connect_events_filter_empty_in_person": "沒有實體活動",
+  "connect_events_filter_hybrid": "混合",
+  "connect_events_filter_empty_hybrid": "沒有混合活動",
   "connect_open": "開啟",
   "connect_event_fallback_title": "活動",
   "connect_group_fallback_title": "社群",
@@ -932,6 +934,15 @@
     }
   },
   "connect_event_participants_empty": "尚無參與者",
+  "connect_event_tab_videos": "Videos",
+  "connect_event_tab_links": "Links",
+  "connect_event_tab_about": "About",
+  "connect_event_links_title": "More about this event",
+  "connect_event_links_empty": "No links yet",
+  "connect_event_link_tap_to_join": "Tap to join",
+  "connect_event_link_open": "Open link",
+  "connect_event_date_tba": "Date to be announced",
+  "connect_event_about_empty": "No event details yet",
   "timer_notification_in_progress": "禪修進行中",
   "timer_notification_paused": "已暫停 · 剩餘 {time}",
   "@timer_notification_paused": {
@@ -954,5 +965,30 @@
   "group_chat_empty_body": "與你的群組開始對話吧。",
   "group_chat_load_failed": "無法載入訊息。",
   "group_chat_retry": "重試",
-  "group_chat_unknown_sender": "成員"
+  "group_chat_unknown_sender": "成員",
+  "group_chat_reactions_all": "全部",
+  "group_chat_reacted": "已回應",
+  "group_chat_reply": "回覆",
+  "group_chat_copy": "複製",
+  "group_chat_copied": "已複製訊息",
+  "group_chat_report": "檢舉",
+  "group_chat_delete": "刪除",
+  "group_chat_delete_title": "刪除訊息？",
+  "group_chat_delete_confirm_body": "此訊息將為聊天中的所有人刪除。",
+  "group_chat_delete_for_everyone": "為所有人刪除",
+  "group_chat_delete_failed": "無法刪除訊息。",
+  "group_chat_message_deleted": "你已刪除此訊息",
+  "group_chat_message_deleted_by_sender": "此訊息已刪除",
+  "group_chat_reaction_failed": "無法儲存你的回應。",
+  "group_chat_reactions_count": "{count, plural, =1{1 個回應} other{{count} 個回應}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "你",
+  "group_chat_tap_to_remove": "點按以移除",
+  "group_chat_reply_parent_gone": "該訊息已不存在，引用已移除。請再次傳送你的訊息。"
 }

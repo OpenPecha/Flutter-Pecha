@@ -856,6 +856,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_events_filter_empty_in_person => 'No in-person events';
 
   @override
+  String get connect_events_filter_hybrid => 'Hybrid';
+
+  @override
+  String get connect_events_filter_empty_hybrid => 'No hybrid events';
+
+  @override
   String get connect_open => 'Open';
 
   @override
@@ -877,6 +883,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => 'No participants yet';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => 'Search groups';
@@ -2378,4 +2411,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'Member';
+
+  @override
+  String get group_chat_reactions_all => 'All';
+
+  @override
+  String get group_chat_reacted => 'Reacted';
+
+  @override
+  String get group_chat_reply => 'Reply';
+
+  @override
+  String get group_chat_copy => 'Copy';
+
+  @override
+  String get group_chat_copied => 'Message copied';
+
+  @override
+  String get group_chat_report => 'Report';
+
+  @override
+  String get group_chat_delete => 'Delete';
+
+  @override
+  String get group_chat_delete_title => 'Delete message?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'This message will be deleted for everyone in this chat.';
+
+  @override
+  String get group_chat_delete_for_everyone => 'Delete for everyone';
+
+  @override
+  String get group_chat_delete_failed => 'The message couldn\'t be deleted.';
+
+  @override
+  String get group_chat_message_deleted => 'You deleted this message';
+
+  @override
+  String get group_chat_message_deleted_by_sender => 'This message was deleted';
+
+  @override
+  String get group_chat_reaction_failed => 'Your reaction couldn\'t be saved.';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reactions',
+      one: '1 reaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'You';
+
+  @override
+  String get group_chat_tap_to_remove => 'Tap to remove';
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'That message is no longer available, so the quote was removed. Send again to post your message.';
 }

@@ -1,7 +1,9 @@
 import 'package:flutter_pecha/core/config/locale/locale_notifier.dart';
 import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/recitation/data/datasource/recitations_remote_datasource.dart';
+import 'package:flutter_pecha/features/recitation/data/models/my_recitation_list_collection_model.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitation_search_provider.dart';
 import 'package:flutter_pecha/features/recitation/presentation/providers/recitations_providers.dart';
@@ -13,6 +15,7 @@ const int practiceRecitationsPageSize = 20;
 
 class PracticeRecitationsState {
   final List<RecitationModel> recitations;
+  final List<MyRecitationListCollectionModel> collections;
   final bool isLoading;
   final bool isLoadingMore;
   final String? error;
@@ -22,6 +25,7 @@ class PracticeRecitationsState {
 
   const PracticeRecitationsState({
     this.recitations = const [],
+    this.collections = const [],
     this.isLoading = false,
     this.isLoadingMore = false,
     this.error,
@@ -30,8 +34,11 @@ class PracticeRecitationsState {
     this.total = 0,
   });
 
+  bool get isEmpty => recitations.isEmpty && collections.isEmpty;
+
   PracticeRecitationsState copyWith({
     List<RecitationModel>? recitations,
+    List<MyRecitationListCollectionModel>? collections,
     bool? isLoading,
     bool? isLoadingMore,
     String? error,
@@ -41,6 +48,7 @@ class PracticeRecitationsState {
   }) {
     return PracticeRecitationsState(
       recitations: recitations ?? this.recitations,
+      collections: collections ?? this.collections,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: error,
@@ -54,33 +62,56 @@ class PracticeRecitationsState {
 class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState> {
   final RecitationsRemoteDatasource _datasource;
   final String _languageCode;
+  final bool _includeCollections;
+  bool _loadInFlight = false;
 
   PracticeRecitationsNotifier({
     required RecitationsRemoteDatasource datasource,
     required String languageCode,
+    required bool includeCollections,
+    bool deferLoad = false,
   }) : _datasource = datasource,
        _languageCode = languageCode,
-       super(const PracticeRecitationsState()) {
-    loadInitial();
+       _includeCollections = includeCollections,
+       super(
+         deferLoad
+             ? const PracticeRecitationsState(isLoading: true)
+             : const PracticeRecitationsState(),
+       ) {
+    if (!deferLoad) {
+      loadInitial();
+    }
+  }
+
+  RecitationsQueryParams _queryParams({required int skip}) {
+    return RecitationsQueryParams(
+      language: _languageCode,
+      skip: skip,
+      limit: practiceRecitationsPageSize,
+      shouldIncludeCollections: _includeCollections && skip == 0,
+    );
   }
 
   Future<void> loadInitial() async {
-    if (state.isLoading) return;
+    if (_loadInFlight) return;
 
+    _loadInFlight = true;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final page = await _datasource.fetchRecitationsPage(
-        queryParams: RecitationsQueryParams(
-          language: _languageCode,
-          skip: 0,
-          limit: practiceRecitationsPageSize,
-        ),
+        queryParams: _queryParams(skip: 0),
       );
 
       if (!mounted) return;
+      _logger.debug(
+        'Loaded ${page.recitations.length} recitations, '
+        '${page.collections.length} collections '
+        '(includeCollections=$_includeCollections)',
+      );
       state = PracticeRecitationsState(
         recitations: page.recitations,
+        collections: page.collections,
         isLoading: false,
         hasMore: page.hasMore,
         skip: page.recitations.length,
@@ -90,6 +121,8 @@ class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState
       _logger.error('Initial recitations load failed', e);
       if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
+    } finally {
+      _loadInFlight = false;
     }
   }
 
@@ -100,11 +133,7 @@ class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState
 
     try {
       final page = await _datasource.fetchRecitationsPage(
-        queryParams: RecitationsQueryParams(
-          language: _languageCode,
-          skip: state.skip,
-          limit: practiceRecitationsPageSize,
-        ),
+        queryParams: _queryParams(skip: state.skip),
       );
 
       if (!mounted) return;
@@ -124,7 +153,7 @@ class PracticeRecitationsNotifier extends StateNotifier<PracticeRecitationsState
   }
 
   void retry() {
-    if (state.recitations.isEmpty) {
+    if (state.isEmpty) {
       loadInitial();
     } else {
       loadMore();
@@ -161,9 +190,32 @@ final practiceRecitationsPaginatedProvider = StateNotifierProvider.autoDispose
       ref,
       languageCode,
     ) {
+      // Select the three fields this provider actually depends on. AuthState
+      // has no `==`, so watching it whole rebuilds the notifier on every auth
+      // emission — including the background onboarding fetch — discarding
+      // loaded pages and the user's scroll position. Records compare
+      // structurally, so this only rebuilds when one of the three changes.
+      final (isAuthLoading, isLoggedIn, isGuest) = ref.watch(
+        authProvider.select(
+          (auth) => (auth.isLoading, auth.isLoggedIn, auth.isGuest),
+        ),
+      );
+
+      // Defer the first fetch until auth is ready so a logged-in session
+      // attaches Bearer + should_include_collections on the first request.
+      if (isAuthLoading) {
+        return PracticeRecitationsNotifier(
+          datasource: RecitationsRemoteDatasource(dio: ref.watch(dioProvider)),
+          languageCode: languageCode,
+          includeCollections: false,
+          deferLoad: true,
+        );
+      }
+
       return PracticeRecitationsNotifier(
         datasource: RecitationsRemoteDatasource(dio: ref.watch(dioProvider)),
         languageCode: languageCode,
+        includeCollections: isLoggedIn && !isGuest,
       );
     });
 

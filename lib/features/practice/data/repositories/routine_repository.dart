@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:flutter_pecha/core/error/exception_mapper.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_pecha/features/practice/data/datasource/routine_remote_datasource.dart';
@@ -117,6 +118,10 @@ class RoutineApiRepositoryImpl implements RoutineApiRepository {
     if (e is RoutineApiException) {
       return ServerFailure(e.message);
     }
-    return const ServerFailure('An unexpected error occurred. Please try again.');
+    // Everything else is a transport/HTTP error already typed by
+    // ErrorInterceptor. Delegate instead of collapsing it into one generic
+    // message: a 500, an offline device, and an expired session are different
+    // failures and callers (and users) need to tell them apart.
+    return ExceptionMapper.map(e);
   }
 }

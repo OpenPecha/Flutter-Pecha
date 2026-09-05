@@ -26,11 +26,16 @@ void main() {
       expect(without, withZone);
     });
 
+    test('reads the offset form the API actually sends', () {
+      // e.g. 2026-08-31T10:18:53.143679+00:00 — microseconds plus an offset.
+      final offset = parseChatTimestamp('2026-08-31T10:18:53.143679+00:00');
+      final zulu = parseChatTimestamp('2026-08-31T10:18:53.143679Z');
+      expect(offset, zulu);
+      expect(offset.toUtc().hour, 10);
+    });
+
     test('falls back to the epoch on unparseable input', () {
-      expect(
-        parseChatTimestamp('not a date').millisecondsSinceEpoch,
-        0,
-      );
+      expect(parseChatTimestamp('not a date').millisecondsSinceEpoch, 0);
     });
   });
 

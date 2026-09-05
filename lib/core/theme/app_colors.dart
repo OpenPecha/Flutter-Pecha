@@ -90,8 +90,7 @@ class AppColors {
   static const Color brandblue = Color(0xFF3382FD);
 
   /// My Practices card and filled action button — dark card with a subtle blue tint.
-  static final Color myPracticesBackground =
-      Color.lerp(cardDark, blue, 0.18)!;
+  static final Color myPracticesBackground = Color.lerp(cardDark, blue, 0.18)!;
 
   // ============ Semantic Colors (for compatibility) ============
   static const Color onPrimary = Color(0xFFFFFFFF);
@@ -111,6 +110,48 @@ class AppColors {
   static const Color outerCircleColor = Color(0xFFAD2424);
   static const Color middleCircleColor = Color(0xFF871C1C);
   static const Color innerCircleColor = Color(0xFF611414);
+
+  // ============ Group chat bubbles ============
+  /// Outgoing message fill: #DC8600 at 10% (`#DC86001A`), a warm tint of the
+  /// page rather than a second solid colour.
+  static const Color chatOutgoingBubble = Color(0x1ADC8600);
+
+  /// Dark mode uses its own value: #FDAE33, the brighter amber, but at 30%
+  /// rather than the 70% first tried — over black that read as a highlight
+  /// rather than a bubble. Still clearly warmer than the incoming fill.
+  static const Color chatOutgoingBubbleDark = Color(0x4DFDAE33);
+
+  // ============ Group chat sender colours ============
+  /// One colour per participant in a group thread, picked by a stable hash of
+  /// the sender so a person keeps the same colour across every message.
+  ///
+  /// Two variants because the same hue cannot serve both: these are read on a
+  /// white bubble in light mode and on a dark bubble in dark mode.
+  static const List<Color> chatSenderColors = [
+    Color(0xFFC2410C), // orange
+    Color(0xFFB45309), // amber
+    Color(0xFF15803D), // green
+    Color(0xFF0F766E), // teal
+    Color(0xFF0C53C5), // blue
+    Color(0xFF6D28D9), // violet
+    Color(0xFFA21CAF), // fuchsia
+    Color(0xFFBE123C), // rose
+    Color(0xFF4D7C0F), // lime
+    Color(0xFF0369A1), // sky
+  ];
+
+  static const List<Color> chatSenderColorsDark = [
+    Color(0xFFFB923C), // orange
+    Color(0xFFF59E0B), // amber
+    Color(0xFF4ADE80), // green
+    Color(0xFF2DD4BF), // teal
+    Color(0xFF8CB5F8), // blue
+    Color(0xFFA78BFA), // violet
+    Color(0xFFE879F9), // fuchsia
+    Color(0xFFFB7185), // rose
+    Color(0xFFA3E635), // lime
+    Color(0xFF38BDF8), // sky
+  ];
 
   // ============ Design System Reference ============
   // Figma file: 0TE5qdViUvrisFZfNqODpX/WeBuddhist-App

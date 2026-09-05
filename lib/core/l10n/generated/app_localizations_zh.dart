@@ -811,6 +811,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_events_filter_empty_in_person => '沒有實體活動';
 
   @override
+  String get connect_events_filter_hybrid => '混合';
+
+  @override
+  String get connect_events_filter_empty_hybrid => '沒有混合活動';
+
+  @override
   String get connect_open => '開啟';
 
   @override
@@ -832,6 +838,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => '尚無參與者';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => '搜尋社群';
@@ -2260,4 +2293,66 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => '成員';
+
+  @override
+  String get group_chat_reactions_all => '全部';
+
+  @override
+  String get group_chat_reacted => '已回應';
+
+  @override
+  String get group_chat_reply => '回覆';
+
+  @override
+  String get group_chat_copy => '複製';
+
+  @override
+  String get group_chat_copied => '已複製訊息';
+
+  @override
+  String get group_chat_report => '檢舉';
+
+  @override
+  String get group_chat_delete => '刪除';
+
+  @override
+  String get group_chat_delete_title => '刪除訊息？';
+
+  @override
+  String get group_chat_delete_confirm_body => '此訊息將為聊天中的所有人刪除。';
+
+  @override
+  String get group_chat_delete_for_everyone => '為所有人刪除';
+
+  @override
+  String get group_chat_delete_failed => '無法刪除訊息。';
+
+  @override
+  String get group_chat_message_deleted => '你已刪除此訊息';
+
+  @override
+  String get group_chat_message_deleted_by_sender => '此訊息已刪除';
+
+  @override
+  String get group_chat_reaction_failed => '無法儲存你的回應。';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 個回應',
+      one: '1 個回應',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => '你';
+
+  @override
+  String get group_chat_tap_to_remove => '點按以移除';
+
+  @override
+  String get group_chat_reply_parent_gone => '該訊息已不存在，引用已移除。請再次傳送你的訊息。';
 }

@@ -72,8 +72,23 @@ class ErrorInterceptor extends Interceptor {
     final statusCode = error.response?.statusCode;
     final responseData = error.response?.data;
     final body = responseData is Map<String, dynamic> ? responseData : null;
-    final message = body?['message'] as String? ?? 'Server error';
-    final code = body?['code'] as String?;
+
+    // Two envelopes are in play. Some endpoints answer with `code` and
+    // `message` at the top level; anything raised as a FastAPI
+    // `HTTPException` answers with `detail`, which is either a plain string or
+    // an object carrying the same pair. Reading only the first shape dropped
+    // everything the second one says — a 404's reason was replaced with a
+    // fixed string, and `code` came back null, so every `code ==` check
+    // downstream silently never matched.
+    final detail = body?['detail'];
+    final detailBody = detail is Map<String, dynamic> ? detail : null;
+
+    final serverMessage =
+        body?['message'] as String? ??
+        detailBody?['message'] as String? ??
+        (detail is String ? detail : null);
+    final message = serverMessage ?? 'Server error';
+    final code = body?['code'] as String? ?? detailBody?['code'] as String?;
 
     switch (statusCode) {
       case 400:
@@ -83,7 +98,10 @@ class ErrorInterceptor extends Interceptor {
       case 403:
         return const AuthorizationException('Forbidden');
       case 404:
-        return const NotFoundException('Resource not found');
+        // Keeps the server's reason when it gave one: "message not found" and
+        // "not a member of this room" are the same status but not the same
+        // bug, and the generic string hid which one had happened.
+        return NotFoundException(serverMessage ?? 'Resource not found');
       case 409:
         return ValidationException(message, code: code);
       case 429:
@@ -92,9 +110,25 @@ class ErrorInterceptor extends Interceptor {
       case 502:
       case 503:
       case 504:
-        return ServerException('Server error ($statusCode)');
+        return ServerException(_serverErrorMessage(body, statusCode));
       default:
         return ServerException('HTTP $statusCode: $message');
     }
+  }
+
+  String _serverErrorMessage(Map<String, dynamic>? body, int? statusCode) {
+    final message = body?['message'];
+    if (message is String && message.isNotEmpty) return message;
+
+    final detail = body?['detail'];
+    if (detail is String && detail.isNotEmpty) return detail;
+    if (detail is List && detail.isNotEmpty) {
+      final first = detail.first;
+      if (first is Map && first['msg'] is String) {
+        return first['msg'] as String;
+      }
+    }
+
+    return 'Server error ($statusCode)';
   }
 }

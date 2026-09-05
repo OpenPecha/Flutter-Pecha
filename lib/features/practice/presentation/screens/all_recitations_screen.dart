@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/localization/content_language_picker_sheet.dart';
+import 'package:flutter_pecha/core/localization/languages_providers.dart';
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/practice_recitations_paginated_provider.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/recitations_search_screen.dart';
 import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
+import 'package:flutter_pecha/features/practice/presentation/widgets/new_collection_dialog.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/practice_chant_list_tile.dart';
+import 'package:flutter_pecha/features/practice/presentation/widgets/practice_my_chants_collection_list_tile.dart';
 import 'package:flutter_pecha/features/recitation/presentation/widgets/recitation_list_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class AllRecitationsScreen extends ConsumerStatefulWidget {
   const AllRecitationsScreen({super.key});
@@ -25,6 +32,8 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Prefetch so the language picker usually opens already resolved.
+    ref.read(recitationContentLanguagesProvider);
   }
 
   @override
@@ -56,6 +65,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     showContentLanguagePickerSheet(
       context,
       selectedCode: selectedCode,
+      recitationOnly: true,
       onSelected: (code) {
         ref
             .read(practiceRecitationsLanguageProvider.notifier)
@@ -65,6 +75,14 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
         }
       },
     );
+  }
+
+  void _onCreateCollectionPressed() {
+    if (ref.read(authProvider).isGuest) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    showNewCollectionDialog(context);
   }
 
   @override
@@ -101,6 +119,9 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
         ],
       ),
       body: _buildBody(context, recitationsState, languageCode),
+      floatingActionButton: _CreateCollectionButton(
+        onPressed: _onCreateCollectionPressed,
+      ),
     );
   }
 
@@ -109,13 +130,13 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
     PracticeRecitationsState state,
     String languageCode,
   ) {
-    if (state.isLoading && state.recitations.isEmpty) {
+    if (state.isLoading && state.isEmpty) {
       return const RecitationListSkeleton(
         variant: RecitationListSkeletonVariant.chantTile,
       );
     }
 
-    if (state.error != null && state.recitations.isEmpty) {
+    if (state.error != null && state.isEmpty) {
       return ErrorStateWidget(
         error: state.error!,
         onRetry:
@@ -130,16 +151,35 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
       );
     }
 
-    if (state.recitations.isEmpty) {
+    if (state.isEmpty) {
       return Center(child: Text(context.l10n.recitations_no_content));
     }
 
+    final collectionCount = state.collections.length;
+    final recitationCount = state.recitations.length;
+
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(top: 8, bottom: 16),
-      itemCount: state.recitations.length + (state.hasMore ? 1 : 0),
+      padding: const EdgeInsets.only(top: 8, bottom: 88),
+      itemCount:
+          collectionCount + recitationCount + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == state.recitations.length) {
+        if (index < collectionCount) {
+          final collection = state.collections[index];
+          return PracticeMyChantsCollectionListTile(
+            collection: collection,
+            onTap: () {
+              context.pushNamed(
+                'my-recitation-collection',
+                pathParameters: {'collectionId': collection.collectionId},
+                extra: {'title': collection.name},
+              );
+            },
+          );
+        }
+
+        final recitationIndex = index - collectionCount;
+        if (recitationIndex == recitationCount) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Center(
@@ -151,7 +191,7 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
           );
         }
 
-        final recitation = state.recitations[index];
+        final recitation = state.recitations[recitationIndex];
         return PracticeChantListTile(
           recitation: recitation,
           onTap: () => openRecitationReader(
@@ -161,6 +201,50 @@ class _AllRecitationsScreenState extends ConsumerState<AllRecitationsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class _CreateCollectionButton extends StatelessWidget {
+  const _CreateCollectionButton({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor =
+        isDark ? AppColors.surfaceWhite : AppColors.textPrimary;
+    final foregroundColor =
+        isDark ? AppColors.textPrimary : AppColors.onPrimary;
+
+    return Material(
+      color: backgroundColor,
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: isDark ? 0.4 : 0.25),
+      shape: const StadiumBorder(),
+      child: InkWell(
+        onTap: onPressed,
+        customBorder: const StadiumBorder(),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 12, 14, 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Create collection',
+                style: TextStyle(
+                  color: foregroundColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(AppAssets.plus, size: 20, color: foregroundColor),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

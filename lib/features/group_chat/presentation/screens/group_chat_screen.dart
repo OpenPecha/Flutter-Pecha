@@ -4,21 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
 import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_live_client.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/domain/usecases/resolve_group_chat_room.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/chat_send_error.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_thread_providers.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_composer_controller.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_link_spans.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reconnect_backoff.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_composer_link_preview.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_empty_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_error_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_header.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_reply_preview.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_thread.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
@@ -43,7 +49,8 @@ class GroupChatScreen extends ConsumerStatefulWidget {
 
 class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     with WidgetsBindingObserver {
-  final _bodyController = TextEditingController();
+  // Styles its own markers as they are typed.
+  final _bodyController = ChatComposerController();
   final _bodyFocusNode = FocusNode();
   ChatLiveClient? _live;
   StreamSubscription<ChatLiveEvent>? _liveSub;
@@ -56,7 +63,40 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   bool _resolvingRoom = false;
   _RoomState _roomState = _RoomState.resolving;
   String? _roomId;
-  String _currentUserId = '';
+
+  /// The JWT `sub`, used **only** to namespace this account's local room
+  /// cache. It is a different id space from chat's `sender_id`, so it must
+  /// never reach an identity check — see [_viewerId].
+  String _accountId = '';
+
+  /// The provider container, captured while the element is still active.
+  ///
+  /// Socket frames, the lifecycle observer and the reconnect timer all outlive
+  /// this element. A route pop *deactivates* it before `dispose` runs, and
+  /// `_tearDownLive` is only started there, so a frame's worth of events still
+  /// arrives in that window. `ref.read` walks up from the element and throws
+  /// "Looking up a deactivated widget's ancestor is unsafe" there — an
+  /// unhandled error mid-frame, which swaps a RenderErrorBox into the thread
+  /// and corrupts the sliver child list behind it. Reading through the
+  /// container never touches the element tree.
+  late final ProviderContainer _providers;
+
+  /// `State.mounted` stays true across deactivation, so it cannot gate this on
+  /// its own. Set in [dispose] so a late arrival stops doing work instead of
+  /// resurrecting an autoDispose provider for a screen that is gone.
+  bool _disposed = false;
+
+  /// Resolved while active, for the same reason as [_providers]: a socket
+  /// error frame arriving after a route pop must not do an ancestor lookup.
+  ScaffoldMessengerState? _messenger;
+  AppLocalizations? _l10n;
+
+  /// The message a reply is being composed for, quoted above the composer.
+  ChatMessageDTO? _replyingTo;
+
+  /// Draft link previews the sender closed, so a dismissed card does not come
+  /// straight back on the next keystroke.
+  final _dismissedPreviews = <String>{};
 
   /// True once the group has a room session worth holding a socket open for.
   /// [_RoomState.absent] counts: the socket is group-scoped, so it reports the
@@ -67,11 +107,20 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   @override
   void initState() {
     super.initState();
+    _providers = ProviderScope.containerOf(context, listen: false);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _messenger = ScaffoldMessenger.maybeOf(context);
+    _l10n = context.l10n;
+  }
+
+  @override
   void dispose() {
+    _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _reconnectTimer?.cancel();
     unawaited(_tearDownLive());
@@ -82,7 +131,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_hasRoomSession) return;
+    if (_disposed || !_hasRoomSession) return;
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -134,26 +183,36 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     });
   }
 
-  Future<String> _userId() async {
-    if (_currentUserId.isNotEmpty) return _currentUserId;
-    final userId =
-        await ref
+  Future<String> _loadAccountId() async {
+    if (_accountId.isNotEmpty) return _accountId;
+    final accountId =
+        await _providers
             .read(storageServiceProvider)
             .get<String>(StorageKeys.currentUserId) ??
         '';
-    _currentUserId = userId;
-    return userId;
+    _accountId = accountId;
+    return accountId;
   }
+
+  /// The viewer's backend user id, in the same id space as chat's `sender_id`
+  /// and reaction `user_ids`.
+  ///
+  /// Empty until `/users/info` has landed, and empty is the honest answer:
+  /// every consumer then falls back to matching on email, where a value from
+  /// the wrong id space would instead assert a confident "not mine".
+  String get _viewerId => _providers.read(userProvider).user?.id?.trim() ?? '';
+
+  String? get _viewerEmail => _providers.read(userProvider).user?.email;
 
   /// Resolves the room once per screen. Runs again only through
   /// [_retryResolveRoom] after a failed lookup.
   Future<void> _resolveRoom() async {
-    if (_resolvingRoom) return;
+    if (_disposed || _resolvingRoom) return;
     _resolvingRoom = true;
-    final userId = await _userId();
+    final accountId = await _loadAccountId();
     if (!mounted) return;
-    final lookup = await ref.read(resolveGroupChatRoomProvider)(
-      userId: userId,
+    final lookup = await _providers.read(resolveGroupChatRoomProvider)(
+      userId: accountId,
       groupId: widget.groupId,
     );
     if (!mounted) return;
@@ -184,7 +243,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// an error handler, so a failure here must degrade to a retry rather than
   /// escape as an unhandled async error.
   Future<void> _ensureLiveConnected() async {
-    if (_live != null || _connectingLive || !_hasRoomSession) return;
+    if (_disposed || _live != null || _connectingLive || !_hasRoomSession) {
+      return;
+    }
     // Set synchronously, before the first await, so a second caller racing in
     // before token retrieval resolves sees this and backs off instead of
     // opening a second socket that would silently orphan this one.
@@ -192,7 +253,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
 
     final String? token;
     try {
-      token = await ref.read(authServiceProvider).getValidAccessToken();
+      token = await _providers.read(authServiceProvider).getValidAccessToken();
     } catch (_) {
       // A renewal can fail transiently; back off and try the whole thing again
       // instead of leaving live updates silently disconnected.
@@ -206,7 +267,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     }
 
     final uri = ChatLiveClient.liveUri(
-      restBaseUrl: ref.read(apiConfigProvider).baseUrl,
+      restBaseUrl: _providers.read(apiConfigProvider).baseUrl,
       token: token,
       groupId: widget.groupId,
       roomId: _roomId,
@@ -239,7 +300,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   }
 
   void _onLiveEvent(ChatLiveEvent event) {
-    if (!mounted) return;
+    if (_disposed || !mounted) return;
     // A frame on a fresh socket means the connection is healthy again.
     _reconnectAttempt = 0;
 
@@ -249,8 +310,21 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
       case ChatLiveMessageCreated(message: final json):
         _onMessageCreated(json);
       case ChatLiveError():
-        presentChatSendError(context, event);
-      case ChatLiveReactionsUpdated():
+        final messenger = _messenger;
+        final l10n = _l10n;
+        if (messenger != null && l10n != null) {
+          showChatSendError(messenger, l10n, event);
+        }
+      case ChatLiveReactionsUpdated(
+        messageId: final messageId,
+        reactions: final raw,
+      ):
+        _onReactionsUpdated(messageId, raw);
+      case ChatLiveMessageDeleted(
+        messageId: final messageId,
+        deletedAt: final deletedAt,
+      ):
+        _onMessageDeleted(messageId, deletedAt);
       case ChatLiveTyping():
       case ChatLivePresence():
       case ChatLiveUnknown():
@@ -278,24 +352,65 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     // first mention of it when the sender was someone else.
     _adoptRoomId(message.roomId);
     if (_roomId != message.roomId) return;
-    ref
+    _providers
         .read(groupChatThreadProvider(message.roomId).notifier)
         .appendLive(message);
     unawaited(_markRoomRead());
   }
 
+  /// Applies a reaction broadcast. The payload is shared by every member, so
+  /// `reacted_by_me` on it is not viewer-specific — the notifier re-derives
+  /// own state from the identity we hold.
+  /// A member deleted a message. Falls back to this client's clock only if
+  /// the frame arrives without a timestamp — the row still has to become a
+  /// tombstone, and the next fetch carries the server's own value.
+  void _onMessageDeleted(String messageId, String deletedAt) {
+    final roomId = _roomId;
+    if (_disposed || roomId == null || messageId.isEmpty) return;
+    _providers
+        .read(groupChatThreadProvider(roomId).notifier)
+        .applyDeletion(
+          messageId,
+          deletedAt:
+              deletedAt.isNotEmpty
+                  ? deletedAt
+                  : DateTime.now().toUtc().toIso8601String(),
+        );
+  }
+
+  void _onReactionsUpdated(String messageId, List<dynamic> raw) {
+    final roomId = _roomId;
+    if (_disposed || roomId == null || messageId.isEmpty) return;
+    _providers
+        .read(groupChatThreadProvider(roomId).notifier)
+        .replaceReactions(
+          messageId,
+          raw
+              .whereType<Map<String, dynamic>>()
+              .map(ChatMessageReactionDTO.fromJson)
+              .toList(),
+          currentUserId: _viewerId,
+          currentUserEmail: _viewerEmail,
+        );
+  }
+
   Future<void> _refreshThread() async {
     final roomId = _roomId;
-    if (roomId == null) return;
-    await ref.read(groupChatThreadProvider(roomId).notifier).refreshLatest();
+    if (_disposed || roomId == null) return;
+    await _providers
+        .read(groupChatThreadProvider(roomId).notifier)
+        .refreshLatest(
+          currentUserId: _viewerId,
+          currentUserEmail: _viewerEmail,
+        );
   }
 
   void _scheduleReconnect() {
-    if (!mounted || !_hasRoomSession) return;
+    if (_disposed || !mounted || !_hasRoomSession) return;
     _reconnectTimer?.cancel();
     _reconnectAttempt++;
     _reconnectTimer = Timer(chatReconnectDelay(_reconnectAttempt), () async {
-      if (!mounted) return;
+      if (_disposed || !mounted) return;
       await _tearDownLive();
       await _ensureLiveConnected();
     });
@@ -304,33 +419,59 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// Best-effort: a failed read receipt never surfaces to the user.
   Future<void> _markRoomRead() async {
     final roomId = _roomId;
-    if (roomId == null) return;
-    await ref.read(groupChatRepositoryProvider).markRoomRead(roomId);
+    if (_disposed || roomId == null) return;
+    await _providers.read(groupChatRepositoryProvider).markRoomRead(roomId);
   }
 
   Future<void> _persistRoomId(String roomId) async {
+    if (_disposed) return;
     try {
-      final userId = await _userId();
-      await ref
+      final accountId = await _loadAccountId();
+      await _providers
           .read(groupChatRoomCacheProvider)
-          .write(userId: userId, groupId: widget.groupId, roomId: roomId);
+          .write(
+            userId: accountId,
+            groupId: widget.groupId,
+            roomId: roomId,
+          );
     } catch (_) {
       // Cache is best-effort; join is already committed on the server.
     }
   }
 
+  /// Starts a reply. The intent is always to type next, so focus follows.
+  void _startReply(ChatMessageDTO message) {
+    setState(() => _replyingTo = message);
+    _bodyFocusNode.requestFocus();
+  }
+
+  void _cancelReply() => setState(() => _replyingTo = null);
+
   Future<void> _send() async {
     final body = _bodyController.text.trim();
     if (body.isEmpty || _sending) return;
+    final parent = _replyingTo;
     setState(() => _sending = true);
     try {
-      final result = await ref
+      final result = await _providers
           .read(groupChatRepositoryProvider)
-          .sendGroupMessage(widget.groupId, body: body);
+          .sendGroupMessage(
+            widget.groupId,
+            body: body,
+            parentMessageId: parent?.id,
+          );
       if (!mounted) return;
       await result.fold(
         (failure) async {
-          setState(() => _sending = false);
+          // The quoted message is gone. Drop the quote but keep the draft, so
+          // sending again posts it as an ordinary message rather than
+          // silently changing what was written or stranding it.
+          final lostParent =
+              chatSendErrorKind(failure) == ChatSendErrorKind.invalidParent;
+          setState(() {
+            _sending = false;
+            if (lostParent) _replyingTo = null;
+          });
           presentChatSendError(context, failure);
         },
         (message) async {
@@ -339,12 +480,13 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           _bodyController.clear();
           setState(() {
             _sending = false;
+            _replyingTo = null;
             _roomId = message.roomId;
             _roomState = _RoomState.joined;
           });
           // The POST returns the created message, so it is inserted directly
           // and the `message_created` echo dedupes against it by id.
-          ref
+          _providers
               .read(groupChatThreadProvider(message.roomId).notifier)
               .appendLive(message);
           await _ensureLiveConnected();
@@ -434,7 +576,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
               : GroupChatThread(
                 roomId: roomId,
                 groupId: widget.groupId,
-                currentUserId: _currentUserId,
+                onReply: _startReply,
               ),
       },
       // A confirmed member may always write: a lookup that found no room, or
@@ -462,6 +604,28 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
           children: [
             GroupChatHeader(isDark: isDark, onBack: _goBack, profile: profile),
             Expanded(child: body),
+            if (showComposer)
+              // Watches the draft directly, so the rest of the screen does not
+              // rebuild on every keystroke.
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _bodyController,
+                builder: (context, value, _) {
+                  final url = firstChatLinkUrl(value.text);
+                  if (url == null || _dismissedPreviews.contains(url)) {
+                    return const SizedBox.shrink();
+                  }
+                  return GroupChatComposerLinkPreview(
+                    url: url,
+                    onDismiss:
+                        () => setState(() => _dismissedPreviews.add(url)),
+                  );
+                },
+              ),
+            if (showComposer && _replyingTo != null)
+              GroupChatReplyPreview(
+                message: _replyingTo!,
+                onCancel: _cancelReply,
+              ),
             if (showComposer)
               GroupChatComposer(
                 controller: _bodyController,

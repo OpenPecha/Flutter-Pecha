@@ -72,6 +72,7 @@ abstract class GroupProfileRepositoryInterface {
     required String language,
     int skip = 0,
     int limit = 20,
+    String? eventFormat,
   });
 
   Future<Either<Failure, GroupEvent>> getGroupEventDetail(

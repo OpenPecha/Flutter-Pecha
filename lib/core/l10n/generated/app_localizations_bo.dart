@@ -868,6 +868,12 @@ class AppLocalizationsBo extends AppLocalizations {
       'ས་ཁུལ་དུའི་བྱེད་སྒོ་མེད།';
 
   @override
+  String get connect_events_filter_hybrid => 'ཟུང་འབྲེལ།';
+
+  @override
+  String get connect_events_filter_empty_hybrid => 'ཟུང་འབྲེལ་བྱེད་སྒོ་མེད།';
+
+  @override
   String get connect_open => 'ཁ་ཕྱེ།';
 
   @override
@@ -889,6 +895,33 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => 'ད་དུང་ཞུགས་མཁན་མེད།';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => 'ཚོགས་པ་འཚོལ།';
@@ -2405,4 +2438,69 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'ཚོགས་མི།';
+
+  @override
+  String get group_chat_reactions_all => 'ཡོངས།';
+
+  @override
+  String get group_chat_reacted => 'དྲན་བརྡ་བཏང་།';
+
+  @override
+  String get group_chat_reply => 'ལན་འདེབས།';
+
+  @override
+  String get group_chat_copy => 'འདྲ་བཤུས།';
+
+  @override
+  String get group_chat_copied => 'འཕྲིན་ཐུང་འདྲ་བཤུས་བྱས་ཟིན།';
+
+  @override
+  String get group_chat_report => 'སྙན་ཞུ།';
+
+  @override
+  String get group_chat_delete => 'སུབ།';
+
+  @override
+  String get group_chat_delete_title => 'འཕྲིན་ཐུང་སུབ་དགོས་སམ།';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'འཕྲིན་ཐུང་འདི་ཁ་བརྡའི་ནང་གི་མི་ཚང་མའི་ཆེད་དུ་སུབ་འགྲོ།';
+
+  @override
+  String get group_chat_delete_for_everyone => 'ཚང་མའི་ཆེད་དུ་སུབ།';
+
+  @override
+  String get group_chat_delete_failed => 'འཕྲིན་ཐུང་སུབ་མ་ཐུབ།';
+
+  @override
+  String get group_chat_message_deleted =>
+      'ཁྱེད་ཀྱིས་འཕྲིན་ཐུང་འདི་བསུབས་སོང་།';
+
+  @override
+  String get group_chat_message_deleted_by_sender => 'འཕྲིན་ཐུང་འདི་བསུབས་ཟིན།';
+
+  @override
+  String get group_chat_reaction_failed => 'ཁྱེད་ཀྱི་དྲན་བརྡ་ཉར་མ་ཐུབ།';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'དྲན་བརྡ་ $count',
+      one: 'དྲན་བརྡ་ ༡',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'ཁྱེད།';
+
+  @override
+  String get group_chat_tap_to_remove => 'སུབ་པར་མནན།';
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'འཕྲིན་ཐུང་དེ་མི་འདུག་པས་ལུང་འདྲེན་ཕྱིར་བསུབས། ཡང་བསྐྱར་གཏོང་རོགས།';
 }
