@@ -2464,6 +2464,25 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_chat_delete => 'मेटाउनुहोस्';
 
   @override
+  String get group_chat_delete_title => 'सन्देश मेटाउने?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'यो सन्देश यस च्याटमा सबैका लागि मेटिनेछ।';
+
+  @override
+  String get group_chat_delete_for_everyone => 'सबैका लागि मेटाउनुहोस्';
+
+  @override
+  String get group_chat_delete_failed => 'सन्देश मेटाउन सकिएन।';
+
+  @override
+  String get group_chat_message_deleted => 'तपाईंले यो सन्देश मेटाउनुभयो';
+
+  @override
+  String get group_chat_message_deleted_by_sender => 'यो सन्देश मेटाइयो';
+
+  @override
   String get group_chat_reaction_failed =>
       'तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।';
 

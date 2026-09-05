@@ -26,6 +26,23 @@ class ChatLiveReactionsUpdated extends ChatLiveEvent {
   });
 }
 
+/// A message was deleted for everyone.
+///
+/// [deletedBy] is carried even though the tombstone label does not currently
+/// need it — deletion is sender-only, so the deleter is always the sender. It
+/// becomes the right signal the day moderators can delete, and dropping a
+/// field the server sends only hides it from whoever reads this next.
+class ChatLiveMessageDeleted extends ChatLiveEvent {
+  final String messageId;
+  final String deletedBy;
+  final String deletedAt;
+  const ChatLiveMessageDeleted({
+    required this.messageId,
+    required this.deletedBy,
+    required this.deletedAt,
+  });
+}
+
 class ChatLiveTyping extends ChatLiveEvent {
   final String userId;
   final String email;
@@ -105,6 +122,11 @@ class ChatLiveClient {
       'reactions_updated' => ChatLiveReactionsUpdated(
         messageId: json['message_id'] as String? ?? '',
         reactions: json['reactions'] as List<dynamic>? ?? const [],
+      ),
+      'message_deleted' => ChatLiveMessageDeleted(
+        messageId: json['message_id'] as String? ?? '',
+        deletedBy: json['deleted_by'] as String? ?? '',
+        deletedAt: json['deleted_at'] as String? ?? '',
       ),
       'typing' => ChatLiveTyping(
         userId: json['user_id'] as String? ?? '',

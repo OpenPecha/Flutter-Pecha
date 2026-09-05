@@ -33,6 +33,11 @@ abstract class GroupChatRepository {
 
   Future<Either<Failure, Unit>> markRoomRead(String roomId);
 
+  Future<Either<Failure, Unit>> deleteMessage(
+    String roomId, {
+    required String messageId,
+  });
+
   Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
     String roomId, {
     required String messageId,

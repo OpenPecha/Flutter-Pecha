@@ -82,6 +82,10 @@ class GroupChatQuotedMessage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 1),
+              // Kept even once the original is deleted. The reply was an
+              // answer to these words, and the server embeds them in the reply
+              // itself — so the quote stays readable for everyone, at any
+              // scroll position, rather than hollowing out the conversation.
               Text(
                 parent.body,
                 maxLines: 2,

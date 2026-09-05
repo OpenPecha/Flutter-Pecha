@@ -176,10 +176,20 @@ class _CachedNetworkImageWidgetState extends State<CachedNetworkImageWidget> {
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
+        // Memory decode only. `maxWidthDiskCache` / `maxHeightDiskCache`
+        // used to be set from the same pair, which made the *stored file*
+        // depend on the size of whichever widget requested it first — while
+        // the cache key deliberately does not include that size. Two widgets
+        // showing one image at different sizes then fight over a single
+        // entry, and the loser can sit on its placeholder indefinitely: a
+        // stalled re-encode never resolves and never errors, so no
+        // `errorWidget` is reached either.
+        //
+        // Dropping them costs some disk, since the original is stored rather
+        // than a shrunken copy, and keeps the whole memory benefit —
+        // `memCacheWidth` / `memCacheHeight` are what bound the decode.
         memCacheWidth: memW,
         memCacheHeight: memH,
-        maxWidthDiskCache: memW,
-        maxHeightDiskCache: memH,
         fadeInDuration:
             widget.fadeInDuration ?? const Duration(milliseconds: 200),
         placeholderFadeInDuration:

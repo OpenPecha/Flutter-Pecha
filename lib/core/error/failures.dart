@@ -17,6 +17,22 @@ class ServerFailure extends Failure {
   const ServerFailure(super.message);
 }
 
+/// Collection row was persisted, but adding items failed.
+///
+/// Callers should retry item addition with [collectionId] instead of creating
+/// another collection.
+class PartialCollectionCreateFailure extends Failure {
+  final String collectionId;
+
+  const PartialCollectionCreateFailure(
+    super.message, {
+    required this.collectionId,
+  });
+
+  @override
+  List<Object> get props => [message, collectionId];
+}
+
 class CacheFailure extends Failure {
   const CacheFailure(super.message);
 }

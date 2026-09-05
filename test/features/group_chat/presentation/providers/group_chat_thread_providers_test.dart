@@ -102,6 +102,20 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   Future<Either<Failure, Unit>> markRoomRead(String roomId) async =>
       const Right(unit);
 
+  final List<String> deleteCalls = [];
+  Failure? deleteFailure;
+
+  @override
+  Future<Either<Failure, Unit>> deleteMessage(
+    String roomId, {
+    required String messageId,
+  }) async {
+    deleteCalls.add(messageId);
+    final failure = deleteFailure;
+    if (failure != null) return Left(failure);
+    return const Right(unit);
+  }
+
   @override
   Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
     String roomId, {
@@ -132,6 +146,10 @@ class _FakeGroupChatRepository implements GroupChatRepository {
     }
     return const Right([]);
   }
+}
+
+ChatMessageDTO _byId(GroupChatThreadNotifier notifier, String id) {
+  return notifier.state.messages.firstWhere((message) => message.id == id);
 }
 
 /// autoDispose tears the provider down the moment nothing listens, so tests
@@ -1356,6 +1374,207 @@ void main() {
 
       final inserted = notifier.state.messages.firstWhere((m) => m.id == 'm1');
       expect(inserted.reactions.single.count, 3);
+    });
+  });
+
+  group('deleteMessage', () {
+    test('tombstones the message once the server confirms', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.deleteMessage('m1');
+
+      expect(failure, isNull);
+      expect(repository.deleteCalls, ['m1']);
+      // Stamped locally: the 204 carries no body, so there is nothing to adopt
+      // until the next fetch brings the server's own value.
+      expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+      // The row stays: it is the tombstone. Removing it would move the
+      // pagination cursor for a message the server already dropped.
+      expect(notifier.state.messages.map((m) => m.id), ['m2', 'm1']);
+      expect(notifier.state.skip, 2);
+    });
+
+    test('a failed delete leaves the message standing', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      repository.deleteFailure = const NetworkFailure('offline');
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final failure = await notifier.deleteMessage('m1');
+
+      // Reported rather than swallowed, and nothing is tombstoned — the
+      // message is still there for everyone.
+      expect(failure, isA<NetworkFailure>());
+      expect(_byId(notifier, 'm1').deletedAt, isNull);
+      expect(notifier.state.messages, hasLength(1));
+    });
+
+    test('deleting the same message twice sends one request', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.deleteMessage('m1');
+      await notifier.deleteMessage('m1');
+
+      expect(repository.deleteCalls, ['m1']);
+    });
+
+    test('a refresh does not resurrect a tombstoned message', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      await notifier.deleteMessage('m1');
+      // The server no longer returns it.
+      repository.history = [_message('m2')];
+      await notifier.refreshLatest();
+
+      // Still held, still tombstoned: the refetch that dropped it does not
+      // silently turn the row back into a message.
+      expect(notifier.state.messages.map((m) => m.id), ['m2', 'm1']);
+      expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+    });
+
+    test('a refetch adopts the server deleted_at', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(_byId(notifier, 'm1').deletedAt, isNull);
+
+      // Deleted by this member on another device: nothing local marked it, the
+      // page simply comes back carrying the timestamp.
+      repository.history = [
+        _message('m1').copyWith(deletedAt: '2026-09-03T10:00:00Z'),
+      ];
+      await notifier.refreshLatest();
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+    });
+  });
+
+  group('applyDeletion', () {
+    test('a broadcast tombstones a loaded message', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      notifier.applyDeletion('m1', deletedAt: '2026-09-03T10:00:00Z');
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+      // Nobody else is touched.
+      expect(_byId(notifier, 'm2').deletedAt, isNull);
+    });
+
+    test('the first timestamp stands', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      notifier.applyDeletion('m1', deletedAt: 'first');
+      // Our own delete stamps the row, then the broadcast for it arrives.
+      notifier.applyDeletion('m1', deletedAt: 'second');
+
+      expect(_byId(notifier, 'm1').deletedAt, 'first');
+    });
+
+    test('a deletion arriving before its message is not lost', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m0')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // m1 is in the page being fetched, but not yet held. That page was built
+      // before the deletion, so it carries the message as live.
+      repository.history = [_message('m1'), _message('m0')];
+
+      final refresh = notifier.refreshLatest();
+      notifier.applyDeletion('m1', deletedAt: '2026-09-03T10:00:00Z');
+      await refresh;
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+    });
+
+    test('a deletion for a message no page brings back is dropped', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m0')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      // No fetch running: a later page would carry deleted_at itself, so
+      // holding this would only leak.
+      notifier.applyDeletion('gone', deletedAt: '2026-09-03T10:00:00Z');
+
+      repository.history = [_message('gone'), _message('m0')];
+      await notifier.refreshLatest();
+
+      expect(_byId(notifier, 'gone').deletedAt, isNull);
+    });
+  });
+
+
+  group('deletion vs a page already in flight', () {
+    test(
+      'own delete survives a stale refresh that still carries the row',
+      () async {
+        repository = _FakeGroupChatRepository(
+          history: [_message('m2'), _message('m1')],
+        );
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        // A refresh went out before the delete, so its page has m1 as live.
+        final hold = Completer<void>();
+        repository.holdNextList = hold;
+        final refresh = notifier.refreshLatest();
+
+        await notifier.deleteMessage('m1');
+        expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+
+        hold.complete();
+        await refresh;
+
+        // The page predates the deletion; it must not turn the tombstone
+        // back into the message.
+        expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+      },
+    );
+
+    test('a broadcast tombstone survives a stale refresh', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final hold = Completer<void>();
+      repository.holdNextList = hold;
+      final refresh = notifier.refreshLatest();
+
+      notifier.applyDeletion('m1', deletedAt: '2026-09-03T10:00:00Z');
+
+      hold.complete();
+      await refresh;
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
     });
   });
 

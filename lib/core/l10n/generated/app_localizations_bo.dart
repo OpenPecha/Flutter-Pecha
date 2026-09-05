@@ -2461,6 +2461,26 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_chat_delete => 'སུབ།';
 
   @override
+  String get group_chat_delete_title => 'འཕྲིན་ཐུང་སུབ་དགོས་སམ།';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'འཕྲིན་ཐུང་འདི་ཁ་བརྡའི་ནང་གི་མི་ཚང་མའི་ཆེད་དུ་སུབ་འགྲོ།';
+
+  @override
+  String get group_chat_delete_for_everyone => 'ཚང་མའི་ཆེད་དུ་སུབ།';
+
+  @override
+  String get group_chat_delete_failed => 'འཕྲིན་ཐུང་སུབ་མ་ཐུབ།';
+
+  @override
+  String get group_chat_message_deleted =>
+      'ཁྱེད་ཀྱིས་འཕྲིན་ཐུང་འདི་བསུབས་སོང་།';
+
+  @override
+  String get group_chat_message_deleted_by_sender => 'འཕྲིན་ཐུང་འདི་བསུབས་ཟིན།';
+
+  @override
   String get group_chat_reaction_failed => 'ཁྱེད་ཀྱི་དྲན་བརྡ་ཉར་མ་ཐུབ།';
 
   @override

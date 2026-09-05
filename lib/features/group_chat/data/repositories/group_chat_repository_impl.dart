@@ -94,6 +94,19 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> deleteMessage(
+    String roomId, {
+    required String messageId,
+  }) async {
+    try {
+      await _remote.deleteMessage(roomId, messageId: messageId);
+      return const Right(unit);
+    } catch (e) {
+      return Left(ExceptionMapper.map(e, context: 'deleteMessage'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<ChatMessageReactionDTO>>> addReaction(
     String roomId, {
     required String messageId,

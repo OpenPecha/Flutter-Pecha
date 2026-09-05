@@ -4358,6 +4358,42 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get group_chat_delete;
 
+  /// No description provided for @group_chat_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete message?'**
+  String get group_chat_delete_title;
+
+  /// No description provided for @group_chat_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This message will be deleted for everyone in this chat.'**
+  String get group_chat_delete_confirm_body;
+
+  /// No description provided for @group_chat_delete_for_everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for everyone'**
+  String get group_chat_delete_for_everyone;
+
+  /// No description provided for @group_chat_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The message couldn\'t be deleted.'**
+  String get group_chat_delete_failed;
+
+  /// No description provided for @group_chat_message_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'You deleted this message'**
+  String get group_chat_message_deleted;
+
+  /// No description provided for @group_chat_message_deleted_by_sender.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get group_chat_message_deleted_by_sender;
+
   /// No description provided for @group_chat_reaction_failed.
   ///
   /// In en, this message translates to:

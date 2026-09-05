@@ -128,6 +128,12 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   @override
   Future<Either<Failure, Unit>> markRoomRead(String roomId) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> deleteMessage(
+    String roomId, {
+    required String messageId,
+  }) async => const Right(unit);
 }
 
 void main() {
