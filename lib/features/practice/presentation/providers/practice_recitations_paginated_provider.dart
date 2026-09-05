@@ -210,10 +210,13 @@ class PracticeRecitationsLanguageNotifier extends StateNotifier<String> {
     _lastKnown = languageCode;
     state = languageCode;
     try {
-      await _localStorageService.set(
+      final persisted = await _localStorageService.set(
         StorageKeys.chantListLanguage,
         languageCode,
       );
+      if (!persisted) {
+        _logger.warning('Persisting chant list language failed');
+      }
     } catch (e) {
       _logger.warning('Persisting chant list language failed', e);
     }
