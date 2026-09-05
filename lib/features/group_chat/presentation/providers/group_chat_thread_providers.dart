@@ -145,9 +145,10 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// anyway, so dropping the update is correct.
   final Map<String, List<ChatMessageReactionDTO>> _pendingReactions = {};
 
-  /// Deletions that arrived for a message not yet in the loaded window while a
-  /// page request was in flight. Exactly the race [_pendingReactions] solves,
-  /// and solved the same way.
+  /// Deletions that arrived while a page request was in flight, whether or
+  /// not the message was loaded yet: a page built before the deletion commits
+  /// the row as live either way. Held until no fetch is running, then swept
+  /// over whatever was committed — see [_applyPendingDeletions].
   final Map<String, String> _pendingDeletions = {};
 
   /// How many page requests are in flight. A broadcast is only worth holding
@@ -189,7 +190,10 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
           message
         else
           () {
-            final deletedAt = _pendingDeletions.remove(message.id);
+            // Read, not consumed: a second page still in flight can commit
+            // the same stale copy, and `_dropStalePending` clears the map
+            // once none is running.
+            final deletedAt = _pendingDeletions[message.id];
             if (deletedAt == null) return message;
             changed = true;
             return message.copyWith(deletedAt: deletedAt);
@@ -910,16 +914,17 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   void applyDeletion(String messageId, {required String deletedAt}) {
     if (messageId.isEmpty) return;
 
+    // A page already in flight was built before this deletion and would
+    // commit the row as live — inserting it if it is not held yet, or
+    // replacing the held copy if it is. Either way the marker has to outlive
+    // that commit, so it is held until no fetch is running. With nothing in
+    // flight it is safe to drop: any later fetch carries `deleted_at` itself.
+    if (_fetchesInFlight > 0) _pendingDeletions[messageId] = deletedAt;
+
     final index = state.messages.indexWhere(
       (message) => message.id == messageId,
     );
-    if (index < 0) {
-      // Not loaded. Normally safe to drop: any later fetch brings the message
-      // back already carrying `deleted_at`. The exception is a page already in
-      // flight, built before this deletion, which would insert it as live.
-      if (_fetchesInFlight > 0) _pendingDeletions[messageId] = deletedAt;
-      return;
-    }
+    if (index < 0) return;
     if (state.messages[index].deletedAt != null) return;
 
     state = state.copyWith(

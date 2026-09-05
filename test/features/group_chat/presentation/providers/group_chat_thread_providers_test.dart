@@ -1528,6 +1528,56 @@ void main() {
     });
   });
 
+
+  group('deletion vs a page already in flight', () {
+    test(
+      'own delete survives a stale refresh that still carries the row',
+      () async {
+        repository = _FakeGroupChatRepository(
+          history: [_message('m2'), _message('m1')],
+        );
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        // A refresh went out before the delete, so its page has m1 as live.
+        final hold = Completer<void>();
+        repository.holdNextList = hold;
+        final refresh = notifier.refreshLatest();
+
+        await notifier.deleteMessage('m1');
+        expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+
+        hold.complete();
+        await refresh;
+
+        // The page predates the deletion; it must not turn the tombstone
+        // back into the message.
+        expect(_byId(notifier, 'm1').deletedAt, isNotNull);
+      },
+    );
+
+    test('a broadcast tombstone survives a stale refresh', () async {
+      repository = _FakeGroupChatRepository(
+        history: [_message('m2'), _message('m1')],
+      );
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      final hold = Completer<void>();
+      repository.holdNextList = hold;
+      final refresh = notifier.refreshLatest();
+
+      notifier.applyDeletion('m1', deletedAt: '2026-09-03T10:00:00Z');
+
+      hold.complete();
+      await refresh;
+
+      expect(_byId(notifier, 'm1').deletedAt, '2026-09-03T10:00:00Z');
+    });
+  });
+
   group('ChatLinkPreviewCache', () {
     test('distinguishes a cached failure from an absent entry', () {
       final cache = ChatLinkPreviewCache();
