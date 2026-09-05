@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -84,11 +85,19 @@ class _ChatMessageMenu extends StatelessWidget {
     final safeBottom = media.size.height - media.padding.bottom - 8;
     final cardHeight = 52.0 * (canDelete ? 4 : 3) + 16;
 
+    // A long message cannot be lifted whole. The pill above it and the card
+    // below it are the whole point of the menu, and a full-height bubble drove
+    // the card clean off the bottom of the screen — leaving a wall of text and
+    // no way to act on it. Cap the lift at the room actually left over.
+    final room = safeBottom - safeTop - _pillHeight - _gap - _gap - cardHeight;
+    final messageHeight = math.min(anchor.height, math.max(room, 0.0));
+    final isClipped = messageHeight < anchor.height;
+
     // Keep the lifted message on screen when it sat near an edge: the pill
     // above and the card below both have to fit.
     var top = anchor.top;
     final minTop = safeTop + _pillHeight + _gap;
-    final maxTop = safeBottom - anchor.height - _gap - cardHeight;
+    final maxTop = safeBottom - messageHeight - _gap - cardHeight;
     if (maxTop > minTop) {
       top = top.clamp(minTop, maxTop);
     } else {
@@ -124,11 +133,25 @@ class _ChatMessageMenu extends StatelessWidget {
             left: anchor.left,
             top: top,
             width: anchor.width,
-            child: IgnorePointer(child: message),
+            height: messageHeight,
+            // Clipped, not scaled: the text stays the size it is in the
+            // thread and the remainder is a scroll away. A cut message takes
+            // touches so it can be read; a whole one stays inert, so tapping
+            // it still dismisses the menu.
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child:
+                  isClipped
+                      ? SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: message,
+                      )
+                      : IgnorePointer(child: message),
+            ),
           ),
           Positioned(
             left: anchor.left,
-            top: top + anchor.height + _gap,
+            top: top + messageHeight + _gap,
             width: anchor.width,
             child: Align(
               alignment: Alignment.centerLeft,

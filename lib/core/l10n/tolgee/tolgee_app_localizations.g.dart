@@ -4782,6 +4782,48 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_chat_delete_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_title',
+    () => _fallback.group_chat_delete_title,
+  );
+
+  @override
+  String get group_chat_delete_confirm_body => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_confirm_body',
+    () => _fallback.group_chat_delete_confirm_body,
+  );
+
+  @override
+  String get group_chat_delete_for_everyone => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_for_everyone',
+    () => _fallback.group_chat_delete_for_everyone,
+  );
+
+  @override
+  String get group_chat_delete_failed => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_failed',
+    () => _fallback.group_chat_delete_failed,
+  );
+
+  @override
+  String get group_chat_message_deleted => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_deleted',
+    () => _fallback.group_chat_message_deleted,
+  );
+
+  @override
+  String get group_chat_message_deleted_by_sender => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_deleted_by_sender',
+    () => _fallback.group_chat_message_deleted_by_sender,
+  );
+
+  @override
   String get group_chat_reaction_failed => TolgeeBridge.get(
     localeName,
     'group_chat_reaction_failed',

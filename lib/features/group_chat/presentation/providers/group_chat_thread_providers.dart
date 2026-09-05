@@ -126,8 +126,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// single slot let the echo overwrite the one worth keeping. Among those
   /// that agree, one that would change nothing is passed over for the same
   /// reason — see [_replayDeferredReaction].
-  final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions =
-      {};
+  final Map<String, List<List<ChatMessageReactionDTO>>> _deferredReactions = {};
 
   /// Bumped whenever a message's reactions change locally. A refetch compares
   /// the value it saw before its request with the value on arrival: checking
@@ -146,8 +145,14 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   /// anyway, so dropping the update is correct.
   final Map<String, List<ChatMessageReactionDTO>> _pendingReactions = {};
 
-  /// How many page requests are in flight. A reaction broadcast is only worth
-  /// holding while one of them might be carrying the message it names.
+  /// Deletions that arrived while a page request was in flight, whether or
+  /// not the message was loaded yet: a page built before the deletion commits
+  /// the row as live either way. Held until no fetch is running, then swept
+  /// over whatever was committed — see [_applyPendingDeletions].
+  final Map<String, String> _pendingDeletions = {};
+
+  /// How many page requests are in flight. A broadcast is only worth holding
+  /// while one of them might be carrying the message it names.
   int _fetchesInFlight = 0;
 
   /// Runs a page request with [_fetchesInFlight] raised for its duration.
@@ -160,18 +165,50 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
     }
   }
 
-  /// Applies a summary held while this page was in flight. It is newer than
+  /// Applies anything held while this page was in flight. It is newer than
   /// the page's own snapshot of the same message.
-  ChatMessageDTO _withPendingReactions(ChatMessageDTO message) {
-    final pending = _pendingReactions.remove(message.id);
-    if (pending == null) return message;
-    return message.copyWith(reactions: pending);
+  ChatMessageDTO _withPendingUpdates(ChatMessageDTO message) {
+    final reactions = _pendingReactions.remove(message.id);
+    if (reactions == null) return message;
+    return message.copyWith(reactions: reactions);
+  }
+
+  /// Applies deletions held while a page was in flight, across the whole list.
+  ///
+  /// A sweep rather than a per-row hook, because `refreshLatest` commits its
+  /// rows through several branches — restart, merge, first load — and a row it
+  /// drops as a duplicate on the way in would take the marker with it, since
+  /// the map has already forgotten it. Running last, over whatever was
+  /// actually committed, treats an inserted row and an already-held one alike.
+  void _applyPendingDeletions() {
+    if (_pendingDeletions.isEmpty) return;
+
+    var changed = false;
+    final messages = [
+      for (final message in state.messages)
+        if (message.deletedAt != null)
+          message
+        else
+          () {
+            // Read, not consumed: a second page still in flight can commit
+            // the same stale copy, and `_dropStalePending` clears the map
+            // once none is running.
+            final deletedAt = _pendingDeletions[message.id];
+            if (deletedAt == null) return message;
+            changed = true;
+            return message.copyWith(deletedAt: deletedAt);
+          }(),
+    ];
+
+    if (changed) state = state.copyWith(messages: messages);
   }
 
   /// Anything still held once no fetch is running names a message no page is
   /// going to insert, so it is dropped rather than kept for good.
-  void _dropStalePendingReactions() {
-    if (_fetchesInFlight == 0) _pendingReactions.clear();
+  void _dropStalePending() {
+    if (_fetchesInFlight > 0) return;
+    _pendingReactions.clear();
+    _pendingDeletions.clear();
   }
 
   void _bumpRevision(String messageId) {
@@ -200,7 +237,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       },
       (page) {
         state = state.copyWith(
-          messages: page.messages.map(_withPendingReactions).toList(),
+          messages: page.messages.map(_withPendingUpdates).toList(),
           isLoading: false,
           hasLoaded: true,
           hasMore: page.messages.length < page.total,
@@ -210,7 +247,8 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         );
       },
     );
-    _dropStalePendingReactions();
+    _applyPendingDeletions();
+    _dropStalePending();
   }
 
   Future<void> loadMore() async {
@@ -237,7 +275,7 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         final fresh =
             page.messages
                 .where((message) => !known.contains(message.id))
-                .map(_withPendingReactions)
+                .map(_withPendingUpdates)
                 .toList();
         final messages = [...state.messages, ...fresh];
         state = state.copyWith(
@@ -250,7 +288,8 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         );
       },
     );
-    _dropStalePendingReactions();
+    _applyPendingDeletions();
+    _dropStalePending();
   }
 
   /// Inserts a message that arrived over the socket or came back from a REST
@@ -467,7 +506,8 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         hasMore: state.messages.length < total,
       );
     });
-    _dropStalePendingReactions();
+    _applyPendingDeletions();
+    _dropStalePending();
   }
 
   /// Rewrites one message's reactions from an authoritative summary — the
@@ -864,6 +904,69 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
               )
               .toList(),
     );
+  }
+
+  /// Marks a message deleted — from a `message_deleted` broadcast, or from
+  /// our own confirmed call.
+  ///
+  /// Idempotent: the first timestamp stands, so the broadcast that follows our
+  /// own delete does not churn the value already stamped.
+  void applyDeletion(String messageId, {required String deletedAt}) {
+    if (messageId.isEmpty) return;
+
+    // A page already in flight was built before this deletion and would
+    // commit the row as live — inserting it if it is not held yet, or
+    // replacing the held copy if it is. Either way the marker has to outlive
+    // that commit, so it is held until no fetch is running. With nothing in
+    // flight it is safe to drop: any later fetch carries `deleted_at` itself.
+    if (_fetchesInFlight > 0) _pendingDeletions[messageId] = deletedAt;
+
+    final index = state.messages.indexWhere(
+      (message) => message.id == messageId,
+    );
+    if (index < 0) return;
+    if (state.messages[index].deletedAt != null) return;
+
+    state = state.copyWith(
+      messages: [
+        for (final message in state.messages)
+          message.id == messageId
+              ? message.copyWith(deletedAt: deletedAt)
+              : message,
+      ],
+    );
+  }
+
+  /// Deletes one of this member's own messages, for everyone.
+  ///
+  /// The row is left alone until the server confirms. A destructive action
+  /// already behind a confirm dialog should not need a rollback that brings
+  /// back a message the user watched disappear.
+  ///
+  /// Returns the failure when the call fails, so the caller can say so.
+  Future<Failure?> deleteMessage(String messageId) async {
+    if (messageId.isEmpty) return null;
+
+    final index = state.messages.indexWhere(
+      (message) => message.id == messageId,
+    );
+    if (index >= 0 && state.messages[index].deletedAt != null) return null;
+
+    final result = await ref
+        .read(groupChatRepositoryProvider)
+        .deleteMessage(roomId, messageId: messageId);
+
+    if (!mounted) return null;
+
+    return result.fold((failure) => failure, (_) {
+      // 204 with no body, so there is nothing to adopt: the row is stamped now
+      // and the next fetch replaces this with the server's own value.
+      applyDeletion(
+        messageId,
+        deletedAt: DateTime.now().toUtc().toIso8601String(),
+      );
+      return null;
+    });
   }
 
   void retry() {

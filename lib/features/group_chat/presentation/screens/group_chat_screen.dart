@@ -320,6 +320,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
         reactions: final raw,
       ):
         _onReactionsUpdated(messageId, raw);
+      case ChatLiveMessageDeleted(
+        messageId: final messageId,
+        deletedAt: final deletedAt,
+      ):
+        _onMessageDeleted(messageId, deletedAt);
       case ChatLiveTyping():
       case ChatLivePresence():
       case ChatLiveUnknown():
@@ -356,6 +361,23 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// Applies a reaction broadcast. The payload is shared by every member, so
   /// `reacted_by_me` on it is not viewer-specific — the notifier re-derives
   /// own state from the identity we hold.
+  /// A member deleted a message. Falls back to this client's clock only if
+  /// the frame arrives without a timestamp — the row still has to become a
+  /// tombstone, and the next fetch carries the server's own value.
+  void _onMessageDeleted(String messageId, String deletedAt) {
+    final roomId = _roomId;
+    if (_disposed || roomId == null || messageId.isEmpty) return;
+    _providers
+        .read(groupChatThreadProvider(roomId).notifier)
+        .applyDeletion(
+          messageId,
+          deletedAt:
+              deletedAt.isNotEmpty
+                  ? deletedAt
+                  : DateTime.now().toUtc().toIso8601String(),
+        );
+  }
+
   void _onReactionsUpdated(String messageId, List<dynamic> raw) {
     final roomId = _roomId;
     if (_disposed || roomId == null || messageId.isEmpty) return;

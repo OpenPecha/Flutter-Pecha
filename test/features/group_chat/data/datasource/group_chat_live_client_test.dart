@@ -42,6 +42,30 @@ void main() {
       expect(uri.scheme, 'ws');
     });
 
+    test('parses a message_deleted frame', () {
+      final event = ChatLiveClient.parseFrame(
+        '{"type":"message_deleted","message_id":"m1",'
+        '"deleted_by":"u9","deleted_at":"2026-09-03T10:00:00Z"}',
+      );
+
+      expect(event, isA<ChatLiveMessageDeleted>());
+      final deleted = event! as ChatLiveMessageDeleted;
+      expect(deleted.messageId, 'm1');
+      expect(deleted.deletedAt, '2026-09-03T10:00:00Z');
+      // Carried even though the label does not need it yet: the day a
+      // moderator can delete, this is what tells the two apart.
+      expect(deleted.deletedBy, 'u9');
+    });
+
+    test('a message_deleted frame missing fields does not throw', () {
+      final event = ChatLiveClient.parseFrame('{"type":"message_deleted"}');
+
+      expect(event, isA<ChatLiveMessageDeleted>());
+      final deleted = event! as ChatLiveMessageDeleted;
+      expect(deleted.messageId, isEmpty);
+      expect(deleted.deletedAt, isEmpty);
+    });
+
     test('parses error frames including INAPPROPRIATE_LANGUAGE', () {
       final event = ChatLiveClient.parseFrame(
         '{"type":"error","code":"INAPPROPRIATE_LANGUAGE","message":"blocked"}',

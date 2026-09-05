@@ -1214,6 +1214,12 @@
   "group_chat_copied": "Message copied",
   "group_chat_report": "Report",
   "group_chat_delete": "Delete",
+  "group_chat_delete_title": "Delete message?",
+  "group_chat_delete_confirm_body": "This message will be deleted for everyone in this chat.",
+  "group_chat_delete_for_everyone": "Delete for everyone",
+  "group_chat_delete_failed": "The message couldn't be deleted.",
+  "group_chat_message_deleted": "You deleted this message",
+  "group_chat_message_deleted_by_sender": "This message was deleted",
   "group_chat_reaction_failed": "Your reaction couldn't be saved.",
   "group_chat_reactions_count": "{count, plural, =1{1 reaction} other{{count} reactions}}",
   "@group_chat_reactions_count": {

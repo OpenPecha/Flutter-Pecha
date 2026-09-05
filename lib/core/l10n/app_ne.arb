@@ -1039,6 +1039,12 @@
   "group_chat_copied": "सन्देश प्रतिलिपि गरियो",
   "group_chat_report": "रिपोर्ट गर्नुहोस्",
   "group_chat_delete": "मेटाउनुहोस्",
+  "group_chat_delete_title": "सन्देश मेटाउने?",
+  "group_chat_delete_confirm_body": "यो सन्देश यस च्याटमा सबैका लागि मेटिनेछ।",
+  "group_chat_delete_for_everyone": "सबैका लागि मेटाउनुहोस्",
+  "group_chat_delete_failed": "सन्देश मेटाउन सकिएन।",
+  "group_chat_message_deleted": "तपाईंले यो सन्देश मेटाउनुभयो",
+  "group_chat_message_deleted_by_sender": "यो सन्देश मेटाइयो",
   "group_chat_reaction_failed": "तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।",
   "group_chat_reactions_count": "{count, plural, =1{1 प्रतिक्रिया} other{{count} प्रतिक्रियाहरू}}",
   "@group_chat_reactions_count": {
