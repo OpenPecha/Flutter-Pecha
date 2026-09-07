@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
@@ -24,6 +26,13 @@ class ChatRoomsState extends Equatable {
   /// before the initial request lands.
   final bool hasLoaded;
 
+  /// Whether an unread group room sits past the end of [rooms].
+  ///
+  /// The list stops walking the server once it has a page to show, but the
+  /// dot has to answer for every room. Set by a scan that carries on from
+  /// where the list stopped, purely to look for unread counts.
+  final bool hasUnreadBeyondList;
+
   const ChatRoomsState({
     this.rooms = const [],
     this.isLoading = false,
@@ -33,10 +42,11 @@ class ChatRoomsState extends Equatable {
     this.skip = 0,
     this.total = 0,
     this.hasLoaded = false,
+    this.hasUnreadBeyondList = false,
   });
 
   /// Drives the dot on the Connect app bar.
-  bool get hasUnread => rooms.any(chatRoomIsUnread);
+  bool get hasUnread => rooms.any(chatRoomIsUnread) || hasUnreadBeyondList;
 
   ChatRoomsState copyWith({
     List<ChatRoomDTO>? rooms,
@@ -47,6 +57,7 @@ class ChatRoomsState extends Equatable {
     int? skip,
     int? total,
     bool? hasLoaded,
+    bool? hasUnreadBeyondList,
     bool clearError = false,
   }) {
     return ChatRoomsState(
@@ -58,6 +69,7 @@ class ChatRoomsState extends Equatable {
       skip: skip ?? this.skip,
       total: total ?? this.total,
       hasLoaded: hasLoaded ?? this.hasLoaded,
+      hasUnreadBeyondList: hasUnreadBeyondList ?? this.hasUnreadBeyondList,
     );
   }
 
@@ -71,6 +83,7 @@ class ChatRoomsState extends Equatable {
     skip,
     total,
     hasLoaded,
+    hasUnreadBeyondList,
   ];
 }
 
@@ -123,7 +136,14 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
   /// list on screen there is nothing to scroll, so a load that stopped short
   /// and empty would never be followed by another, and the viewer's group
   /// chats would sit hidden behind the offset for good.
+  ///
+  /// The cap bounds what the list waits for, not what the dot sees: once the
+  /// list is published, [_scanForUnread] carries on past it in the background.
   static const int _maxPagesPerLoad = 5;
+
+  /// Server offset of the page where the unread scan found its room, so
+  /// `loadMore` can tell when the list has caught up with it.
+  int? _unreadBeyondOffset;
 
   /// Bumped by every load from the top.
   ///
@@ -172,6 +192,10 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       return;
     }
 
+    // A fresh list starts with no verdict about what lies beyond it; the scan
+    // below earns that again from scratch, since the room it found last time
+    // may have been read since.
+    _unreadBeyondOffset = null;
     state = state.copyWith(
       rooms: groupChatRooms(walk.rooms),
       isLoading: false,
@@ -179,10 +203,18 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       hasMore: walk.hasMore,
       skip: walk.skip,
       total: walk.total,
+      hasUnreadBeyondList: false,
       error: failure?.message,
       clearError: failure == null,
     );
     _seedRoomCache(walk.rooms);
+
+    // Only when the list cannot already answer: a dot that is on stays on.
+    // Not after a failed page either — the scan would start on the page that
+    // just failed, and the retry belongs to the viewer.
+    if (failure == null && walk.hasMore && !state.hasUnread) {
+      unawaited(_scanForUnread(skip: walk.skip, generation: _generation));
+    }
   }
 
   Future<void> loadMore() async {
@@ -214,12 +246,20 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       ...walk.rooms.where((room) => !known.contains(room.id)),
     ];
 
+    // Once the list has paged past the room the scan found, the list speaks
+    // for it: the room is either in `rooms` still unread, or was read in the
+    // meantime — and a flag that outlived that would keep the dot on.
+    final beyond = _unreadBeyondOffset;
+    final caughtUp = beyond != null && walk.skip > beyond;
+    if (caughtUp) _unreadBeyondOffset = null;
+
     state = state.copyWith(
       rooms: groupChatRooms(merged),
       isLoadingMore: false,
       hasMore: walk.hasMore,
       skip: walk.skip,
       total: walk.total,
+      hasUnreadBeyondList: caughtUp ? false : null,
       error: failure?.message,
       clearError: failure == null,
     );
@@ -285,6 +325,51 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
     }
 
     return _RoomsWalk(rooms: rooms, skip: skip, total: total, hasMore: hasMore);
+  }
+
+  /// Pages on from [skip] — where the list's walk stopped — looking only for
+  /// an unread group room, and stops at the first one.
+  ///
+  /// There is no unread endpoint and `/chat/rooms` has no sort or filter, so
+  /// the only way to be sure nothing is unread is to see every room. That is
+  /// the cost of an honest dot, paid in the background after the list is
+  /// already on screen, and only when the list itself holds nothing unread.
+  /// Nothing here touches `rooms` or `skip`: those belong to the list's own
+  /// paging, and a page fetched for the dot is fetched again when the viewer
+  /// scrolls to it.
+  ///
+  /// A failed page ends the scan quietly; the next refresh starts it over. A
+  /// load from the top that overtakes it ends it too — its verdict would be
+  /// about a list that no longer exists.
+  Future<void> _scanForUnread({
+    required int skip,
+    required int generation,
+  }) async {
+    final repository = ref.read(groupChatRepositoryProvider);
+    var hasMore = true;
+
+    while (hasMore) {
+      final result = await repository.listRooms(skip: skip, limit: _limit);
+      if (!mounted || generation != _generation) return;
+
+      final ChatRoomsPage page;
+      switch (result) {
+        case Left():
+          return;
+        case Right(value: final loaded):
+          page = loaded;
+      }
+
+      _seedRoomCache(page.rooms);
+      if (hasUnreadChatRooms(page.rooms)) {
+        _unreadBeyondOffset = skip;
+        state = state.copyWith(hasUnreadBeyondList: true);
+        return;
+      }
+
+      skip += page.rooms.length;
+      hasMore = page.rooms.isNotEmpty && skip < page.total;
+    }
   }
 
   /// Records room ids against their groups.

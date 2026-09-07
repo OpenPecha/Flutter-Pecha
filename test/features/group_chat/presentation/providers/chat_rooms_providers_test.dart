@@ -53,15 +53,25 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   /// Holds the next list call until completed, so a later one can overtake it.
   Completer<void>? holdNextList;
 
+  /// Holds only the call with this 1-based index, for reaching a call that
+  /// goes out on the heels of another.
+  int? holdCall;
+  Completer<void>? holdCallCompleter;
+
+  /// The skips asked for, in order.
+  final List<int> skips = [];
+
   @override
   Future<Either<Failure, ChatRoomsPage>> listRooms({
     int skip = 0,
     int limit = 20,
   }) async {
     listCallCount++;
+    skips.add(skip);
     final hold = holdNextList;
     holdNextList = null;
     if (hold != null) await hold.future;
+    if (holdCall == listCallCount) await holdCallCompleter!.future;
     if (failCall == listCallCount) {
       failCall = null;
       return const Left(NetworkFailure('offline'));
@@ -233,28 +243,31 @@ void main() {
       expect(notifier.state.rooms, hasLength(20));
       expect(notifier.state.hasMore, isTrue);
       expect(notifier.state.skip, 20);
-      expect(repository.listCallCount, 1);
+      // One page for the list; the other two are the unread scan seeing the
+      // rest out, without touching what the list holds.
+      expect(repository.listCallCount, 3);
+      expect(repository.skips, [0, 20, 40]);
     });
 
-    test(
-      'caps the walk once it has something to show, so a DM-heavy account '
-      'is not crawled whole',
-      () async {
-        repository = _FakeGroupChatRepository(
-          rooms: [_group(1), for (var i = 0; i < 200; i++) _direct(i)],
-        );
-        container = buildContainer();
+    test('caps the list walk once it has something to show, so a DM-heavy '
+        'account is on screen after five pages', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [_group(1), for (var i = 0; i < 200; i++) _direct(i)],
+      );
+      container = buildContainer();
 
-        final notifier = _keepAlive(container);
-        await _settle();
+      final notifier = _keepAlive(container);
+      await _settle();
 
-        expect(repository.listCallCount, 5);
-        expect(notifier.state.rooms, hasLength(1));
-        expect(notifier.state.hasLoaded, isTrue);
-        expect(notifier.state.hasMore, isTrue);
-        expect(notifier.state.skip, 100);
-      },
-    );
+      expect(notifier.state.rooms, hasLength(1));
+      expect(notifier.state.hasLoaded, isTrue);
+      expect(notifier.state.hasMore, isTrue);
+      expect(notifier.state.skip, 100);
+      // The cap bounds the list, not the dot: the scan walks the remaining
+      // 101 rooms behind it looking for something unread.
+      expect(repository.listCallCount, 11);
+      expect(notifier.state.hasUnread, isFalse);
+    });
 
     test(
       'keeps walking past the cap while it has found nothing, so group rooms '
@@ -276,25 +289,22 @@ void main() {
       },
     );
 
-    test(
-      'an account with only direct messages ends with the server exhausted, '
-      'never an empty list that still claims more',
-      () async {
-        repository = _FakeGroupChatRepository(
-          rooms: [for (var i = 0; i < 200; i++) _direct(i)],
-        );
-        container = buildContainer();
+    test('an account with only direct messages ends with the server exhausted, '
+        'never an empty list that still claims more', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [for (var i = 0; i < 200; i++) _direct(i)],
+      );
+      container = buildContainer();
 
-        final notifier = _keepAlive(container);
-        await _settle();
+      final notifier = _keepAlive(container);
+      await _settle();
 
-        expect(repository.listCallCount, 10);
-        expect(notifier.state.rooms, isEmpty);
-        expect(notifier.state.hasLoaded, isTrue);
-        expect(notifier.state.hasMore, isFalse);
-        expect(notifier.state.skip, 200);
-      },
-    );
+      expect(repository.listCallCount, 10);
+      expect(notifier.state.rooms, isEmpty);
+      expect(notifier.state.hasLoaded, isTrue);
+      expect(notifier.state.hasMore, isFalse);
+      expect(notifier.state.skip, 200);
+    });
 
     test(
       'a page failing mid-walk keeps what landed and surfaces the error',
@@ -356,16 +366,183 @@ void main() {
 
         final notifier = _keepAlive(container);
         await _settle();
-        expect(repository.listCallCount, 1);
+        // The list took one page; the unread scan took the other two.
+        expect(repository.listCallCount, 3);
 
         await notifier.loadMore();
 
         expect(notifier.state.rooms, hasLength(21));
         expect(_ids(notifier), contains('group-room-99'));
         expect(notifier.state.hasMore, isFalse);
-        expect(repository.listCallCount, 3);
+        expect(repository.listCallCount, 5);
       },
     );
+  });
+
+  group('unread beyond the list', () {
+    test('the dot sees an unread room the list stopped short of', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          for (var i = 0; i < 30; i++) _group(i, unreadCount: i == 27 ? 1 : 0),
+        ],
+      );
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(notifier.state.rooms, hasLength(20));
+      expect(notifier.state.rooms.any((r) => r.unreadCount > 0), isFalse);
+      expect(notifier.state.hasUnreadBeyondList, isTrue);
+      expect(notifier.state.hasUnread, isTrue);
+    });
+
+    test('the dot sees an unread room behind a DM-heavy cap', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          _group(1),
+          for (var i = 0; i < 150; i++) _direct(i),
+          _group(2, unreadCount: 4),
+        ],
+      );
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(_ids(notifier), ['group-room-1']);
+      expect(notifier.state.hasUnread, isTrue);
+    });
+
+    test('the scan stops at the first unread room it finds', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          for (var i = 0; i < 20; i++) _group(i),
+          _group(20, unreadCount: 1),
+          for (var i = 21; i < 100; i++) _group(i),
+        ],
+      );
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(notifier.state.hasUnread, isTrue);
+      expect(repository.listCallCount, 2);
+    });
+
+    test('a list that already has something unread is not scanned', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          _group(0, unreadCount: 1),
+          for (var i = 1; i < 60; i++) _group(i),
+        ],
+      );
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(notifier.state.hasUnread, isTrue);
+      expect(notifier.state.hasUnreadBeyondList, isFalse);
+      expect(repository.listCallCount, 1);
+    });
+
+    test(
+      'paging the list past the room hands the answer back to the list',
+      () async {
+        repository = _FakeGroupChatRepository(
+          rooms: [
+            for (var i = 0; i < 30; i++)
+              _group(i, unreadCount: i == 27 ? 1 : 0),
+          ],
+        );
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+        expect(notifier.state.hasUnreadBeyondList, isTrue);
+
+        await notifier.loadMore();
+
+        expect(notifier.state.rooms, hasLength(30));
+        expect(notifier.state.hasUnreadBeyondList, isFalse);
+        // Still on, now because the room itself is in the list.
+        expect(notifier.state.hasUnread, isTrue);
+      },
+    );
+
+    test('a refresh after the room is read turns the dot off', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          for (var i = 0; i < 30; i++) _group(i, unreadCount: i == 27 ? 1 : 0),
+        ],
+      );
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+      expect(notifier.state.hasUnread, isTrue);
+
+      repository.rooms = [for (var i = 0; i < 30; i++) _group(i)];
+      await notifier.refresh();
+      await _settle();
+
+      expect(notifier.state.hasUnreadBeyondList, isFalse);
+      expect(notifier.state.hasUnread, isFalse);
+    });
+
+    test('a scan that a refresh overtook does not turn the dot on', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          for (var i = 0; i < 30; i++) _group(i, unreadCount: i == 27 ? 1 : 0),
+        ],
+      );
+      // Call 1 is the list's page; call 2 is the scan's, held here.
+      final hold = Completer<void>();
+      repository
+        ..holdCall = 2
+        ..holdCallCompleter = hold;
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+      expect(repository.listCallCount, 2);
+      expect(notifier.state.hasUnread, isFalse);
+
+      // Everything is read by the time the refresh goes out.
+      repository.rooms = [for (var i = 0; i < 30; i++) _group(i)];
+      await notifier.refresh();
+      await _settle();
+      expect(notifier.state.hasUnread, isFalse);
+
+      // The held scan lands with its stale page of unread rooms.
+      hold.complete();
+      await _settle();
+
+      expect(notifier.state.hasUnreadBeyondList, isFalse);
+      expect(notifier.state.hasUnread, isFalse);
+    });
+
+    test('a page failing mid-scan leaves the dot off, not stuck', () async {
+      repository = _FakeGroupChatRepository(
+        rooms: [
+          for (var i = 0; i < 30; i++) _group(i, unreadCount: i == 27 ? 1 : 0),
+        ],
+      )..failCall = 2;
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      expect(notifier.state.rooms, hasLength(20));
+      expect(notifier.state.error, isNull);
+      expect(notifier.state.hasUnread, isFalse);
+
+      await notifier.refresh();
+      await _settle();
+      expect(notifier.state.hasUnread, isTrue);
+    });
   });
 
   group('refresh', () {

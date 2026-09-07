@@ -196,8 +196,9 @@ class _ConnectMainTabBar extends StatelessWidget {
 /// Opens the chats list, with a dot when anything is unread.
 ///
 /// Watching `chatRoomsProvider` here is what loads it: there is no unread
-/// endpoint, so the dot can only come from the rooms list — and having Connect
-/// hold that subscription means the Chats screen usually opens on data it
+/// endpoint, so the dot can only come from the rooms list (the notifier scans
+/// past the page it shows, so the dot answers for every room) — and having
+/// Connect hold that subscription means the Chats screen usually opens on data it
 /// already has rather than fetching again.
 class _ChatsAction extends ConsumerWidget {
   const _ChatsAction();
