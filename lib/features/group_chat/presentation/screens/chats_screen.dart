@@ -113,7 +113,24 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
       );
     }
 
-    if (state.rooms.isEmpty) return const _EmptyChats();
+    if (state.rooms.isEmpty) {
+      // Still pull-to-refresh: a viewer just added to their first group has
+      // no other way to ask for the list again without leaving the screen.
+      return RefreshIndicator(
+        onRefresh: () => ref.read(chatRoomsProvider.notifier).refresh(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                height: constraints.maxHeight,
+                child: const _EmptyChats(),
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _fillViewport(state));
 

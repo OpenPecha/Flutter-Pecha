@@ -236,21 +236,65 @@ void main() {
       expect(repository.listCallCount, 1);
     });
 
-    test('caps the walk so a DM-heavy account is not crawled whole', () async {
-      repository = _FakeGroupChatRepository(
-        rooms: [for (var i = 0; i < 200; i++) _direct(i)],
-      );
-      container = buildContainer();
+    test(
+      'caps the walk once it has something to show, so a DM-heavy account '
+      'is not crawled whole',
+      () async {
+        repository = _FakeGroupChatRepository(
+          rooms: [_group(1), for (var i = 0; i < 200; i++) _direct(i)],
+        );
+        container = buildContainer();
 
-      final notifier = _keepAlive(container);
-      await _settle();
+        final notifier = _keepAlive(container);
+        await _settle();
 
-      expect(repository.listCallCount, 5);
-      expect(notifier.state.rooms, isEmpty);
-      expect(notifier.state.hasLoaded, isTrue);
-      expect(notifier.state.hasMore, isTrue);
-      expect(notifier.state.skip, 100);
-    });
+        expect(repository.listCallCount, 5);
+        expect(notifier.state.rooms, hasLength(1));
+        expect(notifier.state.hasLoaded, isTrue);
+        expect(notifier.state.hasMore, isTrue);
+        expect(notifier.state.skip, 100);
+      },
+    );
+
+    test(
+      'keeps walking past the cap while it has found nothing, so group rooms '
+      'behind many pages of DMs are not hidden behind an empty screen',
+      () async {
+        repository = _FakeGroupChatRepository(
+          rooms: [for (var i = 0; i < 130; i++) _direct(i), _group(1)],
+        );
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        expect(repository.listCallCount, 7);
+        expect(notifier.state.rooms.map((r) => r.id), ['group-room-1']);
+        expect(notifier.state.hasLoaded, isTrue);
+        expect(notifier.state.hasMore, isFalse);
+        expect(notifier.state.skip, 131);
+      },
+    );
+
+    test(
+      'an account with only direct messages ends with the server exhausted, '
+      'never an empty list that still claims more',
+      () async {
+        repository = _FakeGroupChatRepository(
+          rooms: [for (var i = 0; i < 200; i++) _direct(i)],
+        );
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        expect(repository.listCallCount, 10);
+        expect(notifier.state.rooms, isEmpty);
+        expect(notifier.state.hasLoaded, isTrue);
+        expect(notifier.state.hasMore, isFalse);
+        expect(notifier.state.skip, 200);
+      },
+    );
 
     test(
       'a page failing mid-walk keeps what landed and surfaces the error',

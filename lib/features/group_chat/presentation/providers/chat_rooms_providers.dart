@@ -112,15 +112,17 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
   final Ref ref;
   static const int _limit = 20;
 
-  /// How many server pages one load will walk in search of group rooms.
+  /// How many server pages one load will walk once it has a group room to
+  /// show.
   ///
   /// `/chat/rooms` has no kind filter and mixes direct messages in, so a page
-  /// can be all DMs and contribute nothing to this list. Left at one page, a
-  /// viewer whose first twenty rooms are DMs would see the empty state — and
-  /// with no list on screen there is nothing to scroll, so the next page would
-  /// never be asked for and their group chats would be hidden for good. The
-  /// cap keeps a DM-heavy account from turning every refresh into a crawl of
-  /// the whole endpoint.
+  /// can be all DMs and contribute nothing to this list. The cap keeps a
+  /// DM-heavy account from turning every load into a crawl of the whole
+  /// endpoint — but it only applies once the walk has found something. A walk
+  /// that has found nothing keeps going until the server runs out: with no
+  /// list on screen there is nothing to scroll, so a load that stopped short
+  /// and empty would never be followed by another, and the viewer's group
+  /// chats would sit hidden behind the offset for good.
   static const int _maxPagesPerLoad = 5;
 
   /// Bumped by every load from the top.
@@ -240,14 +242,22 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
 
   /// Pages forward from [skip] until a page's worth of group rooms has been
   /// collected, the server runs out, a page fails, or [_maxPagesPerLoad] is
-  /// reached — whichever comes first.
+  /// reached with at least one group room in hand — whichever comes first.
+  ///
+  /// Never returns empty-handed while the server still has rooms: an empty
+  /// result with `hasMore` set is a dead end for the caller, since nothing on
+  /// screen would ever ask for the next page.
   Future<_RoomsWalk> _walk({required int skip}) async {
     final repository = ref.read(groupChatRepositoryProvider);
     final rooms = <ChatRoomDTO>[];
     var total = 0;
     var hasMore = true;
 
-    for (var page = 0; page < _maxPagesPerLoad && hasMore; page++) {
+    for (var page = 0; hasMore; page++) {
+      final found = groupChatRooms(rooms).length;
+      if (found >= _limit) break;
+      if (page >= _maxPagesPerLoad && found > 0) break;
+
       final result = await repository.listRooms(skip: skip, limit: _limit);
       if (!mounted) break;
 
@@ -272,8 +282,6 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       // towards the server's total, so a page that is all DMs still means
       // there is more to walk.
       hasMore = loaded.rooms.isNotEmpty && skip < total;
-
-      if (groupChatRooms(rooms).length >= _limit) break;
     }
 
     return _RoomsWalk(rooms: rooms, skip: skip, total: total, hasMore: hasMore);
