@@ -325,7 +325,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// is not working — replace it rather than trust it with the next one. The
   /// thread notifier makes that call, not a before/after comparison here: a
   /// message the socket delivers while the refetch is in flight also changes
-  /// the newest row, and that is the socket working, not failing.
+  /// the newest row, and that is the socket working, not failing. Nor is a
+  /// frame that lands just after the page: the refetch is given a grace
+  /// window for the socket to catch up before its verdict counts.
   ///
   /// A refetch that fails proves nothing either way, and the push says a
   /// message exists that this screen may not hold. Keeping a socket that
@@ -343,7 +345,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     }
     if (_roomId == null) return;
 
-    final outcome = await _refreshThread();
+    final outcome = await _refreshThread(socketGrace: _pushSocketGrace);
     if (_disposed || !mounted) return;
 
     unawaited(_markRoomRead());
@@ -412,7 +414,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     if (_roomId != message.roomId) return;
     _providers
         .read(groupChatThreadProvider(message.roomId).notifier)
-        .appendLive(message);
+        .appendFromSocket(message);
     unawaited(_markRoomRead());
   }
 
@@ -452,7 +454,15 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
         );
   }
 
-  Future<ThreadRefreshResult> _refreshThread() async {
+  /// How long a push-triggered refetch waits for the socket to deliver what
+  /// the page carried before calling the socket dead. Long enough to cover
+  /// ordinary jitter between the push and the frame, short enough that a
+  /// socket that really is half-open is replaced before the next message.
+  static const Duration _pushSocketGrace = Duration(seconds: 2);
+
+  Future<ThreadRefreshResult> _refreshThread({
+    Duration socketGrace = Duration.zero,
+  }) async {
     final roomId = _roomId;
     if (_disposed || roomId == null) return ThreadRefreshResult.failed;
     return _providers
@@ -460,6 +470,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
         .refreshLatest(
           currentUserId: _viewerId,
           currentUserEmail: _viewerEmail,
+          socketGrace: socketGrace,
         );
   }
 
