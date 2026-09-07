@@ -909,6 +909,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connect_event_date_tba => 'Date to be announced';
 
   @override
+  String get connect_event_when => 'When';
+
+  @override
+  String get connect_event_where => 'Where';
+
+  @override
+  String get connect_event_practices => 'Event practices';
+
+  @override
   String get connect_event_every_day => 'Every day';
 
   @override

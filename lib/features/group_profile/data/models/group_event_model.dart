@@ -133,6 +133,30 @@ class GroupEventLocationModel {
   }
 }
 
+class GroupEventPracticeRefModel {
+  final String id;
+  final String name;
+  final String? imageUrl;
+
+  const GroupEventPracticeRefModel({
+    required this.id,
+    required this.name,
+    this.imageUrl,
+  });
+
+  factory GroupEventPracticeRefModel.fromJson(Map<String, dynamic> json) {
+    return GroupEventPracticeRefModel(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      imageUrl: json['image_url'] as String?,
+    );
+  }
+
+  GroupEventPracticeRef toEntity() {
+    return GroupEventPracticeRef(id: id, name: name, imageUrl: imageUrl);
+  }
+}
+
 class GroupEventRecurrenceModel {
   final String frequency;
   final String? dateSystem;
@@ -189,6 +213,9 @@ class GroupEventModel {
   final String? mantraId;
   final String? timerId;
   final String? groupRecitationCollectionId;
+  final GroupEventPracticeRefModel? plan;
+  final GroupEventPracticeRefModel? accumulator;
+  final GroupEventPracticeRefModel? groupRecitationCollection;
   final String? groupName;
   final String? groupAvatarUrl;
   final String? locationId;
@@ -215,6 +242,9 @@ class GroupEventModel {
     this.mantraId,
     this.timerId,
     this.groupRecitationCollectionId,
+    this.plan,
+    this.accumulator,
+    this.groupRecitationCollection,
     this.groupName,
     this.groupAvatarUrl,
     this.locationId,
@@ -259,6 +289,11 @@ class GroupEventModel {
       timerId: json['timer_id'] as String?,
       groupRecitationCollectionId:
           json['group_recitation_collection_id'] as String?,
+      plan: _parsePracticeRef(json['plan']),
+      accumulator: _parsePracticeRef(json['accumulator']),
+      groupRecitationCollection: _parsePracticeRef(
+        json['group_recitation_collection'],
+      ),
       groupName: json['group_name'] as String?,
       groupAvatarUrl: json['group_avatar_url'] as String?,
       locationId: json['location_id'] as String?,
@@ -293,12 +328,21 @@ class GroupEventModel {
       mantraId: mantraId,
       timerId: timerId,
       groupRecitationCollectionId: groupRecitationCollectionId,
+      plan: plan?.toEntity(),
+      accumulator: accumulator?.toEntity(),
+      groupRecitationCollection: groupRecitationCollection?.toEntity(),
       groupName: groupName,
       groupAvatarUrl: groupAvatarUrl,
       locationId: locationId,
       location: location?.toEntity(),
       eventFormat: eventFormat,
     );
+  }
+
+  static GroupEventPracticeRefModel? _parsePracticeRef(Object? value) {
+    if (value is! Map<String, dynamic>) return null;
+    final ref = GroupEventPracticeRefModel.fromJson(value);
+    return ref.id.isEmpty ? null : ref;
   }
 
   static DateTime? _parseDate(Object? value) {

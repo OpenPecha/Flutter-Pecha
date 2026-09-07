@@ -1807,6 +1807,27 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_event_when => TolgeeBridge.get(
+    localeName,
+    'connect_event_when',
+    () => _fallback.connect_event_when,
+  );
+
+  @override
+  String get connect_event_where => TolgeeBridge.get(
+    localeName,
+    'connect_event_where',
+    () => _fallback.connect_event_where,
+  );
+
+  @override
+  String get connect_event_practices => TolgeeBridge.get(
+    localeName,
+    'connect_event_practices',
+    () => _fallback.connect_event_practices,
+  );
+
+  @override
   String get connect_event_every_day => TolgeeBridge.get(
     localeName,
     'connect_event_every_day',

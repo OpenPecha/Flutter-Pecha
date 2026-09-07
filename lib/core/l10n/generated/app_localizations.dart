@@ -1744,6 +1744,24 @@ abstract class AppLocalizations {
   /// **'Date to be announced'**
   String get connect_event_date_tba;
 
+  /// No description provided for @connect_event_when.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get connect_event_when;
+
+  /// No description provided for @connect_event_where.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get connect_event_where;
+
+  /// No description provided for @connect_event_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'Event practices'**
+  String get connect_event_practices;
+
   /// No description provided for @connect_event_every_day.
   ///
   /// In en, this message translates to:

@@ -352,6 +352,9 @@
   "connect_event_link_tap_to_join": "Tap to join",
   "connect_event_link_open": "Open link",
   "connect_event_date_tba": "Date to be announced",
+  "connect_event_when": "When",
+  "connect_event_where": "Where",
+  "connect_event_practices": "Event practices",
   "connect_event_every_day": "Every day",
   "connect_event_every_weekday": "Every {weekday}",
   "@connect_event_every_weekday": {

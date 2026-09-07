@@ -56,6 +56,19 @@ class GroupEventLocation {
   });
 }
 
+/// Plan, accumulator or recitation collection attached to an event.
+class GroupEventPracticeRef {
+  final String id;
+  final String name;
+  final String? imageUrl;
+
+  const GroupEventPracticeRef({
+    required this.id,
+    required this.name,
+    this.imageUrl,
+  });
+}
+
 class GroupEventRecurrence {
   /// "DAILY", "WEEKLY", "MONTHLY" or "YEARLY".
   final String frequency;
@@ -95,6 +108,9 @@ class GroupEvent {
   final String? mantraId;
   final String? timerId;
   final String? groupRecitationCollectionId;
+  final GroupEventPracticeRef? plan;
+  final GroupEventPracticeRef? accumulator;
+  final GroupEventPracticeRef? groupRecitationCollection;
   final String? groupName;
   final String? groupAvatarUrl;
   final String? locationId;
@@ -125,6 +141,9 @@ class GroupEvent {
     this.mantraId,
     this.timerId,
     this.groupRecitationCollectionId,
+    this.plan,
+    this.accumulator,
+    this.groupRecitationCollection,
     this.groupName,
     this.groupAvatarUrl,
     this.locationId,
