@@ -1,11 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_rooms_list.dart';
 import 'package:flutter_pecha/features/push_notifications/presentation/providers/push_notification_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart' show Left, Right;
 
 class ChatRoomsState extends Equatable {
   /// Group rooms only, most recently active first.
@@ -71,6 +74,29 @@ class ChatRoomsState extends Equatable {
   ];
 }
 
+/// What one walk down `/chat/rooms` brought back.
+class _RoomsWalk {
+  const _RoomsWalk({
+    required this.rooms,
+    required this.skip,
+    required this.total,
+    required this.hasMore,
+    this.failure,
+  });
+
+  /// Every room fetched, direct messages included, in server order.
+  final List<ChatRoomDTO> rooms;
+
+  /// Where the next walk should start.
+  final int skip;
+  final int total;
+  final bool hasMore;
+
+  /// Set when a page failed. Earlier pages of the same walk are still in
+  /// [rooms]; a walk whose first page failed has none.
+  final Failure? failure;
+}
+
 /// The viewer's group chats.
 ///
 /// Read by both the Connect app-bar dot and the Chats screen, so the dot's
@@ -85,6 +111,25 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
 
   final Ref ref;
   static const int _limit = 20;
+
+  /// How many server pages one load will walk in search of group rooms.
+  ///
+  /// `/chat/rooms` has no kind filter and mixes direct messages in, so a page
+  /// can be all DMs and contribute nothing to this list. Left at one page, a
+  /// viewer whose first twenty rooms are DMs would see the empty state — and
+  /// with no list on screen there is nothing to scroll, so the next page would
+  /// never be asked for and their group chats would be hidden for good. The
+  /// cap keeps a DM-heavy account from turning every refresh into a crawl of
+  /// the whole endpoint.
+  static const int _maxPagesPerLoad = 5;
+
+  /// Bumped by every load from the top.
+  ///
+  /// A `loadMore` that went out before the bump was paging a list that no
+  /// longer exists. Merging its page into the fresh list would put its rooms
+  /// in twice over and leave `skip` counting rows the new list never held, so
+  /// its result is dropped instead.
+  int _generation = 0;
 
   /// Unread counts and last messages both change on the server without the app
   /// hearing about it — the live socket is per-room, and there is no rooms
@@ -104,85 +149,86 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
+    _generation++;
+    // `hasLoaded` waits for the whole walk, not the first page: with a first
+    // page of DMs the list is still empty when it lands, and marking it loaded
+    // there would flash the empty state before the group rooms arrive.
     state = state.copyWith(isLoading: true, clearError: true);
 
-    final result = await ref
-        .read(groupChatRepositoryProvider)
-        .listRooms(skip: 0, limit: _limit);
-
+    final walk = await _walk(skip: 0);
     if (!mounted) return;
 
-    result.fold(
-      (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          hasLoaded: true,
-          error: failure.message,
-        );
-      },
-      (page) {
-        state = state.copyWith(
-          rooms: groupChatRooms(page.rooms),
-          isLoading: false,
-          hasLoaded: true,
-          // Against the raw page, not the filtered list: direct rooms count
-          // towards the server's total, so a page that is all DMs still means
-          // there is more to walk.
-          hasMore: page.rooms.isNotEmpty && page.rooms.length < page.total,
-          skip: page.rooms.length,
-          total: page.total,
-          clearError: true,
-        );
-        _seedRoomCache(page.rooms);
-      },
+    final failure = walk.failure;
+    if (failure != null && walk.rooms.isEmpty) {
+      // Nothing new landed; whatever was on screen stays, and so does the
+      // paging that goes with it.
+      state = state.copyWith(
+        isLoading: false,
+        hasLoaded: true,
+        error: failure.message,
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      rooms: groupChatRooms(walk.rooms),
+      isLoading: false,
+      hasLoaded: true,
+      hasMore: walk.hasMore,
+      skip: walk.skip,
+      total: walk.total,
+      error: failure?.message,
+      clearError: failure == null,
     );
+    _seedRoomCache(walk.rooms);
   }
 
   Future<void> loadMore() async {
     if (state.isLoadingMore || state.isLoading || !state.hasMore) return;
+    final generation = _generation;
     state = state.copyWith(isLoadingMore: true, clearError: true);
 
-    final result = await ref
-        .read(groupChatRepositoryProvider)
-        .listRooms(skip: state.skip, limit: _limit);
-
+    final walk = await _walk(skip: state.skip);
     if (!mounted) return;
+    if (generation != _generation) {
+      // A load from the top overtook this page. The list it was extending is
+      // gone, so there is nothing to append it to.
+      state = state.copyWith(isLoadingMore: false);
+      return;
+    }
 
-    result.fold(
-      (failure) {
-        state = state.copyWith(isLoadingMore: false, error: failure.message);
-      },
-      (page) {
-        // Re-sorted across the whole list rather than appended: a later page
-        // can hold a room more recent than one already shown, since the
-        // server's own ordering is undocumented.
-        final known = state.rooms.map((room) => room.id).toSet();
-        final merged = [
-          ...state.rooms,
-          ...page.rooms.where((room) => !known.contains(room.id)),
-        ];
-        final skip = state.skip + page.rooms.length;
+    final failure = walk.failure;
+    if (failure != null && walk.rooms.isEmpty) {
+      state = state.copyWith(isLoadingMore: false, error: failure.message);
+      return;
+    }
 
-        state = state.copyWith(
-          rooms: groupChatRooms(merged),
-          isLoadingMore: false,
-          hasMore: page.rooms.isNotEmpty && skip < page.total,
-          skip: skip,
-          total: page.total,
-          clearError: true,
-        );
-        _seedRoomCache(page.rooms);
-      },
+    // Re-sorted across the whole list rather than appended: a later page can
+    // hold a room more recent than one already shown, since the server's own
+    // ordering is undocumented.
+    final known = state.rooms.map((room) => room.id).toSet();
+    final merged = [
+      ...state.rooms,
+      ...walk.rooms.where((room) => !known.contains(room.id)),
+    ];
+
+    state = state.copyWith(
+      rooms: groupChatRooms(merged),
+      isLoadingMore: false,
+      hasMore: walk.hasMore,
+      skip: walk.skip,
+      total: walk.total,
+      error: failure?.message,
+      clearError: failure == null,
     );
+    _seedRoomCache(walk.rooms);
   }
 
-  /// Reloads from the top, keeping what is on screen until the page lands so
-  /// the list does not blink back to a spinner on every refresh.
-  Future<void> refresh() async {
-    if (state.isLoading) return;
-    state = state.copyWith(skip: 0, hasMore: true);
-    await loadInitial();
-  }
+  /// Reloads from the top, keeping what is on screen until the walk lands so
+  /// the list does not blink back to a spinner on every refresh. Paging is
+  /// only replaced once the new list is, so a refresh that fails leaves the
+  /// old list able to page on from where it was.
+  Future<void> refresh() => loadInitial();
 
   void retry() {
     if (state.rooms.isEmpty) {
@@ -190,6 +236,47 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
     } else {
       loadMore();
     }
+  }
+
+  /// Pages forward from [skip] until a page's worth of group rooms has been
+  /// collected, the server runs out, a page fails, or [_maxPagesPerLoad] is
+  /// reached — whichever comes first.
+  Future<_RoomsWalk> _walk({required int skip}) async {
+    final repository = ref.read(groupChatRepositoryProvider);
+    final rooms = <ChatRoomDTO>[];
+    var total = 0;
+    var hasMore = true;
+
+    for (var page = 0; page < _maxPagesPerLoad && hasMore; page++) {
+      final result = await repository.listRooms(skip: skip, limit: _limit);
+      if (!mounted) break;
+
+      final ChatRoomsPage loaded;
+      switch (result) {
+        case Left(value: final failure):
+          return _RoomsWalk(
+            rooms: rooms,
+            skip: skip,
+            total: total,
+            hasMore: hasMore,
+            failure: failure,
+          );
+        case Right(value: final page):
+          loaded = page;
+      }
+
+      rooms.addAll(loaded.rooms);
+      skip += loaded.rooms.length;
+      total = loaded.total;
+      // Against the raw page, not the filtered list: direct rooms count
+      // towards the server's total, so a page that is all DMs still means
+      // there is more to walk.
+      hasMore = loaded.rooms.isNotEmpty && skip < total;
+
+      if (groupChatRooms(rooms).length >= _limit) break;
+    }
+
+    return _RoomsWalk(rooms: rooms, skip: skip, total: total, hasMore: hasMore);
   }
 
   /// Records room ids against their groups.

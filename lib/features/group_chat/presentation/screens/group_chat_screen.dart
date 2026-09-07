@@ -322,7 +322,16 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   ///
   /// So the push is treated as a second opinion: refetch, and if the refetch
   /// turns up a message the socket never delivered, that is proof the socket
-  /// is not working — replace it rather than trust it with the next one.
+  /// is not working — replace it rather than trust it with the next one. The
+  /// thread notifier makes that call, not a before/after comparison here: a
+  /// message the socket delivers while the refetch is in flight also changes
+  /// the newest row, and that is the socket working, not failing.
+  ///
+  /// A refetch that fails proves nothing either way, and the push says a
+  /// message exists that this screen may not hold. Keeping a socket that
+  /// cannot be vouched for is how the half-open case went unnoticed in the
+  /// first place, so it is replaced too; the reconnect refetches, which also
+  /// retries the page.
   Future<void> _onForegroundPush(PushMessage message) async {
     if (_disposed || !mounted) return;
     if (!chatPushTargets(
@@ -332,28 +341,20 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     )) {
       return;
     }
+    if (_roomId == null) return;
 
-    final roomId = _roomId;
-    if (roomId == null) return;
-
-    final before = _newestMessageId(roomId);
-    await _refreshThread();
+    final outcome = await _refreshThread();
     if (_disposed || !mounted) return;
 
     unawaited(_markRoomRead());
-    if (_newestMessageId(roomId) == before) return;
+    if (outcome == ThreadRefreshResult.nothingMissed) return;
 
-    // The socket missed a message. Tear it down first: `_ensureLiveConnected`
-    // treats a non-null client as already connected and would otherwise leave
-    // the dead one in place.
+    // Tear the socket down first: `_ensureLiveConnected` treats a non-null
+    // client as already connected and would otherwise leave the dead one in
+    // place.
     await _tearDownLive();
     if (_disposed || !mounted) return;
     await _ensureLiveConnected();
-  }
-
-  String? _newestMessageId(String roomId) {
-    final messages = _providers.read(groupChatThreadProvider(roomId)).messages;
-    return messages.isEmpty ? null : messages.first.id;
   }
 
   void _onLiveEvent(ChatLiveEvent event) {
@@ -451,10 +452,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
         );
   }
 
-  Future<void> _refreshThread() async {
+  Future<ThreadRefreshResult> _refreshThread() async {
     final roomId = _roomId;
-    if (_disposed || roomId == null) return;
-    await _providers
+    if (_disposed || roomId == null) return ThreadRefreshResult.failed;
+    return _providers
         .read(groupChatThreadProvider(roomId).notifier)
         .refreshLatest(
           currentUserId: _viewerId,

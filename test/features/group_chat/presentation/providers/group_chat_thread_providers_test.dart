@@ -283,6 +283,83 @@ void main() {
         'm1',
       ]);
     });
+
+    test('refreshLatest reports a message nothing else delivered', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      repository.history = [_message('m2'), _message('m1')];
+      expect(
+        await notifier.refreshLatest(),
+        ThreadRefreshResult.missedMessages,
+      );
+    });
+
+    test(
+      'refreshLatest reports nothing missed when the page is all held',
+      () async {
+        repository = _FakeGroupChatRepository(history: [_message('m1')]);
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        expect(
+          await notifier.refreshLatest(),
+          ThreadRefreshResult.nothingMissed,
+        );
+      },
+    );
+
+    test(
+      'a message the socket delivers mid-refresh does not count as missed',
+      () async {
+        repository = _FakeGroupChatRepository(history: [_message('m1')]);
+        container = buildContainer();
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        // The push and the socket frame race the refetch; the socket wins.
+        repository.history = [_message('m2'), _message('m1')];
+        final hold = repository.holdNextList = Completer<void>();
+        final refreshing = notifier.refreshLatest();
+        notifier.appendLive(_message('m2'));
+        hold.complete();
+
+        expect(await refreshing, ThreadRefreshResult.nothingMissed);
+        expect(notifier.state.messages.map((m) => m.id).toList(), [
+          'm2',
+          'm1',
+        ]);
+      },
+    );
+
+    test('a restart from a full unseen page counts as missed', () async {
+      repository = _FakeGroupChatRepository(history: [_message('old')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      repository.history = [
+        for (var i = 0; i < 40; i++) _message('new$i'),
+        _message('old'),
+      ];
+      expect(
+        await notifier.refreshLatest(),
+        ThreadRefreshResult.missedMessages,
+      );
+    });
+
+    test('a failed refreshLatest says so', () async {
+      repository = _FakeGroupChatRepository(history: [_message('m1')]);
+      container = buildContainer();
+      final notifier = _keepAlive(container);
+      await _settle();
+
+      repository.listFailure = const NetworkFailure('offline');
+      expect(await notifier.refreshLatest(), ThreadRefreshResult.failed);
+    });
   });
 
   group('reactions', () {

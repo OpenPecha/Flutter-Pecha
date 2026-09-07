@@ -50,6 +50,20 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     }
   }
 
+  /// Asks for the next page when the list is too short to scroll.
+  ///
+  /// Paging is driven by the scroll position, and a list that fits on screen
+  /// never scrolls — so a viewer with a few group chats and more pages behind
+  /// them would sit on a list that never grows. Runs after each build; once
+  /// the list overflows, the scroll listener takes over. Not while an error
+  /// is showing: a rebuild on every failure would turn that into a retry loop.
+  void _fillViewport(ChatRoomsState state) {
+    if (!mounted || !_scrollController.hasClients) return;
+    if (!state.hasMore || state.isLoadingMore || state.error != null) return;
+    if (_scrollController.position.maxScrollExtent > 0) return;
+    ref.read(chatRoomsProvider.notifier).loadMore();
+  }
+
   Future<void> _openRoom(ChatRoomDTO room) async {
     final groupId = room.groupId;
     if (groupId == null || groupId.isEmpty) return;
@@ -100,6 +114,8 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     }
 
     if (state.rooms.isEmpty) return const _EmptyChats();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fillViewport(state));
 
     return RefreshIndicator(
       onRefresh: () => ref.read(chatRoomsProvider.notifier).refresh(),

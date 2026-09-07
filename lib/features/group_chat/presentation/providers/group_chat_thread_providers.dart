@@ -70,6 +70,19 @@ class GroupChatThreadState extends Equatable {
   ];
 }
 
+/// What a `refreshLatest` found, for the caller deciding whether the socket
+/// that should have delivered it can still be trusted.
+enum ThreadRefreshResult {
+  /// The request failed, so nothing can be said either way.
+  failed,
+
+  /// Every message the page carried was already held.
+  nothingMissed,
+
+  /// The page carried a message nothing else had delivered.
+  missedMessages,
+}
+
 class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
   GroupChatThreadNotifier({required this.ref, required this.roomId})
     : super(const GroupChatThreadState()) {
@@ -308,7 +321,12 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
 
   /// Re-reads the newest page after a reconnect and merges by id, so anything
   /// missed while the socket was down lands without duplicating what is held.
-  Future<void> refreshLatest({
+  ///
+  /// Reports whether the page carried a message nothing else had delivered by
+  /// the time it was merged. A message the socket delivered while the request
+  /// was in flight is already held when the page lands, so it does not count:
+  /// the socket did its job, just not before the refetch went out.
+  Future<ThreadRefreshResult> refreshLatest({
     String? currentUserId,
     String? currentUserEmail,
   }) async {
@@ -331,9 +349,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
           .listMessages(roomId, skip: 0, limit: _limit),
     );
 
-    if (!mounted) return;
+    if (!mounted) return ThreadRefreshResult.failed;
 
-    result.fold((_) {}, (page) {
+    final outcome = result.fold((_) => ThreadRefreshResult.failed, (page) {
       List<ChatMessageReactionDTO> resolve(
         List<ChatMessageReactionDTO> reactions,
       ) {
@@ -408,6 +426,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       }
 
       if (state.messages.isEmpty) {
+        // Only a thread that had loaded can have missed anything: an empty
+        // list before the first page lands says nothing about the socket.
+        final missed = state.hasLoaded && fetched.isNotEmpty;
         final messages = fetched.map(withPending).toList();
         state = state.copyWith(
           messages: messages,
@@ -417,7 +438,9 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
           total: page.total,
           clearError: true,
         );
-        return;
+        return missed
+            ? ThreadRefreshResult.missedMessages
+            : ThreadRefreshResult.nothingMissed;
       }
 
       // A full page with nothing in common with what is held means more
@@ -448,7 +471,8 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
           total: total,
           clearError: true,
         );
-        return;
+        // A whole page of rows nothing here had seen.
+        return ThreadRefreshResult.missedMessages;
       }
 
       // Refresh what is already held rather than skipping it. A reaction that
@@ -462,6 +486,11 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
       // count that came back with it cannot include. Counted before the
       // page's own rows are inserted further down.
       final arrivedDuring = arrivedSince(fetchedIds).length;
+
+      // Judged against what is held now, not when the request went out, so a
+      // row the socket delivered meanwhile counts as delivered.
+      final heldNow = {for (final message in state.messages) message.id};
+      final missed = fetched.any((message) => !heldNow.contains(message.id));
 
       state = state.copyWith(
         messages:
@@ -505,9 +534,13 @@ class GroupChatThreadNotifier extends StateNotifier<GroupChatThreadState> {
         total: total,
         hasMore: state.messages.length < total,
       );
+      return missed
+          ? ThreadRefreshResult.missedMessages
+          : ThreadRefreshResult.nothingMissed;
     });
     _applyPendingDeletions();
     _dropStalePending();
+    return outcome;
   }
 
   /// Rewrites one message's reactions from an authoritative summary — the
