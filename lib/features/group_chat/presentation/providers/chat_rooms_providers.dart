@@ -175,7 +175,17 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
     // `hasLoaded` waits for the whole walk, not the first page: with a first
     // page of DMs the list is still empty when it lands, and marking it loaded
     // there would flash the empty state before the group rooms arrive.
-    state = state.copyWith(isLoading: true, clearError: true);
+    //
+    // `isLoadingMore` is cleared here rather than when the orphaned page
+    // lands: the bump above has already made that page a no-op, and `isLoading`
+    // holds off any new `loadMore` until this walk is published. Leaving the
+    // flag to the orphan would let it land after a fresh page had gone out and
+    // clear that page's flag from under it.
+    state = state.copyWith(
+      isLoading: true,
+      isLoadingMore: false,
+      clearError: true,
+    );
 
     final walk = await _walk(skip: 0);
     if (!mounted) return;
@@ -226,8 +236,9 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
     if (!mounted) return;
     if (generation != _generation) {
       // A load from the top overtook this page. The list it was extending is
-      // gone, so there is nothing to append it to.
-      state = state.copyWith(isLoadingMore: false);
+      // gone, so there is nothing to append it to — and nothing to reset
+      // either: `loadInitial` already cleared `isLoadingMore`, and a page of
+      // the new list may be in flight under that flag by now.
       return;
     }
 
@@ -264,6 +275,15 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       clearError: failure == null,
     );
     _seedRoomCache(walk.rooms);
+
+    // The scan stopped at the room it found, so nothing past it has been
+    // looked at. If the list now covers that room and still has nothing unread
+    // — the room was read in the meantime — the rest of the server is once
+    // more the only place an unread room could be. Same terms as the first
+    // scan: not after a failed page, and not while the list can answer.
+    if (caughtUp && failure == null && walk.hasMore && !state.hasUnread) {
+      unawaited(_scanForUnread(skip: walk.skip, generation: _generation));
+    }
   }
 
   /// Reloads from the top, keeping what is on screen until the walk lands so

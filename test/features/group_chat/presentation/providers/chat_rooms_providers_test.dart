@@ -469,6 +469,43 @@ void main() {
         expect(notifier.state.hasUnreadBeyondList, isFalse);
         // Still on, now because the room itself is in the list.
         expect(notifier.state.hasUnread, isTrue);
+        // And nothing left to scan for: the list can answer.
+        await _settle();
+        expect(repository.listCallCount, 3);
+      },
+    );
+
+    test(
+      'paging past a room that was read in the meantime carries the scan on, '
+      'so an unread room further back still reaches the dot',
+      () async {
+        List<ChatRoomDTO> rooms({required bool read27}) => [
+          for (var i = 0; i < 60; i++)
+            _group(
+              i,
+              unreadCount: (i == 27 && !read27) || i == 55 ? 1 : 0,
+            ),
+        ];
+        repository = _FakeGroupChatRepository(rooms: rooms(read27: false));
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+        // The list took page one; the scan stopped on page two at room 27.
+        expect(repository.listCallCount, 2);
+        expect(notifier.state.hasUnreadBeyondList, isTrue);
+
+        // Room 27 is read before the list pages on to it.
+        repository.rooms = rooms(read27: true);
+        await notifier.loadMore();
+        await _settle();
+
+        expect(notifier.state.rooms, hasLength(40));
+        expect(notifier.state.rooms.any((r) => r.unreadCount > 0), isFalse);
+        // The scan picked up where the list stopped and found room 55.
+        expect(repository.skips, [0, 20, 20, 40]);
+        expect(notifier.state.hasUnreadBeyondList, isTrue);
+        expect(notifier.state.hasUnread, isTrue);
       },
     );
 
@@ -579,6 +616,49 @@ void main() {
       expect(notifier.state.rooms, hasLength(40));
       expect(_ids(notifier).toSet(), hasLength(40));
     });
+
+    test(
+      'an overtaken page landing late leaves a fresh page in flight alone',
+      () async {
+        repository = _FakeGroupChatRepository(
+          rooms: [for (var i = 0; i < 40; i++) _group(i)],
+        );
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+
+        final holdStale = repository.holdNextList = Completer<void>();
+        final stale = notifier.loadMore();
+        await _settle();
+        expect(notifier.state.isLoadingMore, isTrue);
+
+        // The refresh orphans that page and clears its flag straight away,
+        // rather than showing a "loading more" footer for a page it will drop.
+        await notifier.refresh();
+        await _settle();
+        expect(notifier.state.isLoadingMore, isFalse);
+
+        // A fresh page goes out against the new list.
+        final holdFresh = repository.holdNextList = Completer<void>();
+        final fresh = notifier.loadMore();
+        await _settle();
+        expect(notifier.state.isLoadingMore, isTrue);
+
+        // The stale page lands under it and must not clear its flag, or a
+        // third page could go out for the same offset.
+        holdStale.complete();
+        await stale;
+        expect(notifier.state.isLoadingMore, isTrue);
+        expect(notifier.state.rooms, hasLength(20));
+
+        holdFresh.complete();
+        await fresh;
+        expect(notifier.state.isLoadingMore, isFalse);
+        expect(notifier.state.rooms, hasLength(40));
+        expect(_ids(notifier).toSet(), hasLength(40));
+      },
+    );
 
     test('a failed refresh keeps the list and its paging', () async {
       repository = _FakeGroupChatRepository(
