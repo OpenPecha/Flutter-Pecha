@@ -133,6 +133,42 @@ class GroupEventLocationModel {
   }
 }
 
+class GroupEventRecurrenceModel {
+  final String frequency;
+  final String? dateSystem;
+  final int? month;
+  final int? day;
+  final int? durationDays;
+
+  const GroupEventRecurrenceModel({
+    required this.frequency,
+    this.dateSystem,
+    this.month,
+    this.day,
+    this.durationDays,
+  });
+
+  factory GroupEventRecurrenceModel.fromJson(Map<String, dynamic> json) {
+    return GroupEventRecurrenceModel(
+      frequency: json['frequency'] as String? ?? '',
+      dateSystem: json['date_system'] as String?,
+      month: (json['month'] as num?)?.toInt(),
+      day: (json['day'] as num?)?.toInt(),
+      durationDays: (json['duration_days'] as num?)?.toInt(),
+    );
+  }
+
+  GroupEventRecurrence toEntity() {
+    return GroupEventRecurrence(
+      frequency: frequency,
+      dateSystem: dateSystem,
+      month: month,
+      day: day,
+      durationDays: durationDays,
+    );
+  }
+}
+
 class GroupEventModel {
   final String id;
   final String groupId;
@@ -140,6 +176,9 @@ class GroupEventModel {
   final DateTime? endDate;
   final bool isOneDay;
   final bool featured;
+  final bool isRecurring;
+  final GroupEventRecurrenceModel? recurrence;
+  final DateTime? occurrenceDate;
   final GroupEventMetadataModel? metadata;
   final ResponsiveImage? image;
   final int participantCount;
@@ -163,6 +202,9 @@ class GroupEventModel {
     this.endDate,
     this.isOneDay = false,
     this.featured = false,
+    this.isRecurring = false,
+    this.recurrence,
+    this.occurrenceDate,
     this.metadata,
     this.image,
     this.participantCount = 0,
@@ -186,6 +228,7 @@ class GroupEventModel {
   }) {
     final imageJson = json['image'] as Map<String, dynamic>?;
     final locationJson = json['location'] as Map<String, dynamic>?;
+    final recurrenceJson = json['recurrence'] as Map<String, dynamic>?;
 
     return GroupEventModel(
       id: json['id'] as String? ?? '',
@@ -194,6 +237,12 @@ class GroupEventModel {
       endDate: _parseDate(json['end_date']),
       isOneDay: json['is_one_day'] as bool? ?? false,
       featured: json['featured'] as bool? ?? false,
+      isRecurring: json['is_recurring'] as bool? ?? false,
+      recurrence:
+          recurrenceJson != null
+              ? GroupEventRecurrenceModel.fromJson(recurrenceJson)
+              : null,
+      occurrenceDate: _parseDate(json['occurrence_date']),
       metadata: _parseMetadata(json['metadata'], language: language),
       image: imageJson != null ? ResponsiveImage.fromJson(imageJson) : null,
       participantCount: (json['participant_count'] as num?)?.toInt() ?? 0,
@@ -229,6 +278,9 @@ class GroupEventModel {
       endDate: endDate,
       isOneDay: isOneDay,
       featured: featured,
+      isRecurring: isRecurring,
+      recurrence: recurrence?.toEntity(),
+      occurrenceDate: occurrenceDate,
       title: metadata?.name ?? '',
       description: metadata?.description,
       language: metadata?.language,

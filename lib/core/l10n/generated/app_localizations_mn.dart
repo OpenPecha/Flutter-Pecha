@@ -917,6 +917,22 @@ class AppLocalizationsMn extends AppLocalizations {
   String get connect_event_date_tba => 'Date to be announced';
 
   @override
+  String get connect_event_every_day => 'Every day';
+
+  @override
+  String connect_event_every_weekday(String weekday) {
+    return 'Every $weekday';
+  }
+
+  @override
+  String get connect_event_every_month => 'Every month';
+
+  @override
+  String connect_event_every_date(String date) {
+    return 'Every $date';
+  }
+
+  @override
   String get connect_event_about_empty => 'No event details yet';
 
   @override

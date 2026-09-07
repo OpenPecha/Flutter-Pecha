@@ -56,6 +56,23 @@ class GroupEventLocation {
   });
 }
 
+class GroupEventRecurrence {
+  /// "DAILY", "WEEKLY", "MONTHLY" or "YEARLY".
+  final String frequency;
+  final String? dateSystem;
+  final int? month;
+  final int? day;
+  final int? durationDays;
+
+  const GroupEventRecurrence({
+    required this.frequency,
+    this.dateSystem,
+    this.month,
+    this.day,
+    this.durationDays,
+  });
+}
+
 class GroupEvent {
   final String id;
   final String groupId;
@@ -63,6 +80,9 @@ class GroupEvent {
   final DateTime? endDate;
   final bool isOneDay;
   final bool featured;
+  final bool isRecurring;
+  final GroupEventRecurrence? recurrence;
+  final DateTime? occurrenceDate;
   final String title;
   final String? description;
   final String? language;
@@ -90,6 +110,9 @@ class GroupEvent {
     this.endDate,
     this.isOneDay = false,
     this.featured = false,
+    this.isRecurring = false,
+    this.recurrence,
+    this.occurrenceDate,
     this.title = '',
     this.description,
     this.language,
