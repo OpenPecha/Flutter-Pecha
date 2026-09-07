@@ -49,6 +49,55 @@ class MyRecitationCollectionsRepository {
     }
   }
 
+  Future<Either<Failure, void>> deleteCollection(String collectionId) async {
+    try {
+      await remoteDatasource.deleteCollection(collectionId);
+      return const Right(null);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to delete collection'),
+      );
+    }
+  }
+
+  Future<Either<Failure, MyRecitationCollectionModel>> updateCollection({
+    required String collectionId,
+    required String name,
+    String? imgUrl,
+  }) async {
+    try {
+      final result = await remoteDatasource.updateCollection(
+        collectionId: collectionId,
+        request: UpdateMyRecitationCollectionRequest(
+          name: name,
+          imgUrl: imgUrl,
+        ),
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to update collection'),
+      );
+    }
+  }
+
+  Future<Either<Failure, void>> deleteCollectionItem({
+    required String collectionId,
+    required String itemId,
+  }) async {
+    try {
+      await remoteDatasource.deleteCollectionItem(
+        collectionId: collectionId,
+        itemId: itemId,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to remove chant from collection'),
+      );
+    }
+  }
+
   Future<Either<Failure, AddMyRecitationCollectionItemsResponse>>
   addItemsToCollection({
     required String collectionId,
