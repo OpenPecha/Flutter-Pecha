@@ -361,6 +361,13 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
   /// A failed page ends the scan quietly; the next refresh starts it over. A
   /// load from the top that overtakes it ends it too — its verdict would be
   /// about a list that no longer exists.
+  ///
+  /// A `loadMore` that overtakes it is different: the list is the same one,
+  /// just longer. The scan then skips ahead to where the list now ends. The
+  /// rooms it was about to judge are on screen, so the list speaks for them;
+  /// a verdict from a page the list has since re-fetched could turn the dot
+  /// on for a room the list shows as read, and `loadMore` only clears that
+  /// flag on the *next* page — which a list at its end never asks for.
   Future<void> _scanForUnread({
     required int skip,
     required int generation,
@@ -381,6 +388,15 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       }
 
       _seedRoomCache(page.rooms);
+      if (state.skip > skip) {
+        // The list paged past this page while it was in flight. If the list
+        // can answer now the scan has nothing to add; otherwise carry on from
+        // the list's new end, which nothing has looked past yet.
+        if (state.hasUnread) return;
+        skip = state.skip;
+        hasMore = state.hasMore;
+        continue;
+      }
       if (hasUnreadChatRooms(page.rooms)) {
         _unreadBeyondOffset = skip;
         state = state.copyWith(hasUnreadBeyondList: true);

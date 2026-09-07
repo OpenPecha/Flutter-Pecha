@@ -159,11 +159,16 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     }
   }
 
+  /// Clears the fields before the first await, so anything that looks at
+  /// `_live` while the old socket is still closing — a second push verdict, a
+  /// reconnect firing — sees it gone rather than a client mid-teardown.
   Future<void> _tearDownLive() async {
-    await _liveSub?.cancel();
+    final sub = _liveSub;
+    final live = _live;
     _liveSub = null;
-    await _live?.dispose();
     _live = null;
+    await sub?.cancel();
+    await live?.dispose();
   }
 
   String get _profilePath => '/home/group/${widget.groupId}';
@@ -345,11 +350,20 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     }
     if (_roomId == null) return;
 
+    // The socket under judgement. The verdict takes a refetch plus the grace
+    // window to arrive, and pushes can overlap within that — by the time it
+    // lands, an earlier push or the reconnect timer may already have replaced
+    // this socket. A verdict is only ever about the socket that was up when
+    // the refetch went out; acting on it against whatever is up now would
+    // close a fresh, healthy connection over the sins of the old one.
+    final judged = _live;
+
     final outcome = await _refreshThread(socketGrace: _pushSocketGrace);
     if (_disposed || !mounted) return;
 
     unawaited(_markRoomRead());
     if (outcome == ThreadRefreshResult.nothingMissed) return;
+    if (!identical(_live, judged)) return;
 
     // Tear the socket down first: `_ensureLiveConnected` treats a non-null
     // client as already connected and would otherwise leave the dead one in

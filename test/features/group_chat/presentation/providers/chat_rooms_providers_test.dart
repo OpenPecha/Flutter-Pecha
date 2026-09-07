@@ -481,10 +481,7 @@ void main() {
       () async {
         List<ChatRoomDTO> rooms({required bool read27}) => [
           for (var i = 0; i < 60; i++)
-            _group(
-              i,
-              unreadCount: (i == 27 && !read27) || i == 55 ? 1 : 0,
-            ),
+            _group(i, unreadCount: (i == 27 && !read27) || i == 55 ? 1 : 0),
         ];
         repository = _FakeGroupChatRepository(rooms: rooms(read27: false));
         container = buildContainer();
@@ -560,6 +557,89 @@ void main() {
       expect(notifier.state.hasUnreadBeyondList, isFalse);
       expect(notifier.state.hasUnread, isFalse);
     });
+
+    test('a scan that a loadMore overtook defers to the list for the rooms '
+        'the list now holds', () async {
+      List<ChatRoomDTO> rooms({required bool read27}) => [
+        for (var i = 0; i < 30; i++)
+          _group(i, unreadCount: i == 27 && !read27 ? 1 : 0),
+      ];
+      repository = _FakeGroupChatRepository(rooms: rooms(read27: false));
+      // Call 1 is the list's page; call 2 is the scan's, held here.
+      final hold = Completer<void>();
+      repository
+        ..holdCall = 2
+        ..holdCallCompleter = hold;
+      container = buildContainer();
+
+      final notifier = _keepAlive(container);
+      await _settle();
+      expect(repository.listCallCount, 2);
+      expect(notifier.state.hasUnread, isFalse);
+
+      // The list pages on past the scan's page and sees room 27 read.
+      repository.rooms = rooms(read27: true);
+      await notifier.loadMore();
+      expect(notifier.state.rooms, hasLength(30));
+      expect(notifier.state.hasMore, isFalse);
+      expect(notifier.state.hasUnread, isFalse);
+
+      // The held scan lands with an older copy of that page, room 27 still
+      // unread on it. The list holds room 27 now, so the list decides.
+      repository.rooms = rooms(read27: false);
+      hold.complete();
+      await _settle();
+
+      expect(notifier.state.hasUnreadBeyondList, isFalse);
+      expect(notifier.state.hasUnread, isFalse);
+      expect(repository.skips, [0, 20, 20]);
+    });
+
+    test(
+      'a scan that a loadMore overtook carries on from the list\'s new end',
+      () async {
+        List<ChatRoomDTO> rooms({required bool read27}) => [
+          for (var i = 0; i < 60; i++)
+            _group(i, unreadCount: (i == 27 && !read27) || i == 55 ? 1 : 0),
+        ];
+        repository = _FakeGroupChatRepository(rooms: rooms(read27: false));
+        // Call 1 is the list's page; call 2 is the scan's, held here.
+        final hold = Completer<void>();
+        repository
+          ..holdCall = 2
+          ..holdCallCompleter = hold;
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+        expect(repository.listCallCount, 2);
+
+        // The list pages on past the scan's page and sees room 27 read.
+        repository.rooms = rooms(read27: true);
+        await notifier.loadMore();
+        expect(notifier.state.rooms, hasLength(40));
+        expect(notifier.state.skip, 40);
+        expect(notifier.state.hasUnread, isFalse);
+
+        // The held scan lands with an older copy of that page, room 27 still
+        // unread on it. Rather than stop there — the list holds room 27 and
+        // shows it read — it skips to 40, where it finds room 55.
+        repository.rooms = rooms(read27: false);
+        hold.complete();
+        await _settle();
+
+        expect(repository.skips, [0, 20, 20, 40]);
+        expect(notifier.state.hasUnreadBeyondList, isTrue);
+        expect(notifier.state.hasUnread, isTrue);
+
+        // Paging on past room 55 hands it to the list, and the dot stays on
+        // because the list now holds it unread.
+        repository.rooms = rooms(read27: true);
+        await notifier.loadMore();
+        expect(notifier.state.rooms, hasLength(60));
+        expect(notifier.state.hasUnread, isTrue);
+      },
+    );
 
     test('a page failing mid-scan leaves the dot off, not stuck', () async {
       repository = _FakeGroupChatRepository(
