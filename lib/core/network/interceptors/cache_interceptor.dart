@@ -160,7 +160,12 @@ class CacheInterceptor extends Interceptor {
     if (path.contains('/accumulators') || path.contains('/timers')) {
       paths.add('/users/me/stats');
     }
-    
+
+    // Personal recitation collections are merged into GET /recitations.
+    if (path.startsWith('/users/me/recitation-collections')) {
+      paths.add('/recitations');
+    }
+
     return paths;
   }
 

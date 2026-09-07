@@ -14,12 +14,14 @@ class RecitationsQueryParams {
   final String? search;
   final int? skip;
   final int? limit;
+  final bool shouldIncludeCollections;
 
   RecitationsQueryParams({
     this.language,
     this.search,
     this.skip,
     this.limit,
+    this.shouldIncludeCollections = false,
   });
 
   Map<String, dynamic> toQueryParams() {
@@ -28,6 +30,9 @@ class RecitationsQueryParams {
     if (search != null && search!.isNotEmpty) params['search'] = search!;
     if (skip != null) params['skip'] = skip!;
     if (limit != null) params['limit'] = limit!;
+    if (shouldIncludeCollections) {
+      params['should_include_collections'] = 'true';
+    }
     return params;
   }
 }
@@ -41,6 +46,10 @@ class RecitationsRemoteDatasource {
   Future<RecitationsPageResponse> fetchRecitationsPage({
     RecitationsQueryParams? queryParams,
   }) async {
+    // Collection-bearing responses stay cacheable: cache keys are scoped by
+    // `should_include_collections` and by auth (CacheInterceptor clears the
+    // `auth|` scope on login/logout), and a collection mutation invalidates
+    // `/recitations` via CacheInterceptor._extractRelatedPaths.
     final response = await dio.get(
       '/recitations',
       queryParameters: queryParams?.toQueryParams(),
