@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/l10n/intl_format_locale.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
@@ -163,7 +164,13 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
       parts.add(DateFormat('EEE d MMM', locale).format(start));
     }
 
-    parts.add(groupEventLocationLabel(event, context.l10n.connect_online));
+    parts.add(
+      groupEventLocationLabel(
+        event,
+        context.l10n.connect_online,
+        hybridLabel: context.l10n.connect_events_filter_hybrid,
+      ),
+    );
 
     if (participantCount > 0) {
       parts.add(
@@ -177,7 +184,10 @@ class _ConnectEventCardState extends ConsumerState<ConnectEventCard> {
 
   Future<void> _shareEvent(GroupEvent event) async {
     final title = event.title.trim();
-    final shareUrl = DeepLinkUrlBuilder.eventLink(eventId: event.id).toString();
+    final longUrl = DeepLinkUrlBuilder.eventLink(eventId: event.id).toString();
+    final shareUrl = await resolveShareUrlRef(ref, longUrl);
+    if (!mounted) return;
+
     final message = title.isNotEmpty ? '$title\n\n$shareUrl' : shareUrl;
     await SharePlus.instance.share(ShareParams(text: message));
   }

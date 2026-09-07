@@ -863,6 +863,13 @@ class AppLocalizationsMn extends AppLocalizations {
       'Биечлэн арга хэмжээ байхгүй';
 
   @override
+  String get connect_events_filter_hybrid => 'Хосолсон';
+
+  @override
+  String get connect_events_filter_empty_hybrid =>
+      'Хосолсон арга хэмжээ байхгүй';
+
+  @override
   String get connect_open => 'Нээх';
 
   @override
@@ -884,6 +891,33 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => 'Одоогоор оролцогч байхгүй';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => 'Бүлэг хайх';
@@ -2404,4 +2438,69 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'Гишүүн';
+
+  @override
+  String get group_chat_reactions_all => 'Бүгд';
+
+  @override
+  String get group_chat_reacted => 'Хариу үйлдэл үзүүлсэн';
+
+  @override
+  String get group_chat_reply => 'Хариулах';
+
+  @override
+  String get group_chat_copy => 'Хуулах';
+
+  @override
+  String get group_chat_copied => 'Мессежийг хуулсан';
+
+  @override
+  String get group_chat_report => 'Мэдэгдэх';
+
+  @override
+  String get group_chat_delete => 'Устгах';
+
+  @override
+  String get group_chat_delete_title => 'Мессежийг устгах уу?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'Энэ мессеж энэ чат дахь бүх хүний хувьд устгагдана.';
+
+  @override
+  String get group_chat_delete_for_everyone => 'Бүгдээс устгах';
+
+  @override
+  String get group_chat_delete_failed => 'Мессежийг устгаж чадсангүй.';
+
+  @override
+  String get group_chat_message_deleted => 'Та энэ мессежийг устгасан';
+
+  @override
+  String get group_chat_message_deleted_by_sender => 'Энэ мессежийг устгасан';
+
+  @override
+  String get group_chat_reaction_failed =>
+      'Таны хариу үйлдлийг хадгалж чадсангүй.';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count хариу үйлдэл',
+      one: '1 хариу үйлдэл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'Та';
+
+  @override
+  String get group_chat_tap_to_remove => 'Устгахын тулд товшино уу';
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'Тэр мессеж байхгүй тул иш татсаныг хаслаа. Мессежээ илгээхийн тулд дахин илгээнэ үү.';
 }

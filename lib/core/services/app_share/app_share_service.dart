@@ -1,15 +1,21 @@
 library;
 
 import 'package:flutter_pecha/core/constants/app_config.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/utils/app_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 class AppShareService {
+  AppShareService({required ShareUrlService shareUrlService})
+    : _shareUrlService = shareUrlService;
+
+  final ShareUrlService _shareUrlService;
   final _logger = AppLogger('AppShareService');
 
-  String buildShareMessage(String localizedMessage) {
-    return '$localizedMessage\n\n${AppConfig.airbridgeTrackingLink}';
+  Future<String> buildShareMessage(String localizedMessage) async {
+    final link = await _shareUrlService.shorten(AppConfig.airbridgeTrackingLink);
+    return '$localizedMessage\n\n$link';
   }
 
   Future<void> shareApp(String localizedMessage) async {
@@ -18,7 +24,7 @@ class AppShareService {
 
       await SharePlus.instance.share(
         ShareParams(
-          text: buildShareMessage(localizedMessage),
+          text: await buildShareMessage(localizedMessage),
         ),
       );
 
@@ -31,5 +37,5 @@ class AppShareService {
 }
 
 final appShareServiceProvider = Provider<AppShareService>((ref) {
-  return AppShareService();
+  return AppShareService(shareUrlService: ref.watch(shareUrlServiceProvider));
 });

@@ -6,6 +6,7 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/l10n/generated/app_localizations.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/theme/app_theme.dart';
 import 'package:flutter_pecha/features/home/presentation/widgets/verse_of_day_content.dart';
@@ -236,7 +237,7 @@ Future<void> shareGroupAccumulatorSession(
       context: context,
       globalKey: shareOriginKey,
     );
-    final shareText = _sessionShareText(
+    final shareText = await _sessionShareText(
       context,
       sessionCount: sessionCount,
       accumulationTitle: accumulationTitle,
@@ -244,6 +245,7 @@ Future<void> shareGroupAccumulatorSession(
       accumulatorId: accumulatorId,
       groupId: groupId,
     );
+    if (!context.mounted) return;
 
     await SharePlus.instance.share(
       ShareParams(
@@ -273,20 +275,21 @@ Future<void> shareGroupAccumulatorSession(
   }
 }
 
-String _sessionShareText(
+Future<String> _sessionShareText(
   BuildContext context, {
   required int sessionCount,
   required String accumulationTitle,
   required String accumulatorId,
   required String groupId,
   String? groupName,
-}) {
+}) async {
   final l10n = AppLocalizations.of(context)!;
-  final shareUrl =
+  final longUrl =
       DeepLinkUrlBuilder.groupAccumulatorLink(
         accumulatorId: accumulatorId,
         groupId: groupId,
       ).toString();
+  final shareUrl = await resolveShareUrl(context, longUrl);
   final message =
       groupName == null
           ? l10n.group_accumulator_session_share_message_no_group(

@@ -984,6 +984,8 @@
   "connect_events_filter_in_person": "Биечлэн",
   "connect_events_filter_empty_online": "Онлайн арга хэмжээ байхгүй",
   "connect_events_filter_empty_in_person": "Биечлэн арга хэмжээ байхгүй",
+  "connect_events_filter_hybrid": "Хосолсон",
+  "connect_events_filter_empty_hybrid": "Хосолсон арга хэмжээ байхгүй",
   "connect_open": "Нээх",
   "connect_event_fallback_title": "Арга хэмжээ",
   "connect_group_fallback_title": "Бүлэг",
@@ -998,6 +1000,15 @@
     }
   },
   "connect_event_participants_empty": "Одоогоор оролцогч байхгүй",
+  "connect_event_tab_videos": "Videos",
+  "connect_event_tab_links": "Links",
+  "connect_event_tab_about": "About",
+  "connect_event_links_title": "More about this event",
+  "connect_event_links_empty": "No links yet",
+  "connect_event_link_tap_to_join": "Tap to join",
+  "connect_event_link_open": "Open link",
+  "connect_event_date_tba": "Date to be announced",
+  "connect_event_about_empty": "No event details yet",
   "timer_notification_in_progress": "Бясалгал үргэлжилж байна",
   "timer_notification_paused": "Түр зогссон · {time} үлдсэн",
   "@timer_notification_paused": {
@@ -1020,5 +1031,30 @@
   "group_chat_empty_body": "Бүлгээрээ яриа эхлүүлээрэй.",
   "group_chat_load_failed": "Мессежийг ачаалж чадсангүй.",
   "group_chat_retry": "Дахин оролдох",
-  "group_chat_unknown_sender": "Гишүүн"
+  "group_chat_unknown_sender": "Гишүүн",
+  "group_chat_reactions_all": "Бүгд",
+  "group_chat_reacted": "Хариу үйлдэл үзүүлсэн",
+  "group_chat_reply": "Хариулах",
+  "group_chat_copy": "Хуулах",
+  "group_chat_copied": "Мессежийг хуулсан",
+  "group_chat_report": "Мэдэгдэх",
+  "group_chat_delete": "Устгах",
+  "group_chat_delete_title": "Мессежийг устгах уу?",
+  "group_chat_delete_confirm_body": "Энэ мессеж энэ чат дахь бүх хүний хувьд устгагдана.",
+  "group_chat_delete_for_everyone": "Бүгдээс устгах",
+  "group_chat_delete_failed": "Мессежийг устгаж чадсангүй.",
+  "group_chat_message_deleted": "Та энэ мессежийг устгасан",
+  "group_chat_message_deleted_by_sender": "Энэ мессежийг устгасан",
+  "group_chat_reaction_failed": "Таны хариу үйлдлийг хадгалж чадсангүй.",
+  "group_chat_reactions_count": "{count, plural, =1{1 хариу үйлдэл} other{{count} хариу үйлдэл}}",
+  "@group_chat_reactions_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_chat_you": "Та",
+  "group_chat_tap_to_remove": "Устгахын тулд товшино уу",
+  "group_chat_reply_parent_gone": "Тэр мессеж байхгүй тул иш татсаныг хаслаа. Мессежээ илгээхийн тулд дахин илгээнэ үү."
 }

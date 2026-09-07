@@ -34,9 +34,7 @@ class GroupChatDateSeparator extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               color:
-                  isDark
-                      ? AppColors.textTertiaryDark
-                      : AppColors.textSecondary,
+                  isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
             ),
           ),
         ),
@@ -59,9 +57,7 @@ class GroupChatDateSeparator extends StatelessWidget {
                 ? DateFormat.MMMd(locale)
                 : DateFormat.yMMMd(locale);
         final formatted = pattern.format(day);
-        return context.isTibetanLocale
-            ? toTibetanDigits(formatted)
-            : formatted;
+        return context.isTibetanLocale ? toTibetanDigits(formatted) : formatted;
     }
   }
 }

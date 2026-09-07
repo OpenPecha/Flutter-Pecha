@@ -12,12 +12,10 @@ class GroupChatLinkPreviewCard extends ConsumerWidget {
   const GroupChatLinkPreviewCard({
     super.key,
     required this.url,
-    required this.isSelf,
     required this.onOpen,
   });
 
   final String url;
-  final bool isSelf;
   final ValueChanged<String> onOpen;
 
   static const double _thumbnailSize = 64;
@@ -29,13 +27,9 @@ class GroupChatLinkPreviewCard extends ConsumerWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleColor =
-        isSelf
-            ? AppColors.surfaceWhite
-            : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary);
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final secondaryColor =
-        isSelf
-            ? AppColors.grey300
-            : (isDark ? AppColors.textTertiaryDark : AppColors.textSecondary);
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
     final imageUrl = preview.imageUrl;
     final title = preview.title;
 
@@ -48,11 +42,7 @@ class GroupChatLinkPreviewCard extends ConsumerWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color:
-                isSelf
-                    ? AppColors.surfaceWhite.withValues(alpha: 0.12)
-                    : (isDark
-                        ? AppColors.scaffoldBackgroundDark
-                        : AppColors.surfaceWhite),
+                isDark ? AppColors.scaffoldBackgroundDark : AppColors.goldLight,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(

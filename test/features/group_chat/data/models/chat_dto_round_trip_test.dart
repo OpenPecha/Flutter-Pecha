@@ -56,12 +56,16 @@ void main() {
         'room_id': 'r1',
         'sender_id': 'u9',
         'sender_email': 'sender@example.com',
+        'sender_name': 'Pema Yangchen',
+        'sender_avatar_url': 'https://cdn.example/p.png',
         'body': 'metta',
         'created_at': '2026-01-02T00:00:00Z',
         'parent': {
           'id': 'p1',
           'sender_id': 'u1',
           'sender_email': 'parent@example.com',
+          'sender_name': 'Tenzin Tamdin',
+          'sender_avatar_url': 'images/profile_images/u1.webp',
           'body': 'hello',
           'created_at': '2026-01-01T00:00:00Z',
         },
@@ -81,7 +85,52 @@ void main() {
       final encoded = first.toJson();
       expect(encoded['room_id'], 'r1');
       expect(encoded['sender_email'], 'sender@example.com');
+      expect(encoded['sender_name'], 'Pema Yangchen');
+      expect(encoded['sender_avatar_url'], 'https://cdn.example/p.png');
+      final parent = encoded['parent'] as Map<String, dynamic>;
+      expect(parent['sender_name'], 'Tenzin Tamdin');
+      expect(parent['sender_avatar_url'], 'images/profile_images/u1.webp');
       expect(ChatMessageDTO.fromJson(encoded), first);
+      // Absent on the wire and absent again on the way out, rather than
+      // round-tripping as an explicit null.
+      expect(first.deletedAt, isNull);
+      expect(encoded.containsKey('deleted_at'), isFalse);
+    });
+
+    test('ChatMessageDTO carries deleted_at through a round trip', () {
+      const json = {
+        'id': 'm1',
+        'room_id': 'r1',
+        'sender_id': 'u9',
+        'sender_email': 'sender@example.com',
+        'body': 'metta',
+        'created_at': '2026-01-02T00:00:00Z',
+        // A deleted message still arrives with its body: nothing may infer
+        // deletion from an empty one.
+        'deleted_at': '2026-01-03T09:30:00Z',
+      };
+
+      final first = ChatMessageDTO.fromJson(json);
+      expect(first.deletedAt, '2026-01-03T09:30:00Z');
+      expect(first.body, 'metta');
+
+      final encoded = first.toJson();
+      expect(encoded['deleted_at'], '2026-01-03T09:30:00Z');
+      expect(ChatMessageDTO.fromJson(encoded), first);
+    });
+
+    test('ChatMessageDTO tolerates a null deleted_at', () {
+      const json = {
+        'id': 'm1',
+        'room_id': 'r1',
+        'sender_id': 'u9',
+        'sender_email': 'sender@example.com',
+        'body': 'metta',
+        'created_at': '2026-01-02T00:00:00Z',
+        'deleted_at': null,
+      };
+
+      expect(ChatMessageDTO.fromJson(json).deletedAt, isNull);
     });
 
     test('ChatRoomDTO group room', () {

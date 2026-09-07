@@ -43,6 +43,9 @@ class StorageKeys {
   /// Content language code sent to backend APIs. May be a language the app has
   /// no UI translation for; the UI then falls back to English.
   static const String contentLanguage = 'content_language';
+  /// Chant list language picked on the all-recitations screen. Independent of
+  /// [contentLanguage] and kept across restarts.
+  static const String chantListLanguage = 'chant_list_language';
   /// Font size preference
   static const String fontSize = 'font_size';
   /// First launch flag

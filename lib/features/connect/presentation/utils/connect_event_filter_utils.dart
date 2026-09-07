@@ -1,32 +1,40 @@
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 
-enum ConnectEventLocationFilter { all, online, inPerson }
+enum ConnectEventFormatFilter { all, online, offline, hybrid }
+
+extension ConnectEventFormatFilterX on ConnectEventFormatFilter {
+  /// `event_format` query value; null on the "All" tab, which sends no filter.
+  String? get apiValue => switch (this) {
+    ConnectEventFormatFilter.all => null,
+    ConnectEventFormatFilter.online => 'online',
+    ConnectEventFormatFilter.offline => 'offline',
+    ConnectEventFormatFilter.hybrid => 'hybrid',
+  };
+}
 
 bool isGroupEventOnline(GroupEvent event) {
+  final format = event.eventFormat;
+  if (format != null) return format == ConnectEventFormatFilter.online.apiValue;
   final locationId = event.locationId?.trim();
   return locationId == null || locationId.isEmpty;
 }
 
-bool isGroupEventInPerson(GroupEvent event) => !isGroupEventOnline(event);
+bool isGroupEventHybrid(GroupEvent event) =>
+    event.eventFormat == ConnectEventFormatFilter.hybrid.apiValue;
 
-String groupEventLocationLabel(GroupEvent event, String onlineLabel) {
-  final locationId = event.locationId?.trim();
-  if (locationId != null && locationId.isNotEmpty) {
-    final name = event.location?.name.trim();
-    if (name != null && name.isNotEmpty) return name;
+/// Location name for the event, suffixed with [hybridLabel] on hybrid events
+/// since they run in person and online at once.
+String groupEventLocationLabel(
+  GroupEvent event,
+  String onlineLabel, {
+  String? hybridLabel,
+}) {
+  final name = event.location?.name.trim();
+  final hasName = name != null && name.isNotEmpty;
+
+  if (isGroupEventHybrid(event) && hybridLabel != null) {
+    return hasName ? '$name / $hybridLabel' : hybridLabel;
   }
+  if (hasName && !isGroupEventOnline(event)) return name;
   return onlineLabel;
-}
-
-List<GroupEvent> filterGroupEventsByLocation(
-  List<GroupEvent> events,
-  ConnectEventLocationFilter filter,
-) {
-  return switch (filter) {
-    ConnectEventLocationFilter.all => events,
-    ConnectEventLocationFilter.online =>
-      events.where(isGroupEventOnline).toList(growable: false),
-    ConnectEventLocationFilter.inPerson =>
-      events.where(isGroupEventInPerson).toList(growable: false),
-  };
 }

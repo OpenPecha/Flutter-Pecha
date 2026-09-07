@@ -1,83 +1,17 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_pecha/features/group_chat/data/models/chat_person_dto.dart';
-import 'package:flutter_pecha/features/group_chat/data/models/chat_room_member_dto.dart';
-
-/// Display identity for a message sender.
-///
-/// `ChatMessageDTO` carries only `sender_id` and `sender_email`, so names and
-/// avatars are joined in from two endpoints: room members supply the name,
-/// group people supply `avatar_url`. Either half may be missing.
-class ChatSender extends Equatable {
-  final String userId;
-  final String? name;
-  final String? email;
-  final String? avatarUrl;
-
-  const ChatSender({
-    required this.userId,
-    this.name,
-    this.email,
-    this.avatarUrl,
-  });
-
-  ChatSender mergeWith(ChatSender other) {
-    return ChatSender(
-      userId: userId,
-      name: _firstNonEmpty(name, other.name),
-      email: _firstNonEmpty(email, other.email),
-      avatarUrl: _firstNonEmpty(avatarUrl, other.avatarUrl),
-    );
-  }
-
-  @override
-  List<Object?> get props => [userId, name, email, avatarUrl];
-}
-
-/// Builds the `user_id` → sender lookup the thread renders from. Either list
-/// may be empty when its request failed; the merge is best-effort.
-Map<String, ChatSender> buildChatSenderDirectory({
-  List<ChatRoomMemberDTO> members = const [],
-  List<ChatPersonDTO> people = const [],
-}) {
-  final directory = <String, ChatSender>{};
-
-  void add(ChatSender sender) {
-    if (sender.userId.isEmpty) return;
-    final existing = directory[sender.userId];
-    directory[sender.userId] =
-        existing == null ? sender : existing.mergeWith(sender);
-  }
-
-  for (final member in members) {
-    add(
-      ChatSender(
-        userId: member.userId,
-        name: joinChatName(member.firstname, member.lastname),
-        email: member.email,
-      ),
-    );
-  }
-  for (final person in people) {
-    add(
-      ChatSender(
-        userId: person.userId,
-        name: joinChatName(person.firstname, person.lastname),
-        email: person.email,
-        avatarUrl: person.avatarUrl,
-      ),
-    );
-  }
-
-  return directory;
-}
+import 'package:flutter_pecha/core/theme/app_colors.dart';
 
 /// Whether [senderId] / [senderEmail] identify the signed-in user.
 ///
-/// Two id spaces are in play: `StorageKeys.currentUserId` holds the JWT `sub`
-/// claim, while chat `sender_id` is a backend UUID, and `/users/info` returns
-/// no id to bridge them. Matching on either the id **or** the email keeps own
-/// messages on the right whichever space the deployment uses.
+/// [currentUserId] must be the **backend** user id — the one `/users/info`
+/// returns, which is the id space chat's `sender_id` and reaction `user_ids`
+/// live in. It is deliberately not the JWT `sub`: those are different ids for
+/// the same person, so comparing them can only ever produce a false negative,
+/// and a false negative here puts the viewer's own messages on the left.
+///
+/// Email stays as the fallback for a session that has not loaded the profile
+/// yet. Pass an empty [currentUserId] rather than a guess when the real one is
+/// unavailable — "unknown" degrades to the email check, a wrong id does not.
 bool isSelfChatMessage({
   required String senderId,
   required String senderEmail,
@@ -100,17 +34,53 @@ String? joinChatName(String? firstname, String? lastname) {
   return parts.isEmpty ? null : parts.join(' ');
 }
 
-/// Directory name → email local part → null, in that order. The caller
+/// Message name → email local part → null, in that order. The caller
 /// substitutes `group_chat_unknown_sender` for null so the fallback string
 /// stays localized.
-String? chatSenderDisplayName({ChatSender? sender, String? senderEmail}) {
-  final name = sender?.name?.trim();
-  if (name != null && name.isNotEmpty) return name;
+///
+/// [messageName] is `sender_name` off the message. It needs no lookup, so it
+/// is right on the first frame — which is why the thread no longer fetches a
+/// sender directory at all. The email split remains only for rows written
+/// before the API carried a name.
+String? chatSenderDisplayName({String? messageName, String? senderEmail}) {
+  final fromMessage = messageName?.trim();
+  if (fromMessage != null && fromMessage.isNotEmpty) return fromMessage;
 
-  final email = (sender?.email ?? senderEmail ?? '').trim();
+  final email = senderEmail?.trim() ?? '';
   if (email.isEmpty) return null;
   final local = email.split('@').first.trim();
   return local.isEmpty ? null : local;
+}
+
+/// The value a sender's colour is derived from.
+///
+/// The backend id is preferred because it never changes; email is the fallback
+/// for rows that predate it, and the name only as a last resort. Lower-cased so
+/// the same person cannot land on two colours through casing alone.
+String chatSenderSeed({String? senderId, String? senderEmail, String? name}) {
+  for (final candidate in [senderId, senderEmail, name]) {
+    final value = candidate?.trim().toLowerCase() ?? '';
+    if (value.isNotEmpty) return value;
+  }
+  return '';
+}
+
+/// A participant's colour, stable for the life of that seed.
+///
+/// FNV-1a rather than [String.hashCode]: the hash has to give the same person
+/// the same colour on every device and every launch, and `hashCode` carries no
+/// such guarantee across platforms or SDK versions.
+Color chatSenderColor({required String seed, required bool onDark}) {
+  final palette =
+      onDark ? AppColors.chatSenderColorsDark : AppColors.chatSenderColors;
+  if (seed.isEmpty) return palette.first;
+
+  var hash = 0x811c9dc5;
+  for (final unit in seed.codeUnits) {
+    hash ^= unit;
+    hash = (hash * 0x01000193) & 0xFFFFFFFF;
+  }
+  return palette[hash % palette.length];
 }
 
 /// Up to two initials for the avatar fallback.
@@ -121,10 +91,4 @@ String chatSenderInitials(String? displayName) {
   if (words.isEmpty) return '?';
   final letters = words.take(2).map((w) => w.characters.first).join();
   return letters.toUpperCase();
-}
-
-String? _firstNonEmpty(String? a, String? b) {
-  if (a != null && a.trim().isNotEmpty) return a;
-  if (b != null && b.trim().isNotEmpty) return b;
-  return null;
 }

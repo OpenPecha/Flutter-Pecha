@@ -77,6 +77,7 @@ class AppAssets {
   static const IconData caretRight = PhosphorIconsRegular.caretRight;
   static const IconData caretRight2 = PhosphorIconsBold.caretRight;
   static const IconData caretDown = PhosphorIconsRegular.caretDown;
+  static const IconData caretDoubleDown = PhosphorIconsRegular.caretDoubleDown;
   static const IconData caretUp = PhosphorIconsRegular.caretUp;
   static const IconData caretLeft = PhosphorIconsRegular.caretLeft;
   static const IconData caretLeft2 = PhosphorIconsBold.caretLeft;
@@ -90,8 +91,11 @@ class AppAssets {
   static const IconData chatCircle = PhosphorIconsRegular.chatCircle;
   static const IconData chatCircleDots = PhosphorIconsRegular.chatCircleDots;
   static const IconData x = PhosphorIconsRegular.x;
-  static const IconData dotsThreeVertical = PhosphorIconsRegular.dotsThreeVertical;
+  static const IconData dotsThreeVertical =
+      PhosphorIconsRegular.dotsThreeVertical;
   static const IconData paperPlaneRight = PhosphorIconsRegular.paperPlaneRight;
+  static const IconData arrowBendUpLeft = PhosphorIconsRegular.arrowBendUpLeft;
+  static const IconData copy = PhosphorIconsRegular.copy;
 
   // ========== ACTION ICONS ==========
   static const IconData plus = PhosphorIconsRegular.plus;
@@ -118,6 +122,7 @@ class AppAssets {
   // ========== STATUS ICONS ==========
   static const IconData checkCircle = PhosphorIconsRegular.checkCircle;
   static const IconData warningCircle = PhosphorIconsRegular.warningCircle;
+  static const IconData warning = PhosphorIconsRegular.warning;
   static const IconData check = PhosphorIconsBold.check;
 
   // ========== SOCIAL MEDIA ICONS ==========

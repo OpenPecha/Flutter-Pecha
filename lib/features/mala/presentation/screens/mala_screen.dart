@@ -12,6 +12,7 @@ import 'package:flutter_pecha/features/mala/presentation/providers/group_accumul
 import 'package:flutter_pecha/features/mala/presentation/providers/mala_accumulation_selection_provider.dart';
 import 'package:flutter_pecha/features/mala/presentation/providers/mala_providers.dart';
 import 'package:flutter_pecha/features/mala/presentation/providers/mala_settings_provider.dart';
+import 'package:flutter_pecha/features/mala/presentation/widgets/add_mala_rounds_button.dart';
 import 'package:flutter_pecha/features/mala/presentation/widgets/group_accumulations_bar.dart';
 import 'package:flutter_pecha/features/mala/presentation/widgets/mala_beads.dart';
 import 'package:flutter_pecha/features/mala/presentation/widgets/mala_skeleton.dart';
@@ -287,9 +288,17 @@ class _MalaScreenState extends ConsumerState<MalaScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                GroupAccumulationsBar(
-                  presetId: mantra.presetId,
-                  personalLifetimeCount: notifier.displayLifetimeCount,
+                Row(
+                  children: [
+                    Expanded(
+                      child: GroupAccumulationsBar(
+                        presetId: mantra.presetId,
+                        personalLifetimeCount: notifier.displayLifetimeCount,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    AddMalaRoundsButton(mantra: mantra),
+                  ],
                 ),
               ],
             ),

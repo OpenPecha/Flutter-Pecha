@@ -1687,6 +1687,20 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_events_filter_hybrid => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_hybrid',
+    () => _fallback.connect_events_filter_hybrid,
+  );
+
+  @override
+  String get connect_events_filter_empty_hybrid => TolgeeBridge.get(
+    localeName,
+    'connect_events_filter_empty_hybrid',
+    () => _fallback.connect_events_filter_empty_hybrid,
+  );
+
+  @override
   String get connect_open => TolgeeBridge.get(
     localeName,
     'connect_open',
@@ -1734,6 +1748,69 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'connect_event_participants_empty',
     () => _fallback.connect_event_participants_empty,
+  );
+
+  @override
+  String get connect_event_tab_videos => TolgeeBridge.get(
+    localeName,
+    'connect_event_tab_videos',
+    () => _fallback.connect_event_tab_videos,
+  );
+
+  @override
+  String get connect_event_tab_links => TolgeeBridge.get(
+    localeName,
+    'connect_event_tab_links',
+    () => _fallback.connect_event_tab_links,
+  );
+
+  @override
+  String get connect_event_tab_about => TolgeeBridge.get(
+    localeName,
+    'connect_event_tab_about',
+    () => _fallback.connect_event_tab_about,
+  );
+
+  @override
+  String get connect_event_links_title => TolgeeBridge.get(
+    localeName,
+    'connect_event_links_title',
+    () => _fallback.connect_event_links_title,
+  );
+
+  @override
+  String get connect_event_links_empty => TolgeeBridge.get(
+    localeName,
+    'connect_event_links_empty',
+    () => _fallback.connect_event_links_empty,
+  );
+
+  @override
+  String get connect_event_link_tap_to_join => TolgeeBridge.get(
+    localeName,
+    'connect_event_link_tap_to_join',
+    () => _fallback.connect_event_link_tap_to_join,
+  );
+
+  @override
+  String get connect_event_link_open => TolgeeBridge.get(
+    localeName,
+    'connect_event_link_open',
+    () => _fallback.connect_event_link_open,
+  );
+
+  @override
+  String get connect_event_date_tba => TolgeeBridge.get(
+    localeName,
+    'connect_event_date_tba',
+    () => _fallback.connect_event_date_tba,
+  );
+
+  @override
+  String get connect_event_about_empty => TolgeeBridge.get(
+    localeName,
+    'connect_event_about_empty',
+    () => _fallback.connect_event_about_empty,
   );
 
   @override
@@ -4653,5 +4730,132 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'group_chat_unknown_sender',
     () => _fallback.group_chat_unknown_sender,
+  );
+
+  @override
+  String get group_chat_reactions_all => TolgeeBridge.get(
+    localeName,
+    'group_chat_reactions_all',
+    () => _fallback.group_chat_reactions_all,
+  );
+
+  @override
+  String get group_chat_reacted => TolgeeBridge.get(
+    localeName,
+    'group_chat_reacted',
+    () => _fallback.group_chat_reacted,
+  );
+
+  @override
+  String get group_chat_reply => TolgeeBridge.get(
+    localeName,
+    'group_chat_reply',
+    () => _fallback.group_chat_reply,
+  );
+
+  @override
+  String get group_chat_copy => TolgeeBridge.get(
+    localeName,
+    'group_chat_copy',
+    () => _fallback.group_chat_copy,
+  );
+
+  @override
+  String get group_chat_copied => TolgeeBridge.get(
+    localeName,
+    'group_chat_copied',
+    () => _fallback.group_chat_copied,
+  );
+
+  @override
+  String get group_chat_report => TolgeeBridge.get(
+    localeName,
+    'group_chat_report',
+    () => _fallback.group_chat_report,
+  );
+
+  @override
+  String get group_chat_delete => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete',
+    () => _fallback.group_chat_delete,
+  );
+
+  @override
+  String get group_chat_delete_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_title',
+    () => _fallback.group_chat_delete_title,
+  );
+
+  @override
+  String get group_chat_delete_confirm_body => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_confirm_body',
+    () => _fallback.group_chat_delete_confirm_body,
+  );
+
+  @override
+  String get group_chat_delete_for_everyone => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_for_everyone',
+    () => _fallback.group_chat_delete_for_everyone,
+  );
+
+  @override
+  String get group_chat_delete_failed => TolgeeBridge.get(
+    localeName,
+    'group_chat_delete_failed',
+    () => _fallback.group_chat_delete_failed,
+  );
+
+  @override
+  String get group_chat_message_deleted => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_deleted',
+    () => _fallback.group_chat_message_deleted,
+  );
+
+  @override
+  String get group_chat_message_deleted_by_sender => TolgeeBridge.get(
+    localeName,
+    'group_chat_message_deleted_by_sender',
+    () => _fallback.group_chat_message_deleted_by_sender,
+  );
+
+  @override
+  String get group_chat_reaction_failed => TolgeeBridge.get(
+    localeName,
+    'group_chat_reaction_failed',
+    () => _fallback.group_chat_reaction_failed,
+  );
+
+  @override
+  String group_chat_reactions_count(int count) => TolgeeBridge.format(
+    localeName,
+    'group_chat_reactions_count',
+    <String, Object>{'count': count},
+    () => _fallback.group_chat_reactions_count(count),
+  );
+
+  @override
+  String get group_chat_you => TolgeeBridge.get(
+    localeName,
+    'group_chat_you',
+    () => _fallback.group_chat_you,
+  );
+
+  @override
+  String get group_chat_tap_to_remove => TolgeeBridge.get(
+    localeName,
+    'group_chat_tap_to_remove',
+    () => _fallback.group_chat_tap_to_remove,
+  );
+
+  @override
+  String get group_chat_reply_parent_gone => TolgeeBridge.get(
+    localeName,
+    'group_chat_reply_parent_gone',
+    () => _fallback.group_chat_reply_parent_gone,
   );
 }

@@ -18,10 +18,7 @@ class ChatLinkMatch {
           : 'https://$text';
 }
 
-final _urlPattern = RegExp(
-  r'(?:https?://|www\.)[^\s<]+',
-  caseSensitive: false,
-);
+final _urlPattern = RegExp(r'(?:https?://|www\.)[^\s<]+', caseSensitive: false);
 
 /// Trailing characters that are almost always sentence punctuation rather than
 /// part of the URL.

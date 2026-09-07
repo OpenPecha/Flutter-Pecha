@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
-import 'package:flutter_pecha/features/group_chat/data/models/chat_person_dto.dart';
+import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_member_dto.dart';
 
@@ -41,20 +41,6 @@ class ChatRoomMembersPage {
 
   const ChatRoomMembersPage({
     required this.members,
-    required this.skip,
-    required this.limit,
-    required this.total,
-  });
-}
-
-class ChatPeoplePage {
-  final List<ChatPersonDTO> people;
-  final int skip;
-  final int limit;
-  final int total;
-
-  const ChatPeoplePage({
-    required this.people,
     required this.skip,
     required this.limit,
     required this.total,
@@ -177,31 +163,61 @@ class GroupChatRemoteDatasource {
     }
   }
 
-  /// Group joiners. Read for `avatar_url`, which the room members payload
-  /// does not carry. Excludes the caller, whose own bubbles show no avatar.
-  Future<ChatPeoplePage> listGroupPeople(
-    String groupId, {
-    int skip = 0,
-    int limit = 100,
+  /// Reacts to a message. Idempotent, and returns the message's full updated
+  /// reaction summary rather than an ack.
+  Future<List<ChatMessageReactionDTO>> addReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
   }) async {
     try {
-      final response = await _dio.get(
-        '/chat/groups/$groupId/people',
-        queryParameters: {'skip': skip, 'limit': limit},
-        options: _noCache,
+      final response = await _dio.post(
+        '/chat/rooms/$roomId/messages/$messageId/reactions',
+        data: {'emoji': emoji},
       );
-      final data = response.data as Map<String, dynamic>;
-      return ChatPeoplePage(
-        people:
-            (data['people'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>()
-                .map(ChatPersonDTO.fromJson)
-                .toList() ??
-            const [],
-        skip: _readInt(data['skip']),
-        limit: _readInt(data['limit']),
-        total: _readInt(data['total']),
+      return _readReactions(response.data);
+    } on DioException catch (e) {
+      throw _unwrap(e);
+    }
+  }
+
+  /// Removes the caller's reaction. Idempotent, and returns the same full
+  /// summary as [addReaction].
+  ///
+  /// The emoji travels in the path, so it must be percent-encoded — several of
+  /// the quick reactions are multi-code-point sequences.
+  Future<List<ChatMessageReactionDTO>> removeReaction(
+    String roomId, {
+    required String messageId,
+    required String emoji,
+  }) async {
+    try {
+      final encoded = Uri.encodeComponent(emoji);
+      final response = await _dio.delete(
+        '/chat/rooms/$roomId/messages/$messageId/reactions/$encoded',
       );
+      return _readReactions(response.data);
+    } on DioException catch (e) {
+      throw _unwrap(e);
+    }
+  }
+
+  static List<ChatMessageReactionDTO> _readReactions(Object? data) {
+    return (data as List<dynamic>?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(ChatMessageReactionDTO.fromJson)
+            .toList() ??
+        const [];
+  }
+
+  /// Deletes one of the caller's own messages, for everyone. Returns 204
+  /// with no body.
+  ///
+  /// Sender-only, enforced server side. Nothing is broadcast over the socket,
+  /// so other members see it gone on their next fetch rather than live.
+  Future<void> deleteMessage(String roomId, {required String messageId}) async {
+    try {
+      await _dio.delete('/chat/rooms/$roomId/messages/$messageId');
     } on DioException catch (e) {
       throw _unwrap(e);
     }

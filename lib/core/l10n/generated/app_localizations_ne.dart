@@ -870,6 +870,13 @@ class AppLocalizationsNe extends AppLocalizations {
       'कुनै प्रत्यक्ष कार्यक्रम छैन';
 
   @override
+  String get connect_events_filter_hybrid => 'हाइब्रिड';
+
+  @override
+  String get connect_events_filter_empty_hybrid =>
+      'कुनै हाइब्रिड कार्यक्रम छैन';
+
+  @override
   String get connect_open => 'खोल्नुहोस्';
 
   @override
@@ -891,6 +898,33 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get connect_event_participants_empty => 'अहिलेसम्म कुनै सहभागी छैन';
+
+  @override
+  String get connect_event_tab_videos => 'Videos';
+
+  @override
+  String get connect_event_tab_links => 'Links';
+
+  @override
+  String get connect_event_tab_about => 'About';
+
+  @override
+  String get connect_event_links_title => 'More about this event';
+
+  @override
+  String get connect_event_links_empty => 'No links yet';
+
+  @override
+  String get connect_event_link_tap_to_join => 'Tap to join';
+
+  @override
+  String get connect_event_link_open => 'Open link';
+
+  @override
+  String get connect_event_date_tba => 'Date to be announced';
+
+  @override
+  String get connect_event_about_empty => 'No event details yet';
 
   @override
   String get search_groups => 'समूह खोज्नुहोस्';
@@ -2407,4 +2441,69 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get group_chat_unknown_sender => 'सदस्य';
+
+  @override
+  String get group_chat_reactions_all => 'सबै';
+
+  @override
+  String get group_chat_reacted => 'प्रतिक्रिया दिनुभयो';
+
+  @override
+  String get group_chat_reply => 'जवाफ दिनुहोस्';
+
+  @override
+  String get group_chat_copy => 'प्रतिलिपि गर्नुहोस्';
+
+  @override
+  String get group_chat_copied => 'सन्देश प्रतिलिपि गरियो';
+
+  @override
+  String get group_chat_report => 'रिपोर्ट गर्नुहोस्';
+
+  @override
+  String get group_chat_delete => 'मेटाउनुहोस्';
+
+  @override
+  String get group_chat_delete_title => 'सन्देश मेटाउने?';
+
+  @override
+  String get group_chat_delete_confirm_body =>
+      'यो सन्देश यस च्याटमा सबैका लागि मेटिनेछ।';
+
+  @override
+  String get group_chat_delete_for_everyone => 'सबैका लागि मेटाउनुहोस्';
+
+  @override
+  String get group_chat_delete_failed => 'सन्देश मेटाउन सकिएन।';
+
+  @override
+  String get group_chat_message_deleted => 'तपाईंले यो सन्देश मेटाउनुभयो';
+
+  @override
+  String get group_chat_message_deleted_by_sender => 'यो सन्देश मेटाइयो';
+
+  @override
+  String get group_chat_reaction_failed =>
+      'तपाईंको प्रतिक्रिया सुरक्षित गर्न सकिएन।';
+
+  @override
+  String group_chat_reactions_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count प्रतिक्रियाहरू',
+      one: '1 प्रतिक्रिया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get group_chat_you => 'तपाईं';
+
+  @override
+  String get group_chat_tap_to_remove => 'हटाउन ट्याप गर्नुहोस्';
+
+  @override
+  String get group_chat_reply_parent_gone =>
+      'त्यो सन्देश अब उपलब्ध छैन, त्यसैले उद्धरण हटाइयो। आफ्नो सन्देश पठाउन फेरि पठाउनुहोस्।';
 }

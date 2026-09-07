@@ -167,7 +167,8 @@ class _RecitationsSearchScreenState
   ) {
     final l10n = context.l10n;
 
-    if (searchState.query.trim().isEmpty) {
+    if (searchState.query.trim().length <
+        RecitationSearchNotifier.minQueryLength) {
       return const SizedBox.shrink();
     }
 

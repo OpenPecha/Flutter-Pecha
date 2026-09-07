@@ -1642,6 +1642,18 @@ abstract class AppLocalizations {
   /// **'No in-person events'**
   String get connect_events_filter_empty_in_person;
 
+  /// No description provided for @connect_events_filter_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get connect_events_filter_hybrid;
+
+  /// No description provided for @connect_events_filter_empty_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'No hybrid events'**
+  String get connect_events_filter_empty_hybrid;
+
   /// No description provided for @connect_open.
   ///
   /// In en, this message translates to:
@@ -1683,6 +1695,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No participants yet'**
   String get connect_event_participants_empty;
+
+  /// No description provided for @connect_event_tab_videos.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get connect_event_tab_videos;
+
+  /// No description provided for @connect_event_tab_links.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get connect_event_tab_links;
+
+  /// No description provided for @connect_event_tab_about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get connect_event_tab_about;
+
+  /// No description provided for @connect_event_links_title.
+  ///
+  /// In en, this message translates to:
+  /// **'More about this event'**
+  String get connect_event_links_title;
+
+  /// No description provided for @connect_event_links_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No links yet'**
+  String get connect_event_links_empty;
+
+  /// No description provided for @connect_event_link_tap_to_join.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to join'**
+  String get connect_event_link_tap_to_join;
+
+  /// No description provided for @connect_event_link_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open link'**
+  String get connect_event_link_open;
+
+  /// No description provided for @connect_event_date_tba.
+  ///
+  /// In en, this message translates to:
+  /// **'Date to be announced'**
+  String get connect_event_date_tba;
+
+  /// No description provided for @connect_event_about_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No event details yet'**
+  String get connect_event_about_empty;
 
   /// No description provided for @search_groups.
   ///
@@ -4249,6 +4315,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Member'**
   String get group_chat_unknown_sender;
+
+  /// No description provided for @group_chat_reactions_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get group_chat_reactions_all;
+
+  /// No description provided for @group_chat_reacted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reacted'**
+  String get group_chat_reacted;
+
+  /// No description provided for @group_chat_reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get group_chat_reply;
+
+  /// No description provided for @group_chat_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get group_chat_copy;
+
+  /// No description provided for @group_chat_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied'**
+  String get group_chat_copied;
+
+  /// No description provided for @group_chat_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get group_chat_report;
+
+  /// No description provided for @group_chat_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get group_chat_delete;
+
+  /// No description provided for @group_chat_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete message?'**
+  String get group_chat_delete_title;
+
+  /// No description provided for @group_chat_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This message will be deleted for everyone in this chat.'**
+  String get group_chat_delete_confirm_body;
+
+  /// No description provided for @group_chat_delete_for_everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for everyone'**
+  String get group_chat_delete_for_everyone;
+
+  /// No description provided for @group_chat_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The message couldn\'t be deleted.'**
+  String get group_chat_delete_failed;
+
+  /// No description provided for @group_chat_message_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'You deleted this message'**
+  String get group_chat_message_deleted;
+
+  /// No description provided for @group_chat_message_deleted_by_sender.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get group_chat_message_deleted_by_sender;
+
+  /// No description provided for @group_chat_reaction_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reaction couldn\'t be saved.'**
+  String get group_chat_reaction_failed;
+
+  /// No description provided for @group_chat_reactions_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reaction} other{{count} reactions}}'**
+  String group_chat_reactions_count(int count);
+
+  /// No description provided for @group_chat_you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get group_chat_you;
+
+  /// No description provided for @group_chat_tap_to_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to remove'**
+  String get group_chat_tap_to_remove;
+
+  /// No description provided for @group_chat_reply_parent_gone.
+  ///
+  /// In en, this message translates to:
+  /// **'That message is no longer available, so the quote was removed. Send again to post your message.'**
+  String get group_chat_reply_parent_gone;
 }
 
 class _AppLocalizationsDelegate

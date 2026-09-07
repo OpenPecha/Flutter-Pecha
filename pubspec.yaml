@@ -95,6 +95,9 @@ dependencies:
 
   url_launcher: ^6.3.2
 
+  # Emoji picker behind the + in the chat reaction pill
+  emoji_picker_flutter: ^4.3.0
+
   # Audio service
   audio_service: ^0.18.18
 
