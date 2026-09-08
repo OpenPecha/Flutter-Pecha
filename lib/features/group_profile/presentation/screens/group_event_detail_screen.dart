@@ -636,8 +636,7 @@ class _EventInfoCard extends StatelessWidget {
         GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
     final meetingLinks = links.where(isMeeting).toList();
     final otherLinks = links.where((link) => !isMeeting(link)).toList();
-    final showOnline =
-        isOnline || isGroupEventHybrid(event) || meetingLinks.isNotEmpty;
+    final showOnline = isOnline || isGroupEventHybrid(event);
 
     return Container(
       width: double.infinity,
