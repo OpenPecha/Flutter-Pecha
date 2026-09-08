@@ -713,6 +713,11 @@ class _EventInfoCard extends StatelessWidget {
     }
 
     final endTime = DateFormat.jm(locale).format(end).toLowerCase();
+    final isMultiDay = !event.isOneDay && !DateUtils.isSameDay(start, end);
+    if (isMultiDay) {
+      final endDate = DateFormat('EEE d MMM y', locale).format(end);
+      return '$date · $startTime – $endDate · $endTime ${start.timeZoneName}';
+    }
     return '$date · $startTime – $endTime ${start.timeZoneName}';
   }
 
