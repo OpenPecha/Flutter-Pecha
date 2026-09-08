@@ -337,8 +337,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   /// A refetch that fails proves nothing either way, and the push says a
   /// message exists that this screen may not hold. Keeping a socket that
   /// cannot be vouched for is how the half-open case went unnoticed in the
-  /// first place, so it is replaced too; the reconnect refetches, which also
-  /// retries the page.
+  /// first place, so it is replaced too. That costs a healthy socket at most
+  /// one reconnect round trip: the reconnect refetches, which retries the
+  /// page and merges anything posted in the gap, and a reconnect that fails
+  /// backs off and retries rather than leaving the thread without a socket.
   Future<void> _onForegroundPush(PushMessage message) async {
     if (_disposed || !mounted) return;
     if (!chatPushTargets(
