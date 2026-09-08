@@ -21,7 +21,6 @@ import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigatio
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_segment_audio_controller.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_subtask_completion.dart';
 import 'package:flutter_pecha/features/practice/data/datasource/bookmark_remote_datasource.dart';
-import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_completion_service.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/bookmark_providers.dart';
 import 'package:flutter_pecha/features/reader/constants/reader_constants.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
@@ -123,17 +122,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen>
     );
     _initAudio();
     _initGroupAccumulatorChantSession();
-    _markMyRecitationCollectionChantOnOpen();
-  }
-
-  void _markMyRecitationCollectionChantOnOpen() {
-    final ctx = widget.navigationContext;
-    if (ctx?.source != NavigationSource.myRecitationCollection) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(myRecitationCompletionProvider).completeCurrent(ctx);
-    });
   }
 
   void _initGroupAccumulatorChantSession() {
