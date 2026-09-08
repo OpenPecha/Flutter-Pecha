@@ -15,6 +15,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_pract
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/domain/repositories/group_profile_repository.dart';
 import 'package:flutter_pecha/features/group_profile/domain/usecases/get_group_profile_usecase.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/providers/group_post_providers.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
@@ -1188,6 +1189,7 @@ Future<void> refreshGroupProfilePage({
   if (ref.exists(groupMembersProvider(groupId))) {
     ref.read(groupMembersProvider(groupId).notifier).loadInitial();
   }
+  refreshGroupPosts(ref, groupId);
 
   await Future.wait(refreshTasks);
 }

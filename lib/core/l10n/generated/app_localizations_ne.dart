@@ -2506,4 +2506,94 @@ class AppLocalizationsNe extends AppLocalizations {
   @override
   String get group_chat_reply_parent_gone =>
       'त्यो सन्देश अब उपलब्ध छैन, त्यसैले उद्धरण हटाइयो। आफ्नो सन्देश पठाउन फेरि पठाउनुहोस्।';
+
+  @override
+  String get group_tab_posts => 'पोस्ट';
+
+  @override
+  String get group_tab_events => 'कार्यक्रम';
+
+  @override
+  String get group_posts_empty_title => 'अहिलेसम्म कुनै पोस्ट छैन';
+
+  @override
+  String get group_posts_empty_message =>
+      'आफ्नो समुदायसँग पहिलो अपडेट साझा गर्नुहोस्।';
+
+  @override
+  String get group_posts_load_error =>
+      'पोस्टहरू लोड गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get group_post_button => 'पोस्ट गर्नुहोस्';
+
+  @override
+  String get group_post_new_title => 'नयाँ पोस्ट';
+
+  @override
+  String get group_post_posting_to => 'यहाँ पोस्ट हुँदैछ:';
+
+  @override
+  String get group_post_caption_hint => 'के नयाँ छ?';
+
+  @override
+  String get group_post_photos => 'फोटो';
+
+  @override
+  String get group_post_link => 'लिङ्क';
+
+  @override
+  String get group_post_discard_title => 'पोस्ट खारेज गर्ने?';
+
+  @override
+  String get group_post_discard_message => 'तपाईंले लेखेको कुरा हराउनेछ।';
+
+  @override
+  String get group_post_keep_editing => 'सम्पादन जारी राख्नुहोस्';
+
+  @override
+  String get group_post_discard => 'खारेज गर्नुहोस्';
+
+  @override
+  String get group_post_add_link_title => 'लिङ्क थप्नुहोस्';
+
+  @override
+  String get group_post_add_link_hint =>
+      'लिङ्क टाँस्नुहोस्, हामी पूर्वावलोकन देखाउनेछौँ।';
+
+  @override
+  String get group_post_link_field_hint => 'लिङ्क';
+
+  @override
+  String get group_post_attach => 'संलग्न गर्नुहोस्';
+
+  @override
+  String get group_post_attach_as_link => 'लिङ्कको रूपमा संलग्न गर्नुहोस्';
+
+  @override
+  String get group_post_preview_failed_title => 'पूर्वावलोकन लोड गर्न सकिएन';
+
+  @override
+  String get group_post_preview_failed_message =>
+      'तपाईं यसलाई अझै लिङ्कको रूपमा संलग्न गर्न सक्नुहुन्छ।';
+
+  @override
+  String get group_post_invalid_link =>
+      'मान्य लिङ्क प्रविष्ट गर्नुहोस्, जस्तै https://example.com';
+
+  @override
+  String group_post_photo_limit(int count) {
+    return 'तपाईं बढीमा $count फोटो थप्न सक्नुहुन्छ।';
+  }
+
+  @override
+  String get group_post_upload_error =>
+      'फोटो अपलोड गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get group_post_publish_error =>
+      'तपाईंको पोस्ट प्रकाशित गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get group_post_published => 'तपाईंको पोस्ट प्रकाशित भयो।';
 }

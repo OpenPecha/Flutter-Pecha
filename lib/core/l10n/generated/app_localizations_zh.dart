@@ -2355,4 +2355,87 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_chat_reply_parent_gone => '該訊息已不存在，引用已移除。請再次傳送你的訊息。';
+
+  @override
+  String get group_tab_posts => '貼文';
+
+  @override
+  String get group_tab_events => '活動';
+
+  @override
+  String get group_posts_empty_title => '尚無貼文';
+
+  @override
+  String get group_posts_empty_message => '與你的社群分享第一則動態。';
+
+  @override
+  String get group_posts_load_error => '無法載入貼文，請再試一次。';
+
+  @override
+  String get group_post_button => '發佈';
+
+  @override
+  String get group_post_new_title => '新貼文';
+
+  @override
+  String get group_post_posting_to => '發佈至：';
+
+  @override
+  String get group_post_caption_hint => '有什麼新鮮事？';
+
+  @override
+  String get group_post_photos => '相片';
+
+  @override
+  String get group_post_link => '連結';
+
+  @override
+  String get group_post_discard_title => '捨棄貼文？';
+
+  @override
+  String get group_post_discard_message => '你所寫的內容將會遺失。';
+
+  @override
+  String get group_post_keep_editing => '繼續編輯';
+
+  @override
+  String get group_post_discard => '捨棄';
+
+  @override
+  String get group_post_add_link_title => '新增連結';
+
+  @override
+  String get group_post_add_link_hint => '貼上連結，我們會顯示預覽。';
+
+  @override
+  String get group_post_link_field_hint => '連結';
+
+  @override
+  String get group_post_attach => '附加';
+
+  @override
+  String get group_post_attach_as_link => '以連結附加';
+
+  @override
+  String get group_post_preview_failed_title => '無法載入預覽';
+
+  @override
+  String get group_post_preview_failed_message => '你仍可將它以連結附加。';
+
+  @override
+  String get group_post_invalid_link => '請輸入有效的連結，例如 https://example.com';
+
+  @override
+  String group_post_photo_limit(int count) {
+    return '最多可新增 $count 張相片。';
+  }
+
+  @override
+  String get group_post_upload_error => '無法上傳相片，請再試一次。';
+
+  @override
+  String get group_post_publish_error => '無法發佈你的貼文，請再試一次。';
+
+  @override
+  String get group_post_published => '你的貼文已發佈。';
 }

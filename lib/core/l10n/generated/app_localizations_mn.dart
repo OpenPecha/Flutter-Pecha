@@ -2503,4 +2503,94 @@ class AppLocalizationsMn extends AppLocalizations {
   @override
   String get group_chat_reply_parent_gone =>
       'Тэр мессеж байхгүй тул иш татсаныг хаслаа. Мессежээ илгээхийн тулд дахин илгээнэ үү.';
+
+  @override
+  String get group_tab_posts => 'Нийтлэл';
+
+  @override
+  String get group_tab_events => 'Арга хэмжээ';
+
+  @override
+  String get group_posts_empty_title => 'Одоогоор нийтлэл алга';
+
+  @override
+  String get group_posts_empty_message =>
+      'Анхны мэдээллээ нийгэмлэгтэйгээ хуваалцаарай.';
+
+  @override
+  String get group_posts_load_error =>
+      'Нийтлэлүүдийг ачаалж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get group_post_button => 'Нийтлэх';
+
+  @override
+  String get group_post_new_title => 'Шинэ нийтлэл';
+
+  @override
+  String get group_post_posting_to => 'Нийтлэх газар:';
+
+  @override
+  String get group_post_caption_hint => 'Юу шинэ байна?';
+
+  @override
+  String get group_post_photos => 'Зураг';
+
+  @override
+  String get group_post_link => 'Холбоос';
+
+  @override
+  String get group_post_discard_title => 'Нийтлэлийг устгах уу?';
+
+  @override
+  String get group_post_discard_message => 'Таны бичсэн зүйл устах болно.';
+
+  @override
+  String get group_post_keep_editing => 'Үргэлжлүүлэн засах';
+
+  @override
+  String get group_post_discard => 'Устгах';
+
+  @override
+  String get group_post_add_link_title => 'Холбоос нэмэх';
+
+  @override
+  String get group_post_add_link_hint =>
+      'Холбоос буулгавал бид урьдчилан харуулна.';
+
+  @override
+  String get group_post_link_field_hint => 'Холбоос';
+
+  @override
+  String get group_post_attach => 'Хавсаргах';
+
+  @override
+  String get group_post_attach_as_link => 'Холбоос болгон хавсаргах';
+
+  @override
+  String get group_post_preview_failed_title => 'Урьдчилан харах боломжгүй';
+
+  @override
+  String get group_post_preview_failed_message =>
+      'Та үүнийг холбоос болгон хавсаргаж болно.';
+
+  @override
+  String get group_post_invalid_link =>
+      'Зөв холбоос оруулна уу, жишээ нь https://example.com';
+
+  @override
+  String group_post_photo_limit(int count) {
+    return 'Та хамгийн ихдээ $count зураг нэмэх боломжтой.';
+  }
+
+  @override
+  String get group_post_upload_error =>
+      'Зургуудыг байршуулж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get group_post_publish_error =>
+      'Таны нийтлэлийг нийтэлж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get group_post_published => 'Таны нийтлэл нийтлэгдлээ.';
 }

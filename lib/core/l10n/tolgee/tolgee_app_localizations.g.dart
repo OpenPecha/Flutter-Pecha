@@ -4858,4 +4858,194 @@ class TolgeeAppLocalizations extends AppLocalizations {
     'group_chat_reply_parent_gone',
     () => _fallback.group_chat_reply_parent_gone,
   );
+
+  @override
+  String get group_tab_posts => TolgeeBridge.get(
+    localeName,
+    'group_tab_posts',
+    () => _fallback.group_tab_posts,
+  );
+
+  @override
+  String get group_tab_events => TolgeeBridge.get(
+    localeName,
+    'group_tab_events',
+    () => _fallback.group_tab_events,
+  );
+
+  @override
+  String get group_posts_empty_title => TolgeeBridge.get(
+    localeName,
+    'group_posts_empty_title',
+    () => _fallback.group_posts_empty_title,
+  );
+
+  @override
+  String get group_posts_empty_message => TolgeeBridge.get(
+    localeName,
+    'group_posts_empty_message',
+    () => _fallback.group_posts_empty_message,
+  );
+
+  @override
+  String get group_posts_load_error => TolgeeBridge.get(
+    localeName,
+    'group_posts_load_error',
+    () => _fallback.group_posts_load_error,
+  );
+
+  @override
+  String get group_post_button => TolgeeBridge.get(
+    localeName,
+    'group_post_button',
+    () => _fallback.group_post_button,
+  );
+
+  @override
+  String get group_post_new_title => TolgeeBridge.get(
+    localeName,
+    'group_post_new_title',
+    () => _fallback.group_post_new_title,
+  );
+
+  @override
+  String get group_post_posting_to => TolgeeBridge.get(
+    localeName,
+    'group_post_posting_to',
+    () => _fallback.group_post_posting_to,
+  );
+
+  @override
+  String get group_post_caption_hint => TolgeeBridge.get(
+    localeName,
+    'group_post_caption_hint',
+    () => _fallback.group_post_caption_hint,
+  );
+
+  @override
+  String get group_post_photos => TolgeeBridge.get(
+    localeName,
+    'group_post_photos',
+    () => _fallback.group_post_photos,
+  );
+
+  @override
+  String get group_post_link => TolgeeBridge.get(
+    localeName,
+    'group_post_link',
+    () => _fallback.group_post_link,
+  );
+
+  @override
+  String get group_post_discard_title => TolgeeBridge.get(
+    localeName,
+    'group_post_discard_title',
+    () => _fallback.group_post_discard_title,
+  );
+
+  @override
+  String get group_post_discard_message => TolgeeBridge.get(
+    localeName,
+    'group_post_discard_message',
+    () => _fallback.group_post_discard_message,
+  );
+
+  @override
+  String get group_post_keep_editing => TolgeeBridge.get(
+    localeName,
+    'group_post_keep_editing',
+    () => _fallback.group_post_keep_editing,
+  );
+
+  @override
+  String get group_post_discard => TolgeeBridge.get(
+    localeName,
+    'group_post_discard',
+    () => _fallback.group_post_discard,
+  );
+
+  @override
+  String get group_post_add_link_title => TolgeeBridge.get(
+    localeName,
+    'group_post_add_link_title',
+    () => _fallback.group_post_add_link_title,
+  );
+
+  @override
+  String get group_post_add_link_hint => TolgeeBridge.get(
+    localeName,
+    'group_post_add_link_hint',
+    () => _fallback.group_post_add_link_hint,
+  );
+
+  @override
+  String get group_post_link_field_hint => TolgeeBridge.get(
+    localeName,
+    'group_post_link_field_hint',
+    () => _fallback.group_post_link_field_hint,
+  );
+
+  @override
+  String get group_post_attach => TolgeeBridge.get(
+    localeName,
+    'group_post_attach',
+    () => _fallback.group_post_attach,
+  );
+
+  @override
+  String get group_post_attach_as_link => TolgeeBridge.get(
+    localeName,
+    'group_post_attach_as_link',
+    () => _fallback.group_post_attach_as_link,
+  );
+
+  @override
+  String get group_post_preview_failed_title => TolgeeBridge.get(
+    localeName,
+    'group_post_preview_failed_title',
+    () => _fallback.group_post_preview_failed_title,
+  );
+
+  @override
+  String get group_post_preview_failed_message => TolgeeBridge.get(
+    localeName,
+    'group_post_preview_failed_message',
+    () => _fallback.group_post_preview_failed_message,
+  );
+
+  @override
+  String get group_post_invalid_link => TolgeeBridge.get(
+    localeName,
+    'group_post_invalid_link',
+    () => _fallback.group_post_invalid_link,
+  );
+
+  @override
+  String group_post_photo_limit(int count) => TolgeeBridge.format(
+    localeName,
+    'group_post_photo_limit',
+    <String, Object>{'count': count},
+    () => _fallback.group_post_photo_limit(count),
+  );
+
+  @override
+  String get group_post_upload_error => TolgeeBridge.get(
+    localeName,
+    'group_post_upload_error',
+    () => _fallback.group_post_upload_error,
+  );
+
+  @override
+  String get group_post_publish_error => TolgeeBridge.get(
+    localeName,
+    'group_post_publish_error',
+    () => _fallback.group_post_publish_error,
+  );
+
+  @override
+  String get group_post_published => TolgeeBridge.get(
+    localeName,
+    'group_post_published',
+    () => _fallback.group_post_published,
+  );
 }

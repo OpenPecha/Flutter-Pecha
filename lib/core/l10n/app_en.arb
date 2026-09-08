@@ -1231,5 +1231,39 @@
   },
   "group_chat_you": "You",
   "group_chat_tap_to_remove": "Tap to remove",
-  "group_chat_reply_parent_gone": "That message is no longer available, so the quote was removed. Send again to post your message."
+  "group_chat_reply_parent_gone": "That message is no longer available, so the quote was removed. Send again to post your message.",
+  "group_tab_posts": "Posts",
+  "group_tab_events": "Events",
+  "group_posts_empty_title": "No posts yet",
+  "group_posts_empty_message": "Share your first update with your community.",
+  "group_posts_load_error": "Unable to load posts. Please try again.",
+  "group_post_button": "Post",
+  "group_post_new_title": "New post",
+  "group_post_posting_to": "Posting to:",
+  "group_post_caption_hint": "What's new?",
+  "group_post_photos": "Photos",
+  "group_post_link": "Link",
+  "group_post_discard_title": "Discard post?",
+  "group_post_discard_message": "You'll lose what you've written.",
+  "group_post_keep_editing": "Keep editing",
+  "group_post_discard": "Discard",
+  "group_post_add_link_title": "Add link",
+  "group_post_add_link_hint": "Paste a link and we'll show a preview.",
+  "group_post_link_field_hint": "Link",
+  "group_post_attach": "Attach",
+  "group_post_attach_as_link": "Attach as link",
+  "group_post_preview_failed_title": "Couldn't load a preview",
+  "group_post_preview_failed_message": "You can still attach it as a link.",
+  "group_post_invalid_link": "Enter a valid link, for example https://example.com",
+  "group_post_photo_limit": "You can add up to {count} photos.",
+  "@group_post_photo_limit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "group_post_upload_error": "Unable to upload photos. Please try again.",
+  "group_post_publish_error": "Unable to publish your post. Please try again.",
+  "group_post_published": "Your post is live."
 }
