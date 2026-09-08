@@ -716,9 +716,9 @@ class _EventInfoCard extends StatelessWidget {
     final isMultiDay = !event.isOneDay && !DateUtils.isSameDay(start, end);
     if (isMultiDay) {
       final endDate = DateFormat('EEE d MMM y', locale).format(end);
-      return '$date · $startTime – $endDate · $endTime ${start.timeZoneName}';
+      return '$date · $startTime – $endDate · $endTime ${end.timeZoneName}';
     }
-    return '$date · $startTime – $endTime ${start.timeZoneName}';
+    return '$date · $startTime – $endTime ${end.timeZoneName}';
   }
 
   String? _formatRecurrenceText(BuildContext context, GroupEvent event) {
