@@ -193,7 +193,7 @@ Use this sequence for a full local sync:
 
 ```
 dart run tool/tolgee_sync.dart doctor
-$env:TOLGEE_SYNC_API_KEY = 'tgpak_ha4tmnk7heztsyzxgbrwq4rzmnqte33wmizww5ddnftwwytpge'
+$env:TOLGEE_SYNC_API_KEY = 'tgpak_...'
 dart run tool/tolgee_sync.dart push --dry-run
 dart run tool/tolgee_sync.dart push
 dart run tool/tolgee_sync.dart pull --dry-run

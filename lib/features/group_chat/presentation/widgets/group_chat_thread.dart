@@ -6,6 +6,7 @@ import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/network/connectivity_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/domain/entities/user.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.d
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_thread_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reactions.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_report_feedback.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_report_reason.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_thread_rows.dart';
@@ -360,37 +362,40 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
 
     if (!mounted) return;
 
-    if (failure == null) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.group_chat_report_thanks)),
-      );
-      return;
-    }
-
     // Offline is not a failure worth a retry button: the request never left,
-    // and saying so is more honest than implying something went wrong.
-    if (failure is NetworkFailure) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.group_chat_report_offline)),
-      );
-      return;
-    }
-
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(l10n.group_chat_report_failed),
-        action: SnackBarAction(
-          label: l10n.group_chat_report_retry,
-          onPressed:
-              () => _submitReport(
-                message,
-                reason: reason,
-                note: note,
-                offTopicLabel: offTopicLabel,
-              ),
-        ),
-      ),
+    // and saying so is more honest than implying something went wrong. The
+    // failure type alone cannot tell us that, so ask the connectivity service.
+    final feedback = chatReportFeedbackFor(
+      failure,
+      isOnline: ref.read(connectivityServiceProvider).isOnline,
     );
+
+    switch (feedback) {
+      case ChatReportFeedback.sent:
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.group_chat_report_thanks)),
+        );
+      case ChatReportFeedback.offline:
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.group_chat_report_offline)),
+        );
+      case ChatReportFeedback.failed:
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.group_chat_report_failed),
+            action: SnackBarAction(
+              label: l10n.group_chat_report_retry,
+              onPressed:
+                  () => _submitReport(
+                    message,
+                    reason: reason,
+                    note: note,
+                    offTopicLabel: offTopicLabel,
+                  ),
+            ),
+          ),
+        );
+    }
   }
 
   bool _canDelete(ChatMessageDTO message) {
