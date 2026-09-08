@@ -623,8 +623,7 @@ class _EventInfoCard extends StatelessWidget {
     final locationName = event.location?.name.trim() ?? '';
     final isOnline = isGroupEventOnline(event);
     final showLocation = !isOnline && locationName.isNotEmpty;
-    final showOnline = isOnline || isGroupEventHybrid(event);
-    final onlineLinks =
+    final links =
         event.links
             .where(
               (link) =>
@@ -632,6 +631,13 @@ class _EventInfoCard extends StatelessWidget {
                   GroupEventLinkUtils.kindOf(link) != GroupEventLinkKind.video,
             )
             .toList();
+    // Only a meeting room implies an online venue, not a plain link.
+    final hasMeetingLink = links.any(
+      (link) =>
+          GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting,
+    );
+    final showOnline =
+        isOnline || isGroupEventHybrid(event) || hasMeetingLink;
 
     return Container(
       width: double.infinity,
@@ -664,7 +670,7 @@ class _EventInfoCard extends StatelessWidget {
               iconColor: secondaryColor,
             ),
           ],
-          if (showLocation || showOnline || onlineLinks.isNotEmpty) ...[
+          if (showLocation || showOnline || links.isNotEmpty) ...[
             const SizedBox(height: 16),
             _EventSectionLabel(text: context.l10n.connect_event_where),
             const SizedBox(height: 10),
@@ -676,7 +682,7 @@ class _EventInfoCard extends StatelessWidget {
               iconColor: secondaryColor,
               bold: true,
             ),
-          if (showOnline || onlineLinks.isNotEmpty) ...[
+          if (showOnline) ...[
             if (showLocation) const SizedBox(height: 12),
             _EventInfoRow(
               icon: AppAssets.videoCamera,
@@ -684,10 +690,10 @@ class _EventInfoCard extends StatelessWidget {
               iconColor: secondaryColor,
               bold: true,
             ),
-            for (final link in onlineLinks) ...[
-              const SizedBox(height: 10),
-              _EventLinkText(link: link, isDark: isDark),
-            ],
+          ],
+          for (final link in links) ...[
+            const SizedBox(height: 10),
+            _EventLinkText(link: link, isDark: isDark),
           ],
         ],
       ),
