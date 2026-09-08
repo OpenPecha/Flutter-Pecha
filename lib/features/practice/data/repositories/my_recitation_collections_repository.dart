@@ -116,6 +116,38 @@ class MyRecitationCollectionsRepository {
     }
   }
 
+  Future<Either<Failure, Set<String>>> getTodayCompletions(
+    String collectionId,
+  ) async {
+    try {
+      final result = await remoteDatasource.getTodayCompletions(
+        collectionId: collectionId,
+      );
+      return Right(result.completedChantIds);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to load completed recitations'),
+      );
+    }
+  }
+
+  Future<Either<Failure, void>> completeChant({
+    required String collectionId,
+    required String chantId,
+  }) async {
+    try {
+      await remoteDatasource.completeChant(
+        collectionId: collectionId,
+        chantId: chantId,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to complete recitation'),
+      );
+    }
+  }
+
   /// Creates a collection (unless [existingCollectionId] is set), then adds
   /// [textIds] when non-empty.
   ///

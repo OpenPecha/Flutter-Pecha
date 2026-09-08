@@ -6,9 +6,8 @@ import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
-import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/my_recitation_collection_options_sheet.dart';
-import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
+import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,6 +30,9 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(
       myRecitationCollectionDetailProvider(collectionId),
+    );
+    final completionState = ref.watch(
+      myRecitationCollectionCompletionProvider(collectionId),
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final detail = detailAsync.valueOrNull?.fold((_) => null, (value) => value);
@@ -67,8 +69,16 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                       ),
                       (collection) => _CollectionContent(
                         collection: collection,
+                        completionState: completionState,
                         isDark: isDark,
-                        onOpenItem: (item) => _openChantReader(context, item),
+                        onOpenItem:
+                            (item) => _openChantReader(
+                              context,
+                              ref,
+                              collectionId,
+                              collection,
+                              item,
+                            ),
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -89,19 +99,46 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
   }
 }
 
-void _openChantReader(
+Future<void> _openChantReader(
   BuildContext context,
+  WidgetRef ref,
+  String collectionId,
+  MyRecitationCollectionDetailModel collection,
   MyRecitationCollectionItemModel item,
-) {
+) async {
   final textId = item.textId.trim();
   if (textId.isEmpty) return;
 
-  final title = item.title?.trim().isNotEmpty == true ? item.title! : textId;
-
-  openRecitationReader(
-    context,
-    RecitationModel(textId: textId, title: title, language: item.language),
+  final completionState = ref.read(
+    myRecitationCollectionCompletionProvider(collectionId),
   );
+  final currentIndex = collection.items.indexWhere((i) => i.id == item.id);
+  final planTextItems =
+      collection.items.map((collectionItem) {
+        final itemTextId = collectionItem.textId.trim();
+        final title =
+            collectionItem.title?.trim().isNotEmpty == true
+                ? collectionItem.title!
+                : itemTextId;
+        return PlanTextItem.sourceReference(
+          textId: itemTextId,
+          title: title,
+          language: collectionItem.language,
+          subtaskId: collectionItem.id,
+          isCompleted: _isItemCompleted(completionState, collectionItem),
+        );
+      }).toList();
+
+  final language = item.language?.trim();
+  final navigationContext = NavigationContext(
+    source: NavigationSource.myRecitationCollection,
+    planTextItems: planTextItems,
+    currentTextIndex: currentIndex >= 0 ? currentIndex : 0,
+    collectionId: collectionId,
+    language: language != null && language.isNotEmpty ? language : null,
+  );
+
+  await context.push('/reader/$textId', extra: navigationContext);
 }
 
 class _CollectionAppBar extends StatelessWidget {
@@ -151,11 +188,13 @@ class _CollectionAppBar extends StatelessWidget {
 class _CollectionContent extends StatelessWidget {
   const _CollectionContent({
     required this.collection,
+    required this.completionState,
     required this.isDark,
     required this.onOpenItem,
   });
 
   final MyRecitationCollectionDetailModel collection;
+  final MyRecitationCollectionCompletionState completionState;
   final bool isDark;
   final ValueChanged<MyRecitationCollectionItemModel> onOpenItem;
 
@@ -180,6 +219,8 @@ class _CollectionContent extends StatelessWidget {
                     (item) => _RecitationCollectionRow(
                       item: item,
                       isDark: isDark,
+                      isCompleted: _isItemCompleted(completionState, item),
+                      isSubmitting: completionState.isSubmitting(item.id),
                       onTap: () => onOpenItem(item),
                     ),
                   )
@@ -214,8 +255,8 @@ class _CollectionContent extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              // Disabled until the collection reading flow is designed.
-              onPressed: null,
+              onPressed:
+                  hasItems ? () => onOpenItem(collection.items.first) : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor:
@@ -241,6 +282,14 @@ class _CollectionContent extends StatelessWidget {
       ],
     );
   }
+}
+
+bool _isItemCompleted(
+  MyRecitationCollectionCompletionState completionState,
+  MyRecitationCollectionItemModel item,
+) {
+  return completionState.isCompleted(item.id) ||
+      completionState.isCompleted(item.textId);
 }
 
 class _CollectionHero extends StatelessWidget {
@@ -361,11 +410,15 @@ class _RecitationCollectionRow extends StatelessWidget {
   const _RecitationCollectionRow({
     required this.item,
     required this.isDark,
+    required this.isCompleted,
+    required this.isSubmitting,
     required this.onTap,
   });
 
   final MyRecitationCollectionItemModel item;
   final bool isDark;
+  final bool isCompleted;
+  final bool isSubmitting;
   final VoidCallback onTap;
 
   @override
@@ -377,19 +430,17 @@ class _RecitationCollectionRow extends StatelessWidget {
         item.title?.trim().isNotEmpty == true ? item.title! : item.textId;
 
     return InkWell(
-      onTap: onTap,
+      onTap: isSubmitting ? null : onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 9),
         child: Row(
           children: [
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor, width: 1),
-              ),
+            _CompletionIndicator(
+              isCompleted: isCompleted,
+              isSubmitting: isSubmitting,
+              isDark: isDark,
+              borderColor: borderColor,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -420,6 +471,51 @@ class _RecitationCollectionRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CompletionIndicator extends StatelessWidget {
+  const _CompletionIndicator({
+    required this.isCompleted,
+    required this.isSubmitting,
+    required this.isDark,
+    required this.borderColor,
+  });
+
+  final bool isCompleted;
+  final bool isSubmitting;
+  final bool isDark;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isSubmitting) {
+      return const SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    final fillColor = isDark ? AppColors.surfaceWhite : AppColors.textPrimary;
+    final checkColor = isDark ? AppColors.textPrimary : AppColors.surfaceWhite;
+
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted ? fillColor : Colors.transparent,
+        border: Border.all(
+          color: isCompleted ? fillColor : borderColor,
+          width: 1,
+        ),
+      ),
+      child:
+          isCompleted
+              ? Icon(AppAssets.check, size: 13, color: checkColor)
+              : null,
     );
   }
 }
