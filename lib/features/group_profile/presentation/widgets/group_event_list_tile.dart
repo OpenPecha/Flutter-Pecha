@@ -216,7 +216,7 @@ class GroupEventListTile extends StatelessWidget {
 
     final end = event.endDate?.toLocal();
     final isMultiDay =
-        end != null && !event.isOneDay && !DateUtils.isSameDay(start, end);
+        end != null && !DateUtils.isSameDay(start, end);
     if (isMultiDay) {
       return '${dayFormat.format(start)} - ${dayFormat.format(end)}';
     }
