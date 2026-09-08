@@ -345,6 +345,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
     // the element, and an ancestor lookup then throws.
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
+    final connectivity = ref.read(connectivityServiceProvider);
 
     final failure = await ref
         .read(groupChatRepositoryProvider)
@@ -360,15 +361,17 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
         )
         .then((result) => result.fold<Failure?>((f) => f, (_) => null));
 
-    if (!mounted) return;
-
     // Offline is not a failure worth a retry button: the request never left,
     // and saying so is more honest than implying something went wrong. The
-    // failure type alone cannot tell us that, so ask the connectivity service.
-    final feedback = chatReportFeedbackFor(
+    // failure type alone cannot tell us that, and the cached flag may be
+    // stale (it is only refreshed on connectivity events), so probe live.
+    // The probe only runs when the failure makes it relevant.
+    final feedback = await chatReportFeedbackFor(
       failure,
-      isOnline: ref.read(connectivityServiceProvider).isOnline,
+      isOnline: connectivity.checkConnectivity,
     );
+
+    if (!mounted) return;
 
     switch (feedback) {
       case ChatReportFeedback.sent:

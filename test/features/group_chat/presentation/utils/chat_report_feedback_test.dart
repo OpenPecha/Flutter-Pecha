@@ -2,30 +2,46 @@ import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_report_feedback.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// A connectivity probe that records whether it was asked.
+class _Probe {
+  _Probe(this.online);
+
+  final bool online;
+  int calls = 0;
+
+  Future<bool> call() async {
+    calls++;
+    return online;
+  }
+}
+
 void main() {
   group('chatReportFeedbackFor', () {
-    test('no failure means the report was sent', () {
-      expect(
-        chatReportFeedbackFor(null, isOnline: true),
-        ChatReportFeedback.sent,
-      );
-      expect(
-        chatReportFeedbackFor(null, isOnline: false),
-        ChatReportFeedback.sent,
-      );
+    test('no failure means the report was sent without probing', () async {
+      for (final online in const [true, false]) {
+        final probe = _Probe(online);
+        expect(
+          await chatReportFeedbackFor(null, isOnline: probe.call),
+          ChatReportFeedback.sent,
+        );
+        expect(probe.calls, 0);
+      }
     });
 
-    test('a network failure while offline is reported as offline', () {
+    test('a network failure is only offline when a live probe says so',
+        () async {
+      final probe = _Probe(false);
       expect(
-        chatReportFeedbackFor(
+        await chatReportFeedbackFor(
           const NetworkFailure('reportMessage: No internet connection'),
-          isOnline: false,
+          isOnline: probe.call,
         ),
         ChatReportFeedback.offline,
       );
+      expect(probe.calls, 1);
     });
 
-    test('a network failure while online keeps the retry path', () {
+    test('a network failure while online keeps the retry path', () async {
       // The interceptor files timeouts, cancels, bad certificates and unknown
       // errors under NetworkFailure too; none of those mean the user is
       // offline.
@@ -35,28 +51,33 @@ void main() {
         'reportMessage: Invalid SSL certificate',
         'reportMessage: Unknown error: something',
       ]) {
+        final probe = _Probe(true);
         expect(
-          chatReportFeedbackFor(NetworkFailure(message), isOnline: true),
+          await chatReportFeedbackFor(
+            NetworkFailure(message),
+            isOnline: probe.call,
+          ),
           ChatReportFeedback.failed,
           reason: message,
         );
+        expect(probe.calls, 1, reason: message);
       }
     });
 
-    test('any other failure keeps the retry path, online or not', () {
+    test('any other failure keeps the retry path without probing', () async {
       for (final failure in const <Failure>[
         ServerFailure('reportMessage: 500'),
         NotFoundFailure('reportMessage: 404'),
         UnknownFailure('reportMessage: boom'),
       ]) {
-        expect(
-          chatReportFeedbackFor(failure, isOnline: true),
-          ChatReportFeedback.failed,
-        );
-        expect(
-          chatReportFeedbackFor(failure, isOnline: false),
-          ChatReportFeedback.failed,
-        );
+        for (final online in const [true, false]) {
+          final probe = _Probe(online);
+          expect(
+            await chatReportFeedbackFor(failure, isOnline: probe.call),
+            ChatReportFeedback.failed,
+          );
+          expect(probe.calls, 0);
+        }
       }
     });
   });
