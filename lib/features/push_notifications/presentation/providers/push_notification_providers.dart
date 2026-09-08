@@ -50,7 +50,7 @@ final pushNotificationBootstrapProvider = Provider<void>((ref) {
   service.shouldSuppressForeground =
       (message) => isGroupChatPushForActiveRoom(
         message.data,
-        ref.read(activeGroupChatGroupIdProvider),
+        ref.read(activeGroupChatRoomProvider).groupId,
       );
 
   unawaited(service.initialize());

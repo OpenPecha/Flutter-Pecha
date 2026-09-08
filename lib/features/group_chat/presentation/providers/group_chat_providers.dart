@@ -29,9 +29,28 @@ final resolveGroupChatRoomProvider = Provider<ResolveGroupChatRoom>((ref) {
   );
 });
 
-/// The group whose chat screen is currently on screen, or null.
+/// Which group's chat screen is currently on screen.
 ///
-/// Set by [GroupChatScreen] on init and cleared on dispose. Read by the push
-/// layer to skip the foreground heads-up for a room the user is already
-/// reading; the message still arrives live over the WebSocket.
-final activeGroupChatGroupIdProvider = StateProvider<String?>((ref) => null);
+/// A plain mutable holder rather than Riverpod state on purpose: the chat
+/// screen claims and releases it from `initState` and `dispose`, and Riverpod
+/// forbids modifying a provider inside widget lifecycles. Nothing needs to
+/// rebuild on change; the push layer only reads it at the moment a foreground
+/// message arrives, to skip the heads-up for a room the user is already
+/// reading (the message still arrives live over the WebSocket).
+class ActiveGroupChatRoom {
+  String? _groupId;
+
+  String? get groupId => _groupId;
+
+  void claim(String groupId) => _groupId = groupId;
+
+  /// Only clears when [groupId] still holds the slot, so a chat for another
+  /// group pushed on top keeps its own claim when this one disposes.
+  void release(String groupId) {
+    if (_groupId == groupId) _groupId = null;
+  }
+}
+
+final activeGroupChatRoomProvider = Provider<ActiveGroupChatRoom>(
+  (ref) => ActiveGroupChatRoom(),
+);

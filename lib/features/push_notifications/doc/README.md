@@ -90,7 +90,7 @@ server-stored, and greyed out in the UI while master is off.
 ## Foreground suppression
 
 `PushNotificationService.shouldSuppressForeground` is wired in the bootstrap
-provider to `isGroupChatPushForActiveRoom` + `activeGroupChatGroupIdProvider`
+provider to `isGroupChatPushForActiveRoom` + `activeGroupChatRoomProvider`
 (group_chat feature): a group chat push for the room currently on screen shows
 no heads-up, since the open screen already receives it live.
 
