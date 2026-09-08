@@ -4244,6 +4244,24 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get group_chat_title;
 
+  /// No description provided for @chats_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats'**
+  String get chats_title;
+
+  /// No description provided for @chats_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No chats yet'**
+  String get chats_empty_title;
+
+  /// No description provided for @chats_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a community to start chatting.'**
+  String get chats_empty_body;
+
   /// No description provided for @group_chat_inappropriate.
   ///
   /// In en, this message translates to:

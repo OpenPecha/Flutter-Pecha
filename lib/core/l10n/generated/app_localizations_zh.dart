@@ -2259,6 +2259,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_chat_title => '聊天';
 
   @override
+  String get chats_title => '聊天';
+
+  @override
+  String get chats_empty_title => '尚無聊天';
+
+  @override
+  String get chats_empty_body => '加入社群即可開始聊天。';
+
+  @override
   String get group_chat_inappropriate => '此訊息含有不允許的用語，因此無法發送。';
 
   @override

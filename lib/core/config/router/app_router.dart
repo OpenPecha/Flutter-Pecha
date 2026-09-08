@@ -17,6 +17,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_pract
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_accumulator_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_event_detail_screen.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/screens/chats_screen.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/screens/group_chat_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_profile_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_recitation_collection_screen.dart';
@@ -190,6 +191,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: "/onboarding",
         name: "onboarding",
         builder: (context, state) => const OnboardingWrapper(),
+      ),
+      GoRoute(
+        path: AppRoutes.chats,
+        name: 'chats',
+        builder: (context, state) => const ChatsScreen(),
       ),
       GoRoute(
         path: AppRoutes.groupChat,

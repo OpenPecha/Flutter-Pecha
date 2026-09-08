@@ -2376,6 +2376,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_chat_title => 'Chat';
 
   @override
+  String get chats_title => 'Chats';
+
+  @override
+  String get chats_empty_title => 'No chats yet';
+
+  @override
+  String get chats_empty_body => 'Join a community to start chatting.';
+
+  @override
   String get group_chat_inappropriate =>
       'This message couldn\'t be sent because it contains language that isn\'t allowed.';
 

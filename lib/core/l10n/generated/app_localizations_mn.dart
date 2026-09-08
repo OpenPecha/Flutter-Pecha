@@ -2401,6 +2401,15 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_chat_title => 'Чат';
 
   @override
+  String get chats_title => 'Чатууд';
+
+  @override
+  String get chats_empty_title => 'Одоогоор чат алга';
+
+  @override
+  String get chats_empty_body => 'Чат эхлүүлэхийн тулд нэгдэлд нэгдээрэй.';
+
+  @override
   String get group_chat_inappropriate =>
       'Зөвшөөрөгдөөгүй үг агуулсан тул энэ мессежийг илгээж чадсангүй.';
 
