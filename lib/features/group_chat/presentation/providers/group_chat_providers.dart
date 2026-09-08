@@ -28,3 +28,10 @@ final resolveGroupChatRoomProvider = Provider<ResolveGroupChatRoom>((ref) {
     cache: ref.watch(groupChatRoomCacheProvider),
   );
 });
+
+/// The group whose chat screen is currently on screen, or null.
+///
+/// Set by [GroupChatScreen] on init and cleared on dispose. Read by the push
+/// layer to skip the foreground heads-up for a room the user is already
+/// reading; the message still arrives live over the WebSocket.
+final activeGroupChatGroupIdProvider = StateProvider<String?>((ref) => null);

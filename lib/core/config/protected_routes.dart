@@ -66,6 +66,7 @@ class ProtectedRoutes {
     // Group join / follow
     '/author/groups/{groupId}/join',
     '/author/groups/{groupId}/follow',
+    '/author/groups/{groupId}/notification-preferences',
 
     // Event participation (join / leave require auth)
     '/events/{eventId}/participants',

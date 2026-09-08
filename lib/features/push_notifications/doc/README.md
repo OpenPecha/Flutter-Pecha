@@ -60,18 +60,39 @@ push_notifications/
 | TIMER | Timers screen |
 | RECITATION / COLLECTION / ACCUMULATION | Practice tab |
 | VERSE_OF_DAY (and aliases) | Home tab (verse card) |
+| CHAT (`chat_kind: GROUP`) | Group chat by `group_id`; private chats fall back to Home |
+| GROUP_POST | Post detail by `source_id` |
+| EVENT / EVENT_REMINDER | Event detail by `source_id` |
+| GROUP (join request created / decided) | Group profile by `source_id` |
 | Empty / unknown | Home tab |
 
 Post-frame scheduling (`_schedule`) — defer navigation until tree ready.
 
 ## Cross-feature dependencies
 
-- **auth**, **notifications**, **home** (MainTab), **practice** (pending nav), **core** (router, dio)
+- **auth**, **notifications**, **home** (MainTab), **practice** (pending nav), **group_chat** (active room for suppression), **core** (router, dio)
 
 ## Server vs local split
 
-- **FCM:** plan, series (routine toggle gates backend prefs)
+- **FCM:** plan, series (routine toggle gates backend prefs), group chat, group posts, events, event reminders, join requests, verse of the day
 - **Local only (notifications feature):** recitation, mala, timer
+
+## Master switch
+
+The app's master notification toggle is enforced server-side by
+**unregistering the device**: OFF calls `DELETE /users/me/push-devices/{id}`
+with the id kept from the register response (`StorageKeys.pushDeviceServerId`),
+ON registers again. Token refreshes and sign-in while master is off never
+re-register; sign-in with master off removes a registration left from an
+earlier session. Per-group toggles (group_profile feature) are separate,
+server-stored, and greyed out in the UI while master is off.
+
+## Foreground suppression
+
+`PushNotificationService.shouldSuppressForeground` is wired in the bootstrap
+provider to `isGroupChatPushForActiveRoom` + `activeGroupChatGroupIdProvider`
+(group_chat feature): a group chat push for the room currently on screen shows
+no heads-up, since the open screen already receives it live.
 
 ---
 
