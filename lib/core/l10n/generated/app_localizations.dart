@@ -4370,6 +4370,96 @@ abstract class AppLocalizations {
   /// **'Report'**
   String get group_chat_report;
 
+  /// No description provided for @group_chat_report_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you reporting this?'**
+  String get group_chat_report_title;
+
+  /// No description provided for @group_chat_report_privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name stays private.'**
+  String get group_chat_report_privacy;
+
+  /// No description provided for @group_chat_report_reason_harassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment or bullying'**
+  String get group_chat_report_reason_harassment;
+
+  /// No description provided for @group_chat_report_reason_hate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hateful or harmful speech'**
+  String get group_chat_report_reason_hate;
+
+  /// No description provided for @group_chat_report_reason_sexual.
+  ///
+  /// In en, this message translates to:
+  /// **'Sexual or explicit content'**
+  String get group_chat_report_reason_sexual;
+
+  /// No description provided for @group_chat_report_reason_spam.
+  ///
+  /// In en, this message translates to:
+  /// **'Spam or scams'**
+  String get group_chat_report_reason_spam;
+
+  /// No description provided for @group_chat_report_reason_off_topic.
+  ///
+  /// In en, this message translates to:
+  /// **'Off-topic or disruptive'**
+  String get group_chat_report_reason_off_topic;
+
+  /// No description provided for @group_chat_report_reason_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get group_chat_report_reason_other;
+
+  /// No description provided for @group_chat_report_note_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get group_chat_report_note_title;
+
+  /// No description provided for @group_chat_report_note_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else...'**
+  String get group_chat_report_note_hint;
+
+  /// No description provided for @group_chat_report_submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get group_chat_report_submit;
+
+  /// No description provided for @group_chat_report_thanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for the feedback'**
+  String get group_chat_report_thanks;
+
+  /// No description provided for @group_chat_report_offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline — try again later'**
+  String get group_chat_report_offline;
+
+  /// No description provided for @group_chat_report_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send report'**
+  String get group_chat_report_failed;
+
+  /// No description provided for @group_chat_report_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get group_chat_report_retry;
+
   /// No description provided for @group_chat_delete.
   ///
   /// In en, this message translates to:
@@ -4421,7 +4511,7 @@ abstract class AppLocalizations {
   /// No description provided for @group_chat_reactions_count.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 reaction} other{{count} reactions}}'**
+  /// **'{count, plural,\n=1 {1 reaction}\nother {{count} reactions}\n}'**
   String group_chat_reactions_count(int count);
 
   /// No description provided for @group_chat_you.

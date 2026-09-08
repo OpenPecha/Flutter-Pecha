@@ -191,6 +191,18 @@ Use this sequence for a full local sync:
 8. `dart run tool/generate_tolgee_bridge.dart` — regenerate OTA bridge for CI freshness
 9. `dart run tool/tolgee_sync.dart doctor --remote` — confirm ARB ↔ Tolgee ↔ CDN health
 
+```
+dart run tool/tolgee_sync.dart doctor
+$env:TOLGEE_SYNC_API_KEY = 'tgpak_ha4tmnk7heztsyzxgbrwq4rzmnqte33wmizww5ddnftwwytpge'
+dart run tool/tolgee_sync.dart push --dry-run
+dart run tool/tolgee_sync.dart push
+dart run tool/tolgee_sync.dart pull --dry-run
+dart run tool/tolgee_sync.dart pull
+flutter gen-l10n
+dart run tool/generate_tolgee_bridge.dart
+dart run tool/tolgee_sync.dart doctor --remote
+```
+
 Steps 3–4 are only needed when `app_en.arb` has new keys. Steps 5–8 are the
 usual “bring translator updates into the app” path. Always dry-run before a
 real push or pull.

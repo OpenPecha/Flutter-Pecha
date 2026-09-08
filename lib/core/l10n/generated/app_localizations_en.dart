@@ -2440,6 +2440,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_chat_report => 'Report';
 
   @override
+  String get group_chat_report_title => 'Why are you reporting this?';
+
+  @override
+  String get group_chat_report_privacy => 'Your name stays private.';
+
+  @override
+  String get group_chat_report_reason_harassment => 'Harassment or bullying';
+
+  @override
+  String get group_chat_report_reason_hate => 'Hateful or harmful speech';
+
+  @override
+  String get group_chat_report_reason_sexual => 'Sexual or explicit content';
+
+  @override
+  String get group_chat_report_reason_spam => 'Spam or scams';
+
+  @override
+  String get group_chat_report_reason_off_topic => 'Off-topic or disruptive';
+
+  @override
+  String get group_chat_report_reason_other => 'Something else';
+
+  @override
+  String get group_chat_report_note_title => 'Add a note';
+
+  @override
+  String get group_chat_report_note_hint => 'Something else...';
+
+  @override
+  String get group_chat_report_submit => 'Submit report';
+
+  @override
+  String get group_chat_report_thanks => 'Thank you for the feedback';
+
+  @override
+  String get group_chat_report_offline => 'You\'re offline — try again later';
+
+  @override
+  String get group_chat_report_failed => 'Couldn\'t send report';
+
+  @override
+  String get group_chat_report_retry => 'Retry';
+
+  @override
   String get group_chat_delete => 'Delete';
 
   @override
