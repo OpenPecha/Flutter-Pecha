@@ -159,6 +159,7 @@ class _GroupRecitationCollectionScreenState
           return PlanTextItem.sourceReference(
             textId: collectionItem.textId,
             title: collectionItem.title,
+            language: collectionItem.language,
             subtaskId: collectionItem.id,
             isCompleted: completionState.isCompleted(collectionItem.id),
           );
@@ -170,6 +171,7 @@ class _GroupRecitationCollectionScreenState
       currentTextIndex: currentIndex >= 0 ? currentIndex : 0,
       groupId: key.groupId,
       collectionId: key.collectionId,
+      language: item.language,
     );
 
     await context.push('/reader/$textId', extra: navigationContext);
