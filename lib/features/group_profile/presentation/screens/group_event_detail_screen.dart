@@ -727,7 +727,7 @@ class _EventInfoCard extends StatelessWidget {
         start.timeZoneName == endZone
             ? startTime
             : '$startTime ${start.timeZoneName}';
-    final isMultiDay = !event.isOneDay && !DateUtils.isSameDay(start, end);
+    final isMultiDay = !DateUtils.isSameDay(start, end);
     if (isMultiDay) {
       final endDate = DateFormat('EEE d MMM y', locale).format(end);
       return '$date · $startLabel – $endDate · $endTime $endZone';
