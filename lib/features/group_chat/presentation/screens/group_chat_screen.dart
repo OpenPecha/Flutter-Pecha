@@ -109,6 +109,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
     super.initState();
     _providers = ProviderScope.containerOf(context, listen: false);
     WidgetsBinding.instance.addObserver(this);
+    // Lets the push layer mute foreground banners for this room while open.
+    _providers.read(activeGroupChatRoomProvider).claim(widget.groupId);
   }
 
   @override
@@ -122,6 +124,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen>
   void dispose() {
     _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
+    _providers.read(activeGroupChatRoomProvider).release(widget.groupId);
     _reconnectTimer?.cancel();
     unawaited(_tearDownLive());
     _bodyController.dispose();

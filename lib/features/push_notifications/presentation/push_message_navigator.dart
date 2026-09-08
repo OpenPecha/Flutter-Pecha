@@ -34,6 +34,11 @@ class PushSessionType {
   /// `EVENT` pushes — a group event.
   static const String event = 'EVENT';
 
+  /// `EVENT_REMINDER` pushes — "starting soon" / "starting now" for an event
+  /// the user joined. Carries `reminder_type` (`T_MINUS_10` | `T_ZERO`) and
+  /// `source_id` = event id, so it lands on the same screen as [event].
+  static const String eventReminder = 'EVENT_REMINDER';
+
   /// Shared by `JOIN_REQUEST_CREATED` and `JOIN_REQUEST_DECIDED`; the backend
   /// does not distinguish them by `session_type`, and it doesn't need to —
   /// both currently land on the same screen.
@@ -118,6 +123,7 @@ PushTapResolution resolvePushTap(Map<String, dynamic> data) {
     case PushSessionType.groupPost when sourceId.isNotEmpty:
       return PushTapResolution(PushTapTarget.postDetail, sourceId: sourceId);
     case PushSessionType.event when sourceId.isNotEmpty:
+    case PushSessionType.eventReminder when sourceId.isNotEmpty:
       return PushTapResolution(PushTapTarget.eventDetail, sourceId: sourceId);
     case PushSessionType.group when sourceId.isNotEmpty:
       // Both JOIN_REQUEST_CREATED and JOIN_REQUEST_DECIDED arrive with
@@ -143,6 +149,20 @@ String _sessionTypeOf(Map<String, dynamic> data) {
 
 String _chatKindOf(Map<String, dynamic> data) =>
     (data['chat_kind'] as String?)?.trim().toUpperCase() ?? '';
+
+/// Whether [data] is a group chat push for the group whose chat screen is
+/// currently open ([activeGroupId]). Used to skip the foreground heads-up
+/// banner for a room the user is already reading.
+bool isGroupChatPushForActiveRoom(
+  Map<String, dynamic> data,
+  String? activeGroupId,
+) {
+  if (activeGroupId == null || activeGroupId.isEmpty) return false;
+  if (_sessionTypeOf(data) != PushSessionType.chat) return false;
+  if (_chatKindOf(data) != PushChatKind.group) return false;
+  final groupId = (data['group_id'] as String?)?.trim() ?? '';
+  return groupId == activeGroupId;
+}
 
 /// Single entry point for navigating after a push notification is opened.
 ///

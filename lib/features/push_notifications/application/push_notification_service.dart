@@ -49,8 +49,20 @@ class PushNotificationService {
   /// flutter_local_notifications callback), so they don't pass through here.
   void Function(PushMessage message)? onOpenMessage;
 
+  /// Asked before a foreground message is shown as a heads-up. Return true to
+  /// drop the banner (the payload is still handled by whoever owns the
+  /// screen, e.g. the open chat room receiving it live). Set by the bootstrap
+  /// layer, which knows which screen is on top.
+  bool Function(PushMessage message)? shouldSuppressForeground;
+
   String? _token;
   bool _loggedIn = false;
+
+  /// Mirrors the app's master notification switch. While false the device is
+  /// kept unregistered on the backend so no server push of any kind reaches
+  /// it; the OS shows background pushes before the app can filter them, so
+  /// this has to be enforced server-side. Fed by [setMasterEnabled].
+  bool _masterEnabled = true;
   bool _initialized = false;
   Future<void>? _initializing;
   int _initRetryCount = 0;
@@ -128,16 +140,59 @@ class PushNotificationService {
   /// sign-in (the backend keys the device on the JWT, so no profile data is
   /// needed). Guests are treated as signed out for push targeting.
   void onAuthChanged({required bool loggedIn}) {
-    final shouldRegister = loggedIn && !_loggedIn;
+    final signedIn = loggedIn && !_loggedIn;
     _loggedIn = loggedIn;
-    if (shouldRegister) unawaited(_registerToken());
+    if (!signedIn) return;
+    if (_masterEnabled) {
+      unawaited(_registerToken());
+    } else {
+      // Master was switched off while signed out (or before auth resolved on
+      // launch), so the registration left from an earlier session must go now
+      // that the JWT is available.
+      unawaited(unregisterDevice());
+    }
   }
 
   /// Re-sends the device registration so the backend picks up the latest
   /// notification-category preferences. Called when the user flips a
-  /// notification toggle. No-op until a token is captured and the user is
-  /// signed in (the guards live in [_registerToken]).
+  /// notification toggle. No-op until a token is captured, the user is
+  /// signed in and the master switch is on (the guards live in
+  /// [_registerToken]).
   void refreshRegistration() => unawaited(_registerToken());
+
+  /// Applies the master notification switch. OFF unregisters the device from
+  /// the backend so every server push stops; ON registers it again. Safe to
+  /// call with the same value repeatedly.
+  void setMasterEnabled(bool enabled) {
+    if (_masterEnabled == enabled) return;
+    _masterEnabled = enabled;
+    if (enabled) {
+      unawaited(_registerToken());
+    } else {
+      unawaited(unregisterDevice());
+    }
+  }
+
+  /// Removes this device's registration from the backend using the id kept
+  /// from the last successful register call. Nothing to do when the device
+  /// was never registered or the user is signed out (the endpoint needs the
+  /// user's JWT). The stored id is kept on failure so a later attempt can
+  /// still find the registration.
+  Future<void> unregisterDevice() async {
+    final serverId = await _storage.get<String>(StorageKeys.pushDeviceServerId);
+    if (serverId == null || serverId.isEmpty) return;
+    if (!_loggedIn) return;
+
+    final result = await _repository.unregisterDeviceToken(serverId);
+    await result.fold(
+      (failure) async =>
+          _logger.warning('Device unregister failed: ${failure.message}'),
+      (_) async {
+        await _storage.remove(StorageKeys.pushDeviceServerId);
+        _logger.info('Device unregistered');
+      },
+    );
+  }
 
   Future<void> _onToken(String token) async {
     if (token == _token) return;
@@ -152,16 +207,25 @@ class PushNotificationService {
   Future<void> _registerToken() async {
     final token = _token;
     if (token == null || !_loggedIn) return;
+    if (!_masterEnabled) {
+      _logger.info('Skipping token registration: master switch is off');
+      return;
+    }
     final deviceId = await _deviceId();
     final result = await _repository.registerDeviceToken(
       token,
       deviceId: deviceId,
       preferences: await _readPreferences(),
     );
-    result.fold(
-      (failure) =>
+    await result.fold(
+      (failure) async =>
           _logger.warning('Token registration failed: ${failure.message}'),
-      (_) => _logger.info('Token registered'),
+      (serverId) async {
+        if (serverId != null) {
+          await _storage.set(StorageKeys.pushDeviceServerId, serverId);
+        }
+        _logger.info('Token registered');
+      },
     );
   }
 
@@ -197,6 +261,10 @@ class PushNotificationService {
 
   Future<void> _showNotification(PushMessage message) async {
     if (!message.hasNotification) return;
+    if (shouldSuppressForeground?.call(message) ?? false) {
+      _logger.info('Foreground message suppressed: ${message.title}');
+      return;
+    }
     _logger.info('Foreground message: ${message.title}');
     await _localNotifications.show(
       // Time-based id kept within the 32-bit range Android requires.

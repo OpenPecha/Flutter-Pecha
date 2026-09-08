@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/utils/local_storage_service.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/state/auth_state.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/notifications/data/services/notification_service.dart';
 import 'package:flutter_pecha/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:flutter_pecha/features/push_notifications/application/push_notification_service.dart';
@@ -44,6 +45,14 @@ final pushNotificationBootstrapProvider = Provider<void>((ref) {
   service.onOpenMessage = navigator.handle;
   NotificationService.setPushTapHandler(navigator.handleData);
 
+  // No heads-up for a group chat message while that room is on screen; the
+  // open screen already shows it live.
+  service.shouldSuppressForeground =
+      (message) => isGroupChatPushForActiveRoom(
+        message.data,
+        ref.read(activeGroupChatRoomProvider).groupId,
+      );
+
   unawaited(service.initialize());
 
   void syncAuth() {
@@ -56,17 +65,24 @@ final pushNotificationBootstrapProvider = Provider<void>((ref) {
   // the JWT, so a single listener on auth is enough.
   ref.listen<AuthState>(authProvider, (_, __) => syncAuth(), fireImmediately: true);
 
-  // Re-register whenever the plan/series push gate changes so the backend can
-  // gate it — the only category delivered via FCM. That gate is master AND
-  // routine (master is the global kill-switch), so watch both. The remaining
-  // toggles (recitation/mala/timer) are local-only and ignored here.
+  // Master is the global kill-switch: OFF unregisters the device so every
+  // server push (chat, group content, reminders, routine, verse of the day)
+  // stops; ON registers it again. The routine toggle only re-sends the
+  // registration with the updated plan/series gate. The remaining toggles
+  // (recitation/mala/timer) are local-only and ignored here.
   ref.listen<NotificationState>(
     notificationProvider,
     (prev, next) {
-      final changed = prev == null ||
-          prev.appMasterEnabled != next.appMasterEnabled ||
-          prev.appRoutineEnabled != next.appRoutineEnabled;
-      if (changed) service.refreshRegistration();
+      final masterChanged =
+          prev == null || prev.appMasterEnabled != next.appMasterEnabled;
+      if (masterChanged) {
+        service.setMasterEnabled(next.appMasterEnabled);
+        return;
+      }
+      if (prev.appRoutineEnabled != next.appRoutineEnabled) {
+        service.refreshRegistration();
+      }
     },
+    fireImmediately: true,
   );
 });
