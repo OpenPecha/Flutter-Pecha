@@ -105,7 +105,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 ConnectFeedCardLayout.horizontalPadding,
                 ConnectFeedCardLayout.bodyTopSpacing,
                 ConnectFeedCardLayout.horizontalPadding,
-                0,
+                ConnectFeedCardLayout.bodyToMediaSpacing,
               ),
               child: Text(
                 series.title,
@@ -118,7 +118,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            ConnectFeedCardSectionDivider(isDark: isDark),
             ConnectFeedCardMediaFrame(
               child: AspectRatio(
                 aspectRatio: 16 / 9,
@@ -154,7 +153,13 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                     () => _onPracticeWithUsTap(practice, series),
                               )
                               : null,
-                      memberCount: series.enrolledCount,
+                      trailing:
+                          series.enrolledCount > 0
+                              ? _PracticeImageBadge(
+                                label: '${series.enrolledCount}',
+                                icon: AppAssets.usercard,
+                              )
+                              : null,
                     ),
                   ],
                 ),
@@ -208,7 +213,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 ConnectFeedCardLayout.horizontalPadding,
                 ConnectFeedCardLayout.bodyTopSpacing,
                 ConnectFeedCardLayout.horizontalPadding,
-                0,
+                ConnectFeedCardLayout.bodyToMediaSpacing,
               ),
               child: Text(
                 accumulator.title,
@@ -221,7 +226,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            ConnectFeedCardSectionDivider(isDark: isDark),
             ConnectFeedCardMediaFrame(
               child: AspectRatio(
                 aspectRatio: 16 / 9,
@@ -260,7 +264,13 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                     ),
                               )
                               : null,
-                      memberCount: accumulator.memberCount,
+                      trailing:
+                          accumulator.memberCount > 0
+                              ? _PracticeImageBadge(
+                                label: '${accumulator.memberCount}',
+                                icon: AppAssets.usercard,
+                              )
+                              : null,
                     ),
                   ],
                 ),
@@ -304,7 +314,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 ConnectFeedCardLayout.horizontalPadding,
                 ConnectFeedCardLayout.bodyTopSpacing,
                 ConnectFeedCardLayout.horizontalPadding,
-                0,
+                ConnectFeedCardLayout.bodyToMediaSpacing,
               ),
               child: Text(
                 plan.title,
@@ -317,7 +327,6 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            ConnectFeedCardSectionDivider(isDark: isDark),
             ConnectFeedCardMediaFrame(
               child: AspectRatio(
                 aspectRatio: 16 / 9,
@@ -372,14 +381,13 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
               timestamp: practice.practiceAt,
-              subtitle: itemCountLabel,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 ConnectFeedCardLayout.horizontalPadding,
                 ConnectFeedCardLayout.bodyTopSpacing,
                 ConnectFeedCardLayout.horizontalPadding,
-                0,
+                ConnectFeedCardLayout.bodyToMediaSpacing,
               ),
               child: Text(
                 collection.name,
@@ -392,11 +400,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            ConnectFeedCardSectionDivider(isDark: isDark),
             ConnectFeedCardMediaFrame(
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child:
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
                     collection.imageUrl != null &&
                             collection.imageUrl!.isNotEmpty
                         ? CachedNetworkImageWidget(
@@ -415,6 +424,12 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                 isDark ? AppColors.grey500 : AppColors.grey600,
                           ),
                         ),
+                    if (itemCountLabel != null)
+                      _PracticeImageOverlayBar(
+                        trailing: _PracticeImageBadge(label: itemCountLabel),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -565,14 +580,14 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
 }
 
 class _PracticeImageOverlayBar extends StatelessWidget {
-  const _PracticeImageOverlayBar({this.leading, this.memberCount = 0});
+  const _PracticeImageOverlayBar({this.leading, this.trailing});
 
   final Widget? leading;
-  final int memberCount;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
-    if (leading == null && memberCount <= 0) {
+    if (leading == null && trailing == null) {
       return const SizedBox.shrink();
     }
 
@@ -584,17 +599,18 @@ class _PracticeImageOverlayBar extends StatelessWidget {
         children: [
           if (leading != null) leading!,
           const Spacer(),
-          if (memberCount > 0) _PracticeImageMemberBadge(count: memberCount),
+          if (trailing != null) trailing!,
         ],
       ),
     );
   }
 }
 
-class _PracticeImageMemberBadge extends StatelessWidget {
-  const _PracticeImageMemberBadge({required this.count});
+class _PracticeImageBadge extends StatelessWidget {
+  const _PracticeImageBadge({required this.label, this.icon});
 
-  final int count;
+  final String label;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -607,10 +623,12 @@ class _PracticeImageMemberBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(AppAssets.usercard, size: 14, color: Colors.white),
-          const SizedBox(width: 4),
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: Colors.white),
+            const SizedBox(width: 4),
+          ],
           Text(
-            '$count',
+            label,
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
