@@ -631,13 +631,13 @@ class _EventInfoCard extends StatelessWidget {
                   GroupEventLinkUtils.kindOf(link) != GroupEventLinkKind.video,
             )
             .toList();
-    // Only a meeting room implies an online venue, not a plain link.
-    final hasMeetingLink = links.any(
-      (link) =>
-          GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting,
-    );
+    // Only a meeting room belongs to the venue; other links are resources.
+    bool isMeeting(GroupEventLink link) =>
+        GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
+    final meetingLinks = links.where(isMeeting).toList();
+    final otherLinks = links.where((link) => !isMeeting(link)).toList();
     final showOnline =
-        isOnline || isGroupEventHybrid(event) || hasMeetingLink;
+        isOnline || isGroupEventHybrid(event) || meetingLinks.isNotEmpty;
 
     return Container(
       width: double.infinity,
@@ -670,7 +670,7 @@ class _EventInfoCard extends StatelessWidget {
               iconColor: secondaryColor,
             ),
           ],
-          if (showLocation || showOnline || links.isNotEmpty) ...[
+          if (showLocation || showOnline) ...[
             const SizedBox(height: 16),
             _EventSectionLabel(text: context.l10n.connect_event_where),
             const SizedBox(height: 10),
@@ -691,9 +691,17 @@ class _EventInfoCard extends StatelessWidget {
               bold: true,
             ),
           ],
-          for (final link in links) ...[
+          for (final link in meetingLinks) ...[
             const SizedBox(height: 10),
             _EventLinkText(link: link, isDark: isDark),
+          ],
+          if (otherLinks.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _EventSectionLabel(text: context.l10n.connect_event_links_title),
+            for (final link in otherLinks) ...[
+              const SizedBox(height: 10),
+              _EventLinkText(link: link, isDark: isDark),
+            ],
           ],
         ],
       ),
@@ -713,12 +721,18 @@ class _EventInfoCard extends StatelessWidget {
     }
 
     final endTime = DateFormat.jm(locale).format(end).toLowerCase();
+    final endZone = end.timeZoneName;
+    // Label the start too when the range crosses a DST change.
+    final startLabel =
+        start.timeZoneName == endZone
+            ? startTime
+            : '$startTime ${start.timeZoneName}';
     final isMultiDay = !event.isOneDay && !DateUtils.isSameDay(start, end);
     if (isMultiDay) {
       final endDate = DateFormat('EEE d MMM y', locale).format(end);
-      return '$date · $startTime – $endDate · $endTime ${end.timeZoneName}';
+      return '$date · $startLabel – $endDate · $endTime $endZone';
     }
-    return '$date · $startTime – $endTime ${end.timeZoneName}';
+    return '$date · $startLabel – $endTime $endZone';
   }
 
   String? _formatRecurrenceText(BuildContext context, GroupEvent event) {
