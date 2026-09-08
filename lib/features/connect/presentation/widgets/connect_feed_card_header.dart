@@ -15,6 +15,7 @@ class ConnectFeedCardHeader extends StatelessWidget {
     this.groupId,
     this.timestamp,
     this.subtitle,
+    this.subtitleIcon,
     this.stackTimestamp = false,
     this.onMoreTap,
     this.trailing,
@@ -25,6 +26,7 @@ class ConnectFeedCardHeader extends StatelessWidget {
   final String? groupId;
   final DateTime? timestamp;
   final String? subtitle;
+  final IconData? subtitleIcon;
   final bool stackTimestamp;
   final VoidCallback? onMoreTap;
   final Widget? trailing;
@@ -119,14 +121,24 @@ class ConnectFeedCardHeader extends StatelessWidget {
                   ),
                   if (secondLine.isNotEmpty) ...[
                     const SizedBox(height: 1),
-                    Text(
-                      secondLine,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: secondaryColor,
-                      ),
+                    Row(
+                      children: [
+                        if (subtitleIcon != null) ...[
+                          Icon(subtitleIcon, size: 14, color: secondaryColor),
+                          const SizedBox(width: 4),
+                        ],
+                        Flexible(
+                          child: Text(
+                            secondLine,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: secondaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],

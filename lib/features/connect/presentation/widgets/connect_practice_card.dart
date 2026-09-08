@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
+import 'package:flutter_pecha/core/deep_linking/deep_link_url_builder.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/services/share_url/share_url_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/providers/grou
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/plans/data/utils/plan_date_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 
 class ConnectPracticeCard extends ConsumerStatefulWidget {
@@ -98,7 +101,17 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupName: practice.groupName ?? '',
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
-              subtitle: dateRange,
+              timestamp: practice.practiceAt,
+              stackTimestamp: true,
+              subtitle:
+                  series.enrolledCount > 0 ? '${series.enrolledCount}' : null,
+              subtitleIcon:
+                  series.enrolledCount > 0 ? AppAssets.usercard : null,
+              trailing: _buildShareButton(
+                isDark: isDark,
+                title: series.title,
+                link: DeepLinkUrlBuilder.seriesLink(seriesId: series.id),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -150,15 +163,13 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                                 isDark: isDark,
                                 onImage: true,
                                 onTap:
-                                    () => _onPracticeWithUsTap(practice, series),
+                                    () =>
+                                        _onPracticeWithUsTap(practice, series),
                               )
                               : null,
                       trailing:
-                          series.enrolledCount > 0
-                              ? _PracticeImageBadge(
-                                label: '${series.enrolledCount}',
-                                icon: AppAssets.usercard,
-                              )
+                          dateRange != null
+                              ? _PracticeImageBadge(label: dateRange)
                               : null,
                     ),
                   ],
@@ -206,7 +217,22 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupName: practice.groupName ?? '',
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
-              subtitle: dateRange,
+              timestamp: practice.practiceAt,
+              stackTimestamp: true,
+              subtitle:
+                  accumulator.memberCount > 0
+                      ? '${accumulator.memberCount}'
+                      : null,
+              subtitleIcon:
+                  accumulator.memberCount > 0 ? AppAssets.usercard : null,
+              trailing: _buildShareButton(
+                isDark: isDark,
+                title: accumulator.title,
+                link: DeepLinkUrlBuilder.groupAccumulatorLink(
+                  accumulatorId: accumulator.id,
+                  groupId: groupId,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -265,11 +291,8 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
                               )
                               : null,
                       trailing:
-                          accumulator.memberCount > 0
-                              ? _PracticeImageBadge(
-                                label: '${accumulator.memberCount}',
-                                icon: AppAssets.usercard,
-                              )
+                          dateRange != null
+                              ? _PracticeImageBadge(label: dateRange)
                               : null,
                     ),
                   ],
@@ -308,6 +331,11 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
               subtitle: details.isNotEmpty ? details : null,
+              trailing: _buildShareButton(
+                isDark: isDark,
+                title: plan.title,
+                link: DeepLinkUrlBuilder.planLink(planId: plan.id),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -362,6 +390,10 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
     bool isDark,
     double? lineHeight,
   ) {
+    final groupId =
+        practice.groupId?.trim().isNotEmpty == true
+            ? practice.groupId!
+            : collection.groupId;
     final cardColor =
         isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
     final itemCountLabel =
@@ -381,6 +413,14 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
               timestamp: practice.practiceAt,
+              trailing: _buildShareButton(
+                isDark: isDark,
+                title: collection.name,
+                link: DeepLinkUrlBuilder.groupRecitationCollectionLink(
+                  groupId: groupId,
+                  collectionId: collection.id,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -436,6 +476,34 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
         ),
       ),
     );
+  }
+
+  Widget _buildShareButton({
+    required bool isDark,
+    required String title,
+    required Uri link,
+  }) {
+    return IconButton(
+      onPressed: () => _sharePractice(title, link),
+      icon: Icon(
+        AppAssets.readerShare,
+        size: 20,
+        color: isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
+      ),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+    );
+  }
+
+  Future<void> _sharePractice(String title, Uri link) async {
+    final shareUrl = await resolveShareUrlRef(ref, link.toString());
+    if (!mounted) return;
+
+    final message =
+        shareUrl.isNotEmpty ? '${title.trim()}\n\n$shareUrl' : title.trim();
+    if (message.isEmpty) return;
+    await SharePlus.instance.share(ShareParams(text: message));
   }
 
   void _navigateToPlanDetail(GroupPractice practice, GroupPracticePlan plan) {
@@ -607,10 +675,9 @@ class _PracticeImageOverlayBar extends StatelessWidget {
 }
 
 class _PracticeImageBadge extends StatelessWidget {
-  const _PracticeImageBadge({required this.label, this.icon});
+  const _PracticeImageBadge({required this.label});
 
   final String label;
-  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -620,22 +687,13 @@ class _PracticeImageBadge extends StatelessWidget {
         color: Colors.black.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: Colors.white),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
       ),
     );
   }
