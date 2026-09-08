@@ -15,6 +15,7 @@ class ConnectFeedCardHeader extends StatelessWidget {
     this.groupId,
     this.timestamp,
     this.subtitle,
+    this.stackTimestamp = false,
     this.onMoreTap,
     this.trailing,
   });
@@ -24,6 +25,7 @@ class ConnectFeedCardHeader extends StatelessWidget {
   final String? groupId;
   final DateTime? timestamp;
   final String? subtitle;
+  final bool stackTimestamp;
   final VoidCallback? onMoreTap;
   final Widget? trailing;
 
@@ -40,6 +42,11 @@ class ConnectFeedCardHeader extends StatelessWidget {
             ? groupName.trim()
             : context.l10n.connect_group_fallback_title;
     final timeLabel = ConnectRelativeTime.format(context, timestamp);
+    final trimmedSubtitle = subtitle?.trim();
+    final secondLine = [
+      if (trimmedSubtitle != null && trimmedSubtitle.isNotEmpty) trimmedSubtitle,
+      if (stackTimestamp && timeLabel.isNotEmpty) timeLabel,
+    ].join(' · ');
 
     final avatar = CircleAvatar(
       radius: avatarRadius,
@@ -98,7 +105,7 @@ class ConnectFeedCardHeader extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (timeLabel.isNotEmpty) ...[
+                      if (!stackTimestamp && timeLabel.isNotEmpty) ...[
                         Text(
                           ' · $timeLabel',
                           style: TextStyle(
@@ -110,10 +117,10 @@ class ConnectFeedCardHeader extends StatelessWidget {
                       ],
                     ],
                   ),
-                  if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
+                  if (secondLine.isNotEmpty) ...[
                     const SizedBox(height: 1),
                     Text(
-                      subtitle!.trim(),
+                      secondLine,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
