@@ -224,6 +224,22 @@ class MyRecitationCollectionsRemoteDatasource {
     }
   }
 
+  /// GET /users/me/recitation-collections/{collectionId}/complete/days-count
+  Future<MyRecitationCollectionCompletionDaysCountResponse>
+  getCompletionDaysCount({required String collectionId}) async {
+    final response = await dio.get(
+      '/users/me/recitation-collections/$collectionId/complete/days-count',
+      options: Options(extra: {'no_cache': true}),
+    );
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Unexpected /users/me/recitation-collections/complete/days-count payload type',
+      );
+    }
+    return MyRecitationCollectionCompletionDaysCountResponse.fromJson(data);
+  }
+
   static List<String> _uniqueNonEmptyTextIds(List<String> textIds) {
     final seen = <String>{};
     final unique = <String>[];

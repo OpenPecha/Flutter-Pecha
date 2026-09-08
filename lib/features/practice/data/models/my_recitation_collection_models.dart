@@ -210,6 +210,27 @@ class MyRecitationCollectionTodayCompletionsResponse {
   }
 }
 
+/// Response from
+/// `GET /users/me/recitation-collections/{id}/complete/days-count` (200).
+class MyRecitationCollectionCompletionDaysCountResponse {
+  final String collectionId;
+  final int dayCount;
+
+  const MyRecitationCollectionCompletionDaysCountResponse({
+    required this.collectionId,
+    required this.dayCount,
+  });
+
+  factory MyRecitationCollectionCompletionDaysCountResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return MyRecitationCollectionCompletionDaysCountResponse(
+      collectionId: json['collection_id'] as String? ?? '',
+      dayCount: (json['day_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// A chant row returned after adding items to a collection.
 class MyRecitationCollectionItemModel {
   final String id;

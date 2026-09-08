@@ -4,6 +4,7 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/collection_completion_sheet.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/my_recitation_collection_options_sheet.dart';
@@ -16,7 +17,7 @@ import 'package:go_router/go_router.dart';
 ///
 /// Layout matches [GroupRecitationCollectionScreen]. Tapping a chant opens the
 /// shared reader using the item's `text_id` and `language`.
-class MyRecitationCollectionScreen extends ConsumerWidget {
+class MyRecitationCollectionScreen extends ConsumerStatefulWidget {
   const MyRecitationCollectionScreen({
     super.key,
     required this.collectionId,
@@ -27,15 +28,36 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
   final String? initialTitle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyRecitationCollectionScreen> createState() =>
+      _MyRecitationCollectionScreenState();
+}
+
+class _MyRecitationCollectionScreenState
+    extends ConsumerState<MyRecitationCollectionScreen> {
+  bool _hasShownCompletionSheetThisVisit = false;
+
+  @override
+  Widget build(BuildContext context) {
     final detailAsync = ref.watch(
-      myRecitationCollectionDetailProvider(collectionId),
+      myRecitationCollectionDetailProvider(widget.collectionId),
     );
     final completionState = ref.watch(
-      myRecitationCollectionCompletionProvider(collectionId),
+      myRecitationCollectionCompletionProvider(widget.collectionId),
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final detail = detailAsync.valueOrNull?.fold((_) => null, (value) => value);
+
+    ref.listen(myRecitationCollectionCompletionProvider(widget.collectionId), (
+      _,
+      next,
+    ) {
+      final currentDetail = ref
+          .read(myRecitationCollectionDetailProvider(widget.collectionId))
+          .valueOrNull
+          ?.fold((_) => null, (value) => value);
+      _maybeShowCompletionSheet(currentDetail, next);
+    });
+    _maybeShowCompletionSheet(detail, completionState);
 
     return Scaffold(
       backgroundColor:
@@ -45,7 +67,7 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
         child: Column(
           children: [
             _CollectionAppBar(
-              title: detail?.name ?? initialTitle,
+              title: detail?.name ?? widget.initialTitle,
               onMenuTap:
                   detail != null
                       ? () => MyRecitationCollectionOptionsSheet.show(
@@ -63,7 +85,7 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                         onRetry:
                             () => ref.invalidate(
                               myRecitationCollectionDetailProvider(
-                                collectionId,
+                                widget.collectionId,
                               ),
                             ),
                       ),
@@ -71,14 +93,25 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                         collection: collection,
                         completionState: completionState,
                         isDark: isDark,
-                        onOpenItem:
-                            (item) => _openChantReader(
-                              context,
-                              ref,
-                              collectionId,
-                              collection,
-                              item,
+                        onOpenItem: (item) async {
+                          await _openChantReader(
+                            context,
+                            ref,
+                            widget.collectionId,
+                            collection,
+                            item,
+                          );
+                          if (!mounted) return;
+                          final latestCompletion = ref.read(
+                            myRecitationCollectionCompletionProvider(
+                              widget.collectionId,
                             ),
+                          );
+                          _maybeShowCompletionSheet(
+                            collection,
+                            latestCompletion,
+                          );
+                        },
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -87,7 +120,9 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                       error: error,
                       onRetry:
                           () => ref.invalidate(
-                            myRecitationCollectionDetailProvider(collectionId),
+                            myRecitationCollectionDetailProvider(
+                              widget.collectionId,
+                            ),
                           ),
                     ),
               ),
@@ -95,6 +130,46 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _maybeShowCompletionSheet(
+    MyRecitationCollectionDetailModel? collection,
+    MyRecitationCollectionCompletionState completionState,
+  ) {
+    if (_hasShownCompletionSheetThisVisit) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    if (collection == null || collection.items.isEmpty) return;
+    if (!completionState.hasCompletedChantThisSession) return;
+
+    final isFullyCompleted = collection.items.every(
+      (item) => _isItemCompleted(completionState, item),
+    );
+    if (!isFullyCompleted) return;
+
+    _hasShownCompletionSheetThisVisit = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showCompletionSheet(collection.name);
+    });
+  }
+
+  Future<void> _showCompletionSheet(String collectionName) async {
+    final result = await ref.read(
+      myRecitationCollectionDaysCountProvider(widget.collectionId).future,
+    );
+    if (!mounted) return;
+
+    final dayCount = result.fold((_) => null, (count) => count);
+    if (dayCount == null) {
+      _hasShownCompletionSheetThisVisit = false;
+      return;
+    }
+
+    showCollectionCompletionSheet(
+      context,
+      collectionName: collectionName,
+      dayCount: dayCount,
     );
   }
 }

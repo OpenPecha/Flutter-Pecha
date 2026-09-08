@@ -39,12 +39,14 @@ enum MyChantCompletionResult { completed, failed }
 class MyRecitationCollectionCompletionState {
   final Set<String> completedChantIds;
   final Set<String> submittingChantIds;
+  final bool hasCompletedChantThisSession;
   final bool isLoading;
   final String? error;
 
   const MyRecitationCollectionCompletionState({
     this.completedChantIds = const {},
     this.submittingChantIds = const {},
+    this.hasCompletedChantThisSession = false,
     this.isLoading = false,
     this.error,
   });
@@ -58,6 +60,7 @@ class MyRecitationCollectionCompletionState {
   MyRecitationCollectionCompletionState copyWith({
     Set<String>? completedChantIds,
     Set<String>? submittingChantIds,
+    bool? hasCompletedChantThisSession,
     bool? isLoading,
     String? error,
     bool clearError = false,
@@ -65,6 +68,8 @@ class MyRecitationCollectionCompletionState {
     return MyRecitationCollectionCompletionState(
       completedChantIds: completedChantIds ?? this.completedChantIds,
       submittingChantIds: submittingChantIds ?? this.submittingChantIds,
+      hasCompletedChantThisSession:
+          hasCompletedChantThisSession ?? this.hasCompletedChantThisSession,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : error ?? this.error,
     );
@@ -149,6 +154,7 @@ class MyRecitationCollectionCompletionNotifier
         state = state.copyWith(
           completedChantIds: {...state.completedChantIds, trimmedChantId},
           submittingChantIds: submitting,
+          hasCompletedChantThisSession: true,
           clearError: true,
         );
         return MyChantCompletionResult.completed;
@@ -172,4 +178,11 @@ final myRecitationCollectionCompletionProvider = StateNotifierProvider
       );
       notifier.loadToday();
       return notifier;
+    });
+
+final myRecitationCollectionDaysCountProvider = FutureProvider.autoDispose
+    .family<Either<Failure, int>, String>((ref, collectionId) async {
+      return ref
+          .watch(myRecitationCollectionsRepositoryProvider)
+          .getCompletionDaysCount(collectionId);
     });

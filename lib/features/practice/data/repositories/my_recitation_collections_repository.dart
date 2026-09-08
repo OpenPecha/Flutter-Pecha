@@ -148,6 +148,21 @@ class MyRecitationCollectionsRepository {
     }
   }
 
+  Future<Either<Failure, int>> getCompletionDaysCount(
+    String collectionId,
+  ) async {
+    try {
+      final result = await remoteDatasource.getCompletionDaysCount(
+        collectionId: collectionId,
+      );
+      return Right(result.dayCount);
+    } catch (e) {
+      return Left(
+        ExceptionMapper.map(e, context: 'Failed to load completion day count'),
+      );
+    }
+  }
+
   /// Creates a collection (unless [existingCollectionId] is set), then adds
   /// [textIds] when non-empty.
   ///
