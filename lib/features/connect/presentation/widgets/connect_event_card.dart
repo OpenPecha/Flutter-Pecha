@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_event.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_event_list_tile.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -15,15 +14,12 @@ class ConnectEventCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final locale = Localizations.localeOf(context);
 
-    return Material(
-      color: isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite,
-      child: GroupEventListTile(
-        event: event,
-        showGroup: true,
-        isDark: isDark,
-        lineHeight: getLineHeight(locale.languageCode),
-        onTap: () => context.push('/home/events/${event.id}'),
-      ),
+    return GroupEventListTile(
+      event: event,
+      showGroup: true,
+      isDark: isDark,
+      lineHeight: getLineHeight(locale.languageCode),
+      onTap: () => context.push('/home/events/${event.id}'),
     );
   }
 }
