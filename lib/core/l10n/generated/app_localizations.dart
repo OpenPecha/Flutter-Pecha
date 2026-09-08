@@ -1744,6 +1744,48 @@ abstract class AppLocalizations {
   /// **'Date to be announced'**
   String get connect_event_date_tba;
 
+  /// No description provided for @connect_event_when.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get connect_event_when;
+
+  /// No description provided for @connect_event_where.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get connect_event_where;
+
+  /// No description provided for @connect_event_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'Event practices'**
+  String get connect_event_practices;
+
+  /// No description provided for @connect_event_every_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get connect_event_every_day;
+
+  /// No description provided for @connect_event_every_weekday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {weekday}'**
+  String connect_event_every_weekday(String weekday);
+
+  /// No description provided for @connect_event_every_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get connect_event_every_month;
+
+  /// No description provided for @connect_event_every_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {date}'**
+  String connect_event_every_date(String date);
+
   /// No description provided for @connect_event_about_empty.
   ///
   /// In en, this message translates to:

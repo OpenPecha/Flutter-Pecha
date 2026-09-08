@@ -66,6 +66,21 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
               groupAvatarUrl: post.groupAvatarUrl,
               groupId: post.groupId,
               timestamp: timestamp,
+              stackTimestamp: true,
+              trailing: IconButton(
+                onPressed: () => _sharePost(post),
+                icon: Icon(
+                  AppAssets.readerShare,
+                  size: 20,
+                  color:
+                      isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
+                ),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
             ),
             if (caption.isNotEmpty)
               Padding(
@@ -82,15 +97,10 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
                     fontWeight: FontWeight.w400,
                     height: 1.45,
                   ),
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             if (imageMedia.isNotEmpty) ...[
-              if (caption.isNotEmpty)
-                ConnectFeedCardSectionDivider(isDark: isDark)
-              else
-                const SizedBox(height: ConnectFeedCardLayout.bodyToMediaSpacing),
+              const SizedBox(height: ConnectFeedCardLayout.bodyToMediaSpacing),
               ConnectFeedCardMediaFrame(
                 bottomSpacing: ConnectFeedCardLayout.actionBarTopSpacing,
                 child: _PostMediaGallery(
@@ -120,13 +130,6 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
                   count: post.commentCount,
                   isLoading: false,
                   onTap: _openDetail,
-                ),
-                (
-                  icon: AppAssets.readerShare,
-                  iconColor: null,
-                  count: null,
-                  isLoading: false,
-                  onTap: () => _sharePost(post),
                 ),
               ],
             ),
