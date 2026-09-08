@@ -4421,7 +4421,7 @@ abstract class AppLocalizations {
   /// No description provided for @group_chat_reactions_count.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 reaction} other{{count} reactions}}'**
+  /// **'{count, plural,\n=1 {1 reaction}\nother {{count} reactions}\n}'**
   String group_chat_reactions_count(int count);
 
   /// No description provided for @group_chat_you.

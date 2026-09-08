@@ -1224,7 +1224,7 @@
   "group_chat_message_deleted": "You deleted this message",
   "group_chat_message_deleted_by_sender": "This message was deleted",
   "group_chat_reaction_failed": "Your reaction couldn't be saved.",
-  "group_chat_reactions_count": "{count, plural, =1{1 reaction} other{{count} reactions}}",
+  "group_chat_reactions_count": "{count, plural,\n=1 {1 reaction}\nother {{count} reactions}\n}",
   "@group_chat_reactions_count": {
     "placeholders": {
       "count": {
