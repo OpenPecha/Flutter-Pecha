@@ -631,12 +631,14 @@ class _EventInfoCard extends StatelessWidget {
                   GroupEventLinkUtils.kindOf(link) != GroupEventLinkKind.video,
             )
             .toList();
-    // Only a meeting room belongs to the venue; other links are resources.
-    bool isMeeting(GroupEventLink link) =>
-        GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
-    final meetingLinks = links.where(isMeeting).toList();
-    final otherLinks = links.where((link) => !isMeeting(link)).toList();
     final showOnline = isOnline || isGroupEventHybrid(event);
+    // A meeting room stands in for the venue only when the event runs online;
+    // on a venue-only event it is just another resource.
+    bool isVenueLink(GroupEventLink link) =>
+        showOnline &&
+        GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
+    final meetingLinks = links.where(isVenueLink).toList();
+    final otherLinks = links.where((link) => !isVenueLink(link)).toList();
 
     return Container(
       width: double.infinity,
