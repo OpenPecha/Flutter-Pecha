@@ -57,46 +57,61 @@ class _ReportSheet extends StatefulWidget {
 class _ReportSheetState extends State<_ReportSheet> {
   final TextEditingController _note = TextEditingController();
 
-  ChatReportReason? _reason;
+  final FocusNode _noteFocus = FocusNode();
 
-  /// The note step, reached only by the reason that needs one.
-  bool _askingForNote = false;
+  /// Anchors the note field so it can be scrolled to when it appears.
+  final GlobalKey _noteKey = GlobalKey();
+
+  ChatReportReason? _reason;
 
   @override
   void dispose() {
+    _noteFocus.dispose();
     _note.dispose();
     super.dispose();
   }
 
-  bool get _canSubmit {
+  /// Whether the chosen reason asks for a note.
+  bool get _needsNote {
     final reason = _reason;
-    if (reason == null) return false;
+    return reason != null && chatReportNeedsNote(reason);
+  }
 
-    // On the reason step the button advances rather than submits, so a choice
-    // is all it needs. Applying the note requirement here too left "Something
-    // else" with a permanently disabled button — and since that button is the
-    // only way to the note step, the note could never be written.
-    if (!_askingForNote) return true;
+  bool get _canSubmit => canSubmitChatReport(reason: _reason, note: _note.text);
 
-    return canSubmitChatReport(reason: reason, note: _note.text);
+  void _onReasonPicked(ChatReportReason reason) {
+    final wasNeeded = _needsNote;
+    setState(() => _reason = reason);
+    if (!chatReportNeedsNote(reason) || wasNeeded) return;
+
+    // The field appears below the list, so it is off screen on a short sheet
+    // and behind the keyboard on a tall one. Bring it into view once it has
+    // been laid out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _noteFocus.requestFocus();
+      final target = _noteKey.currentContext;
+      if (target != null) {
+        Scrollable.ensureVisible(
+          target,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          alignment: 1,
+        );
+      }
+    });
   }
 
   void _onSubmit() {
     final reason = _reason;
-    if (reason == null) return;
-
-    // A reason that wants a note moves on to ask for it rather than sending a
-    // complaint that says no more than the label already did.
-    if (!_askingForNote && chatReportNeedsNote(reason)) {
-      setState(() => _askingForNote = true);
-      return;
-    }
-    if (!_canSubmit) return;
+    if (reason == null || !_canSubmit) return;
 
     Navigator.of(context).pop(
       ChatReportSubmission(
         reason: reason,
-        note: _askingForNote ? _note.text.trim() : null,
+        // Only the reason that asked for one carries it; the rest send
+        // nothing rather than an empty string.
+        note: chatReportNeedsNote(reason) ? _note.text.trim() : null,
       ),
     );
   }
@@ -129,12 +144,7 @@ class _ReportSheetState extends State<_ReportSheet> {
                 isDark: isDark,
                 onClose: () => Navigator.of(context).maybePop(),
               ),
-              Flexible(
-                child:
-                    _askingForNote
-                        ? _noteStep(context, isDark)
-                        : _reasonStep(context, isDark),
-              ),
+              Flexible(child: _body(context, isDark)),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: _SubmitButton(
@@ -150,7 +160,7 @@ class _ReportSheetState extends State<_ReportSheet> {
     );
   }
 
-  Widget _reasonStep(BuildContext context, bool isDark) {
+  Widget _body(BuildContext context, bool isDark) {
     final titleColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final subtitleColor =
@@ -189,85 +199,87 @@ class _ReportSheetState extends State<_ReportSheet> {
               label: chatReportReasonLabel(context, reason),
               isSelected: _reason == reason,
               isDark: isDark,
-              onTap: () => setState(() => _reason = reason),
+              onTap: () => _onReasonPicked(reason),
             ),
+          // Inline rather than a second screen: the reason stays visible and
+          // the note is written in the same breath as choosing it.
+          if (_needsNote) _noteField(context, isDark),
         ],
       ),
     );
   }
 
-  Widget _noteStep(BuildContext context, bool isDark) {
+  Widget _noteField(BuildContext context, bool isDark) {
     final titleColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
     final counter = '${_note.text.characters.length} / $kChatReportNoteLimit';
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+    return Column(
+      key: _noteKey,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Divider(
+          height: 1,
+          color: isDark ? AppColors.grey800 : AppColors.grey100,
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Text(
+            context.l10n.group_chat_report_note_title,
+            strutStyle: context.tibetanStrutStyle(15, compact: true),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: titleColor,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          child: TextField(
+            controller: _note,
+            focusNode: _noteFocus,
+            maxLines: 4,
+            minLines: 2,
+            textCapitalization: TextCapitalization.sentences,
+            // Capped by the field itself, so the counter can never disagree
+            // with what gets sent.
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(kChatReportNoteLimit),
+            ],
+            onChanged: (_) => setState(() {}),
+            strutStyle: context.tibetanStrutStyle(15),
+            style: TextStyle(fontSize: 15, color: titleColor),
+            decoration: InputDecoration(
+              hintText: context.l10n.group_chat_report_note_hint,
+              filled: true,
+              fillColor: isDark ? AppColors.grey800 : AppColors.surfaceWhite,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Align(
+            alignment: Alignment.centerRight,
             child: Text(
-              context.l10n.group_chat_report_note_title,
-              strutStyle: context.tibetanStrutStyle(15, compact: true),
+              context.isTibetanLocale ? toTibetanDigits(counter) : counter,
               style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: titleColor,
+                fontSize: 12,
+                color:
+                    isDark
+                        ? AppColors.textTertiaryDark
+                        : AppColors.textSecondary,
               ),
             ),
           ),
-          Divider(
-            height: 1,
-            color: isDark ? AppColors.grey800 : AppColors.grey100,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: TextField(
-              controller: _note,
-              autofocus: true,
-              maxLines: 4,
-              minLines: 2,
-              textCapitalization: TextCapitalization.sentences,
-              // Capped by the field itself, so the counter can never disagree
-              // with what gets sent.
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(kChatReportNoteLimit),
-              ],
-              onChanged: (_) => setState(() {}),
-              strutStyle: context.tibetanStrutStyle(15),
-              style: TextStyle(fontSize: 15, color: titleColor),
-              decoration: InputDecoration(
-                hintText: context.l10n.group_chat_report_note_hint,
-                filled: true,
-                fillColor: isDark ? AppColors.grey800 : AppColors.surfaceWhite,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(12),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                context.isTibetanLocale ? toTibetanDigits(counter) : counter,
-                style: TextStyle(
-                  fontSize: 12,
-                  color:
-                      isDark
-                          ? AppColors.textTertiaryDark
-                          : AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

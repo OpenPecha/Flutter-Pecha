@@ -57,29 +57,45 @@ void main() {
       expect(_submitEnabled(tester), isTrue);
     });
 
-    testWidgets('something else leads to the note step', (tester) async {
+    testWidgets('something else reveals the note inline', (tester) async {
       await _openSheet(tester);
+
+      // Nothing to write in until the reason that needs one is chosen.
+      expect(find.byType(TextField), findsNothing);
 
       await tester.tap(find.text('Something else'));
       await tester.pumpAndSettle();
 
-      // The button advances here rather than submitting, so choosing the
-      // reason has to be enough to enable it — otherwise the note step is
-      // unreachable and the note can never be written.
-      expect(_submitEnabled(tester), isTrue);
-
-      await tester.tap(find.text('Submit report'));
-      await tester.pumpAndSettle();
-
+      // Same sheet, no second step: the reasons stay on screen beside it.
       expect(find.text('Add a note'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Why are you reporting this?'), findsOneWidget);
+      expect(find.text('Spam or scams'), findsOneWidget);
     });
 
-    testWidgets('the note step will not submit while empty', (tester) async {
+    testWidgets('changing to another reason takes the note away', (
+      tester,
+    ) async {
       await _openSheet(tester);
+
       await tester.tap(find.text('Something else'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Submit report'));
+      await tester.enterText(find.byType(TextField), 'typed something');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spam or scams'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TextField), findsNothing);
+      // And the abandoned note is not sent with the new reason.
+      expect(_submitEnabled(tester), isTrue);
+    });
+
+    testWidgets('something else will not submit while the note is empty', (
+      tester,
+    ) async {
+      await _openSheet(tester);
+      await tester.tap(find.text('Something else'));
       await tester.pumpAndSettle();
 
       expect(_submitEnabled(tester), isFalse);
@@ -93,8 +109,6 @@ void main() {
     testWidgets('whitespace alone is not a note', (tester) async {
       await _openSheet(tester);
       await tester.tap(find.text('Something else'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Submit report'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), '    ');
@@ -114,7 +128,7 @@ void main() {
       await tester.tap(find.text('Submit report'));
       await tester.pumpAndSettle();
 
-      // No note step in the way, and nothing invented to fill one.
+      // No note asked for, and nothing invented to fill one.
       expect(find.text('Add a note'), findsNothing);
       expect(submitted?.reason, ChatReportReason.harassment);
       expect(submitted?.note, isNull);
@@ -123,8 +137,6 @@ void main() {
     testWidgets('the note field stops at the cap', (tester) async {
       await _openSheet(tester);
       await tester.tap(find.text('Something else'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Submit report'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
