@@ -413,6 +413,7 @@ class _ConnectPracticeCardState extends ConsumerState<ConnectPracticeCard> {
               groupAvatarUrl: practice.groupAvatarUrl,
               groupId: practice.groupId,
               timestamp: practice.practiceAt,
+              stackTimestamp: true,
               trailing: _buildShareButton(
                 isDark: isDark,
                 title: collection.name,
