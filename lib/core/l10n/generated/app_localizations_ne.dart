@@ -2471,6 +2471,53 @@ class AppLocalizationsNe extends AppLocalizations {
   String get group_chat_report => 'रिपोर्ट गर्नुहोस्';
 
   @override
+  String get group_chat_report_title =>
+      'तपाईं किन यसको रिपोर्ट गर्दै हुनुहुन्छ?';
+
+  @override
+  String get group_chat_report_privacy => 'तपाईंको नाम गोप्य रहन्छ।';
+
+  @override
+  String get group_chat_report_reason_harassment => 'उत्पीडन वा धम्की';
+
+  @override
+  String get group_chat_report_reason_hate => 'घृणित वा हानिकारक बोली';
+
+  @override
+  String get group_chat_report_reason_sexual => 'यौनजन्य वा अश्लील सामग्री';
+
+  @override
+  String get group_chat_report_reason_spam => 'स्प्याम वा ठगी';
+
+  @override
+  String get group_chat_report_reason_off_topic => 'विषयबाहिर वा बाधक';
+
+  @override
+  String get group_chat_report_reason_other => 'अरू केही';
+
+  @override
+  String get group_chat_report_note_title => 'टिप्पणी थप्नुहोस्';
+
+  @override
+  String get group_chat_report_note_hint => 'अरू केही...';
+
+  @override
+  String get group_chat_report_submit => 'रिपोर्ट पठाउनुहोस्';
+
+  @override
+  String get group_chat_report_thanks => 'प्रतिक्रियाका लागि धन्यवाद';
+
+  @override
+  String get group_chat_report_offline =>
+      'तपाईं अफलाइन हुनुहुन्छ — पछि प्रयास गर्नुहोस्';
+
+  @override
+  String get group_chat_report_failed => 'रिपोर्ट पठाउन सकिएन';
+
+  @override
+  String get group_chat_report_retry => 'पुनः प्रयास गर्नुहोस्';
+
+  @override
   String get group_chat_delete => 'मेटाउनुहोस्';
 
   @override

@@ -2467,6 +2467,56 @@ class AppLocalizationsBo extends AppLocalizations {
   String get group_chat_report => 'སྙན་ཞུ།';
 
   @override
+  String get group_chat_report_title =>
+      'ཁྱེད་ཀྱིས་འདི་ཅིའི་ཕྱིར་སྙན་ཞུ་བྱེད་པ་ཡིན།';
+
+  @override
+  String get group_chat_report_privacy => 'ཁྱེད་ཀྱི་མིང་གསང་བར་གནས།';
+
+  @override
+  String get group_chat_report_reason_harassment =>
+      'གཞན་ལ་གནོད་འཚེ་དང་མནར་གཅོད།';
+
+  @override
+  String get group_chat_report_reason_hate => 'ཞེ་སྡང་ངམ་གནོད་པའི་སྐད་ཆ།';
+
+  @override
+  String get group_chat_report_reason_sexual =>
+      'འཁྲིག་སྤྱོད་དང་མི་འོས་པའི་ནང་དོན།';
+
+  @override
+  String get group_chat_report_reason_spam => 'སྤམ་མམ་གཡོ་སྒྱུ།';
+
+  @override
+  String get group_chat_report_reason_off_topic =>
+      'བརྗོད་གཞི་དང་མི་མཐུན་པའམ་བར་ཆད།';
+
+  @override
+  String get group_chat_report_reason_other => 'གཞན་ཞིག';
+
+  @override
+  String get group_chat_report_note_title => 'མཆན་འགོད།';
+
+  @override
+  String get group_chat_report_note_hint => 'གཞན་ཞིག...';
+
+  @override
+  String get group_chat_report_submit => 'སྙན་ཞུ་སྐུར།';
+
+  @override
+  String get group_chat_report_thanks => 'བསམ་ཚུལ་གནང་བར་ཐུགས་རྗེ་ཆེ།';
+
+  @override
+  String get group_chat_report_offline =>
+      'ཁྱེད་དྲ་ཐོག་མིན། རྗེས་སུ་ཡང་བསྐྱར་འབད་རོགས།';
+
+  @override
+  String get group_chat_report_failed => 'སྙན་ཞུ་སྐུར་མ་ཐུབ།';
+
+  @override
+  String get group_chat_report_retry => 'ཡང་བསྐྱར་འབད།';
+
+  @override
   String get group_chat_delete => 'སུབ།';
 
   @override

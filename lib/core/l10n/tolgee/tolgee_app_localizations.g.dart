@@ -4793,6 +4793,111 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get group_chat_report_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_title',
+    () => _fallback.group_chat_report_title,
+  );
+
+  @override
+  String get group_chat_report_privacy => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_privacy',
+    () => _fallback.group_chat_report_privacy,
+  );
+
+  @override
+  String get group_chat_report_reason_harassment => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_reason_harassment',
+    () => _fallback.group_chat_report_reason_harassment,
+  );
+
+  @override
+  String get group_chat_report_reason_hate => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_reason_hate',
+    () => _fallback.group_chat_report_reason_hate,
+  );
+
+  @override
+  String get group_chat_report_reason_sexual => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_reason_sexual',
+    () => _fallback.group_chat_report_reason_sexual,
+  );
+
+  @override
+  String get group_chat_report_reason_spam => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_reason_spam',
+    () => _fallback.group_chat_report_reason_spam,
+  );
+
+  @override
+  String get group_chat_report_reason_off_topic => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_reason_off_topic',
+    () => _fallback.group_chat_report_reason_off_topic,
+  );
+
+  @override
+  String get group_chat_report_reason_other => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_reason_other',
+    () => _fallback.group_chat_report_reason_other,
+  );
+
+  @override
+  String get group_chat_report_note_title => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_note_title',
+    () => _fallback.group_chat_report_note_title,
+  );
+
+  @override
+  String get group_chat_report_note_hint => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_note_hint',
+    () => _fallback.group_chat_report_note_hint,
+  );
+
+  @override
+  String get group_chat_report_submit => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_submit',
+    () => _fallback.group_chat_report_submit,
+  );
+
+  @override
+  String get group_chat_report_thanks => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_thanks',
+    () => _fallback.group_chat_report_thanks,
+  );
+
+  @override
+  String get group_chat_report_offline => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_offline',
+    () => _fallback.group_chat_report_offline,
+  );
+
+  @override
+  String get group_chat_report_failed => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_failed',
+    () => _fallback.group_chat_report_failed,
+  );
+
+  @override
+  String get group_chat_report_retry => TolgeeBridge.get(
+    localeName,
+    'group_chat_report_retry',
+    () => _fallback.group_chat_report_retry,
+  );
+
+  @override
   String get group_chat_delete => TolgeeBridge.get(
     localeName,
     'group_chat_delete',
