@@ -54,7 +54,7 @@ class NavigationService {
         navigationDirection: direction,
         groupId: currentContext.groupId,
         collectionId: currentContext.collectionId,
-        language: adjacentText.language ?? currentContext.language,
+        language: adjacentText.language,
       );
     }
 
