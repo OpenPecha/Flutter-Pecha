@@ -19,14 +19,16 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_event
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/utils/group_event_link_utils.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_event_participants_drawer.dart';
+import 'package:flutter_pecha/features/home/presentation/widgets/youtube_video_player.dart';
+import 'package:flutter_pecha/features/plans/presentation/providers/plans_providers.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class GroupEventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
@@ -146,11 +148,12 @@ class _GroupEventDetailScreenState
 
     final isAttending = _attendingOverride ?? event.isJoined;
     final totalAttending = _attendeeCount(event, isAttending);
-    final links = event.links.where((link) => link.url.isNotEmpty).toList();
-    final hasLinks = links.isNotEmpty;
-    final hasVideos = links.any(
-      (link) => GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.video,
-    );
+    final videos = _videoLinks(event);
+    final hasVideos = videos.isNotEmpty;
+    final hasPractices =
+        event.plan != null ||
+        event.accumulator != null ||
+        event.groupRecitationCollection != null;
     final isPast = isGroupEventPast(event);
 
     return SingleChildScrollView(
@@ -172,11 +175,15 @@ class _GroupEventDetailScreenState
           ],
           const SizedBox(height: 16),
           _EventInfoCard(event: event, isDark: isDark),
+          if (hasPractices) ...[
+            const SizedBox(height: 16),
+            _EventPracticesCard(event: event, isDark: isDark),
+          ],
           const SizedBox(height: 16),
-          _buildTabs(isDark, hasLinks: hasLinks, hasVideos: hasVideos),
+          _buildTabs(isDark, hasVideos: hasVideos),
           const SizedBox(height: 12),
-          hasLinks && _selectedTab == 0
-              ? _LinksPanel(event: event, isDark: isDark)
+          hasVideos && _selectedTab == 0
+              ? _VideosPanel(videos: videos, event: event, isDark: isDark)
               : _AboutPanel(event: event, isDark: isDark),
         ],
       ),
@@ -255,19 +262,12 @@ class _GroupEventDetailScreenState
     );
   }
 
-  Widget _buildTabs(
-    bool isDark, {
-    required bool hasLinks,
-    required bool hasVideos,
-  }) {
+  Widget _buildTabs(bool isDark, {required bool hasVideos}) {
     return Row(
       children: [
-        if (hasLinks) ...[
+        if (hasVideos) ...[
           _EventTabButton(
-            label:
-                hasVideos
-                    ? context.l10n.connect_event_tab_videos
-                    : context.l10n.connect_event_tab_links,
+            label: context.l10n.connect_event_tab_videos,
             selected: _selectedTab == 0,
             isDark: isDark,
             onTap: () => setState(() => _selectedTab = 0),
@@ -276,12 +276,22 @@ class _GroupEventDetailScreenState
         ],
         _EventTabButton(
           label: context.l10n.connect_event_tab_about,
-          selected: !hasLinks || _selectedTab == 1,
+          selected: !hasVideos || _selectedTab == 1,
           isDark: isDark,
           onTap: () => setState(() => _selectedTab = 1),
         ),
       ],
     );
+  }
+
+  List<GroupEventLink> _videoLinks(GroupEvent event) {
+    return event.links
+        .where(
+          (link) =>
+              link.url.isNotEmpty &&
+              GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.video,
+        )
+        .toList();
   }
 
   Future<void> _attendEvent(GroupEvent event) async {
@@ -609,15 +619,26 @@ class _EventInfoCard extends StatelessWidget {
     final secondaryColor =
         isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
     final dateText = _formatDateText(context, event);
-    final locationLabel = groupEventLocationLabel(
-      event,
-      context.l10n.connect_online,
-      hybridLabel: context.l10n.connect_events_filter_hybrid,
-    );
-    final locationIcon =
-        isGroupEventOnline(event)
-            ? AppAssets.globe
-            : PhosphorIconsRegular.mapPin;
+    final recurrenceText = _formatRecurrenceText(context, event);
+    final locationName = event.location?.name.trim() ?? '';
+    final isOnline = isGroupEventOnline(event);
+    final showLocation = !isOnline && locationName.isNotEmpty;
+    final links =
+        event.links
+            .where(
+              (link) =>
+                  link.url.isNotEmpty &&
+                  GroupEventLinkUtils.kindOf(link) != GroupEventLinkKind.video,
+            )
+            .toList();
+    final showOnline = isOnline || isGroupEventHybrid(event);
+    // A meeting room stands in for the venue only when the event runs online;
+    // on a venue-only event it is just another resource.
+    bool isVenueLink(GroupEventLink link) =>
+        showOnline &&
+        GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
+    final meetingLinks = links.where(isVenueLink).toList();
+    final otherLinks = links.where((link) => !isVenueLink(link)).toList();
 
     return Container(
       width: double.infinity,
@@ -629,15 +650,11 @@ class _EventInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _EventInfoRow(
-            icon: locationIcon,
-            text: locationLabel,
-            iconColor: secondaryColor,
-          ),
-          const SizedBox(height: 12),
+          _EventSectionLabel(text: context.l10n.connect_event_when),
+          const SizedBox(height: 10),
           if (dateText != null)
             _EventInfoRow(
-              icon: AppAssets.calendarDots,
+              icon: AppAssets.clock,
               text: dateText,
               iconColor: secondaryColor,
             )
@@ -646,6 +663,47 @@ class _EventInfoCard extends StatelessWidget {
               context.l10n.connect_event_date_tba,
               style: TextStyle(fontSize: 14, color: secondaryColor),
             ),
+          if (recurrenceText != null) ...[
+            const SizedBox(height: 10),
+            _EventInfoRow(
+              icon: AppAssets.repeat,
+              text: recurrenceText,
+              iconColor: secondaryColor,
+            ),
+          ],
+          if (showLocation || showOnline) ...[
+            const SizedBox(height: 16),
+            _EventSectionLabel(text: context.l10n.connect_event_where),
+            const SizedBox(height: 10),
+          ],
+          if (showLocation)
+            _EventInfoRow(
+              icon: AppAssets.buildings,
+              text: locationName,
+              iconColor: secondaryColor,
+              bold: true,
+            ),
+          if (showOnline) ...[
+            if (showLocation) const SizedBox(height: 12),
+            _EventInfoRow(
+              icon: AppAssets.videoCamera,
+              text: context.l10n.connect_online,
+              iconColor: secondaryColor,
+              bold: true,
+            ),
+          ],
+          for (final link in meetingLinks) ...[
+            const SizedBox(height: 10),
+            _EventLinkText(link: link, isDark: isDark),
+          ],
+          if (otherLinks.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _EventSectionLabel(text: context.l10n.connect_event_links_title),
+            for (final link in otherLinks) ...[
+              const SizedBox(height: 10),
+              _EventLinkText(link: link, isDark: isDark),
+            ],
+          ],
         ],
       ),
     );
@@ -664,7 +722,58 @@ class _EventInfoCard extends StatelessWidget {
     }
 
     final endTime = DateFormat.jm(locale).format(end).toLowerCase();
-    return '$date · $startTime - $endTime ${start.timeZoneName}';
+    final endZone = end.timeZoneName;
+    // Label the start too when the range crosses a DST change.
+    final startLabel =
+        start.timeZoneName == endZone
+            ? startTime
+            : '$startTime ${start.timeZoneName}';
+    final isMultiDay = !DateUtils.isSameDay(start, end);
+    if (isMultiDay) {
+      final endDate = DateFormat('EEE d MMM y', locale).format(end);
+      return '$date · $startLabel – $endDate · $endTime $endZone';
+    }
+    return '$date · $startLabel – $endTime $endZone';
+  }
+
+  String? _formatRecurrenceText(BuildContext context, GroupEvent event) {
+    final recurrence = event.recurrence;
+    if (!event.isRecurring || recurrence == null) return null;
+
+    final anchor = (event.occurrenceDate ?? event.startDate)?.toLocal();
+    if (anchor == null) return null;
+
+    final locale = intlFormatLocaleOf(context);
+    return switch (recurrence.frequency.toUpperCase()) {
+      'DAILY' => context.l10n.connect_event_every_day,
+      'WEEKLY' => context.l10n.connect_event_every_weekday(
+        DateFormat.EEEE(locale).format(anchor),
+      ),
+      'MONTHLY' => context.l10n.connect_event_every_month,
+      'YEARLY' => context.l10n.connect_event_every_date(
+        DateFormat('d MMM', locale).format(anchor),
+      ),
+      _ => null,
+    };
+  }
+}
+
+class _EventSectionLabel extends StatelessWidget {
+  final String text;
+
+  const _EventSectionLabel({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text.toUpperCase(),
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.1,
+        color: AppColors.poemAuthor,
+      ),
+    );
   }
 }
 
@@ -673,11 +782,19 @@ class _EventInfoRow extends StatelessWidget {
     required this.icon,
     required this.text,
     required this.iconColor,
+    this.leading,
+    this.textColor,
+    this.bold = false,
   });
 
   final IconData icon;
   final String text;
   final Color iconColor;
+
+  /// Replaces [icon] when set, e.g. a brand logo image.
+  final Widget? leading;
+  final Color? textColor;
+  final bool bold;
 
   static const double _iconSize = 16;
   static const double _iconSlotWidth = 18;
@@ -693,12 +810,265 @@ class _EventInfoRow extends StatelessWidget {
           height: _textStyle.fontSize! * _textStyle.height!,
           child: Align(
             alignment: Alignment.center,
-            child: Icon(icon, size: _iconSize, color: iconColor),
+            child: leading ?? Icon(icon, size: _iconSize, color: iconColor),
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: _textStyle)),
+        Expanded(
+          child: Text(
+            text,
+            style: _textStyle.copyWith(
+              fontWeight: bold ? FontWeight.w700 : null,
+              color: textColor,
+            ),
+            maxLines: textColor == null ? null : 1,
+            overflow: textColor == null ? null : TextOverflow.ellipsis,
+          ),
+        ),
       ],
+    );
+  }
+}
+
+/// Meeting or web link under the "Online" row, shown as its short url with a
+/// camera icon for meeting rooms and a globe for everything else.
+class _EventLinkText extends StatelessWidget {
+  final GroupEventLink link;
+  final bool isDark;
+
+  const _EventLinkText({required this.link, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final isMeeting =
+        GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final brandIcon = _brandIcon();
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _openLink(link.url),
+      child: _EventInfoRow(
+        icon: isMeeting ? AppAssets.videoCamera : AppAssets.globe,
+        leading:
+            brandIcon == null
+                ? null
+                : Image.asset(brandIcon, width: 16, height: 16),
+        text: GroupEventLinkUtils.shortUrl(link.url),
+        iconColor: secondaryColor,
+        textColor: isDark ? AppColors.blueDark : AppColors.blue,
+        bold: true,
+      ),
+    );
+  }
+
+  String? _brandIcon() {
+    final provider = GroupEventLinkUtils.providerName(link) ?? link.type;
+    return switch (provider.toLowerCase()) {
+      'google meet' || 'google-meet' || 'meet' => AppAssets.googleMeetIcon,
+      'zoom' => AppAssets.zoomIcon,
+      _ => null,
+    };
+  }
+}
+
+class _EventPracticesCard extends ConsumerStatefulWidget {
+  final GroupEvent event;
+  final bool isDark;
+
+  const _EventPracticesCard({required this.event, required this.isDark});
+
+  @override
+  ConsumerState<_EventPracticesCard> createState() =>
+      _EventPracticesCardState();
+}
+
+class _EventPracticesCardState extends ConsumerState<_EventPracticesCard> {
+  String? _loadingId;
+
+  @override
+  Widget build(BuildContext context) {
+    final event = widget.event;
+    final isDark = widget.isDark;
+    final cardColor =
+        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
+    final plan = event.plan;
+    final accumulator = event.accumulator;
+    final collection = event.groupRecitationCollection;
+
+    final rows = <Widget>[
+      if (plan != null)
+        _EventPracticeRow(
+          practice: plan,
+          isDark: isDark,
+          isLoading: _loadingId == plan.id,
+          onTap: () => _openPlan(plan),
+        ),
+      if (accumulator != null)
+        _EventPracticeRow(
+          practice: accumulator,
+          isDark: isDark,
+          isLoading: false,
+          onTap: () => _openMala(accumulator),
+        ),
+      if (collection != null)
+        _EventPracticeRow(
+          practice: collection,
+          isDark: isDark,
+          isLoading: false,
+          onTap:
+              () => context.push(
+                '/home/group/${event.groupId}/recitation-collections/${collection.id}',
+                extra: {'title': collection.name},
+              ),
+        ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 16, 10, 10),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _EventSectionLabel(text: context.l10n.connect_event_practices),
+          const SizedBox(height: 4),
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: isDark ? AppColors.cardBorderDark : AppColors.grey100,
+              ),
+            rows[i],
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openPlan(GroupEventPracticeRef practice) async {
+    if (_loadingId != null) return;
+    setState(() => _loadingId = practice.id);
+
+    final either = await ref.read(planByIdFutureProvider(practice.id).future);
+    if (!mounted) return;
+    setState(() => _loadingId = null);
+
+    final plan = either.fold((_) => null, (plan) => plan);
+    if (plan == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.notFound)));
+      return;
+    }
+    context.push(AppRoutes.practicePlanPreview, extra: {'plan': plan});
+  }
+
+  /// `accumulator_id` on an event is a mala preset id, so the counter opens
+  /// on that mantra directly.
+  void _openMala(GroupEventPracticeRef practice) {
+    final authState = ref.read(authProvider);
+    if (authState.isGuest || !authState.isLoggedIn) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    context.push(AppRoutes.mala, extra: {'presetId': practice.id});
+  }
+}
+
+class _EventPracticeRow extends StatelessWidget {
+  final GroupEventPracticeRef practice;
+  final bool isDark;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _EventPracticeRow({
+    required this.practice,
+    required this.isDark,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final secondaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
+    final imageUrl = practice.imageUrl;
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+
+    return InkWell(
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            ClipOval(
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child:
+                    hasImage
+                        ? CachedNetworkImageWidget(
+                          imageUrl: imageUrl,
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                          errorWidget: _imageFallback(),
+                        )
+                        : _imageFallback(),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                practice.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (isLoading)
+              const Padding(
+                padding: EdgeInsets.all(8),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  AppAssets.caretRight,
+                  size: 18,
+                  color: secondaryColor,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _imageFallback() {
+    return ColoredBox(
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+      child: Icon(
+        AppAssets.bookOpenText,
+        size: 20,
+        color: isDark ? AppColors.grey500 : AppColors.grey600,
+      ),
     );
   }
 }
@@ -750,156 +1120,36 @@ class _EventTabButton extends StatelessWidget {
   }
 }
 
-class _LinksPanel extends StatelessWidget {
+class _VideosPanel extends StatelessWidget {
+  final List<GroupEventLink> videos;
   final GroupEvent event;
   final bool isDark;
 
-  const _LinksPanel({required this.event, required this.isDark});
+  const _VideosPanel({
+    required this.videos,
+    required this.event,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final links = event.links.where((link) => link.url.isNotEmpty).toList();
-    if (links.isEmpty) {
-      return Text(
-        context.l10n.connect_event_links_empty,
-        style: TextStyle(
-          fontSize: 14,
-          color: isDark ? AppColors.textTertiaryDark : AppColors.textSecondary,
-        ),
-      );
-    }
-
-    final videos = <GroupEventLink>[];
-    final rows = <GroupEventLink>[];
-    for (final link in links) {
-      if (GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.video) {
-        videos.add(link);
-      } else {
-        rows.add(link);
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.connect_event_links_title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 10),
-        for (var i = 0; i < rows.length; i++) ...[
-          if (i > 0) const SizedBox(height: 10),
-          _EventLinkRow(link: rows[i], isDark: isDark),
-        ],
-        if (videos.isNotEmpty) ...[
-          if (rows.isNotEmpty) const SizedBox(height: 10),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.72,
-            ),
-            itemCount: videos.length,
-            itemBuilder: (context, index) {
-              return _VideoLinkCard(
-                link: videos[index],
-                event: event,
-                isDark: isDark,
-              );
-            },
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-/// Non-video link (meeting room, article, ...) shown as a tappable row so it
-/// is never mistaken for playable media.
-class _EventLinkRow extends StatelessWidget {
-  final GroupEventLink link;
-  final bool isDark;
-
-  const _EventLinkRow({required this.link, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final isMeeting =
-        GroupEventLinkUtils.kindOf(link) == GroupEventLinkKind.meeting;
-    final shortUrl = GroupEventLinkUtils.shortUrl(link.url);
-    final cardColor =
-        isDark ? AppColors.cardBackgroundDark : AppColors.surfaceWhite;
-    final secondaryColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
-
-    return Material(
-      color: cardColor,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _openLink(link.url),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color:
-                      isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-                ),
-                child: Icon(
-                  isMeeting
-                      ? PhosphorIconsRegular.videoCamera
-                      : AppAssets.linkSimple,
-                  size: 18,
-                  color:
-                      isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      GroupEventLinkUtils.displayLabel(
-                        link,
-                        fallbackLabel: context.l10n.connect_event_link_open,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isMeeting
-                          ? '${context.l10n.connect_event_link_tap_to_join} · $shortUrl'
-                          : shortUrl,
-                      style: TextStyle(fontSize: 12, color: secondaryColor),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Icon(AppAssets.arrowSquareOut, size: 16, color: secondaryColor),
-            ],
-          ),
-        ),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.72,
       ),
+      itemCount: videos.length,
+      itemBuilder: (context, index) {
+        return _VideoLinkCard(
+          link: videos[index],
+          event: event,
+          isDark: isDark,
+        );
+      },
     );
   }
 }
@@ -910,6 +1160,8 @@ Future<void> _openLink(String url) async {
   await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
+/// YouTube thumbnail that plays in the in-app full-screen player; any other
+/// video host falls back to the event image and opens externally.
 class _VideoLinkCard extends StatelessWidget {
   final GroupEventLink link;
   final GroupEvent event;
@@ -923,19 +1175,28 @@ class _VideoLinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final videoId = YoutubePlayer.convertUrlToId(link.url);
+    final placeholderColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.grey100;
+    final label = link.label?.trim() ?? '';
+
     return GestureDetector(
-      onTap: () => _openLink(link.url),
+      onTap: () => _play(context, videoId),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            event.image != null && !event.image!.isEmpty
-                ? ResponsiveCoverImage(image: event.image, fit: BoxFit.cover)
-                : ColoredBox(
-                  color:
-                      isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
-                ),
+            if (videoId != null)
+              CachedNetworkImageWidget(
+                imageUrl: 'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
+                fit: BoxFit.cover,
+                errorWidget: ColoredBox(color: placeholderColor),
+              )
+            else if (event.image != null && !event.image!.isEmpty)
+              ResponsiveCoverImage(image: event.image, fit: BoxFit.cover)
+            else
+              ColoredBox(color: placeholderColor),
             Container(color: Colors.black.withValues(alpha: 0.18)),
             Center(
               child: Container(
@@ -952,8 +1213,50 @@ class _VideoLinkCard extends StatelessWidget {
                 ),
               ),
             ),
+            if (label.isNotEmpty)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10, 16, 10, 8),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black54],
+                    ),
+                  ),
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _play(BuildContext context, String? videoId) {
+    if (videoId == null) {
+      _openLink(link.url);
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (_) => YoutubeVideoPlayer(
+              videoUrl: link.url,
+              title: link.label?.trim() ?? '',
+            ),
       ),
     );
   }

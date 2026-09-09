@@ -352,6 +352,27 @@
   "connect_event_link_tap_to_join": "Tap to join",
   "connect_event_link_open": "Open link",
   "connect_event_date_tba": "Date to be announced",
+  "connect_event_when": "When",
+  "connect_event_where": "Where",
+  "connect_event_practices": "Event practices",
+  "connect_event_every_day": "Every day",
+  "connect_event_every_weekday": "Every {weekday}",
+  "@connect_event_every_weekday": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_event_every_month": "Every month",
+  "connect_event_every_date": "Every {date}",
+  "@connect_event_every_date": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "connect_event_about_empty": "No event details yet",
   "search_groups": "Search groups",
   "search_for_groups": "Search for groups",
