@@ -361,11 +361,10 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
         )
         .then((result) => result.fold<Failure?>((f) => f, (_) => null));
 
-    // Offline is not a failure worth a retry button: the request never left,
-    // and saying so is more honest than implying something went wrong. The
-    // failure type alone cannot tell us that, and the cached flag may be
-    // stale (it is only refreshed on connectivity events), so probe live.
-    // The probe only runs when the failure makes it relevant.
+    // "Offline" is more honest than "something went wrong" when the request
+    // never left. The failure type alone cannot tell us that, and the cached
+    // flag may be stale (it is only refreshed on connectivity events), so
+    // probe live. The probe only runs when the failure makes it relevant.
     final feedback = await chatReportFeedbackFor(
       failure,
       isOnline: connectivity.checkConnectivity,
@@ -373,32 +372,36 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
 
     if (!mounted) return;
 
-    switch (feedback) {
-      case ChatReportFeedback.sent:
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.group_chat_report_thanks)),
-        );
-      case ChatReportFeedback.offline:
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.group_chat_report_offline)),
-        );
-      case ChatReportFeedback.failed:
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.group_chat_report_failed),
-            action: SnackBarAction(
-              label: l10n.group_chat_report_retry,
-              onPressed:
-                  () => _submitReport(
-                    message,
-                    reason: reason,
-                    note: note,
-                    offTopicLabel: offTopicLabel,
-                  ),
-            ),
-          ),
-        );
+    if (feedback == ChatReportFeedback.sent) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.group_chat_report_thanks)),
+      );
+      return;
     }
+
+    // Retry is offered either way. The probe is a DNS lookup that can fail
+    // on a network where the API is still reachable (a filtered resolver, a
+    // slow one), so "offline" only changes the wording; it must never cost
+    // the member the one action that gets the report through.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          feedback == ChatReportFeedback.offline
+              ? l10n.group_chat_report_offline
+              : l10n.group_chat_report_failed,
+        ),
+        action: SnackBarAction(
+          label: l10n.group_chat_report_retry,
+          onPressed:
+              () => _submitReport(
+                message,
+                reason: reason,
+                note: note,
+                offTopicLabel: offTopicLabel,
+              ),
+        ),
+      ),
+    );
   }
 
   bool _canDelete(ChatMessageDTO message) {

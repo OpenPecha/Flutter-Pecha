@@ -16,13 +16,25 @@ enum ChatReportFeedback { sent, offline, failed }
 /// never refreshes connectivity state, so a flag that went stale while the
 /// app was backgrounded would file every network failure as offline and hide
 /// Retry. The probe is only run when a `NetworkFailure` makes it relevant.
+///
+/// A probe that throws (a missing platform plugin, a lookup that blows up)
+/// counts as online: the failure keeps the Retry path instead of being
+/// mislabeled, and the caller never has to guard the probe itself.
 Future<ChatReportFeedback> chatReportFeedbackFor(
   Failure? failure, {
   required Future<bool> Function() isOnline,
 }) async {
   if (failure == null) return ChatReportFeedback.sent;
-  if (failure is NetworkFailure && !await isOnline()) {
+  if (failure is NetworkFailure && !await _probe(isOnline)) {
     return ChatReportFeedback.offline;
   }
   return ChatReportFeedback.failed;
+}
+
+Future<bool> _probe(Future<bool> Function() isOnline) async {
+  try {
+    return await isOnline();
+  } catch (_) {
+    return true;
+  }
 }

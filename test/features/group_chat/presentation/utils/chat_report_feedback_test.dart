@@ -64,6 +64,20 @@ void main() {
       }
     });
 
+    test('a probe that throws keeps the retry path', () async {
+      // The platform channel can be missing, and the lookup itself can blow
+      // up; neither says anything about the report, so it must not be filed
+      // as offline nor escape to the caller.
+      Future<bool> throwingProbe() async => throw StateError('no plugin');
+      expect(
+        await chatReportFeedbackFor(
+          const NetworkFailure('reportMessage: No internet connection'),
+          isOnline: throwingProbe,
+        ),
+        ChatReportFeedback.failed,
+      );
+    });
+
     test('any other failure keeps the retry path without probing', () async {
       for (final failure in const <Failure>[
         ServerFailure('reportMessage: 500'),
