@@ -42,6 +42,7 @@ import 'package:flutter_pecha/features/plans/presentation/widgets/plan_track/pla
 import 'package:flutter_pecha/features/plans/presentation/plan_info.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_preview/plan_preview_details.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/edit_routine_screen.dart';
+import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/my_recitation_collection_screen.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/bookmarks_screen.dart';
 import 'package:flutter_pecha/features/practice/presentation/screens/practice_explore_screen.dart';
@@ -530,6 +531,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final timer = extra?['initialTimer'] as PresetTimer?;
           final groupCollection =
               extra?['initialGroupCollection'] as GroupRecitationCollection?;
+          final myCollection =
+              extra?['initialMyCollection']
+                  as MyRecitationCollectionDetailModel?;
           return EditRoutineScreen(
             initialPlan: plan,
             initialRecitation: recitation,
@@ -538,6 +542,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             initialMantra: mantra,
             enrollSeriesId: enrollSeriesId,
             initialGroupCollection: groupCollection,
+            initialMyCollection: myCollection,
           );
         },
         routes: [

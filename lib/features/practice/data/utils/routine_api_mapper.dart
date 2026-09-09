@@ -33,6 +33,8 @@ RoutineItem routineItemFromSessionDto(SessionDTO s) {
       SessionType.accumulator => RoutineItemType.accumulator,
       SessionType.groupRecitationCollection =>
         RoutineItemType.groupRecitationCollection,
+      SessionType.recitationCollection =>
+        RoutineItemType.myRecitationCollection,
     },
     enrolledAt: s.startedAt,
     language: s.language.isEmpty ? null : s.language,
@@ -68,6 +70,8 @@ List<SessionRequest> _sessionsForBlock(RoutineBlock block) {
           RoutineItemType.accumulator => SessionType.accumulator,
           RoutineItemType.groupRecitationCollection =>
             SessionType.groupRecitationCollection,
+          RoutineItemType.myRecitationCollection =>
+            SessionType.recitationCollection,
         },
         sourceId: item.id,
         displayOrder: i,

@@ -13,6 +13,7 @@ enum RoutineItemType {
   timer,
   accumulator,
   groupRecitationCollection,
+  myRecitationCollection,
 }
 
 class RoutineItem {
@@ -32,8 +33,7 @@ class RoutineItem {
   /// Preview text for [RoutineItemType.recitation] items (from API or selection).
   final RecitationFirstSegmentModel? firstSegment;
 
-  /// Number of chants — only present for
-  /// [RoutineItemType.groupRecitationCollection] items.
+  /// Number of chants — only present for recitation collection items.
   final int? itemCount;
 
   const RoutineItem({
@@ -145,6 +145,7 @@ class RoutineItem {
       'timer' => RoutineItemType.timer,
       'accumulator' => RoutineItemType.accumulator,
       'groupRecitationCollection' => RoutineItemType.groupRecitationCollection,
+      'myRecitationCollection' => RoutineItemType.myRecitationCollection,
       _ => RoutineItemType.series,
     };
   }
@@ -177,7 +178,7 @@ class RoutineBlock {
     int? notificationId,
     this.apiTimeBlockId,
   })  : id = id ?? _uuid.v4(),
-        _persistedNotificationId = notificationId;
+       _persistedNotificationId = notificationId;
 
   RoutineBlock copyWith({
     String? id,

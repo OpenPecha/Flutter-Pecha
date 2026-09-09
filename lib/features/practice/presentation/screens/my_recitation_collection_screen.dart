@@ -4,6 +4,8 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/collection_completion_sheet.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
@@ -287,7 +289,7 @@ class _CollectionContent extends StatelessWidget {
               children: [
                 _CollectionHero(imageUrl: collection.imgUrl, isDark: isDark),
                 const SizedBox(height: 14),
-                _CollectionActionBar(isDark: isDark),
+                _CollectionActionBar(collection: collection, isDark: isDark),
                 const SizedBox(height: 12),
                 if (hasItems)
                   ...collection.items.map(
@@ -402,13 +404,14 @@ class _CollectionHero extends StatelessWidget {
   }
 }
 
-class _CollectionActionBar extends StatelessWidget {
-  const _CollectionActionBar({required this.isDark});
+class _CollectionActionBar extends ConsumerWidget {
+  const _CollectionActionBar({required this.collection, required this.isDark});
 
+  final MyRecitationCollectionDetailModel collection;
   final bool isDark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -417,7 +420,7 @@ class _CollectionActionBar extends StatelessWidget {
             icon: AppAssets.plus,
             label: context.l10n.nav_practice,
             isDark: isDark,
-            onTap: () {},
+            onTap: () => _addToPractices(context, ref),
           ),
           const SizedBox(width: 8),
           _ActionChip(
@@ -436,6 +439,19 @@ class _CollectionActionBar extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
+    );
+  }
+
+  /// Hands the collection to the routine editor, which injects it as a
+  /// RECITATION_COLLECTION session and lets the user place its time block.
+  void _addToPractices(BuildContext context, WidgetRef ref) {
+    if (ref.read(authProvider).isGuest) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    context.pushNamed(
+      'edit-routine',
+      extra: {'initialMyCollection': collection},
     );
   }
 }
