@@ -12,12 +12,15 @@ import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/responsive_cover_image.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
+import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_accumulator.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_practice.dart';
 import 'package:flutter_pecha/features/group_profile/domain/entities/group_profile.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_accumulator_providers.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/providers/group_post_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_profile_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/screens/group_about_screen.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/screens/group_post_composer_screen.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_accumulator_card.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_join_request_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_events_tab.dart';
@@ -25,6 +28,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/utils/group_pr
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_links_drawer.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_members_tab.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_nested_tab_scroll_view.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_posts_tab.dart';
 import 'package:flutter_pecha/features/home/presentation/providers/series_enrollment_provider.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_inline_markdown_view.dart';
 import 'package:flutter_pecha/shared/utils/helper_functions.dart';
@@ -101,9 +105,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     );
   }
 
-  /// Posts have no data source yet, so the tab never has content to show.
-  bool get _hasPosts => false;
-
   bool _hasBanner(GroupProfile profile) =>
       profile.bannerUrl != null && profile.bannerUrl!.isNotEmpty;
 
@@ -154,6 +155,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ? _visibleTabs[previous.index]
             : null;
     var initialIndex = selectedTab == null ? -1 : tabs.indexOf(selectedTab);
+    if (initialIndex < 0) initialIndex = tabs.indexOf(_GroupProfileTab.posts);
     if (initialIndex < 0) {
       initialIndex = tabs.indexOf(_GroupProfileTab.practices);
     }
@@ -419,11 +421,26 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final isEventsLoading =
         eventsAsync.isLoading && !eventsAsync.hasValue && !eventsAsync.hasError;
 
-    // Wait for both sections before laying out the tabs, otherwise tabs would
+    final postsState = ref.watch(groupPostsProvider(profile.id));
+    final permissionAsync = ref.watch(groupPostPermissionProvider(profile.id));
+    final canPost = permissionAsync.valueOrNull ?? false;
+    // Keep the posts tab when loading failed so its retry action stays
+    // reachable, and for anyone allowed to publish so the Post button shows.
+    final hasPosts =
+        postsState.posts.isNotEmpty ||
+        (postsState.hasLoaded && postsState.error != null);
+    final isPostsLoading =
+        !postsState.hasLoaded ||
+        (permissionAsync.isLoading &&
+            !permissionAsync.hasValue &&
+            !permissionAsync.hasError);
+
+    // Wait for every section before laying out the tabs, otherwise tabs would
     // pop in and out as each request settles.
-    final isTabDataLoading = isPracticesLoading || isEventsLoading;
+    final isTabDataLoading =
+        isPracticesLoading || isEventsLoading || isPostsLoading;
     final tabs = <_GroupProfileTab>[
-      if (_hasPosts) _GroupProfileTab.posts,
+      if (hasPosts || canPost) _GroupProfileTab.posts,
       if (hasEvents) _GroupProfileTab.events,
       if (hasPractices) _GroupProfileTab.practices,
       _GroupProfileTab.members,
@@ -657,9 +674,17 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final pageStorageKey = '${profile.id}-${tab.name}';
 
     return switch (tab) {
-      _GroupProfileTab.posts => GroupProfileNestedTabScrollView.centered(
+      _GroupProfileTab.posts => GroupProfilePostsTab(
+        groupId: profile.id,
+        isDark: isDark,
+        lineHeight: lineHeight,
         pageStorageKey: pageStorageKey,
-        child: _buildEmptyTab('No posts yet', isDark, lineHeight),
+        canPost: ref.watch(
+          groupPostPermissionProvider(
+            profile.id,
+          ).select((async) => async.valueOrNull ?? false),
+        ),
+        onCreatePost: () => _onCreatePost(profile),
       ),
       _GroupProfileTab.events => GroupProfileEventsTab(
         groupId: profile.id,
@@ -681,6 +706,51 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
         pageStorageKey: pageStorageKey,
       ),
     };
+  }
+
+  Future<void> _onCreatePost(GroupProfile profile) async {
+    final authState = ref.read(authProvider);
+    if (authState.isGuest || !authState.isLoggedIn) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+
+    final created = await GroupPostComposerScreen.show(context, profile);
+    if (created == null || !mounted) return;
+
+    // The create response may omit group fields the card needs; fill them from
+    // the profile, then fetch page one so the list reflects the server.
+    final post = ConnectPost(
+      id: created.id,
+      groupId: created.groupId.isNotEmpty ? created.groupId : profile.id,
+      groupName:
+          created.groupName.trim().isNotEmpty
+              ? created.groupName
+              : profile.title,
+      groupAvatarUrl: created.groupAvatarUrl ?? profile.avatarUrl,
+      caption: created.caption,
+      status: created.status,
+      publishedAt: created.publishedAt ?? DateTime.now(),
+      media: created.media,
+      links: created.links,
+      creatorName: created.creatorName,
+      creatorImageUrl: created.creatorImageUrl,
+      likeCount: created.likeCount,
+      commentCount: created.commentCount,
+      createdAt: created.createdAt ?? DateTime.now(),
+      updatedAt: created.updatedAt,
+      likedByMe: created.likedByMe,
+    );
+    final notifier = ref.read(groupPostsProvider(profile.id).notifier);
+    notifier.prependPost(post);
+    notifier.loadInitial();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.group_post_published),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   GroupProfile _resolveProfile() {
@@ -983,8 +1053,8 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
 
   String _tabLabel(_GroupProfileTab tab, GroupProfile profile) {
     return switch (tab) {
-      _GroupProfileTab.posts => 'Post',
-      _GroupProfileTab.events => 'Events',
+      _GroupProfileTab.posts => context.l10n.group_tab_posts,
+      _GroupProfileTab.events => context.l10n.group_tab_events,
       _GroupProfileTab.practices => context.l10n.tab_practices,
       _GroupProfileTab.members =>
         profile.groupType.isPage
@@ -1355,17 +1425,6 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyTab(String message, bool isDark, double? lineHeight) {
-    final color = isDark ? AppColors.textTertiaryDark : AppColors.textSecondary;
-
-    return Center(
-      child: Text(
-        message,
-        style: TextStyle(fontSize: 14, color: color, height: lineHeight),
       ),
     );
   }
