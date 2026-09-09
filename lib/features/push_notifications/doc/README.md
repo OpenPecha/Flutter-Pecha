@@ -84,7 +84,9 @@ The app's master notification toggle is enforced server-side by
 with the id kept from the register response (`StorageKeys.pushDeviceServerId`),
 ON registers again. Token refreshes and sign-in while master is off never
 re-register; sign-in with master off removes a registration left from an
-earlier session. Per-group toggles (group_profile feature) are separate,
+earlier session. Register and unregister run through one reconcile loop
+(`_requestReconcile`) that re-reads state after each pass and retries a
+failed backend call with linear backoff, up to `maxReconcileRetries`. Per-group toggles (group_profile feature) are separate,
 server-stored, and greyed out in the UI while master is off.
 
 ## Foreground suppression

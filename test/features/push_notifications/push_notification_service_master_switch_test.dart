@@ -101,6 +101,14 @@ class _FakeStorage extends Fake implements LocalStorageService {
 
 Future<void> _settle() => Future<void>.delayed(Duration.zero);
 
+/// Short backoff unit for the retry tests; production uses seconds.
+const _retryDelay = Duration(milliseconds: 20);
+
+/// Waits long enough for the [attempt]th linear-backoff retry to have fired.
+Future<void> _afterRetry(int attempt) => Future<void>.delayed(
+  _retryDelay * attempt + const Duration(milliseconds: 5),
+);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -114,7 +122,11 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     repo = _FakeRepository();
     storage = _FakeStorage();
-    service = PushNotificationService(repository: repo, storage: storage);
+    service = PushNotificationService(
+      repository: repo,
+      storage: storage,
+      reconcileRetryBaseDelay: _retryDelay,
+    );
   });
 
   tearDown(() async {
@@ -300,6 +312,102 @@ void main() {
         expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-1');
       },
     );
+  });
+
+  group('reconcile retries', () {
+    test('a failed unregister is retried until it succeeds', () async {
+      await service.initialize();
+      service.onAuthChanged(loggedIn: true);
+      await _settle();
+
+      repo.unregisterFailure = const NetworkFailure('offline');
+      service.setMasterEnabled(false);
+      await _settle();
+      expect(repo.unregistered, ['dev-1']);
+      expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-1');
+
+      // Connection is back before the first retry fires.
+      repo.unregisterFailure = null;
+      await _afterRetry(1);
+      await service.registrationSettled;
+
+      expect(repo.unregistered, ['dev-1', 'dev-1']);
+      expect(
+        storage.values.containsKey(StorageKeys.pushDeviceServerId),
+        isFalse,
+      );
+    });
+
+    test('a failed register is retried', () async {
+      repo.registerFailure = const NetworkFailure('offline');
+      await service.initialize();
+      service.onAuthChanged(loggedIn: true);
+      await _settle();
+      expect(repo.registered, ['tok-1']);
+
+      repo.registerFailure = null;
+      await _afterRetry(1);
+      await service.registrationSettled;
+
+      expect(repo.registered, ['tok-1', 'tok-1']);
+      expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-1');
+    });
+
+    test('an explicit request supersedes a pending retry', () async {
+      await service.initialize();
+      service.onAuthChanged(loggedIn: true);
+      await _settle();
+
+      repo.unregisterFailure = const NetworkFailure('offline');
+      service.setMasterEnabled(false);
+      await _settle();
+      expect(repo.unregistered, ['dev-1']);
+
+      // User changes their mind before the retry fires: only the register
+      // should run, and the stale unregister retry must not fire afterwards.
+      service.setMasterEnabled(true);
+      await service.registrationSettled;
+      await _afterRetry(1);
+      await service.registrationSettled;
+
+      expect(repo.unregistered, ['dev-1']);
+      expect(repo.registered, ['tok-1', 'tok-1']);
+      expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-1');
+    });
+
+    test('gives up after the retry cap and waits for the next event', () async {
+      await service.initialize();
+      service.onAuthChanged(loggedIn: true);
+      await _settle();
+
+      repo.unregisterFailure = const NetworkFailure('offline');
+      service.setMasterEnabled(false);
+      // Initial attempt plus every retry, with linear backoff between them.
+      for (
+        var attempt = 1;
+        attempt <= PushNotificationService.maxReconcileRetries;
+        attempt++
+      ) {
+        await _afterRetry(attempt);
+      }
+      await service.registrationSettled;
+      final attempts = repo.unregistered.length;
+      expect(attempts, PushNotificationService.maxReconcileRetries + 1);
+
+      // No further retries on their own.
+      await _afterRetry(PushNotificationService.maxReconcileRetries + 1);
+      expect(repo.unregistered.length, attempts);
+
+      // The next explicit event tries again.
+      repo.unregisterFailure = null;
+      service.refreshRegistration();
+      await service.registrationSettled;
+      expect(repo.unregistered.length, attempts + 1);
+      expect(
+        storage.values.containsKey(StorageKeys.pushDeviceServerId),
+        isFalse,
+      );
+    });
   });
 
   group('foreground suppression', () {
