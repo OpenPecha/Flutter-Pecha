@@ -3,6 +3,7 @@ import 'package:flutter_pecha/features/group_profile/presentation/providers/grou
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_navigation_bottom_bar.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_navigator.dart';
 import 'package:flutter_pecha/features/plans/presentation/widgets/plan_navigation/plan_subtask_completion.dart';
+import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_completion_service.dart';
 import 'package:flutter_pecha/features/reader/constants/reader_constants.dart';
 import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_pecha/features/reader/presentation/providers/reader_notifier.dart';
@@ -87,7 +88,10 @@ class _SwipeNavigationWrapperState
                             (navigationContext.source ==
                                     NavigationSource.plan ||
                                 navigationContext.source ==
-                                    NavigationSource.groupRecitationCollection)
+                                    NavigationSource
+                                        .groupRecitationCollection ||
+                                navigationContext.source ==
+                                    NavigationSource.myRecitationCollection)
                         ? _finishReading
                         : null,
               ),
@@ -119,6 +123,11 @@ class _SwipeNavigationWrapperState
           NavigationSource.groupRecitationCollection) {
         ref
             .read(groupRecitationCompletionProvider)
+            .completeCurrent(currentContext);
+      } else if (currentContext.source ==
+          NavigationSource.myRecitationCollection) {
+        ref
+            .read(myRecitationCompletionProvider)
             .completeCurrent(currentContext);
       }
     }
@@ -155,6 +164,10 @@ class _SwipeNavigationWrapperState
         NavigationSource.groupRecitationCollection) {
       await ref
           .read(groupRecitationCompletionProvider)
+          .completeCurrent(navContext);
+    } else if (navContext?.source == NavigationSource.myRecitationCollection) {
+      await ref
+          .read(myRecitationCompletionProvider)
           .completeCurrent(navContext);
     }
 

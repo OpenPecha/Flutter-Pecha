@@ -20,6 +20,7 @@ import 'package:flutter_pecha/features/home/presentation/providers/series_enroll
 import 'package:flutter_pecha/features/home/presentation/providers/use_case_providers.dart'
     show getSeriesByIdUseCaseProvider;
 import 'package:flutter_pecha/features/plans/plans.dart';
+import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/data/models/routine_model.dart';
 import 'package:flutter_pecha/features/practice/data/models/session_selection.dart';
 import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
@@ -48,6 +49,14 @@ ResponsiveImage? _accumulatorCoverImage(Mantra mantra) {
 
 ResponsiveImage? _collectionCoverImage(GroupRecitationCollection collection) {
   final url = collection.imageUrl;
+  if (url == null || url.trim().isEmpty) return null;
+  return ResponsiveImage.uniform(url);
+}
+
+ResponsiveImage? _myCollectionCoverImage(
+  MyRecitationCollectionDetailModel collection,
+) {
+  final url = collection.imgUrl;
   if (url == null || url.trim().isEmpty) return null;
   return ResponsiveImage.uniform(url);
 }
@@ -93,6 +102,10 @@ class EditRoutineScreen extends ConsumerStatefulWidget {
   /// after hydration as a GROUP_RECITATION_COLLECTION session.
   final GroupRecitationCollection? initialGroupCollection;
 
+  /// When provided, the personal chant collection is injected into the routine
+  /// after hydration as a RECITATION_COLLECTION session.
+  final MyRecitationCollectionDetailModel? initialMyCollection;
+
   const EditRoutineScreen({
     super.key,
     this.initialPlan,
@@ -102,6 +115,7 @@ class EditRoutineScreen extends ConsumerStatefulWidget {
     this.initialSeries,
     this.enrollSeriesId,
     this.initialGroupCollection,
+    this.initialMyCollection,
   });
 
   @override
@@ -313,6 +327,41 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
     return resolved.target;
   }
 
+  /// Adds [collection] into the routine as a personal chant-collection session.
+  ///
+  /// Personal and group chant collections are distinct client-side because
+  /// they serialize to different backend session types and navigate to
+  /// different detail screens.
+  _EditableBlock? _injectInitialMyCollection(
+    MyRecitationCollectionDetailModel collection,
+  ) {
+    final alreadyInRoutine = _blocks.any(
+      (b) => b.items.any(
+        (item) =>
+            item.id == collection.id &&
+            item.type == RoutineItemType.myRecitationCollection,
+      ),
+    );
+    if (alreadyInRoutine) return null;
+
+    final resolved = _resolveInjectionTarget();
+    resolved.target.items.add(
+      RoutineItem(
+        id: collection.id,
+        title: collection.name,
+        coverImage: _myCollectionCoverImage(collection),
+        type: RoutineItemType.myRecitationCollection,
+        itemCount: collection.items.length,
+        enrolledAt: DateTime.now(),
+      ),
+    );
+    if (resolved.isNewBlock) {
+      _blocks.add(resolved.target);
+    }
+    _sortBlocks();
+    return resolved.target;
+  }
+
   /// Syncs the block that contains [plan] after deep-link injection.
   void _syncInjectedPlan(Plan plan) {
     for (final block in _blocks) {
@@ -320,10 +369,10 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
         (i) => i.representsStandalonePlan(plan.id),
       )) {
         _syncBlock(block).then((_) {
-          if (mounted) _refreshPracticeEnrollments();
+              if (mounted) _refreshPracticeEnrollments();
         }).catchError((e) {
-          if (mounted) _showErrorSnackBar(_mapError(e));
-        });
+              if (mounted) _showErrorSnackBar(_mapError(e));
+            });
         break;
       }
     }
@@ -351,10 +400,10 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
         final injectedBlock = _injectSeries(series);
         if (injectedBlock != null) {
           _syncBlock(injectedBlock).then((_) {
-            if (mounted) _refreshPracticeEnrollments();
+                if (mounted) _refreshPracticeEnrollments();
           }).catchError((e) {
-            if (mounted) _showErrorSnackBar(_mapError(e));
-          });
+                if (mounted) _showErrorSnackBar(_mapError(e));
+              });
         }
       },
     );
@@ -1384,7 +1433,9 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
             _EditableBlock? injectedSeriesBlock;
             _EditableBlock? injectedAccumulatorBlock;
             _EditableBlock? injectedCollectionBlock;
+            _EditableBlock? injectedMyCollectionBlock;
             var collectionAlreadyInRoutine = false;
+            var myCollectionAlreadyInRoutine = false;
             setState(() {
               _hydratedFromApi = true;
               _applyInitialData(routineData);
@@ -1414,6 +1465,13 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
                   widget.initialGroupCollection!,
                 );
                 collectionAlreadyInRoutine = injectedCollectionBlock == null;
+              }
+              if (widget.initialMyCollection != null) {
+                injectedMyCollectionBlock = _injectInitialMyCollection(
+                  widget.initialMyCollection!,
+                );
+                myCollectionAlreadyInRoutine =
+                    injectedMyCollectionBlock == null;
               }
             });
             if (widget.initialPlan != null) {
@@ -1448,6 +1506,20 @@ class _EditRoutineScreenState extends ConsumerState<EditRoutineScreen> {
                 if (mounted) _showErrorSnackBar(_mapError(e));
               });
             } else if (collectionAlreadyInRoutine && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    'This collection is already in your practices',
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+            if (injectedMyCollectionBlock != null) {
+              _syncBlock(injectedMyCollectionBlock!).catchError((e) {
+                if (mounted) _showErrorSnackBar(_mapError(e));
+              });
+            } else if (myCollectionAlreadyInRoutine && mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text(

@@ -8,7 +8,8 @@ enum SessionType {
   recitation,
   timer,
   accumulator,
-  groupRecitationCollection;
+  groupRecitationCollection,
+  recitationCollection;
 
   String toJson() => switch (this) {
     SessionType.plan => 'PLAN',
@@ -17,6 +18,7 @@ enum SessionType {
     SessionType.timer => 'TIMER',
     SessionType.accumulator => 'ACCUMULATOR',
     SessionType.groupRecitationCollection => 'GROUP_RECITATION_COLLECTION',
+    SessionType.recitationCollection => 'RECITATION_COLLECTION',
   };
 
   static SessionType fromJson(String value) => switch (value.toUpperCase()) {
@@ -26,6 +28,7 @@ enum SessionType {
     'TIMER' => SessionType.timer,
     'ACCUMULATOR' => SessionType.accumulator,
     'GROUP_RECITATION_COLLECTION' => SessionType.groupRecitationCollection,
+    'RECITATION_COLLECTION' => SessionType.recitationCollection,
     _ => throw FormatException('Unknown SessionType: $value'),
   };
 }

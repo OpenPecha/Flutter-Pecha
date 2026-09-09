@@ -4,11 +4,13 @@ import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/core/widgets/cached_network_image_widget.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.dart';
+import 'package:flutter_pecha/features/group_profile/presentation/widgets/collection_completion_sheet.dart';
 import 'package:flutter_pecha/features/practice/data/models/my_recitation_collection_models.dart';
 import 'package:flutter_pecha/features/practice/presentation/providers/my_recitation_collections_providers.dart';
-import 'package:flutter_pecha/features/practice/presentation/utils/recitation_reader_navigation.dart';
 import 'package:flutter_pecha/features/practice/presentation/widgets/my_recitation_collection_options_sheet.dart';
-import 'package:flutter_pecha/features/recitation/data/models/recitation_model.dart';
+import 'package:flutter_pecha/features/reader/data/models/navigation_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,7 +19,7 @@ import 'package:go_router/go_router.dart';
 ///
 /// Layout matches [GroupRecitationCollectionScreen]. Tapping a chant opens the
 /// shared reader using the item's `text_id` and `language`.
-class MyRecitationCollectionScreen extends ConsumerWidget {
+class MyRecitationCollectionScreen extends ConsumerStatefulWidget {
   const MyRecitationCollectionScreen({
     super.key,
     required this.collectionId,
@@ -28,12 +30,36 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
   final String? initialTitle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyRecitationCollectionScreen> createState() =>
+      _MyRecitationCollectionScreenState();
+}
+
+class _MyRecitationCollectionScreenState
+    extends ConsumerState<MyRecitationCollectionScreen> {
+  bool _hasShownCompletionSheetThisVisit = false;
+
+  @override
+  Widget build(BuildContext context) {
     final detailAsync = ref.watch(
-      myRecitationCollectionDetailProvider(collectionId),
+      myRecitationCollectionDetailProvider(widget.collectionId),
+    );
+    final completionState = ref.watch(
+      myRecitationCollectionCompletionProvider(widget.collectionId),
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final detail = detailAsync.valueOrNull?.fold((_) => null, (value) => value);
+
+    ref.listen(myRecitationCollectionCompletionProvider(widget.collectionId), (
+      _,
+      next,
+    ) {
+      final currentDetail = ref
+          .read(myRecitationCollectionDetailProvider(widget.collectionId))
+          .valueOrNull
+          ?.fold((_) => null, (value) => value);
+      _maybeShowCompletionSheet(currentDetail, next);
+    });
+    _maybeShowCompletionSheet(detail, completionState);
 
     return Scaffold(
       backgroundColor:
@@ -43,7 +69,7 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
         child: Column(
           children: [
             _CollectionAppBar(
-              title: detail?.name ?? initialTitle,
+              title: detail?.name ?? widget.initialTitle,
               onMenuTap:
                   detail != null
                       ? () => MyRecitationCollectionOptionsSheet.show(
@@ -61,14 +87,33 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                         onRetry:
                             () => ref.invalidate(
                               myRecitationCollectionDetailProvider(
-                                collectionId,
+                                widget.collectionId,
                               ),
                             ),
                       ),
                       (collection) => _CollectionContent(
                         collection: collection,
+                        completionState: completionState,
                         isDark: isDark,
-                        onOpenItem: (item) => _openChantReader(context, item),
+                        onOpenItem: (item) async {
+                          await _openChantReader(
+                            context,
+                            ref,
+                            widget.collectionId,
+                            collection,
+                            item,
+                          );
+                          if (!mounted) return;
+                          final latestCompletion = ref.read(
+                            myRecitationCollectionCompletionProvider(
+                              widget.collectionId,
+                            ),
+                          );
+                          _maybeShowCompletionSheet(
+                            collection,
+                            latestCompletion,
+                          );
+                        },
                       ),
                     ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -77,7 +122,9 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
                       error: error,
                       onRetry:
                           () => ref.invalidate(
-                            myRecitationCollectionDetailProvider(collectionId),
+                            myRecitationCollectionDetailProvider(
+                              widget.collectionId,
+                            ),
                           ),
                     ),
               ),
@@ -87,21 +134,88 @@ class MyRecitationCollectionScreen extends ConsumerWidget {
       ),
     );
   }
+
+  void _maybeShowCompletionSheet(
+    MyRecitationCollectionDetailModel? collection,
+    MyRecitationCollectionCompletionState completionState,
+  ) {
+    if (_hasShownCompletionSheetThisVisit) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    if (collection == null || collection.items.isEmpty) return;
+    if (!completionState.hasCompletedChantThisSession) return;
+
+    final isFullyCompleted = collection.items.every(
+      (item) => _isItemCompleted(completionState, item),
+    );
+    if (!isFullyCompleted) return;
+
+    _hasShownCompletionSheetThisVisit = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showCompletionSheet(collection.name);
+    });
+  }
+
+  Future<void> _showCompletionSheet(String collectionName) async {
+    final result = await ref.read(
+      myRecitationCollectionDaysCountProvider(widget.collectionId).future,
+    );
+    if (!mounted) return;
+
+    final dayCount = result.fold((_) => null, (count) => count);
+    if (dayCount == null) {
+      _hasShownCompletionSheetThisVisit = false;
+      return;
+    }
+
+    showCollectionCompletionSheet(
+      context,
+      collectionName: collectionName,
+      dayCount: dayCount,
+    );
+  }
 }
 
-void _openChantReader(
+Future<void> _openChantReader(
   BuildContext context,
+  WidgetRef ref,
+  String collectionId,
+  MyRecitationCollectionDetailModel collection,
   MyRecitationCollectionItemModel item,
-) {
+) async {
   final textId = item.textId.trim();
   if (textId.isEmpty) return;
 
-  final title = item.title?.trim().isNotEmpty == true ? item.title! : textId;
-
-  openRecitationReader(
-    context,
-    RecitationModel(textId: textId, title: title, language: item.language),
+  final completionState = ref.read(
+    myRecitationCollectionCompletionProvider(collectionId),
   );
+  final currentIndex = collection.items.indexWhere((i) => i.id == item.id);
+  final planTextItems =
+      collection.items.map((collectionItem) {
+        final itemTextId = collectionItem.textId.trim();
+        final title =
+            collectionItem.title?.trim().isNotEmpty == true
+                ? collectionItem.title!
+                : itemTextId;
+        return PlanTextItem.sourceReference(
+          textId: itemTextId,
+          title: title,
+          language: collectionItem.language,
+          subtaskId: collectionItem.id,
+          isCompleted: _isItemCompleted(completionState, collectionItem),
+        );
+      }).toList();
+
+  final language = item.language?.trim();
+  final navigationContext = NavigationContext(
+    source: NavigationSource.myRecitationCollection,
+    planTextItems: planTextItems,
+    currentTextIndex: currentIndex >= 0 ? currentIndex : 0,
+    collectionId: collectionId,
+    language: language != null && language.isNotEmpty ? language : null,
+  );
+
+  await context.push('/reader/$textId', extra: navigationContext);
 }
 
 class _CollectionAppBar extends StatelessWidget {
@@ -151,11 +265,13 @@ class _CollectionAppBar extends StatelessWidget {
 class _CollectionContent extends StatelessWidget {
   const _CollectionContent({
     required this.collection,
+    required this.completionState,
     required this.isDark,
     required this.onOpenItem,
   });
 
   final MyRecitationCollectionDetailModel collection;
+  final MyRecitationCollectionCompletionState completionState;
   final bool isDark;
   final ValueChanged<MyRecitationCollectionItemModel> onOpenItem;
 
@@ -173,13 +289,15 @@ class _CollectionContent extends StatelessWidget {
               children: [
                 _CollectionHero(imageUrl: collection.imgUrl, isDark: isDark),
                 const SizedBox(height: 14),
-                _CollectionActionBar(isDark: isDark),
+                _CollectionActionBar(collection: collection, isDark: isDark),
                 const SizedBox(height: 12),
                 if (hasItems)
                   ...collection.items.map(
                     (item) => _RecitationCollectionRow(
                       item: item,
                       isDark: isDark,
+                      isCompleted: _isItemCompleted(completionState, item),
+                      isSubmitting: completionState.isSubmitting(item.id),
                       onTap: () => onOpenItem(item),
                     ),
                   )
@@ -214,8 +332,8 @@ class _CollectionContent extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              // Disabled until the collection reading flow is designed.
-              onPressed: null,
+              onPressed:
+                  hasItems ? () => onOpenItem(collection.items.first) : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor:
@@ -241,6 +359,14 @@ class _CollectionContent extends StatelessWidget {
       ],
     );
   }
+}
+
+bool _isItemCompleted(
+  MyRecitationCollectionCompletionState completionState,
+  MyRecitationCollectionItemModel item,
+) {
+  return completionState.isCompleted(item.id) ||
+      completionState.isCompleted(item.textId);
 }
 
 class _CollectionHero extends StatelessWidget {
@@ -278,13 +404,14 @@ class _CollectionHero extends StatelessWidget {
   }
 }
 
-class _CollectionActionBar extends StatelessWidget {
-  const _CollectionActionBar({required this.isDark});
+class _CollectionActionBar extends ConsumerWidget {
+  const _CollectionActionBar({required this.collection, required this.isDark});
 
+  final MyRecitationCollectionDetailModel collection;
   final bool isDark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -293,7 +420,7 @@ class _CollectionActionBar extends StatelessWidget {
             icon: AppAssets.plus,
             label: context.l10n.nav_practice,
             isDark: isDark,
-            onTap: () {},
+            onTap: () => _addToPractices(context, ref),
           ),
           const SizedBox(width: 8),
           _ActionChip(
@@ -312,6 +439,19 @@ class _CollectionActionBar extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
+    );
+  }
+
+  /// Hands the collection to the routine editor, which injects it as a
+  /// RECITATION_COLLECTION session and lets the user place its time block.
+  void _addToPractices(BuildContext context, WidgetRef ref) {
+    if (ref.read(authProvider).isGuest) {
+      LoginDrawer.show(context, ref);
+      return;
+    }
+    context.pushNamed(
+      'edit-routine',
+      extra: {'initialMyCollection': collection},
     );
   }
 }
@@ -361,11 +501,15 @@ class _RecitationCollectionRow extends StatelessWidget {
   const _RecitationCollectionRow({
     required this.item,
     required this.isDark,
+    required this.isCompleted,
+    required this.isSubmitting,
     required this.onTap,
   });
 
   final MyRecitationCollectionItemModel item;
   final bool isDark;
+  final bool isCompleted;
+  final bool isSubmitting;
   final VoidCallback onTap;
 
   @override
@@ -377,19 +521,17 @@ class _RecitationCollectionRow extends StatelessWidget {
         item.title?.trim().isNotEmpty == true ? item.title! : item.textId;
 
     return InkWell(
-      onTap: onTap,
+      onTap: isSubmitting ? null : onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 9),
         child: Row(
           children: [
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor, width: 1),
-              ),
+            _CompletionIndicator(
+              isCompleted: isCompleted,
+              isSubmitting: isSubmitting,
+              isDark: isDark,
+              borderColor: borderColor,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -420,6 +562,51 @@ class _RecitationCollectionRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CompletionIndicator extends StatelessWidget {
+  const _CompletionIndicator({
+    required this.isCompleted,
+    required this.isSubmitting,
+    required this.isDark,
+    required this.borderColor,
+  });
+
+  final bool isCompleted;
+  final bool isSubmitting;
+  final bool isDark;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isSubmitting) {
+      return const SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    final fillColor = isDark ? AppColors.surfaceWhite : AppColors.textPrimary;
+    final checkColor = isDark ? AppColors.textPrimary : AppColors.surfaceWhite;
+
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted ? fillColor : Colors.transparent,
+        border: Border.all(
+          color: isCompleted ? fillColor : borderColor,
+          width: 1,
+        ),
+      ),
+      child:
+          isCompleted
+              ? Icon(AppAssets.check, size: 13, color: checkColor)
+              : null,
     );
   }
 }

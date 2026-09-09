@@ -6,10 +6,15 @@ enum NavigationSource {
   deepLink,
   recitationList,
   routine,
+
   /// Text reader opened from a group accumulation with chant counting.
   groupAccumulatorChant,
+
   /// Text reader opened from a group recitation collection with swipe navigation.
   groupRecitationCollection,
+
+  /// Text reader opened from a user-created recitation collection.
+  myRecitationCollection,
 }
 
 /// Discriminator for the kind of content a [PlanTextItem] carries.
@@ -84,6 +89,11 @@ class PlanTextItem {
   /// Display title used in app bars and bottom-bar progress text.
   final String title;
 
+  /// Optional language for this navigable text item. Recitation collection
+  /// entries use this to keep adjacent reader pages in the collection's
+  /// selected language.
+  final String? language;
+
   /// The subtask ID associated with this item.
   /// When non-null, navigating away from this item will mark the subtask
   /// complete. Left null in preview mode to prevent tracking for
@@ -117,6 +127,7 @@ class PlanTextItem {
     required this.contentType,
     required this.textId,
     required this.title,
+    this.language,
     this.segmentIds,
     this.inlineContent,
     this.imageUrl,
@@ -132,6 +143,7 @@ class PlanTextItem {
   factory PlanTextItem.sourceReference({
     required String textId,
     required String title,
+    String? language,
     List<String>? segmentIds,
     String? subtaskId,
     String? taskId,
@@ -145,6 +157,7 @@ class PlanTextItem {
       contentType: PlanItemContentType.sourceReference,
       textId: textId,
       title: title,
+      language: language,
       segmentIds: segmentIds,
       subtaskId: subtaskId,
       taskId: taskId,
@@ -159,6 +172,7 @@ class PlanTextItem {
   factory PlanTextItem.inlineText({
     required String content,
     required String title,
+    String? language,
     String? subtaskId,
     String? taskId,
     bool isCompleted = false,
@@ -172,6 +186,7 @@ class PlanTextItem {
       textId: '',
       inlineContent: content,
       title: title,
+      language: language,
       subtaskId: subtaskId,
       taskId: taskId,
       isCompleted: isCompleted,
@@ -185,6 +200,7 @@ class PlanTextItem {
   factory PlanTextItem.inlineImage({
     required String imageUrl,
     required String title,
+    String? language,
     String? subtaskId,
     String? taskId,
     bool isCompleted = false,
@@ -198,6 +214,7 @@ class PlanTextItem {
       textId: '',
       imageUrl: imageUrl,
       title: title,
+      language: language,
       subtaskId: subtaskId,
       taskId: taskId,
       isCompleted: isCompleted,
@@ -229,6 +246,7 @@ class PlanTextItem {
     String? inlineContent,
     String? imageUrl,
     String? title,
+    String? language,
     String? subtaskId,
     String? taskId,
     bool? isCompleted,
@@ -243,6 +261,7 @@ class PlanTextItem {
       inlineContent: inlineContent ?? this.inlineContent,
       imageUrl: imageUrl ?? this.imageUrl,
       title: title ?? this.title,
+      language: language ?? this.language,
       subtaskId: subtaskId ?? this.subtaskId,
       taskId: taskId ?? this.taskId,
       isCompleted: isCompleted ?? this.isCompleted,
@@ -261,6 +280,7 @@ class PlanTextItem {
         other.title != title ||
         other.inlineContent != inlineContent ||
         other.imageUrl != imageUrl ||
+        other.language != language ||
         other.subtaskId != subtaskId ||
         other.taskId != taskId ||
         other.isCompleted != isCompleted ||
@@ -286,6 +306,7 @@ class PlanTextItem {
     inlineContent,
     imageUrl,
     title,
+    language,
     subtaskId,
     taskId,
     isCompleted,
@@ -297,7 +318,8 @@ class PlanTextItem {
   @override
   String toString() {
     return 'PlanTextItem(contentType: $contentType, textId: $textId, '
-        'title: $title, subtaskId: $subtaskId, isCompleted: $isCompleted)';
+        'title: $title, language: $language, subtaskId: $subtaskId, '
+        'isCompleted: $isCompleted)';
   }
 }
 
@@ -378,9 +400,10 @@ class NavigationContext {
       currentTextIndex! >= 0 &&
       currentTextIndex! < planTextItems!.length;
 
-  /// Whether this context can navigate between group recitation collection items.
+  /// Whether this context can navigate between recitation collection items.
   bool get hasGroupRecitationItems =>
-      source == NavigationSource.groupRecitationCollection &&
+      (source == NavigationSource.groupRecitationCollection ||
+          source == NavigationSource.myRecitationCollection) &&
       planTextItems != null &&
       planTextItems!.isNotEmpty &&
       currentTextIndex != null &&
@@ -466,8 +489,7 @@ class NavigationContext {
       autoPlay: autoPlay ?? this.autoPlay,
       dayAudioUrl: dayAudioUrl ?? this.dayAudioUrl,
       groupAccumulatorId: groupAccumulatorId ?? this.groupAccumulatorId,
-      presetAccumulatorId:
-          presetAccumulatorId ?? this.presetAccumulatorId,
+      presetAccumulatorId: presetAccumulatorId ?? this.presetAccumulatorId,
       groupId: groupId ?? this.groupId,
       groupTitle: groupTitle ?? this.groupTitle,
       groupAccumulatorSessionCount:
@@ -491,13 +513,13 @@ class NavigationContext {
 
   @override
   int get hashCode => Object.hash(
-        source,
-        planId,
-        dayNumber,
-        targetSegmentId,
-        currentTextIndex,
-        language,
-      );
+    source,
+    planId,
+    dayNumber,
+    targetSegmentId,
+    currentTextIndex,
+    language,
+  );
 
   @override
   String toString() {

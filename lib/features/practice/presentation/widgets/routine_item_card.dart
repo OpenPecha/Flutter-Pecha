@@ -108,8 +108,8 @@ class RoutineItemCard extends StatelessWidget {
                   PhosphorIconsRegular.timer,
                   size: imageSize * 0.45,
                   color: isDark
-                      ? AppColors.textTertiaryDark
-                      : AppColors.textSecondary,
+                          ? AppColors.textTertiaryDark
+                          : AppColors.textSecondary,
                 ),
               )
             else if (type == RoutineItemType.accumulator)
@@ -120,6 +120,13 @@ class RoutineItemCard extends StatelessWidget {
                 isDark: isDark,
               )
             else if (type == RoutineItemType.groupRecitationCollection)
+              _CollectionCoverImage(
+                coverImage: coverImage,
+                imageUrl: imageUrl,
+                size: imageSize,
+                isDark: isDark,
+              )
+            else if (type == RoutineItemType.myRecitationCollection)
               _CollectionCoverImage(
                 coverImage: coverImage,
                 imageUrl: imageUrl,
