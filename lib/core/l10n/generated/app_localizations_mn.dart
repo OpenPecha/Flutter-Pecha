@@ -2492,6 +2492,55 @@ class AppLocalizationsMn extends AppLocalizations {
   String get group_chat_report => 'Мэдэгдэх';
 
   @override
+  String get group_chat_report_title => 'Та үүнийг яагаад мэдээлж байна вэ?';
+
+  @override
+  String get group_chat_report_privacy => 'Таны нэр нууц хэвээр үлдэнэ.';
+
+  @override
+  String get group_chat_report_reason_harassment => 'Дарамт эсвэл дээрэлхэлт';
+
+  @override
+  String get group_chat_report_reason_hate =>
+      'Үзэн ядсан эсвэл хортой үг хэллэг';
+
+  @override
+  String get group_chat_report_reason_sexual =>
+      'Бэлгийн болон садар самуун агуулга';
+
+  @override
+  String get group_chat_report_reason_spam => 'Спам эсвэл залилан';
+
+  @override
+  String get group_chat_report_reason_off_topic =>
+      'Сэдвээс гадуур эсвэл саад учруулсан';
+
+  @override
+  String get group_chat_report_reason_other => 'Өөр зүйл';
+
+  @override
+  String get group_chat_report_note_title => 'Тэмдэглэл нэмэх';
+
+  @override
+  String get group_chat_report_note_hint => 'Өөр зүйл...';
+
+  @override
+  String get group_chat_report_submit => 'Мэдээлэл илгээх';
+
+  @override
+  String get group_chat_report_thanks => 'Санал хүсэлт өгсөнд баярлалаа';
+
+  @override
+  String get group_chat_report_offline =>
+      'Та офлайн байна — дараа дахин оролдоно уу';
+
+  @override
+  String get group_chat_report_failed => 'Мэдээлэл илгээж чадсангүй';
+
+  @override
+  String get group_chat_report_retry => 'Дахин оролдох';
+
+  @override
   String get group_chat_delete => 'Устгах';
 
   @override

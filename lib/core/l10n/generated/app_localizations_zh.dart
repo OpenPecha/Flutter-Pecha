@@ -2347,6 +2347,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String get group_chat_report => '檢舉';
 
   @override
+  String get group_chat_report_title => '你為什麼要檢舉這則訊息？';
+
+  @override
+  String get group_chat_report_privacy => '你的姓名不會公開。';
+
+  @override
+  String get group_chat_report_reason_harassment => '騷擾或霸凌';
+
+  @override
+  String get group_chat_report_reason_hate => '仇恨或有害言論';
+
+  @override
+  String get group_chat_report_reason_sexual => '性相關或露骨內容';
+
+  @override
+  String get group_chat_report_reason_spam => '垃圾訊息或詐騙';
+
+  @override
+  String get group_chat_report_reason_off_topic => '離題或干擾';
+
+  @override
+  String get group_chat_report_reason_other => '其他原因';
+
+  @override
+  String get group_chat_report_note_title => '新增備註';
+
+  @override
+  String get group_chat_report_note_hint => '其他原因...';
+
+  @override
+  String get group_chat_report_submit => '送出檢舉';
+
+  @override
+  String get group_chat_report_thanks => '感謝你的回報';
+
+  @override
+  String get group_chat_report_offline => '你目前離線 — 請稍後再試';
+
+  @override
+  String get group_chat_report_failed => '無法送出檢舉';
+
+  @override
+  String get group_chat_report_retry => '重試';
+
+  @override
   String get group_chat_delete => '刪除';
 
   @override

@@ -4,13 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_pecha/core/error/failures.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
+import 'package:flutter_pecha/core/network/connectivity_service.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
 import 'package:flutter_pecha/features/auth/domain/entities/user.dart';
 import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_thread_providers.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_reactions.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_report_feedback.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_report_reason.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_sender.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/utils/chat_thread_rows.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_date_separator.dart';
@@ -19,6 +24,7 @@ import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_cha
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_empty_state.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_message_bubble.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_message_menu.dart';
+import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_report_sheet.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_reactions_sheet.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/widgets/group_chat_swipe_to_reply.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -285,6 +291,9 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
       myEmoji: currentChatReactionEmoji(message.reactions),
       // Sender-only, and never twice. The backend enforces this too; the gate
       // is here because the API answers a non-sender attempt generically.
+      // Reporting your own message is meaningless, and the API documents no
+      // 403 for it — so the gate is here.
+      canReport: !_isSelf(message) && message.deletedAt == null,
       canDelete: _canDelete(message),
     );
     if (!mounted || result == null) return;
@@ -299,6 +308,100 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
       case ChatMessageActionPicked(action: final action):
         await _onAction(action, message);
     }
+  }
+
+  bool _isSelf(ChatMessageDTO message) {
+    return isSelfChatMessage(
+      senderId: message.senderId,
+      senderEmail: message.senderEmail,
+      currentUserId: _viewerId,
+      currentUserEmail: _viewerEmail,
+    );
+  }
+
+  /// Asks why, then posts it. A failure is reported to the caller so the
+  /// snack bar can offer a retry that repeats the same choice.
+  Future<void> _reportMessage(ChatMessageDTO message) async {
+    final submission = await showChatReportSheet(context);
+    if (!mounted || submission == null) return;
+
+    final offTopicLabel = context.l10n.group_chat_report_reason_off_topic;
+    await _submitReport(
+      message,
+      reason: submission.reason,
+      note: submission.note,
+      offTopicLabel: offTopicLabel,
+    );
+  }
+
+  Future<void> _submitReport(
+    ChatMessageDTO message, {
+    required ChatReportReason reason,
+    required String? note,
+    required String offTopicLabel,
+  }) async {
+    final roomId = widget.roomId;
+    // Resolved before the await: leaving this screen mid-request deactivates
+    // the element, and an ancestor lookup then throws.
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final connectivity = ref.read(connectivityServiceProvider);
+
+    final failure = await ref
+        .read(groupChatRepositoryProvider)
+        .reportMessage(
+          roomId,
+          messageId: message.id,
+          reason: chatReportReasonWireValue(reason),
+          description: chatReportDescription(
+            reason,
+            note: note,
+            offTopicLabel: offTopicLabel,
+          ),
+        )
+        .then((result) => result.fold<Failure?>((f) => f, (_) => null));
+
+    // "Offline" is more honest than "something went wrong" when the request
+    // never left. The failure type alone cannot tell us that, and the cached
+    // flag may be stale (it is only refreshed on connectivity events), so
+    // probe live. The probe only runs when the failure makes it relevant.
+    final feedback = await chatReportFeedbackFor(
+      failure,
+      isOnline: connectivity.checkConnectivity,
+    );
+
+    if (!mounted) return;
+
+    if (feedback == ChatReportFeedback.sent) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.group_chat_report_thanks)),
+      );
+      return;
+    }
+
+    // Retry is offered either way. The probe is a DNS lookup that can fail
+    // on a network where the API is still reachable (a filtered resolver, a
+    // slow one), so "offline" only changes the wording; it must never cost
+    // the member the one action that gets the report through.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          feedback == ChatReportFeedback.offline
+              ? l10n.group_chat_report_offline
+              : l10n.group_chat_report_failed,
+        ),
+        action: SnackBarAction(
+          label: l10n.group_chat_report_retry,
+          onPressed:
+              () => _submitReport(
+                message,
+                reason: reason,
+                note: note,
+                offTopicLabel: offTopicLabel,
+              ),
+        ),
+      ),
+    );
   }
 
   bool _canDelete(ChatMessageDTO message) {
@@ -344,8 +447,7 @@ class _GroupChatThreadState extends ConsumerState<GroupChatThread> {
       case ChatMessageAction.delete:
         await _deleteMessage(message);
       case ChatMessageAction.report:
-        // Wired by task 6's reporting half.
-        break;
+        await _reportMessage(message);
     }
   }
 

@@ -2488,6 +2488,52 @@ class AppLocalizationsHi extends AppLocalizations {
   String get group_chat_report => 'रिपोर्ट करें';
 
   @override
+  String get group_chat_report_title => 'आप इसकी रिपोर्ट क्यों कर रहे हैं?';
+
+  @override
+  String get group_chat_report_privacy => 'आपका नाम गुप्त रहेगा।';
+
+  @override
+  String get group_chat_report_reason_harassment => 'उत्पीड़न या धमकाना';
+
+  @override
+  String get group_chat_report_reason_hate => 'घृणित या हानिकारक भाषा';
+
+  @override
+  String get group_chat_report_reason_sexual => 'यौन या अश्लील सामग्री';
+
+  @override
+  String get group_chat_report_reason_spam => 'स्पैम या धोखाधड़ी';
+
+  @override
+  String get group_chat_report_reason_off_topic => 'विषय से हटकर या बाधक';
+
+  @override
+  String get group_chat_report_reason_other => 'कुछ और';
+
+  @override
+  String get group_chat_report_note_title => 'टिप्पणी जोड़ें';
+
+  @override
+  String get group_chat_report_note_hint => 'कुछ और...';
+
+  @override
+  String get group_chat_report_submit => 'रिपोर्ट भेजें';
+
+  @override
+  String get group_chat_report_thanks => 'आपकी प्रतिक्रिया के लिए धन्यवाद';
+
+  @override
+  String get group_chat_report_offline =>
+      'आप ऑफ़लाइन हैं — बाद में पुनः प्रयास करें';
+
+  @override
+  String get group_chat_report_failed => 'रिपोर्ट नहीं भेजी जा सकी';
+
+  @override
+  String get group_chat_report_retry => 'पुनः प्रयास करें';
+
+  @override
   String get group_chat_delete => 'हटाएँ';
 
   @override
