@@ -3,6 +3,7 @@ import 'package:flutter_pecha/features/group_profile/domain/entities/group_post_
 class GroupPostPermissionModel {
   final String groupId;
   final bool hasPermission;
+  final bool canCreateContent;
   final String? role;
   final bool isSuperAdmin;
   final String? authorId;
@@ -10,6 +11,7 @@ class GroupPostPermissionModel {
   const GroupPostPermissionModel({
     required this.groupId,
     this.hasPermission = false,
+    this.canCreateContent = false,
     this.role,
     this.isSuperAdmin = false,
     this.authorId,
@@ -19,6 +21,7 @@ class GroupPostPermissionModel {
     return GroupPostPermissionModel(
       groupId: json['group_id'] as String? ?? '',
       hasPermission: json['has_permission'] as bool? ?? false,
+      canCreateContent: json['can_create_content'] as bool? ?? false,
       role: json['role'] as String?,
       isSuperAdmin: json['is_super_admin'] as bool? ?? false,
       authorId: json['author_id'] as String?,
@@ -29,6 +32,7 @@ class GroupPostPermissionModel {
     return GroupPostPermission(
       groupId: groupId,
       hasPermission: hasPermission,
+      canCreateContent: canCreateContent,
       role: role,
       isSuperAdmin: isSuperAdmin,
       authorId: authorId,

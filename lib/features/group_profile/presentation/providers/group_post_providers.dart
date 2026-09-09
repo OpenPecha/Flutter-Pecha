@@ -33,7 +33,7 @@ final groupPostPermissionProvider = FutureProvider.autoDispose
           .getPostPermission(groupId);
       return result.fold(
         (_) => false,
-        (permission) => permission.hasPermission,
+        (permission) => permission.canCreateContent,
       );
     });
 
