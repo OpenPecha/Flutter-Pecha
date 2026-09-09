@@ -864,6 +864,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get connect_event_date_tba => 'Date to be announced';
 
   @override
+  String get connect_event_when => 'When';
+
+  @override
+  String get connect_event_where => 'Where';
+
+  @override
+  String get connect_event_practices => 'Event practices';
+
+  @override
+  String get connect_event_every_day => 'Every day';
+
+  @override
+  String connect_event_every_weekday(String weekday) {
+    return 'Every $weekday';
+  }
+
+  @override
+  String get connect_event_every_month => 'Every month';
+
+  @override
+  String connect_event_every_date(String date) {
+    return 'Every $date';
+  }
+
+  @override
   String get connect_event_about_empty => 'No event details yet';
 
   @override
@@ -2257,6 +2282,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_chat_title => '聊天';
+
+  @override
+  String get chats_title => '聊天';
+
+  @override
+  String get chats_empty_title => '尚無聊天';
+
+  @override
+  String get chats_empty_body => '加入社群即可開始聊天。';
 
   @override
   String get group_chat_inappropriate => '此訊息含有不允許的用語，因此無法發送。';

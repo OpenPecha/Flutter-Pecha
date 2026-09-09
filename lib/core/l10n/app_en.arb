@@ -352,6 +352,27 @@
   "connect_event_link_tap_to_join": "Tap to join",
   "connect_event_link_open": "Open link",
   "connect_event_date_tba": "Date to be announced",
+  "connect_event_when": "When",
+  "connect_event_where": "Where",
+  "connect_event_practices": "Event practices",
+  "connect_event_every_day": "Every day",
+  "connect_event_every_weekday": "Every {weekday}",
+  "@connect_event_every_weekday": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "connect_event_every_month": "Every month",
+  "connect_event_every_date": "Every {date}",
+  "@connect_event_every_date": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "connect_event_about_empty": "No event details yet",
   "search_groups": "Search groups",
   "search_for_groups": "Search for groups",
@@ -1195,6 +1216,9 @@
     }
   },
   "group_chat_title": "Chat",
+  "chats_title": "Chats",
+  "chats_empty_title": "No chats yet",
+  "chats_empty_body": "Join a community to start chatting.",
   "group_chat_inappropriate": "This message couldn't be sent because it contains language that isn't allowed.",
   "group_chat_not_a_member": "Only members can open this chat.",
   "group_chat_open": "Chat",
@@ -1221,7 +1245,7 @@
   "group_chat_message_deleted": "You deleted this message",
   "group_chat_message_deleted_by_sender": "This message was deleted",
   "group_chat_reaction_failed": "Your reaction couldn't be saved.",
-  "group_chat_reactions_count": "{count, plural, =1{1 reaction} other{{count} reactions}}",
+  "group_chat_reactions_count": "{count, plural,\n=1 {1 reaction}\nother {{count} reactions}\n}",
   "@group_chat_reactions_count": {
     "placeholders": {
       "count": {

@@ -1744,6 +1744,48 @@ abstract class AppLocalizations {
   /// **'Date to be announced'**
   String get connect_event_date_tba;
 
+  /// No description provided for @connect_event_when.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get connect_event_when;
+
+  /// No description provided for @connect_event_where.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get connect_event_where;
+
+  /// No description provided for @connect_event_practices.
+  ///
+  /// In en, this message translates to:
+  /// **'Event practices'**
+  String get connect_event_practices;
+
+  /// No description provided for @connect_event_every_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get connect_event_every_day;
+
+  /// No description provided for @connect_event_every_weekday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {weekday}'**
+  String connect_event_every_weekday(String weekday);
+
+  /// No description provided for @connect_event_every_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get connect_event_every_month;
+
+  /// No description provided for @connect_event_every_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {date}'**
+  String connect_event_every_date(String date);
+
   /// No description provided for @connect_event_about_empty.
   ///
   /// In en, this message translates to:
@@ -4244,6 +4286,24 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get group_chat_title;
 
+  /// No description provided for @chats_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats'**
+  String get chats_title;
+
+  /// No description provided for @chats_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No chats yet'**
+  String get chats_empty_title;
+
+  /// No description provided for @chats_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a community to start chatting.'**
+  String get chats_empty_body;
+
   /// No description provided for @group_chat_inappropriate.
   ///
   /// In en, this message translates to:
@@ -4403,7 +4463,7 @@ abstract class AppLocalizations {
   /// No description provided for @group_chat_reactions_count.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 reaction} other{{count} reactions}}'**
+  /// **'{count, plural,\n=1 {1 reaction}\nother {{count} reactions}\n}'**
   String group_chat_reactions_count(int count);
 
   /// No description provided for @group_chat_you.

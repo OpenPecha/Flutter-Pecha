@@ -921,6 +921,31 @@ class AppLocalizationsBo extends AppLocalizations {
   String get connect_event_date_tba => 'Date to be announced';
 
   @override
+  String get connect_event_when => 'When';
+
+  @override
+  String get connect_event_where => 'Where';
+
+  @override
+  String get connect_event_practices => 'Event practices';
+
+  @override
+  String get connect_event_every_day => 'Every day';
+
+  @override
+  String connect_event_every_weekday(String weekday) {
+    return 'Every $weekday';
+  }
+
+  @override
+  String get connect_event_every_month => 'Every month';
+
+  @override
+  String connect_event_every_date(String date) {
+    return 'Every $date';
+  }
+
+  @override
   String get connect_event_about_empty => 'No event details yet';
 
   @override
@@ -2400,6 +2425,15 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_chat_title => 'གླེང་མོལ།';
+
+  @override
+  String get chats_title => 'ཁ་བརྡ།';
+
+  @override
+  String get chats_empty_title => 'ད་དུང་ཁ་བརྡ་མེད།';
+
+  @override
+  String get chats_empty_body => 'ཁ་བརྡ་འགོ་འཛུགས་པར་སྤྱི་ཚོགས་ཤིག་ལ་ཞུགས།';
 
   @override
   String get group_chat_inappropriate =>

@@ -1807,6 +1807,57 @@ class TolgeeAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get connect_event_when => TolgeeBridge.get(
+    localeName,
+    'connect_event_when',
+    () => _fallback.connect_event_when,
+  );
+
+  @override
+  String get connect_event_where => TolgeeBridge.get(
+    localeName,
+    'connect_event_where',
+    () => _fallback.connect_event_where,
+  );
+
+  @override
+  String get connect_event_practices => TolgeeBridge.get(
+    localeName,
+    'connect_event_practices',
+    () => _fallback.connect_event_practices,
+  );
+
+  @override
+  String get connect_event_every_day => TolgeeBridge.get(
+    localeName,
+    'connect_event_every_day',
+    () => _fallback.connect_event_every_day,
+  );
+
+  @override
+  String connect_event_every_weekday(String weekday) => TolgeeBridge.format(
+    localeName,
+    'connect_event_every_weekday',
+    <String, Object>{'weekday': weekday},
+    () => _fallback.connect_event_every_weekday(weekday),
+  );
+
+  @override
+  String get connect_event_every_month => TolgeeBridge.get(
+    localeName,
+    'connect_event_every_month',
+    () => _fallback.connect_event_every_month,
+  );
+
+  @override
+  String connect_event_every_date(String date) => TolgeeBridge.format(
+    localeName,
+    'connect_event_every_date',
+    <String, Object>{'date': date},
+    () => _fallback.connect_event_every_date(date),
+  );
+
+  @override
   String get connect_event_about_empty => TolgeeBridge.get(
     localeName,
     'connect_event_about_empty',
@@ -4646,6 +4697,24 @@ class TolgeeAppLocalizations extends AppLocalizations {
     localeName,
     'group_chat_title',
     () => _fallback.group_chat_title,
+  );
+
+  @override
+  String get chats_title =>
+      TolgeeBridge.get(localeName, 'chats_title', () => _fallback.chats_title);
+
+  @override
+  String get chats_empty_title => TolgeeBridge.get(
+    localeName,
+    'chats_empty_title',
+    () => _fallback.chats_empty_title,
+  );
+
+  @override
+  String get chats_empty_body => TolgeeBridge.get(
+    localeName,
+    'chats_empty_body',
+    () => _fallback.chats_empty_body,
   );
 
   @override

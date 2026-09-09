@@ -28,6 +28,8 @@ class AppAssets {
   // ========== LOGOS ==========
   static const String weBuddhistLogo = 'assets/images/webuddhist_logo.png';
   static const String googleIcon = 'assets/images/google-icon.png';
+  static const String googleMeetIcon = 'assets/images/google_meet_icon.png';
+  static const String zoomIcon = 'assets/images/zoom_icon.png';
 
   // ========== AUTH ICONS ==========
   static const IconData apple = Icons.apple;
@@ -146,6 +148,11 @@ class AppAssets {
   static const IconData usercard = PhosphorIconsRegular.users;
   static const IconData bookOpenText = PhosphorIconsRegular.bookOpenText;
   static const IconData calendarDots = PhosphorIconsRegular.calendarDots;
+  static const IconData mapPin = PhosphorIconsRegular.mapPin;
+  static const IconData videoCamera = PhosphorIconsRegular.videoCamera;
+  static const IconData clock = PhosphorIconsRegular.clock;
+  static const IconData repeat = PhosphorIconsRegular.arrowsClockwise;
+  static const IconData buildings = PhosphorIconsRegular.buildings;
   static const IconData arrowRight = PhosphorIconsRegular.arrowRight;
   static const IconData featuredSeriesPlanCount =
       PhosphorIconsRegular.calendarDots;

@@ -917,6 +917,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get connect_event_date_tba => 'Date to be announced';
 
   @override
+  String get connect_event_when => 'When';
+
+  @override
+  String get connect_event_where => 'Where';
+
+  @override
+  String get connect_event_practices => 'Event practices';
+
+  @override
+  String get connect_event_every_day => 'Every day';
+
+  @override
+  String connect_event_every_weekday(String weekday) {
+    return 'Every $weekday';
+  }
+
+  @override
+  String get connect_event_every_month => 'Every month';
+
+  @override
+  String connect_event_every_date(String date) {
+    return 'Every $date';
+  }
+
+  @override
   String get connect_event_about_empty => 'No event details yet';
 
   @override
@@ -2396,6 +2421,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get group_chat_title => 'चैट';
+
+  @override
+  String get chats_title => 'चैट';
+
+  @override
+  String get chats_empty_title => 'अभी कोई चैट नहीं';
+
+  @override
+  String get chats_empty_body =>
+      'बातचीत शुरू करने के लिए किसी समुदाय से जुड़ें।';
 
   @override
   String get group_chat_inappropriate =>
