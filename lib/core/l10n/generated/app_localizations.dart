@@ -4645,6 +4645,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your post is live.'**
   String get group_post_published;
+
+  /// No description provided for @group_post_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete post?'**
+  String get group_post_delete_title;
+
+  /// No description provided for @group_post_delete_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This post will be permanently removed.'**
+  String get group_post_delete_message;
+
+  /// No description provided for @group_post_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to delete the post. Please try again.'**
+  String get group_post_delete_failed;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @group_post_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit post'**
+  String get group_post_edit_title;
+
+  /// No description provided for @group_post_update_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save your changes. Please try again.'**
+  String get group_post_update_error;
+
+  /// No description provided for @group_post_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes are saved.'**
+  String get group_post_updated;
 }
 
 class _AppLocalizationsDelegate

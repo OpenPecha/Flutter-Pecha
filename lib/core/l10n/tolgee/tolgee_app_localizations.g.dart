@@ -5117,4 +5117,49 @@ class TolgeeAppLocalizations extends AppLocalizations {
     'group_post_published',
     () => _fallback.group_post_published,
   );
+
+  @override
+  String get group_post_delete_title => TolgeeBridge.get(
+    localeName,
+    'group_post_delete_title',
+    () => _fallback.group_post_delete_title,
+  );
+
+  @override
+  String get group_post_delete_message => TolgeeBridge.get(
+    localeName,
+    'group_post_delete_message',
+    () => _fallback.group_post_delete_message,
+  );
+
+  @override
+  String get group_post_delete_failed => TolgeeBridge.get(
+    localeName,
+    'group_post_delete_failed',
+    () => _fallback.group_post_delete_failed,
+  );
+
+  @override
+  String get edit => TolgeeBridge.get(localeName, 'edit', () => _fallback.edit);
+
+  @override
+  String get group_post_edit_title => TolgeeBridge.get(
+    localeName,
+    'group_post_edit_title',
+    () => _fallback.group_post_edit_title,
+  );
+
+  @override
+  String get group_post_update_error => TolgeeBridge.get(
+    localeName,
+    'group_post_update_error',
+    () => _fallback.group_post_update_error,
+  );
+
+  @override
+  String get group_post_updated => TolgeeBridge.get(
+    localeName,
+    'group_post_updated',
+    () => _fallback.group_post_updated,
+  );
 }

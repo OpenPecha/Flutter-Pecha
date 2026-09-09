@@ -685,6 +685,7 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
           ).select((async) => async.valueOrNull ?? false),
         ),
         onCreatePost: () => _onCreatePost(profile),
+        onEditPost: (post) => _onEditPost(profile, post),
       ),
       _GroupProfileTab.events => GroupProfileEventsTab(
         groupId: profile.id,
@@ -718,38 +719,59 @@ class _GroupProfileBodyState extends ConsumerState<GroupProfileBody>
     final created = await GroupPostComposerScreen.show(context, profile);
     if (created == null || !mounted) return;
 
-    // The create response may omit group fields the card needs; fill them from
-    // the profile, then fetch page one so the list reflects the server.
-    final post = ConnectPost(
-      id: created.id,
-      groupId: created.groupId.isNotEmpty ? created.groupId : profile.id,
-      groupName:
-          created.groupName.trim().isNotEmpty
-              ? created.groupName
-              : profile.title,
-      groupAvatarUrl: created.groupAvatarUrl ?? profile.avatarUrl,
-      caption: created.caption,
-      status: created.status,
-      publishedAt: created.publishedAt ?? DateTime.now(),
-      media: created.media,
-      links: created.links,
-      creatorName: created.creatorName,
-      creatorImageUrl: created.creatorImageUrl,
-      likeCount: created.likeCount,
-      commentCount: created.commentCount,
-      createdAt: created.createdAt ?? DateTime.now(),
-      updatedAt: created.updatedAt,
-      likedByMe: created.likedByMe,
+    final notifier = ref.read(groupPostsProvider(profile.id).notifier);
+    notifier.prependPost(_withGroupFields(created, profile));
+    notifier.loadInitial();
+    _showPostSnackBar(context.l10n.group_post_published);
+  }
+
+  Future<void> _onEditPost(GroupProfile profile, ConnectPost post) async {
+    final updated = await GroupPostComposerScreen.show(
+      context,
+      profile,
+      post: post,
+    );
+    if (updated == null || !mounted) return;
+
+    // CMS responses don't carry the viewer's like state; keep what we had.
+    final merged = _withGroupFields(updated, profile).copyWith(
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      likedByMe: post.likedByMe,
     );
     final notifier = ref.read(groupPostsProvider(profile.id).notifier);
-    notifier.prependPost(post);
+    notifier.updatePost(merged);
     notifier.loadInitial();
+    _showPostSnackBar(context.l10n.group_post_updated);
+  }
 
+  /// CMS responses may omit group fields the card needs; fill them from the
+  /// profile. The list is refetched right after so it reflects the server.
+  ConnectPost _withGroupFields(ConnectPost post, GroupProfile profile) {
+    return ConnectPost(
+      id: post.id,
+      groupId: post.groupId.isNotEmpty ? post.groupId : profile.id,
+      groupName:
+          post.groupName.trim().isNotEmpty ? post.groupName : profile.title,
+      groupAvatarUrl: post.groupAvatarUrl ?? profile.avatarUrl,
+      caption: post.caption,
+      status: post.status,
+      publishedAt: post.publishedAt ?? DateTime.now(),
+      media: post.media,
+      links: post.links,
+      creatorName: post.creatorName,
+      creatorImageUrl: post.creatorImageUrl,
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      createdAt: post.createdAt ?? DateTime.now(),
+      updatedAt: post.updatedAt,
+      likedByMe: post.likedByMe,
+    );
+  }
+
+  void _showPostSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.group_post_published),
-        behavior: SnackBarBehavior.floating,
-      ),
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 

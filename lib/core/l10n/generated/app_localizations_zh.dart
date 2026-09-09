@@ -2472,4 +2472,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get group_post_published => '你的貼文已發佈。';
+
+  @override
+  String get group_post_delete_title => '刪除貼文？';
+
+  @override
+  String get group_post_delete_message => '這則貼文將被永久刪除。';
+
+  @override
+  String get group_post_delete_failed => '無法刪除貼文，請再試一次。';
+
+  @override
+  String get edit => '編輯';
+
+  @override
+  String get group_post_edit_title => '編輯貼文';
+
+  @override
+  String get group_post_update_error => '無法儲存你的變更，請再試一次。';
+
+  @override
+  String get group_post_updated => '你的變更已儲存。';
 }

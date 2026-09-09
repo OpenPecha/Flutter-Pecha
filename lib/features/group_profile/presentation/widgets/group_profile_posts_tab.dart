@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/core/widgets/destructive_confirmation_dialog.dart';
 import 'package:flutter_pecha/core/widgets/error_state_widget.dart';
+import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_post_card.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/providers/group_post_providers.dart';
 import 'package:flutter_pecha/features/group_profile/presentation/widgets/group_profile_nested_tab_scroll_view.dart';
@@ -17,6 +19,7 @@ class GroupProfilePostsTab extends ConsumerWidget {
   /// True when the signed-in user may publish in this group.
   final bool canPost;
   final VoidCallback onCreatePost;
+  final ValueChanged<ConnectPost> onEditPost;
 
   const GroupProfilePostsTab({
     super.key,
@@ -25,6 +28,7 @@ class GroupProfilePostsTab extends ConsumerWidget {
     required this.pageStorageKey,
     required this.canPost,
     required this.onCreatePost,
+    required this.onEditPost,
     this.lineHeight,
   });
 
@@ -110,6 +114,12 @@ class GroupProfilePostsTab extends ConsumerWidget {
                           post: post,
                           includeUnfollowed: true,
                           showGroupLink: false,
+                          groupId: groupId,
+                          onEdit: canPost ? () => onEditPost(post) : null,
+                          onDelete:
+                              canPost
+                                  ? () => _confirmDelete(context, ref, post)
+                                  : null,
                         ),
                       ),
                     );
@@ -127,6 +137,29 @@ class GroupProfilePostsTab extends ConsumerWidget {
           ),
       ],
     );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    ConnectPost post,
+  ) async {
+    final l10n = context.l10n;
+    final success = await showDestructiveConfirmationDialog(
+      context,
+      title: l10n.group_post_delete_title,
+      message: l10n.group_post_delete_message,
+      onConfirmed:
+          () => ref
+              .read(groupPostsProvider(groupId).notifier)
+              .deletePost(post.id),
+    );
+
+    if (success != false || !context.mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.group_post_delete_failed)));
   }
 }
 

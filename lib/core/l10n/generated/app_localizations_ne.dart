@@ -2631,4 +2631,27 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get group_post_published => 'तपाईंको पोस्ट प्रकाशित भयो।';
+
+  @override
+  String get group_post_delete_title => 'पोस्ट मेट्ने?';
+
+  @override
+  String get group_post_delete_message => 'यो पोस्ट स्थायी रूपमा हटाइनेछ।';
+
+  @override
+  String get group_post_delete_failed =>
+      'पोस्ट मेटाउन सकिएन। कृपया फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get edit => 'सम्पादन गर्नुहोस्';
+
+  @override
+  String get group_post_edit_title => 'पोस्ट सम्पादन गर्नुहोस्';
+
+  @override
+  String get group_post_update_error =>
+      'तपाईंका परिवर्तनहरू सुरक्षित गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get group_post_updated => 'तपाईंका परिवर्तनहरू सुरक्षित गरियो।';
 }

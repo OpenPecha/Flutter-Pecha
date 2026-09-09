@@ -1020,5 +1020,12 @@
   "group_post_photo_limit": "最多可新增 {count} 張相片。",
   "group_post_upload_error": "無法上傳相片，請再試一次。",
   "group_post_publish_error": "無法發佈你的貼文，請再試一次。",
-  "group_post_published": "你的貼文已發佈。"
+  "group_post_published": "你的貼文已發佈。",
+  "group_post_delete_title": "刪除貼文？",
+  "group_post_delete_message": "這則貼文將被永久刪除。",
+  "group_post_delete_failed": "無法刪除貼文，請再試一次。",
+  "edit": "編輯",
+  "group_post_edit_title": "編輯貼文",
+  "group_post_update_error": "無法儲存你的變更，請再試一次。",
+  "group_post_updated": "你的變更已儲存。"
 }

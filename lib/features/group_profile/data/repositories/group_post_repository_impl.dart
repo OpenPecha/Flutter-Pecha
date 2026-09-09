@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_pecha/core/error/exceptions.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
+import 'package:flutter_pecha/features/connect/data/models/connect_post_model.dart';
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/group_profile/data/datasource/group_post_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_profile/data/models/group_post_model.dart';
@@ -58,6 +59,45 @@ class GroupPostRepositoryImpl implements GroupPostRepositoryInterface {
       () async => (await remote.createPost(groupId, request)).toEntity(),
       'Failed to create post',
     );
+  }
+
+  @override
+  Future<Either<Failure, void>> deletePost(String groupId, String postId) {
+    return _guard(
+      () => remote.deletePost(groupId, postId),
+      'Failed to delete post',
+    );
+  }
+
+  @override
+  Future<Either<Failure, ConnectPost?>> updatePost(
+    String groupId,
+    String postId, {
+    String? caption,
+    String status = 'PUBLISHED',
+    List<GroupPostMediaRequest>? media,
+    List<GroupPostLinkRequest>? links,
+  }) {
+    return _guard(() async {
+      ConnectPostModel? latest;
+      if (caption != null) {
+        latest =
+            await remote.updatePost(
+              groupId,
+              postId,
+              caption: caption,
+              status: status,
+            ) ??
+            latest;
+      }
+      if (media != null) {
+        latest = await remote.updatePostMedia(groupId, postId, media) ?? latest;
+      }
+      if (links != null) {
+        latest = await remote.updatePostLinks(groupId, postId, links) ?? latest;
+      }
+      return latest?.toEntity();
+    }, 'Failed to update post');
   }
 
   Future<Either<Failure, T>> _guard<T>(

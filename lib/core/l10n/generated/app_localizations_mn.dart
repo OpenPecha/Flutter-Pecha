@@ -2627,4 +2627,27 @@ class AppLocalizationsMn extends AppLocalizations {
 
   @override
   String get group_post_published => 'Таны нийтлэл нийтлэгдлээ.';
+
+  @override
+  String get group_post_delete_title => 'Нийтлэлийг устгах уу?';
+
+  @override
+  String get group_post_delete_message => 'Энэ нийтлэл бүрмөсөн устгагдана.';
+
+  @override
+  String get group_post_delete_failed =>
+      'Нийтлэлийг устгаж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get edit => 'Засах';
+
+  @override
+  String get group_post_edit_title => 'Нийтлэлийг засах';
+
+  @override
+  String get group_post_update_error =>
+      'Таны өөрчлөлтийг хадгалж чадсангүй. Дахин оролдоно уу.';
+
+  @override
+  String get group_post_updated => 'Таны өөрчлөлт хадгалагдлаа.';
 }

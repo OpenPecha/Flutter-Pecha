@@ -124,6 +124,93 @@ class GroupPostRemoteDatasource {
     }
   }
 
+  Future<void> deletePost(String groupId, String postId) async {
+    try {
+      final response = await dio.delete(
+        '/cms/author/groups/$groupId/posts/$postId',
+      );
+
+      if (response.statusCode == 204 || response.statusCode == 200) return;
+
+      _logger.error(
+        'Failed to delete post $postId in $groupId: ${response.statusCode}',
+      );
+      throw _statusToException(response.statusCode, 'Failed to delete post');
+    } on DioException catch (e) {
+      _logger.error('Dio error in deletePost', e);
+      throw _dioToException(e, 'Failed to delete post');
+    }
+  }
+
+  Future<ConnectPostModel?> updatePost(
+    String groupId,
+    String postId, {
+    required String caption,
+    required String status,
+  }) async {
+    try {
+      final response = await dio.patch(
+        '/cms/author/groups/$groupId/posts/$postId',
+        data: {'caption': caption, 'status': status},
+      );
+      return _postFromResponse(response, 'Failed to update post');
+    } on DioException catch (e) {
+      _logger.error('Dio error in updatePost', e);
+      throw _dioToException(e, 'Failed to update post');
+    }
+  }
+
+  Future<ConnectPostModel?> updatePostMedia(
+    String groupId,
+    String postId,
+    List<GroupPostMediaRequest> media,
+  ) async {
+    try {
+      final response = await dio.put(
+        '/cms/author/groups/$groupId/posts/$postId/media',
+        data: {'media': media.map((item) => item.toJson()).toList()},
+      );
+      return _postFromResponse(response, 'Failed to update post media');
+    } on DioException catch (e) {
+      _logger.error('Dio error in updatePostMedia', e);
+      throw _dioToException(e, 'Failed to update post media');
+    }
+  }
+
+  Future<ConnectPostModel?> updatePostLinks(
+    String groupId,
+    String postId,
+    List<GroupPostLinkRequest> links,
+  ) async {
+    try {
+      final response = await dio.put(
+        '/cms/author/groups/$groupId/posts/$postId/links',
+        data: {'links': links.map((item) => item.toJson()).toList()},
+      );
+      return _postFromResponse(response, 'Failed to update post links');
+    } on DioException catch (e) {
+      _logger.error('Dio error in updatePostLinks', e);
+      throw _dioToException(e, 'Failed to update post links');
+    }
+  }
+
+  /// Update calls may echo the post or return an empty body; both succeed.
+  ConnectPostModel? _postFromResponse(
+    Response<dynamic> response,
+    String label,
+  ) {
+    final statusCode = response.statusCode ?? 0;
+    if (statusCode < 200 || statusCode >= 300) {
+      _logger.error('$label: $statusCode');
+      throw _statusToException(response.statusCode, label);
+    }
+    final data = response.data;
+    if (data is Map<String, dynamic> && data['id'] is String) {
+      return ConnectPostModel.fromJson(data);
+    }
+    return null;
+  }
+
   Exception _statusToException(int? statusCode, String label) {
     if (statusCode == 401) {
       return const AuthenticationException('Unauthorized');

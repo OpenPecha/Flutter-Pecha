@@ -18,20 +18,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Full-screen "New post" composer. Pops with the created [ConnectPost].
+/// Full-screen composer. Pops with the created or updated [ConnectPost].
 class GroupPostComposerScreen extends ConsumerStatefulWidget {
   final GroupProfile profile;
 
-  const GroupPostComposerScreen({super.key, required this.profile});
+  /// When set, the composer edits this post instead of creating one.
+  final ConnectPost? post;
+
+  const GroupPostComposerScreen({super.key, required this.profile, this.post});
 
   static const int maxPhotos = 10;
   static const int maxLinkLabelLength = 255;
 
-  static Future<ConnectPost?> show(BuildContext context, GroupProfile profile) {
+  static Future<ConnectPost?> show(
+    BuildContext context,
+    GroupProfile profile, {
+    ConnectPost? post,
+  }) {
     return Navigator.of(context).push<ConnectPost>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => GroupPostComposerScreen(profile: profile),
+        builder: (_) => GroupPostComposerScreen(profile: profile, post: post),
       ),
     );
   }
@@ -49,17 +56,63 @@ class _GroupPostComposerScreenState
   bool _isPickingPhotos = false;
   bool _isSubmitting = false;
 
+  bool get _isEditing => widget.post != null;
+
   bool get _hasContent =>
       _captionController.text.trim().isNotEmpty ||
       _photos.isNotEmpty ||
       _link != null;
 
-  bool get _canSubmit => _hasContent && !_isSubmitting && !_isPickingPhotos;
+  bool get _captionChanged =>
+      _captionController.text.trim() != (widget.post?.caption ?? '').trim();
+
+  bool get _mediaChanged {
+    final original = widget.post?.media ?? const <ConnectPostMedia>[];
+    if (_photos.length != original.length) return true;
+    for (final (index, photo) in _photos.indexed) {
+      if (photo.source?.id != original[index].id) return true;
+    }
+    return false;
+  }
+
+  bool get _linkChanged {
+    final links = widget.post?.links ?? const <ConnectPostLink>[];
+    final original = links.isNotEmpty ? links.first : null;
+    final link = _link;
+    if (original == null || link == null) {
+      return original != null || link != null;
+    }
+    return original.url != link.url ||
+        (original.label ?? '') != (_truncateLabel(link.title) ?? '');
+  }
+
+  bool get _isDirty => _captionChanged || _mediaChanged || _linkChanged;
+
+  /// Editing asks before losing changes; a new post asks once it has content.
+  bool get _shouldConfirmDiscard => _isEditing ? _isDirty : _hasContent;
+
+  bool get _canSubmit =>
+      _hasContent &&
+      !_isSubmitting &&
+      !_isPickingPhotos &&
+      (!_isEditing || _isDirty);
 
   @override
   void initState() {
     super.initState();
     _captionController.addListener(() => setState(() {}));
+    final post = widget.post;
+    if (post == null) return;
+    _captionController.text = post.caption;
+    _photos.addAll(post.media.map(_ComposerPhoto.remote));
+    if (post.links.isNotEmpty) {
+      final link = post.links.first;
+      _link = GroupPostLinkDraft(
+        url: link.url,
+        type: link.type,
+        title: link.label,
+      );
+    }
   }
 
   @override
@@ -70,7 +123,7 @@ class _GroupPostComposerScreenState
 
   Future<void> _onCancel() async {
     if (_isSubmitting) return;
-    if (!_hasContent) {
+    if (!_shouldConfirmDiscard) {
       Navigator.of(context).pop();
       return;
     }
@@ -171,54 +224,156 @@ class _GroupPostComposerScreenState
     setState(() => _isSubmitting = true);
 
     final l10n = context.l10n;
-    final repository = ref.read(groupPostRepositoryProvider);
+    final post = widget.post;
 
-    final uploads = await Future.wait(
-      _photos.map((photo) => repository.uploadMedia(photo.file)),
-    );
+    List<GroupPostMediaRequest>? media;
+    if (post == null || _mediaChanged) {
+      media = await _buildMediaRequests();
+      if (!mounted) return;
+      if (media == null) {
+        setState(() => _isSubmitting = false);
+        _showError(l10n.group_post_upload_error);
+        return;
+      }
+    }
+
+    final caption = _captionController.text.trim();
+    final link = _link;
+    final links = [
+      if (link != null)
+        GroupPostLinkRequest(
+          type: link.type,
+          url: link.url,
+          label: _truncateLabel(link.title),
+          displayOrder: 1,
+        ),
+    ];
+
+    final saved =
+        post == null
+            ? await _create(
+              caption: caption,
+              media: media ?? const [],
+              links: links,
+            )
+            : await _saveEdits(
+              post,
+              caption: caption,
+              media: media,
+              links: links,
+            );
     if (!mounted) return;
 
+    if (saved == null) {
+      setState(() => _isSubmitting = false);
+      _showError(
+        post == null
+            ? l10n.group_post_publish_error
+            : l10n.group_post_update_error,
+      );
+      return;
+    }
+    Navigator.of(context).pop(saved);
+  }
+
+  /// Uploads new photos and lists every item in display order. Null when an
+  /// upload failed or an existing item has no storage key to resend.
+  Future<List<GroupPostMediaRequest>?> _buildMediaRequests() async {
+    final repository = ref.read(groupPostRepositoryProvider);
+    final keys = await Future.wait(
+      _photos.map((photo) async {
+        final source = photo.source;
+        if (source != null) return source.mediaKey;
+        final upload = await repository.uploadMedia(photo.file!);
+        return upload.fold((_) => null, (key) => key);
+      }),
+    );
+
     final media = <GroupPostMediaRequest>[];
-    for (final (index, upload) in uploads.indexed) {
-      final key = upload.fold((_) => null, (key) => key);
-      if (key == null) break;
+    for (final (index, key) in keys.indexed) {
+      if (key == null || key.isEmpty) return null;
+      final photo = _photos[index];
+      final mediaType = photo.source?.mediaType ?? '';
       media.add(
         GroupPostMediaRequest(
+          mediaType: mediaType.isNotEmpty ? mediaType : 'IMAGE',
           mediaKey: key,
-          width: _photos[index].width,
-          height: _photos[index].height,
+          width: photo.width,
+          height: photo.height,
+          durationMs: photo.source?.durationMs,
           displayOrder: index + 1,
         ),
       );
     }
-    if (media.length != _photos.length) {
-      setState(() => _isSubmitting = false);
-      _showError(l10n.group_post_upload_error);
-      return;
-    }
+    return media;
+  }
 
+  Future<ConnectPost?> _create({
+    required String caption,
+    required List<GroupPostMediaRequest> media,
+    required List<GroupPostLinkRequest> links,
+  }) async {
+    final result = await ref
+        .read(groupPostRepositoryProvider)
+        .createPost(
+          widget.profile.id,
+          CreateGroupPostRequest(caption: caption, media: media, links: links),
+        );
+    return result.fold((_) => null, (created) => created);
+  }
+
+  /// Only changed parts are sent. Falls back to a local copy when the API
+  /// returns no body, so the list updates before its next fetch.
+  Future<ConnectPost?> _saveEdits(
+    ConnectPost post, {
+    required String caption,
+    required List<GroupPostMediaRequest>? media,
+    required List<GroupPostLinkRequest> links,
+  }) async {
+    final result = await ref
+        .read(groupPostRepositoryProvider)
+        .updatePost(
+          widget.profile.id,
+          post.id,
+          caption: _captionChanged ? caption : null,
+          status: post.status.isNotEmpty ? post.status : 'PUBLISHED',
+          media: media,
+          links: _linkChanged ? links : null,
+        );
+    return result.fold(
+      (_) => null,
+      (updated) => updated ?? _applyEdits(post, caption),
+    );
+  }
+
+  ConnectPost _applyEdits(ConnectPost post, String caption) {
     final link = _link;
-    final request = CreateGroupPostRequest(
-      caption: _captionController.text.trim(),
-      media: media,
+    return post.copyWith(
+      caption: caption,
+      media: [
+        for (final (index, photo) in _photos.indexed)
+          photo.source ??
+              ConnectPostMedia(
+                id: '',
+                mediaType: 'IMAGE',
+                url: '',
+                width: photo.width,
+                height: photo.height,
+                displayOrder: index + 1,
+              ),
+      ],
       links: [
         if (link != null)
-          GroupPostLinkRequest(
+          ConnectPostLink(
+            id: post.links.isNotEmpty ? post.links.first.id : '',
             type: link.type,
             url: link.url,
             label: _truncateLabel(link.title),
             displayOrder: 1,
           ),
       ],
+      updatedAt: DateTime.now(),
     );
-
-    final result = await repository.createPost(widget.profile.id, request);
-    if (!mounted) return;
-
-    result.fold((_) {
-      setState(() => _isSubmitting = false);
-      _showError(l10n.group_post_publish_error);
-    }, (post) => Navigator.of(context).pop(post));
   }
 
   String? _truncateLabel(String? label) {
@@ -245,7 +400,7 @@ class _GroupPostComposerScreenState
     final dividerColor = isDark ? AppColors.cardBorderDark : AppColors.grey300;
 
     return PopScope(
-      canPop: !_hasContent && !_isSubmitting,
+      canPop: !_shouldConfirmDiscard && !_isSubmitting,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || _isSubmitting) return;
         _confirmDiscard();
@@ -334,7 +489,9 @@ class _GroupPostComposerScreenState
           ),
           Expanded(
             child: Text(
-              l10n.group_post_new_title,
+              _isEditing
+                  ? l10n.group_post_edit_title
+                  : l10n.group_post_new_title,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -372,7 +529,7 @@ class _GroupPostComposerScreenState
                         ),
                       )
                       : Text(
-                        l10n.group_post_button,
+                        _isEditing ? l10n.save : l10n.group_post_button,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -564,6 +721,25 @@ class _PhotoTile extends StatelessWidget {
   final _ComposerPhoto photo;
   final VoidCallback? onRemove;
 
+  Widget _buildImage(BuildContext context) {
+    final file = photo.file;
+    if (file != null) return Image.file(file, fit: BoxFit.cover);
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final source = photo.source;
+    return CachedNetworkImageWidget(
+      imageUrl: source?.thumbnailUrl ?? source?.url ?? '',
+      fit: BoxFit.cover,
+      errorWidget: ColoredBox(
+        color: isDark ? AppColors.surfaceVariantDark : AppColors.grey100,
+        child: Icon(
+          AppAssets.photoLibrary,
+          color: isDark ? AppColors.grey500 : AppColors.grey600,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -571,7 +747,7 @@ class _PhotoTile extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.file(photo.file, fit: BoxFit.cover),
+          child: _buildImage(context),
         ),
         if (onRemove != null)
           Positioned(
@@ -636,11 +812,17 @@ class _AddPhotoTile extends StatelessWidget {
 }
 
 class _ComposerPhoto {
-  final File file;
+  final File? file;
+
+  /// Set for media already on the server; kept by resending its key.
+  final ConnectPostMedia? source;
   final int? width;
   final int? height;
 
-  const _ComposerPhoto({required this.file, this.width, this.height});
+  const _ComposerPhoto({this.file, this.source, this.width, this.height});
+
+  factory _ComposerPhoto.remote(ConnectPostMedia media) =>
+      _ComposerPhoto(source: media, width: media.width, height: media.height);
 
   /// Bakes the EXIF orientation into the pixels (some iOS builds keep it only
   /// as a tag) and reads the final size for the API.

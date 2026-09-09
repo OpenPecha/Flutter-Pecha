@@ -1289,5 +1289,12 @@
   },
   "group_post_upload_error": "Unable to upload photos. Please try again.",
   "group_post_publish_error": "Unable to publish your post. Please try again.",
-  "group_post_published": "Your post is live."
+  "group_post_published": "Your post is live.",
+  "group_post_delete_title": "Delete post?",
+  "group_post_delete_message": "This post will be permanently removed.",
+  "group_post_delete_failed": "Unable to delete the post. Please try again.",
+  "edit": "Edit",
+  "group_post_edit_title": "Edit post",
+  "group_post_update_error": "Unable to save your changes. Please try again.",
+  "group_post_updated": "Your changes are saved."
 }

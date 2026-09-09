@@ -1086,5 +1086,12 @@
   "group_post_photo_limit": "Та хамгийн ихдээ {count} зураг нэмэх боломжтой.",
   "group_post_upload_error": "Зургуудыг байршуулж чадсангүй. Дахин оролдоно уу.",
   "group_post_publish_error": "Таны нийтлэлийг нийтэлж чадсангүй. Дахин оролдоно уу.",
-  "group_post_published": "Таны нийтлэл нийтлэгдлээ."
+  "group_post_published": "Таны нийтлэл нийтлэгдлээ.",
+  "group_post_delete_title": "Нийтлэлийг устгах уу?",
+  "group_post_delete_message": "Энэ нийтлэл бүрмөсөн устгагдана.",
+  "group_post_delete_failed": "Нийтлэлийг устгаж чадсангүй. Дахин оролдоно уу.",
+  "edit": "Засах",
+  "group_post_edit_title": "Нийтлэлийг засах",
+  "group_post_update_error": "Таны өөрчлөлтийг хадгалж чадсангүй. Дахин оролдоно уу.",
+  "group_post_updated": "Таны өөрчлөлт хадгалагдлаа."
 }

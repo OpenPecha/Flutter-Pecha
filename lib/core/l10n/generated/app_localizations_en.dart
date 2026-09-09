@@ -2599,4 +2599,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get group_post_published => 'Your post is live.';
+
+  @override
+  String get group_post_delete_title => 'Delete post?';
+
+  @override
+  String get group_post_delete_message =>
+      'This post will be permanently removed.';
+
+  @override
+  String get group_post_delete_failed =>
+      'Unable to delete the post. Please try again.';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get group_post_edit_title => 'Edit post';
+
+  @override
+  String get group_post_update_error =>
+      'Unable to save your changes. Please try again.';
+
+  @override
+  String get group_post_updated => 'Your changes are saved.';
 }

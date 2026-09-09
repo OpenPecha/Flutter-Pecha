@@ -9,6 +9,7 @@ import 'package:flutter_pecha/features/auth/presentation/widgets/login_drawer.da
 import 'package:flutter_pecha/features/connect/domain/entities/connect_post.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_post_like_actions.dart';
 import 'package:flutter_pecha/features/connect/presentation/utils/connect_like_utils.dart';
+import 'package:flutter_pecha/features/connect/presentation/widgets/connect_action_menu.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_action_bar.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_header.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_feed_card_layout.dart';
@@ -24,6 +25,9 @@ class ConnectPostCard extends ConsumerStatefulWidget {
     this.includeUnfollowed = false,
     this.syncFeedProvider = false,
     this.showGroupLink = true,
+    this.groupId,
+    this.onEdit,
+    this.onDelete,
   });
 
   final ConnectPost post;
@@ -32,6 +36,13 @@ class ConnectPostCard extends ConsumerStatefulWidget {
 
   /// False when the card is already shown inside the group's own profile.
   final bool showGroupLink;
+
+  /// Group whose post list to keep in sync, set inside that group's profile.
+  final String? groupId;
+
+  /// Header menu entries; the menu is hidden when both are null.
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   ConsumerState<ConnectPostCard> createState() => _ConnectPostCardState();
@@ -74,20 +85,7 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
               groupId: widget.showGroupLink ? post.groupId : null,
               timestamp: timestamp,
               stackTimestamp: true,
-              trailing: IconButton(
-                onPressed: () => _sharePost(post),
-                icon: Icon(
-                  AppAssets.readerShare,
-                  size: 20,
-                  color:
-                      isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondary,
-                ),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              ),
+              trailing: _buildHeaderActions(post, isDark),
             ),
             if (caption.isNotEmpty)
               Padding(
@@ -171,12 +169,43 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
     );
   }
 
+  Widget _buildHeaderActions(ConnectPost post, bool isDark) {
+    final iconColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final share = IconButton(
+      onPressed: () => _sharePost(post),
+      icon: Icon(AppAssets.readerShare, size: 20, color: iconColor),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+    );
+    if (widget.onEdit == null && widget.onDelete == null) return share;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        share,
+        ConnectActionMenu(
+          onEdit: widget.onEdit,
+          onDelete: widget.onDelete,
+          iconColor: iconColor,
+          style: IconButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(36, 36),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+      ],
+    );
+  }
+
   void _openDetail() {
     ConnectPostDetailDrawer.show(
       context,
       postId: widget.post.id,
       initialPost: widget.post,
       includeUnfollowed: widget.includeUnfollowed,
+      groupId: widget.groupId,
     );
   }
 
@@ -200,6 +229,7 @@ class _ConnectPostCardState extends ConsumerState<ConnectPostCard> {
           optimisticLikeCount: _likeCount,
           includeUnfollowed: widget.includeUnfollowed,
           syncFeed: widget.syncFeedProvider,
+          groupId: widget.groupId,
         );
 
     if (!mounted) return;

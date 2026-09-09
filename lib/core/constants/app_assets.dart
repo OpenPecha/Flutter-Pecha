@@ -108,6 +108,7 @@ class AppAssets {
   static const IconData pause = PhosphorIconsFill.pause;
   static const IconData list = PhosphorIconsRegular.list;
   static const IconData trash = PhosphorIconsRegular.trash;
+  static const IconData pencilSimple = PhosphorIconsRegular.pencilSimple;
   static const IconData fileText = PhosphorIconsRegular.fileText;
   static const IconData bookmarkSimple = PhosphorIconsRegular.bookmarkSimple;
   static const IconData bookmarkSimpleFill = PhosphorIconsFill.bookmarkSimple;

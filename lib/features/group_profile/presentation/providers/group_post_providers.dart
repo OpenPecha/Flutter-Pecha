@@ -193,6 +193,24 @@ class GroupPostsNotifier extends StateNotifier<GroupPostsState> {
     updatedPosts[index] = updatedPost;
     state = state.copyWith(posts: updatedPosts);
   }
+
+  /// Resolves false when the API refuses, so the caller can show feedback.
+  Future<bool> deletePost(String postId) async {
+    final result = await _repository.deletePost(_groupId, postId);
+    if (!mounted) return false;
+
+    return result.fold((_) => false, (_) {
+      final remaining =
+          state.posts.where((post) => post.id != postId).toList();
+      if (remaining.length == state.posts.length) return true;
+      state = state.copyWith(
+        posts: remaining,
+        total: state.total > 0 ? state.total - 1 : 0,
+        skip: state.skip > 0 ? state.skip - 1 : 0,
+      );
+      return true;
+    });
+  }
 }
 
 final groupPostsProvider = StateNotifierProvider.autoDispose

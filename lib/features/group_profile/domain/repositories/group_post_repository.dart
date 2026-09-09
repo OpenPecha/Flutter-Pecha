@@ -24,4 +24,17 @@ abstract class GroupPostRepositoryInterface {
     String groupId,
     CreateGroupPostRequest request,
   );
+
+  Future<Either<Failure, void>> deletePost(String groupId, String postId);
+
+  /// Sends only the parts given: caption via PATCH, media and links via PUT.
+  /// Resolves with the post when the API echoes it, otherwise null.
+  Future<Either<Failure, ConnectPost?>> updatePost(
+    String groupId,
+    String postId, {
+    String? caption,
+    String status = 'PUBLISHED',
+    List<GroupPostMediaRequest>? media,
+    List<GroupPostLinkRequest>? links,
+  });
 }

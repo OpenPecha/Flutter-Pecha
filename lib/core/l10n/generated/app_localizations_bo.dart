@@ -2626,4 +2626,27 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get group_post_published => 'ཁྱེད་ཀྱི་སྤེལ་བ་སྤེལ་ཟིན།';
+
+  @override
+  String get group_post_delete_title => 'སྤེལ་བ་བསུབ་རྒྱུ་ཡིན་ནམ།';
+
+  @override
+  String get group_post_delete_message => 'སྤེལ་བ་འདི་གཏན་དུ་བསུབ་འགྲོ།';
+
+  @override
+  String get group_post_delete_failed =>
+      'སྤེལ་བ་བསུབ་མ་ཐུབ། ཡང་བསྐྱར་ཚོད་ལྟ་བྱོས།';
+
+  @override
+  String get edit => 'བཟོ་བཅོས།';
+
+  @override
+  String get group_post_edit_title => 'སྤེལ་བ་བཟོ་བཅོས།';
+
+  @override
+  String get group_post_update_error =>
+      'བཟོ་བཅོས་ཉར་མ་ཐུབ། ཡང་བསྐྱར་ཚོད་ལྟ་བྱོས།';
+
+  @override
+  String get group_post_updated => 'བཟོ་བཅོས་ཉར་ཟིན།';
 }

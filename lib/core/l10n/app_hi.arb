@@ -1086,5 +1086,12 @@
   "group_post_photo_limit": "आप अधिकतम {count} फ़ोटो जोड़ सकते हैं।",
   "group_post_upload_error": "फ़ोटो अपलोड नहीं हो सकीं। कृपया फिर से प्रयास करें।",
   "group_post_publish_error": "आपकी पोस्ट प्रकाशित नहीं हो सकी। कृपया फिर से प्रयास करें।",
-  "group_post_published": "आपकी पोस्ट प्रकाशित हो गई।"
+  "group_post_published": "आपकी पोस्ट प्रकाशित हो गई।",
+  "group_post_delete_title": "पोस्ट हटाएँ?",
+  "group_post_delete_message": "यह पोस्ट स्थायी रूप से हटा दी जाएगी।",
+  "group_post_delete_failed": "पोस्ट हटाई नहीं जा सकी। कृपया फिर से प्रयास करें।",
+  "edit": "संपादित करें",
+  "group_post_edit_title": "पोस्ट संपादित करें",
+  "group_post_update_error": "आपके बदलाव सहेजे नहीं जा सके। कृपया फिर से प्रयास करें।",
+  "group_post_updated": "आपके बदलाव सहेज लिए गए।"
 }
