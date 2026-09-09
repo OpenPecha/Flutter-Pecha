@@ -103,7 +103,10 @@ class _GroupPostComposerScreenState
     _captionController.addListener(() => setState(() {}));
     final post = widget.post;
     if (post == null) return;
-    _captionController.text = post.caption;
+    _captionController.value = TextEditingValue(
+      text: post.caption,
+      selection: TextSelection.collapsed(offset: post.caption.length),
+    );
     _photos.addAll(post.media.map(_ComposerPhoto.remote));
     if (post.links.isNotEmpty) {
       final link = post.links.first;
@@ -436,7 +439,11 @@ class _GroupPostComposerScreenState
                             fontSize: 16,
                             color: secondaryColor,
                           ),
+                          // Undo the theme's fill and outline.
+                          filled: false,
                           border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 8,
                           ),
