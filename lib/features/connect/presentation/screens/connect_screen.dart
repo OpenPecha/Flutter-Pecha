@@ -3,6 +3,7 @@ import 'package:flutter_pecha/core/config/router/app_routes.dart';
 import 'package:flutter_pecha/core/constants/app_assets.dart';
 import 'package:flutter_pecha/core/extensions/context_ext.dart';
 import 'package:flutter_pecha/core/theme/app_colors.dart';
+import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/providers/connect_providers.dart';
 import 'package:flutter_pecha/features/connect/presentation/screens/group_search_screen.dart';
 import 'package:flutter_pecha/features/connect/presentation/widgets/connect_events_tab.dart';
@@ -205,6 +206,15 @@ class _ChatsAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Members only, like every other action on this screen: a guest has no
+    // rooms and no token to list them with, and the route is guest-blocked.
+    // Decided before anything below is watched, so a guest never brings the
+    // rooms list — and its requests — into being.
+    final isMember = ref.watch(
+      authProvider.select((auth) => auth.isLoggedIn && !auth.isGuest),
+    );
+    if (!isMember) return const SizedBox.shrink();
+
     // Keeps the push listener alive for as long as the dot is on screen.
     ref.watch(chatRoomsPushRefreshProvider);
     final hasUnread = ref.watch(chatRoomsProvider).hasUnread;

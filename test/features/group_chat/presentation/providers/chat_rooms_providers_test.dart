@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
-import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
-import 'package:flutter_pecha/features/auth/presentation/providers/user_notifier.dart';
-import 'package:flutter_pecha/features/auth/presentation/state/user_state.dart';
+import 'package:flutter_pecha/core/storage/storage_keys.dart';
+import 'package:flutter_pecha/core/storage/storage_service.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
+import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_room_cache.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_message_reaction_dto.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
@@ -151,14 +152,36 @@ class _FakeGroupChatRepository implements GroupChatRepository {
   }) async => const Right([]);
 }
 
-/// No signed-in user, so the notifier skips seeding the room cache and the
-/// storage stack behind it never has to exist.
-class _FakeUserNotifier extends StateNotifier<UserState>
-    implements UserNotifier {
-  _FakeUserNotifier() : super(const UserState.initial());
+/// Stands in for the preferences the room cache and the account id live in.
+class _MemoryStorage implements StorageService {
+  final Map<String, Object> values = {};
+
+  Iterable<String> get roomCacheKeys =>
+      values.keys.where((key) => key.startsWith('group_chat.room.'));
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  Future<T?> get<T>(String key) async => values[key] as T?;
+
+  @override
+  Future<bool> set<T>(String key, T value) async {
+    values[key] = value as Object;
+    return true;
+  }
+
+  @override
+  Future<bool> delete(String key) async {
+    values.remove(key);
+    return true;
+  }
+
+  @override
+  Future<bool> clear() async {
+    values.clear();
+    return true;
+  }
+
+  @override
+  Future<bool> containsKey(String key) async => values.containsKey(key);
 }
 
 /// autoDispose tears the provider down the moment nothing listens, so tests
@@ -182,17 +205,19 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late _FakeGroupChatRepository repository;
+  late _MemoryStorage storage;
   late ProviderContainer container;
 
   ProviderContainer buildContainer() {
     return ProviderContainer(
       overrides: [
         groupChatRepositoryProvider.overrideWithValue(repository),
-        userProvider.overrideWith((ref) => _FakeUserNotifier()),
+        storageServiceProvider.overrideWithValue(storage),
       ],
     );
   }
 
+  setUp(() => storage = _MemoryStorage());
   tearDown(() => container.dispose());
 
   group('loadInitial', () {
@@ -339,6 +364,38 @@ void main() {
         await notifier.loadMore();
         expect(_ids(notifier), ['group-room-1', 'group-room-2']);
         expect(notifier.state.error, isNull);
+      },
+    );
+    test(
+      'a room going active mid-walk does not put the row it displaced in twice',
+      () async {
+        repository = _FakeGroupChatRepository(
+          rooms: [
+            for (var i = 0; i < 5; i++) _direct(i),
+            for (var i = 0; i < 25; i++) _group(i),
+          ],
+        );
+        // The first page holds 15 group rooms, short of a page, so the walk
+        // asks for a second. Hold that one.
+        repository.holdCall = 2;
+        final hold = repository.holdCallCompleter = Completer<void>();
+        container = buildContainer();
+
+        final notifier = _keepAlive(container);
+        await _settle();
+        expect(repository.listCallCount, 2);
+
+        // A message lands in a room the walk has not reached. The server moves
+        // it to the top and every row behind it shifts down one, so the page
+        // in flight now starts with the last row of the page before.
+        repository.rooms.insert(0, _group(99));
+        hold.complete();
+        await _settle();
+
+        final ids = _ids(notifier);
+        expect(ids.toSet(), hasLength(ids.length));
+        expect(ids.where((id) => id == 'group-room-14'), hasLength(1));
+        expect(notifier.state.hasMore, isFalse);
       },
     );
   });
@@ -802,5 +859,39 @@ void main() {
     repository.rooms = [_group(1), _group(2)];
     await notifier.refresh();
     expect(notifier.state.hasUnread, isFalse);
+  });
+
+  group('room cache seed', () {
+    test(
+      'keys the cache by the stored account id, as the chat screen reads it',
+      () async {
+        repository = _FakeGroupChatRepository(rooms: [_group(1), _direct(1)]);
+        storage.values[StorageKeys.currentUserId] = 'auth0|abc';
+        container = buildContainer();
+
+        _keepAlive(container);
+        await _settle();
+
+        expect(
+          storage.values[GroupChatRoomCache.key(
+            userId: 'auth0|abc',
+            groupId: 'group-1',
+          )],
+          'group-room-1',
+        );
+        // A direct room has no group to key by.
+        expect(storage.roomCacheKeys, hasLength(1));
+      },
+    );
+
+    test('writes nothing until the account id has been stored', () async {
+      repository = _FakeGroupChatRepository(rooms: [_group(1)]);
+      container = buildContainer();
+
+      _keepAlive(container);
+      await _settle();
+
+      expect(storage.roomCacheKeys, isEmpty);
+    });
   });
 }

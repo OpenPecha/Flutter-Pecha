@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_pecha/core/di/core_providers.dart';
 import 'package:flutter_pecha/core/error/failures.dart';
-import 'package:flutter_pecha/features/auth/presentation/providers/state_providers.dart';
+import 'package:flutter_pecha/core/storage/storage_keys.dart';
 import 'package:flutter_pecha/features/group_chat/data/datasource/group_chat_remote_datasource.dart';
 import 'package:flutter_pecha/features/group_chat/data/models/chat_room_dto.dart';
 import 'package:flutter_pecha/features/group_chat/presentation/providers/group_chat_providers.dart';
@@ -217,7 +218,7 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       error: failure?.message,
       clearError: failure == null,
     );
-    _seedRoomCache(walk.rooms);
+    unawaited(_seedRoomCache(walk.rooms));
 
     // Only when the list cannot already answer: a dot that is on stays on.
     // Not after a failed page either — the scan would start on the page that
@@ -274,7 +275,7 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
       error: failure?.message,
       clearError: failure == null,
     );
-    _seedRoomCache(walk.rooms);
+    unawaited(_seedRoomCache(walk.rooms));
 
     // The scan stopped at the room it found, so nothing past it has been
     // looked at. If the list now covers that room and still has nothing unread
@@ -310,6 +311,7 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
   Future<_RoomsWalk> _walk({required int skip}) async {
     final repository = ref.read(groupChatRepositoryProvider);
     final rooms = <ChatRoomDTO>[];
+    final seen = <String>{};
     var total = 0;
     var hasMore = true;
 
@@ -335,7 +337,15 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
           loaded = page;
       }
 
-      rooms.addAll(loaded.rooms);
+      // Pages are offsets into a list the server re-orders on every message,
+      // so a room going active mid-walk shifts every row down one and the
+      // next page repeats the last room of the page before. Kept once, or the
+      // list would show the same room twice. (The room that moved to the top
+      // is missed by this walk instead; the next refresh picks it up.)
+      rooms.addAll(
+        loaded.rooms.where((room) => room.id.isEmpty || seen.add(room.id)),
+      );
+      // Against the raw page, not the kept rows: the offset is the server's.
       skip += loaded.rooms.length;
       total = loaded.total;
       // Against the raw page, not the filtered list: direct rooms count
@@ -387,7 +397,7 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
           page = loaded;
       }
 
-      _seedRoomCache(page.rooms);
+      unawaited(_seedRoomCache(page.rooms));
       if (state.skip > skip) {
         // The list paged past this page while it was in flight. If the list
         // can answer now the scan has nothing to add; otherwise carry on from
@@ -414,17 +424,57 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState>
   /// `ResolveGroupChatRoom`, which pages this same endpoint looking for the id
   /// this list already has. Writing it here turns that lookup into a cache hit
   /// and the thread opens without a request.
-  void _seedRoomCache(List<ChatRoomDTO> rooms) {
-    final userId = ref.read(userProvider).user?.id?.trim() ?? '';
-    if (userId.isEmpty) return;
+  ///
+  /// Best effort throughout: a failed write only costs the lookup it would
+  /// have saved, so nothing here is awaited by the list or allowed to throw.
+  Future<void> _seedRoomCache(List<ChatRoomDTO> rooms) async {
+    final groupRooms =
+        rooms
+            .where(
+              (room) => (room.groupId ?? '').isNotEmpty && room.id.isNotEmpty,
+            )
+            .toList();
+    if (groupRooms.isEmpty) return;
+
+    final userId = await _loadAccountId();
+    if (!mounted || userId.isEmpty) return;
 
     final cache = ref.read(groupChatRoomCacheProvider);
-    for (final room in rooms) {
-      final groupId = room.groupId;
-      if (groupId == null || groupId.isEmpty || room.id.isEmpty) continue;
-      // Fire and forget: a failed write only costs the lookup it would have
-      // saved, so it must never hold up the list.
-      cache.write(userId: userId, groupId: groupId, roomId: room.id);
+    for (final room in groupRooms) {
+      try {
+        await cache.write(
+          userId: userId,
+          groupId: room.groupId!,
+          roomId: room.id,
+        );
+      } catch (_) {
+        // Storage is best-effort; the next lookup falls back to the server.
+      }
+    }
+  }
+
+  /// The id the room cache is keyed by, read once.
+  ///
+  /// This is the account id the chat screen resolves with — the token's `sub`
+  /// — and not the profile id on `userProvider`. That one is the backend's own
+  /// uuid, a different id space: a key written under it is never read back.
+  ///
+  /// An empty read is not kept, so a list loaded before sign-in has finished
+  /// storing the id tries again on the next page.
+  String? _accountId;
+
+  Future<String> _loadAccountId() async {
+    final known = _accountId;
+    if (known != null) return known;
+    try {
+      final stored = await ref
+          .read(storageServiceProvider)
+          .get<String>(StorageKeys.currentUserId);
+      final id = stored?.trim() ?? '';
+      if (id.isNotEmpty) _accountId = id;
+      return id;
+    } catch (_) {
+      return '';
     }
   }
 }
