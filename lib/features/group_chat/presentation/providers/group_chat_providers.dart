@@ -29,7 +29,7 @@ final resolveGroupChatRoomProvider = Provider<ResolveGroupChatRoom>((ref) {
   );
 });
 
-/// Which group's chat screen is currently on screen.
+/// Which group's chat screen is currently on top.
 ///
 /// A plain mutable holder rather than Riverpod state on purpose: the chat
 /// screen claims and releases it from `initState` and `dispose`, and Riverpod
@@ -37,17 +37,24 @@ final resolveGroupChatRoomProvider = Provider<ResolveGroupChatRoom>((ref) {
 /// rebuild on change; the push layer only reads it at the moment a foreground
 /// message arrives, to skip the heads-up for a room the user is already
 /// reading (the message still arrives live over the WebSocket).
+///
+/// Kept as a stack, not a single slot: a chat pushed over another chat (say
+/// from a push tap) takes over while it is on top, and popping it hands the
+/// slot back to the still-mounted chat underneath.
 class ActiveGroupChatRoom {
-  String? _groupId;
+  final List<String> _stack = [];
 
-  String? get groupId => _groupId;
+  /// The group whose chat is on top, or null when no chat screen is open.
+  String? get groupId => _stack.isEmpty ? null : _stack.last;
 
-  void claim(String groupId) => _groupId = groupId;
+  void claim(String groupId) => _stack.add(groupId);
 
-  /// Only clears when [groupId] still holds the slot, so a chat for another
-  /// group pushed on top keeps its own claim when this one disposes.
+  /// Drops the most recent claim for [groupId] wherever it sits, so disposal
+  /// order does not matter and the same group opened twice releases one at a
+  /// time.
   void release(String groupId) {
-    if (_groupId == groupId) _groupId = null;
+    final index = _stack.lastIndexOf(groupId);
+    if (index != -1) _stack.removeAt(index);
   }
 }
 

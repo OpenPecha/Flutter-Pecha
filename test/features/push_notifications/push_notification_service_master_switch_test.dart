@@ -22,6 +22,11 @@ class _FakeRepository extends Fake implements PushMessagingRepository {
   final List<String> registered = [];
   final List<String> unregistered = [];
 
+  /// When set, the next register / unregister call waits on it before
+  /// answering, so a test can flip state while the request is in flight.
+  Completer<void>? holdRegister;
+  Completer<void>? holdUnregister;
+
   @override
   Future<bool> requestPermission() async => true;
 
@@ -47,6 +52,9 @@ class _FakeRepository extends Fake implements PushMessagingRepository {
     Map<String, bool>? preferences,
   }) async {
     registered.add(token);
+    final hold = holdRegister;
+    holdRegister = null;
+    if (hold != null) await hold.future;
     final failure = registerFailure;
     if (failure != null) return Left(failure);
     return Right(serverIdToReturn);
@@ -57,6 +65,9 @@ class _FakeRepository extends Fake implements PushMessagingRepository {
     String pushDeviceId,
   ) async {
     unregistered.add(pushDeviceId);
+    final hold = holdUnregister;
+    holdUnregister = null;
+    if (hold != null) await hold.future;
     final failure = unregisterFailure;
     if (failure != null) return Left(failure);
     return const Right(unit);
@@ -217,6 +228,78 @@ void main() {
       expect(repo.unregistered, ['dev-1']);
       expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-1');
     });
+  });
+
+  group('master switch races', () {
+    test(
+      'master off while a register is in flight still unregisters',
+      () async {
+        await service.initialize();
+        final hold = repo.holdRegister = Completer<void>();
+        service.onAuthChanged(loggedIn: true);
+        await _settle();
+        expect(repo.registered, ['tok-1']);
+        expect(storage.values[StorageKeys.pushDeviceServerId], isNull);
+
+        // Opt out before the backend has answered the register call.
+        service.setMasterEnabled(false);
+        await _settle();
+        expect(repo.unregistered, isEmpty);
+
+        hold.complete();
+        await service.registrationSettled;
+
+        expect(repo.unregistered, ['dev-1']);
+        expect(
+          storage.values.containsKey(StorageKeys.pushDeviceServerId),
+          isFalse,
+        );
+      },
+    );
+
+    test('master back on while an unregister is in flight re-registers and '
+        'keeps the new id', () async {
+      await service.initialize();
+      service.onAuthChanged(loggedIn: true);
+      await _settle();
+
+      final hold = repo.holdUnregister = Completer<void>();
+      service.setMasterEnabled(false);
+      await _settle();
+      expect(repo.unregistered, ['dev-1']);
+
+      repo.serverIdToReturn = 'dev-2';
+      service.setMasterEnabled(true);
+      await _settle();
+      // The register waits for the unregister to finish.
+      expect(repo.registered, ['tok-1']);
+
+      hold.complete();
+      await service.registrationSettled;
+
+      expect(repo.registered, ['tok-1', 'tok-1']);
+      expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-2');
+    });
+
+    test(
+      'off then on before either request lands ends registered once',
+      () async {
+        await service.initialize();
+        service.onAuthChanged(loggedIn: true);
+        await _settle();
+
+        final hold = repo.holdUnregister = Completer<void>();
+        service.setMasterEnabled(false);
+        service.setMasterEnabled(true);
+        await _settle();
+        hold.complete();
+        await service.registrationSettled;
+
+        expect(repo.unregistered, ['dev-1']);
+        expect(repo.registered, ['tok-1', 'tok-1']);
+        expect(storage.values[StorageKeys.pushDeviceServerId], 'dev-1');
+      },
+    );
   });
 
   group('foreground suppression', () {

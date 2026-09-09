@@ -138,27 +138,20 @@ class PushNotificationService {
 
   /// Feeds in the latest auth snapshot. Registers the token with the backend on
   /// sign-in (the backend keys the device on the JWT, so no profile data is
-  /// needed). Guests are treated as signed out for push targeting.
+  /// needed). Guests are treated as signed out for push targeting. Signing in
+  /// with master off removes the registration left from an earlier session
+  /// now that the JWT is available.
   void onAuthChanged({required bool loggedIn}) {
     final signedIn = loggedIn && !_loggedIn;
     _loggedIn = loggedIn;
-    if (!signedIn) return;
-    if (_masterEnabled) {
-      unawaited(_registerToken());
-    } else {
-      // Master was switched off while signed out (or before auth resolved on
-      // launch), so the registration left from an earlier session must go now
-      // that the JWT is available.
-      unawaited(unregisterDevice());
-    }
+    if (signedIn) _requestReconcile();
   }
 
   /// Re-sends the device registration so the backend picks up the latest
   /// notification-category preferences. Called when the user flips a
   /// notification toggle. No-op until a token is captured, the user is
-  /// signed in and the master switch is on (the guards live in
-  /// [_registerToken]).
-  void refreshRegistration() => unawaited(_registerToken());
+  /// signed in and the master switch is on.
+  void refreshRegistration() => _requestReconcile();
 
   /// Applies the master notification switch. OFF unregisters the device from
   /// the backend so every server push stops; ON registers it again. Safe to
@@ -166,10 +159,47 @@ class PushNotificationService {
   void setMasterEnabled(bool enabled) {
     if (_masterEnabled == enabled) return;
     _masterEnabled = enabled;
-    if (enabled) {
-      unawaited(_registerToken());
-    } else {
-      unawaited(unregisterDevice());
+    _requestReconcile();
+  }
+
+  /// Resolves once the backend registration matches the current state, for
+  /// callers that need to wait on it (tests, teardown). Never throws.
+  Future<void> get registrationSettled => _reconciling ?? Future.value();
+
+  Future<void>? _reconciling;
+  bool _reconcileRequested = false;
+
+  /// Brings the backend registration in line with the current token, login
+  /// and master-switch state.
+  ///
+  /// Register and unregister are serialized through one loop, and the loop
+  /// re-reads the desired state after every pass. That closes two races that
+  /// independent fire-and-forget calls leave open: master switched off while
+  /// a register is awaiting the backend (the unregister finds no stored id,
+  /// then the register lands and stays), and master switched back on while
+  /// an unregister is in flight (the unregister wipes the id of the fresh
+  /// registration, which then can never be removed).
+  void _requestReconcile() {
+    _reconcileRequested = true;
+    _reconciling ??= _runReconcile();
+  }
+
+  Future<void> _runReconcile() async {
+    try {
+      while (_reconcileRequested) {
+        _reconcileRequested = false;
+        if (_masterEnabled) {
+          await _register();
+        } else {
+          await _unregister();
+        }
+      }
+    } catch (e, st) {
+      _logger.warning('Push registration reconcile failed: $e', e, st);
+    } finally {
+      _reconciling = null;
+      // A request that arrived while the loop was unwinding starts a new one.
+      if (_reconcileRequested) _requestReconcile();
     }
   }
 
@@ -178,7 +208,7 @@ class PushNotificationService {
   /// was never registered or the user is signed out (the endpoint needs the
   /// user's JWT). The stored id is kept on failure so a later attempt can
   /// still find the registration.
-  Future<void> unregisterDevice() async {
+  Future<void> _unregister() async {
     final serverId = await _storage.get<String>(StorageKeys.pushDeviceServerId);
     if (serverId == null || serverId.isEmpty) return;
     if (!_loggedIn) return;
@@ -188,7 +218,15 @@ class PushNotificationService {
       (failure) async =>
           _logger.warning('Device unregister failed: ${failure.message}'),
       (_) async {
-        await _storage.remove(StorageKeys.pushDeviceServerId);
+        // Only forget the id this call removed. Nothing else can register
+        // concurrently thanks to the reconcile loop, but a stale id must never
+        // shadow a newer one.
+        final stored = await _storage.get<String>(
+          StorageKeys.pushDeviceServerId,
+        );
+        if (stored == serverId) {
+          await _storage.remove(StorageKeys.pushDeviceServerId);
+        }
         _logger.info('Device unregistered');
       },
     );
@@ -201,16 +239,13 @@ class PushNotificationService {
     // Full token logged at debug level only (stripped from release builds) so
     // you can copy it into the Firebase console to send a test push.
     _logger.debug('FCM token: $token');
-    await _registerToken();
+    _requestReconcile();
+    await registrationSettled;
   }
 
-  Future<void> _registerToken() async {
+  Future<void> _register() async {
     final token = _token;
     if (token == null || !_loggedIn) return;
-    if (!_masterEnabled) {
-      _logger.info('Skipping token registration: master switch is off');
-      return;
-    }
     final deviceId = await _deviceId();
     final result = await _repository.registerDeviceToken(
       token,
